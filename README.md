@@ -1,4 +1,4 @@
-# Deep Learning Lecture
+# Introduction to Deep Learning Lecture 2021
 
 The repository latex-math is used. Please read its ReadMe here: https://github.com/compstat-lmu/latex-math
 
