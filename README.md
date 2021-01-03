@@ -2,12 +2,6 @@
 
 The repository latex-math is used. Please read its ReadMe here: https://github.com/compstat-lmu/latex-math
 
-Moodle: https://moodle.lmu.de/course/view.php?id=10446
-
-Teaching Plan: https://docs.google.com/spreadsheets/d/1giiEyqfJccavqARpUsyAyyViDhFwByz8PqCBC76R2QU/edit#gid=0
-
-Revision/ Changes: https://docs.google.com/document/d/1k6JmHEg74szZf4A03EypOXlBX0qoFh8jFkIzEOGzCTg/edit#heading=h.q5t9zzmxt2yo
-
 
 # General rules
 
