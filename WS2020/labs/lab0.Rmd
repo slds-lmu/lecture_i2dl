@@ -1,0 +1,53 @@
+---
+title: "Introduction to the Labs"
+author: "Emilio Dorigatti"
+date: 2020-11-06
+output:
+  beamer_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Labs
+
+ - Mix of theoretical and practical exercises
+ - Not graded! Only final exam counts
+ - Exercises posted on Moodle on Tuesday
+ - Solutions on Friday
+   - Only presented on popular demand
+ - Lab sessions exist to discuss and ask questions
+   - Attend not to fall behind the schedule
+ - I will leave the Zoom call if nobody shows up in the first ten minutes
+
+## Theory-oriented Exercises
+
+ - Apply the math you see in the lectures
+    - Pen-and-paper exercises on simple cases
+    - Code the solution and test on simple problems
+    - Brush up your linear algebra!
+ - Purpose:
+   1. Understand and internalize how things work
+   2. Get practical experience in implementing ML algorithms
+   3. Get ready for the exam
+
+## Practice-oriented Exercises
+
+ - Play with neural networks
+   - github.com/jjallaire/deep-learning-with-r-notebooks
+   - github.com/fchollet/deep-learning-with-python-notebooks
+ - Purpose:
+   1. Learn to use a popular Deep Learning Framework
+   2. Get a feeling for how neural networks behave
+ - Handouts in R, Python is also accepted (and encouraged)
+
+## Our software stack
+
+ 1. Keras for R
+ 2. Keras for Python
+ 3. Tensorflow (Python bindings)
+ 4. Tensorflow (C++)
+      - CPU computations: BLAS (C/Fotran)
+      - GPU computations: cuDNN (C)
+      - TPU computations: Private Google library

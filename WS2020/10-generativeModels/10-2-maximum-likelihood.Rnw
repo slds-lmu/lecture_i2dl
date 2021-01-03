@@ -1,0 +1,161 @@
+<<setup-child, include = FALSE>>=
+    library(knitr)
+set_parent("../style/preamble_mina.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+
+@
+   
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+    
+\lecturechapter{10}{Maximum Likelihood Estimation}
+\lecture{Deeplearning}
+
+\begin{frame}
+\frametitle{Lecture outline}
+\tableofcontents
+\end{frame}
+
+
+
+\frame{
+    \frametitle{Maximum Likelihood}
+    %\vspace{-1cm}
+    \only<1>{
+        \begin{figure}
+        \includegraphics[width=5cm]{plots/sample.png}
+        %\includegraphics[width=6cm]{sample-withGaussian.png}
+        \end{figure}
+    }
+    %\vspace{-1cm}
+    \only<2-3>{
+        \begin{figure}
+        %\includegraphics[width=5cm]{sample.png}
+        \includegraphics[width=5cm]{plots/sample-whichGaussian1.png}
+        \end{figure}
+    }
+    \only<4>{
+        \begin{figure}
+        %\includegraphics[width=5cm]{sample.png}
+        \includegraphics[width=5cm]{plots/sample-whichGaussian2.png}
+        \end{figure}
+    }
+    \only<5>{
+        \begin{figure}
+        %\includegraphics[width=5cm]{sample.png}
+        \includegraphics[width=5cm]{plots/sample-whichGaussian3.png}
+        \end{figure}
+    }
+    %\vspace{-1cm}
+    
+    %We assume that the data-underlying distribution is Gaussian, that is we use a model
+    We choose the model distribution $p_{\theta}$ to be Gaussian, that is
+    \only<1>{
+    \begin{footnotesize}
+        $$p_{\thetab}(\xi)= \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{1}{2} \frac{\left(\xi - \mu\right)^2}{\sigma^2}\right)$$
+    \end{footnotesize}
+    }
+    \only<2-5>{
+        $$p_{\thetab}\left(\xi[1],\dots, \xi[n]\right)
+        = \prod_{i=1}^{n} p_{\thetab}\left(\xi\right)
+        = \prod_{i=1}^{n}  \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{1}{2} \frac{(\xi-\mu)^2}{\sigma^2}\right)$$
+    }
+    %\only<3-6>{
+        %$$p_{\thetab}(x_1,\dots, x_n)
+        %= \prod_{i=1}^{n} p_{\thetab}(x_i)
+        %=  \left(\frac{1}{\sqrt{2\pi\sigma^2}}\right)^n \exp\left(\sum_{i=1}^{n} -\frac{1}{2} \frac{(x_i-\mu)^2}{\sigma^2}\right)$$
+            %}
+    
+    \only<3-5>{
+        Given $\left\{\xi[1], \dots, \xi[n]\right\}$, how should we estimate $\thetab =\{\mu, \sigma^2\}$?
+    }
+}
+
+\frame{
+    \frametitle{Recall: Maximum Likelihood Estimation}
+    
+    
+    The \textbf{likelihood function} is given by
+    
+    $$L\left(\thetab | \xi[1],\dots, \xi[n]\right)= \prod_{i=1}^{n} p_{\thetab}\left(\xi\right)
+    %=  \left(\frac{1}{\sqrt{2\pi\sigma^2}}\right)^n \exp\left(\sum_{i=1}^{n} -\frac{1}{2} \frac{(\xi-\mu)^2}{\sigma^2}\right)
+    =\prod_{i=1}^{n}  \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{1}{2} \frac{(\xi-\mu)^2}{\sigma^2}\right) \enspace.
+    $$
+        
+        To maximize it, we  often consider the  \textbf{log-likelihood}
+    
+    \begin{align*}
+    %l (\thetab | \xi[1],\dots, \xi[n])&=
+        \log L(\thetab | \xi[1],\dots, \xi[n]) &= \log \prod_{i=1}^{n} p_{\thetab}(\xi)
+    %=  \left(\frac{1}{\sqrt{2\pi\sigma^2}}\right)^n \exp\left(\sum_{i=1}^{n} -\frac{1}{2} \frac{(\xi-\mu)^2}{\sigma^2}\right)
+    = \sum_{i=1}^{n} \log p_{\thetab}(\xi) \\
+    &=  \log \left( \frac{1}{\sqrt{2\pi\sigma^2}} \right) -\frac{1}{2}  \sum_{i=1}^{n} \frac{(\xi-\mu)^2}{\sigma^2}\enspace.
+    \end{align*}
+}
+
+
+\begin{frame}{Recall: Maximum Likelihood Estimation}
+    
+    Setting derivatives equal to zero yields
+    $$
+        \frac{\partial \log L\left(\thetab | \xi[1],\dots, \xi[n]\right) }{\partial \mu} = \frac{1}{\sigma^2  } \left( \sum_{i=1}^n \xi -n \mu \right)
+    $$
+        and
+    $$
+        \frac{\partial \log L(\thetab | \xi[1],\dots, \xi[n]) }{\partial \sigma} = \frac{1}{2\sigma^2  } \left(  \frac{1}{\sigma^2  } \sum_{i=1}^n (\xi -\mu)^2 -n \right)  \enspace.
+    $$
+        Leading to
+    $$
+        \hat \mu = \frac{1}{n} \sum_{i=1}^n \xi    \text{\;\;\;\;and\;\;\;\;}  \hat \sigma = \frac{1}{n} \sum_{i=1}^n (\xi- \hat \mu)^2  \enspace.
+    $$
+\end{frame}
+
+% \begin{frame}{Notes on maximum likelihood learning}
+
+% \begin{itemize}\itemsep2ex
+% \item For a  model $p$ with visible variables $\vec x$ and
+% hidden variables $\vec z$, the likelihood computation involves
+% \[
+%     p(\vec \xi\,|\,\vec\theta) = \sum_{\vec z} p(\vec \xi,\vec z\,|\,\vec\theta)\enspace.
+%     \]
+% This is difficult, especially because of the sum which prevents the logarithm to
+% act directly on  the joint distribution. \pause
+% \item If we  can not find the maximum likelihood parameters analytically (i.e.~by setting the derivative to zero) one can  maximize the likelihood via SGD or related algorithms.
+% \item If $p_{\text{data}}$ is the true distribution underlying $S$, maximizing the
+% logarithmic likelihood function corresponds to minimizing an
+% empirical estimate of the Kullback-Leibler divergence
+% $\KL(p_{\text{data}}\,\|\,p)$.
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}
+% \frametitle{Kullback-Leibler divergence}
+% Kullback-Leibler (KL) divergence between two distribution $p$ and $p_{\text{data}}$
+%     over $\vec x$  is
+% %\smallskip
+% \begin{itemize}%\normalsize\itemsep2ex
+% \item a (non-symmetric) measure of
+% difference between
+% % distributions,
+% $p$ and $p_{\text{data}}$,
+% \item always positive, zero iff the distributions are the same,
+% \end{itemize}\pause
+% and defined as
+% \begin{align*}
+% \KL(p_{\text{data}}\,\|\,p)
+% &= -\sum_{\vec x} p_{\text{data}}(\vec
+%     x)\ln\frac{p(\vec x)}{p_{\text{data}}(\vec x)} \\
+% &= -\fub{\sum_{\vec x} p_{\text{data}}(\vec
+%     x)\ln p(\vec x)}{can be approximated by $\frac{1}{\ell}\sum_{n=1}^{\ell} \ln p(\xb_n)$}  +\fub{\sum_{\vec x} p_{\text{data}}(\vec
+%         x)\ln      {p_{\text{data}}(\vec x)}}{{independent of $p$}}
+% \end{align*}
+% (sum turns to integral for
+%     continuous random variables).
+% \end{frame}
+
+
+
+
+\endlecture
+
