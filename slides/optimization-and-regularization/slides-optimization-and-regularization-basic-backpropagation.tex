@@ -5,7 +5,7 @@
 
 \begin{document}
 
-\lecturechapter{8}{Basic Backpropagation}
+\lecturechapter{3}{Basic Backpropagation}
 \lecture{Basic Backpropagation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -154,7 +154,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-    \item 1st step (backwards): We know $\textcolor{teal}{f_{out}}$ from the forward pass. 
+    \item 1st step (backwards): We know $\textcolor{teal}{f_{out}}$ from the forward pass.
   \end{itemize}
     \begin{eqnarray*}
       \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} &=& \frac{d}{\partial f_{out}} \frac{1}{2}(y - f_{out})^2 = -\underbrace{(y - \textcolor{teal}{f_{out}})}_{\hat{=} \text{residual}} \\

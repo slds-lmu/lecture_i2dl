@@ -1,6 +1,8 @@
-\documentclass[11pt,compress,t,notes=noshow]{beamer}\usepackage[]{graphicx}\usepackage[]{color}
+\documentclass[11pt,compress,t,notes=noshow]{beamer}
 
-\makeatletter
+\usepackage[]{color}
+
+
 \def\maxwidth{ %
   \ifdim\Gin@nat@width>\linewidth
     \linewidth
@@ -23,7 +25,6 @@
 \let\hlipl\hlkwb
 
 \usepackage{framed}
-\makeatletter
 \newenvironment{kframe}{%
  \def\at@end@of@kframe{}%
  \ifinner\ifhmode%
@@ -49,8 +50,11 @@
 
 \usepackage{alltt}
 \usepackage[utf8]{inputenc}
-\usepackage[ngerman]{babel}
+
+
+\usepackage[english]{babel}
 \usepackage{dsfont}
+\newcommand\bmmax{2}
 \usepackage{verbatim}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -63,11 +67,17 @@
 \usepackage[absolute,overlay]{textpos}
 \usepackage{psfrag}
 \usepackage{algorithm}
+\usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{eqnarray}
+\usepackage{multimedia}
+\usepackage{media9}
 \usepackage{bytefield}
 \usepackage{animate}
 \usepackage{tikz}
+\usepackage{setspace}
+\usepackage{wrapfig}
+
 \usetikzlibrary{shapes,matrix,positioning,chains,arrows,shadows,decorations.pathmorphing,fit,backgrounds}
 \usepackage{adjustbox}
 \usepackage{colortbl}
@@ -75,15 +85,22 @@
 \usepackage{arydshln} % Load after array, longtable, colortab and/or colortbl , otherwise problems with \hline in tabular env
 \usepackage{etex} %increase registers for \dimenS to more than 256, otherwise we get "No room for a new \dimen"
 \usepackage{graphicx}
+\usepackage{placeins}
 \usepackage{booktabs} %used in epr lectures
 \usepackage{bm} % bold greek letters
+\usepackage{bbm}
 \usepackage{hyperref} % url citing
 \usepackage{blkarray} % block arrays
 \usepackage{listings} % block of code
 \usepackage{xcolor} %colored math symbols
 \usepackage{pgffor}
 \usepackage{verbatimbox}
-\usepackage{xcolor}
+\usepackage{tcolorbox}
+%\usepackage[export]{adjustbox}
+\usepackage{siunitx}
+\def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip1em
+  \hbox{}\nobreak\hfill #1%
+  \parfillskip=0pt \finalhyphendemerits=0 \endgraf}}
 
 %some colors
 \definecolor{checkgreen}{HTML}{18A126}
@@ -102,6 +119,7 @@
 \def\SpAr{\quad \Rightarrow \quad}
 
 %new environments
+
 \newenvironment{vbframe}  %frame with breaks and verbatim
 {
  \begin{frame}[containsverbatim,allowframebreaks]
@@ -132,11 +150,41 @@
 #2}
 {\end{frame}}
 
+\newsavebox\mybox
+\newenvironment{aquote}[1]
+  {\savebox\mybox{#1}\begin{quote}\openautoquote\hspace*{-.7ex}}
+  {\unskip\closeautoquote\vspace*{1mm}\signed{\usebox\mybox}\end{quote}}
+  
+\tikzset{
+  %Define standard arrow tip
+  >=stealth',
+  %Define style for boxes
+  punkt/.style={
+    rectangle,
+    rounded corners,
+    draw=black, very thick,
+    text width=6.5em,
+    minimum height=2em,
+    text centered},
+  % Define arrow style
+  pil/.style={
+    ->,
+    thick,
+    shorten <=2pt,
+    shorten >=2pt,}
+}
+\usepackage{subfig}
+
+
 \newcommand{\myframe}[2]{  %short for frame with framebreaks
 \begin{frame}[allowframebreaks]
 \frametitle{#1}
 #2
 \end{frame}}
+
+\newcommand{\remark}[1]{
+  \textbf{Remark:} #1
+}
 
 \usepackage{../../style/lmu-lecture}
 
@@ -145,8 +193,7 @@
 
 \setkeys{Gin}{width=0.9\textwidth}
 
-\usepackage{tikz}
-\usetikzlibrary{shapes,arrows,snakes, calc}
+\usetikzlibrary{shapes,arrows,automata,positioning,calc}
 
 % Define block styles
 \tikzstyle{decision} = [diamond, draw, text width=6em, text badly centered, node distance=4cm, inner sep=0pt]
