@@ -1,266 +1,204 @@
-\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
-\usepackage[]{graphicx}\usepackage[]{color}
-% maxwidth is the original width if it is less than linewidth
-% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
 
-\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
-\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
-\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
-\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
-\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
-\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
-\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
-\let\hlipl\hlkwb
+<<size = "scriptsize", include=FALSE>>=
+source("../rsrc/functions.R")
+@
 
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
+\input{../latex-math/basic-math}
+\input{../latex-math/basic-ml}
+\input{../latex-math/ml-nn}
 
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+\lecturechapter{2}{Brief History}
+\lecture{Brief History}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage{alltt}
-\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
-\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
-\newcommand{\Sexpr}[1]{}       % will only be parsed by R
-
-
-
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-
-\usepackage{dsfont}
-\usepackage{verbatim}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{bm}
-\usepackage{csquotes}
-\usepackage{multirow}
-\usepackage{longtable}
-\usepackage{booktabs}
-\usepackage{enumerate}
-\usepackage[absolute,overlay]{textpos}
-\usepackage{psfrag}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{eqnarray}
-\usepackage{arydshln}
-\usepackage{tabularx}
-\usepackage{placeins}
-\usepackage{tikz}
-\usepackage{setspace}
-\usepackage{colortbl}
-\usepackage{mathtools}
-\usepackage{wrapfig}
-\usepackage{bm}
-\usetikzlibrary{shapes,arrows,automata,positioning,calc,chains,trees, shadows}
-\tikzset{
-  %Define standard arrow tip
-  >=stealth',
-  %Define style for boxes
-  punkt/.style={
-    rectangle,
-    rounded corners,
-    draw=black, very thick,
-    text width=6.5em,
-    minimum height=2em,
-    text centered},
-  % Define arrow style
-  pil/.style={
-    ->,
-    thick,
-    shorten <=2pt,
-    shorten >=2pt,}
-}
-\usepackage{subfig}
-
-
-% Defines macros and environments
-\input{../../style/common.tex}
-% \input{common.tex}
-
-%\usetheme{lmu-lecture}
-\newcommand{\titlefigure}{figure/eval_ofit_1}
-\newcommand{\learninggoals}{
-\item Understand what overfitting is and why it is a problem
-\item Understand how to avoid overfitting}
-\usepackage{../../style/lmu-lecture}
-
-\let\code=\texttt
-\let\proglang=\textsf
-
-\setkeys{Gin}{width=0.9\textwidth}
-
-\title{Introduction to Machine Learning}
-% \author{Bernd Bischl, Christoph Molnar, Daniel Schalk, Fabian Scheipl}
-\institute{\href{https://compstat-lmu.github.io/lecture_i2ml/}{compstat-lmu.github.io/lecture\_i2ml}}
-\date{}
-
-\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
-
-
-
-\begin{document}
-% Introduction to Machine Learning
-% Day 3
-
-% Set style/preamble.Rnw as parent.
-
-
-% Load all R packages and set up knitr
-
-% This file loads R packages, configures knitr options and sets preamble.Rnw as parent file
-% IF YOU MODIFY THIS, PLZ ALSO MODIFY setup.Rmd ACCORDINGLY...
-
-
-
-
-
-
-
-
-%! includes: evaluation-intro
-
-\lecturechapter{Evaluation: Overfitting}
-\lecture{Introduction to Machine Learning}
-
-\begin{vbframe}{Overfitting}
-
-\begin{columns}[T,onlytextwidth]
-\column{0.5\textwidth}
-Overfitting learner \\
-\vspace{0.5cm}
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=\textwidth]{figure/eval_ofit_1} 
-
-}
-
-
-
-\end{knitrout}
-Better training set performance (seen examples)
-
-\column{0.5\textwidth}
-Non-overfitting learner \\
-\vspace{0.5cm}
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=\textwidth]{figure/eval_ofit_2} 
-
-}
-
-
-
-\end{knitrout}
-Better test set performance (unseen examples)
-\end{columns}
-
-
+\begin{vbframe}{A brief history of neural networks}
+\begin{itemize}
+\item \pkg{1943:} The first artificial neuron, the "Threshold Logic Unit (TLU)", was proposed by Warren McCulloch \& Walter Pitts.
+\begin{figure}
+\includegraphics[width=7cm]{../plots/mp_neuron.png}
+\end{figure}
+\begin{itemize}
+\item The model is limited to binary inputs.
+\vspace{2mm}
+\item The MP-neuron fires a $+1$ if the input exceeds a certain threshold $\theta$.
+\vspace{2mm}
+\item The weight are not adjustable, so learning could only be achieved by changing the threshold $\theta$.
+\end{itemize}
+\end{itemize}
 \framebreak
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 
 \begin{itemize}
-  \item Happens when algorithm models patterns beyond the data- generating process,
-    e.g., noise or artefacts in the training data
-  \item Reason: too many hypotheses and not enough data to tell them apart
-  \item Less in bigger data sets
-  \item If hypothesis space is not constrained, there may never be enough data
-  \item Many learners have a parameter that allows constraining (\textit{regularization})
-  % \item In this unit we will only give a very basic definition, and not really talk
-  %   about measures against overfitting (see regularization!)
-  \item Check for overfitting by validating on a new unseen test data set
+\item \pkg{1957:} The perceptron was invented by Frank Rosenblatt. 
+\begin{figure}
+\includegraphics[width=7cm]{../plots/perceptron_new.png}
+\end{figure}
+\begin{itemize}
+\vspace{2mm}
+\item The inputs are not restricted to be binary.
+\vspace{2mm}
+\item In perceptron, the weights are adjustable and can be learned by learning algorithms.
+\vspace{2mm}
+\item Similar to the MP-neuron, the threshold is adjustable, and decision boundaries are linear.
 \end{itemize}
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{itemize}
+\item \pkg{1960:} Adaptive Linear Neuron (ADALINE) was invented by Bernard Widrow \& Ted Hoff; weights are now adjustable according to the weighted sum of the inputs.
+\vspace{.1cm}
+\begin{figure}
+\includegraphics[width=6cm]{../plots/adaline.png}
+\end{figure}
+\vspace{1cm}
+\item \pkg{1965:} Group method of data handling (also known as polynomial neural networks) by Alexey Ivakhnenko. The first learning algorithm for supervised deep feedforward multilayer perceptrons.
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item \pkg{1969:} The first \enquote{AI Winter} kicked in.
+\begin{itemize}
+\item Marvin Minsky \& Seymour Papert proved that a perceptron cannot solve the XOR-Problem (linear separability).
+\item Less funding $\Rightarrow$ Standstill in AI/DL research
+\end{itemize}
+\end{itemize}
+\begin{figure}
+\includegraphics[width=7cm]{../plots/orvsxor.png}
+\end{figure}
+\begin{itemize}
+\item \pkg{1985:} Multi-layered perceptron with backpropagation by David Rumelhart, Geoffrey Hinton and Ronald Williams.
+\begin{itemize}
+\item Efficiently compute derivatives of composite functions.
+\item Backpropagation was developed already in 1970 by Linnainmaa.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item \pkg{1985:} The second \enquote{AI Winter} kicked in.
+
+\begin{itemize}
+\footnotesize\item Overly optimistic expectations concerning potential of AI/DL.
+\footnotesize\item The phrase \enquote{AI} even reached a pseudoscience status.
+\footnotesize\item Kernel machines and graphical models both achieved good results on many important tasks.
+\footnotesize\item Some fundamental mathematical difficulties in modeling long sequences were identified.
+\end{itemize}
+\begin{figure}
+\includegraphics[width=8cm]{../plots/ai_winter.jpg}
+\\
+\tiny{Credit: https://emerj.com/ai-executive-guides/will-there-be-another-artificial-intelligence-winter-probably-not/}
+\end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item \pkg{2006:} Age of deep neural networks began.
+
+\begin{itemize}
+\footnotesize\item Geoffrey Hinton showed that a deep belief network could be efficiently trained using \textit{greedy layer-wise pretraining}.
+\footnotesize\item This wave of research popularized the use of the term deep learning to emphasize that researchers were now able to train deeper neural networks than had been possible before.
+\footnotesize\item At this time, deep neural networks outperformed competing AI systems based on other ML technologies as well as hand-designed functionality.
+\end{itemize}
+\begin{figure}
+\includegraphics[width=7cm]{../plots/dl_feature2.png}
+\\
+\tiny{Credit: https://towardsdatascience.com/cnn-application-on-structured-data-automated-feature-extraction-8f2cd28d9a7e}
+\end{figure}
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Why now and not earlier?}
+\begin{enumerate}
+\vspace{2mm}
+\item Significantly bigger datasets.
+\vspace{2mm}
+\item Better algorithms resolving the vanishing gradient problem.
+\vspace{2mm}
+\item Better regularization.
+\vspace{2mm}
+\item Unsupervised representation learning.
+\vspace{2mm}
+\item More layers lead to a significant increase of parameters.
+\vspace{2mm}
+\item Deep neural networks are trained on GPUs, rather than CPUs. So processing power can handle huge amounts of parameters.
+\vspace{2mm}
+\item Investment by industries and universities.
+\vspace{2mm}
+\item DL tools make learning and applying DL easier.
+\end{enumerate}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\scalebox{1.1}{\includegraphics{../plots/dl_timeline.png}}
+\tiny{Credit: Favio Vazquez}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\scalebox{1.1}{\includegraphics{../plots/DL_tools.png}}
+\end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{../plots/bostondynamic.png}
+\caption{Boston Dynamics (\href{https://www.youtube.com/watch?v=fUyU3lKzoio&ab_channel=BostonDynamics}{click here})}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item Boston Dynamics is a world leader in mobile robots founded in 1992 as a spin-off from the Massachusetts Institute of Technology.
+\vspace{.1cm}
+\item The company is best known for the development of a series of dynamic highly-mobile robots, including BigDog, Spot, Atlas, and Handle.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{../plots/ibmsupercomputer.jpg}
+\caption{IBM Supercomputer}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item Watson is a question-answering system capable of answering questions posed in natural language, developed in IBM's DeepQA project.
+\vspace{.1cm}
+\item In 2011, Watson competed on \textit{Jeopardy!} against champions Brad Rutter and Ken Jennings, winning the first place prize of $\$ 1$ million.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{../plots/selfdriving.jpg}
+\caption{Google self driving car (Waymo)}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item Google's development of self-driving technology began on January 17, 2009, at the company's secretive X lab.
+\vspace{.1cm}
+\item By January 2020, $20$ million miles of self-driving on public roads had been completed by Waymo.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{../plots/alphafold.jpg}
+\\
+\tiny {Credit: DeepMind}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item\textbf{AlphaFold} is a deep learning system developed by Google DeepMind, to solve determine a protein's 3D shape from its amino-acid sequence.
+\vspace{.1cm}
+\item In 2018 and 2020, AlphaFold placed first in the overall rankings of the Critical Assessment of Techniques for Protein Structure Prediction (CASP).
+\end{itemize}
 \end{vbframe}
-
-
-% \begin{vbframe}{Overfitting and Noise}
-% \begin{itemize}
-%   \item Overfitting is seriously exacerbated by \textit{noise} (errors in the training data)
-%   \item An unconstrained learner will start to model that noise
-%   \item It can also arise when relevant features are missing in the data
-%   \item In general it's better to make some mistakes on training data ("ignore some observations") than trying to get all correct
-% \end{itemize}
-% \end{vbframe}
-
-% \begin{vbframe}{Avoiding Overfitting}
-% \begin{itemize}
-%   \item You should never believe your model until you've \textit{verified it on data that the learner didn't see}
-%   \item Scientific method applied to machine learning: model must make new predictions that can be experimentally verified
-%   \item Use less complex models 
-%   \item Get more, or better data
-%   \item Some learner can do "early stopping" before perfectly fitting (i.e., overfitting) the training data
-%   \item Use regularization
-% \end{itemize}
-% \end{vbframe}
-
-% \begin{vbframe}{Triple Trade-Off}
-
-% In all learning algorithms that are trained from data, there is a trade-off between three factors:
-% \begin{itemize}
-  % \item The complexity of the hypothesis we fit to the training data
-  % \item The amount of training data (in terms of both instances and informative features)
-  % \item The generalization error on new examples
-% \end{itemize}
-% If the capacity of the learning algorithm is large enough to a) approximate the data generating process and b) exploit the information contained in the data, the generalization error will decrease as the amount of training data increases.
-
-% For a fixed size of training data, the generalization error decreases first and then starts to increase (overfitting) as the complexity of the hypothesis space $H$ increases.
-% \end{vbframe}
-
-\begin{vbframe}{Trade-Off Between Generalization Error and Complexity}
-
-% Apparent error (on the training data) and real error (prediction error on new data) evolve in the opposite direction with increasing complexity:
-
-\lz
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=0.95\textwidth]{figure/eval_ofit_3} 
-
-}
-
-
-
-\end{knitrout}
-
-\lz
-$\Rightarrow$ Optimization regarding model complexity is desirable:\\ 
-Find the right amount of complexity for the given amount of data where generalization error becomes minimal.
-
-\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture
-\end{document}

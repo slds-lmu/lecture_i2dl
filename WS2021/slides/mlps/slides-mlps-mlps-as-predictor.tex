@@ -1,266 +1,235 @@
-\documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
-\usepackage[]{graphicx}\usepackage[]{color}
-% maxwidth is the original width if it is less than linewidth
-% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
 
-\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
-\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
-\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
-\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
-\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
-\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
-\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
-\let\hlipl\hlkwb
+<<size = "scriptsize", include=FALSE>>=
+source("../rsrc/functions.R")
+@
 
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
+\input{../latex-math/basic-math}
+\input{../latex-math/basic-ml}
+\input{../latex-math/ml-nn}
 
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+\lecturechapter{4}{MLP as Predictor}
+\lecture{MLP as Predictor}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage{alltt}
-\newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
-\newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
-\newcommand{\Sexpr}[1]{}       % will only be parsed by R
-
-
-
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-
-\usepackage{dsfont}
-\usepackage{verbatim}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{bm}
-\usepackage{csquotes}
-\usepackage{multirow}
-\usepackage{longtable}
-\usepackage{booktabs}
-\usepackage{enumerate}
-\usepackage[absolute,overlay]{textpos}
-\usepackage{psfrag}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{eqnarray}
-\usepackage{arydshln}
-\usepackage{tabularx}
-\usepackage{placeins}
-\usepackage{tikz}
-\usepackage{setspace}
-\usepackage{colortbl}
-\usepackage{mathtools}
-\usepackage{wrapfig}
-\usepackage{bm}
-\usetikzlibrary{shapes,arrows,automata,positioning,calc,chains,trees, shadows}
-\tikzset{
-  %Define standard arrow tip
-  >=stealth',
-  %Define style for boxes
-  punkt/.style={
-    rectangle,
-    rounded corners,
-    draw=black, very thick,
-    text width=6.5em,
-    minimum height=2em,
-    text centered},
-  % Define arrow style
-  pil/.style={
-    ->,
-    thick,
-    shorten <=2pt,
-    shorten >=2pt,}
-}
-\usepackage{subfig}
-
-
-% Defines macros and environments
-\input{../../style/common.tex}
-% \input{common.tex}
-
-%\usetheme{lmu-lecture}
-\newcommand{\titlefigure}{figure/eval_ofit_1}
-\newcommand{\learninggoals}{
-\item Understand what overfitting is and why it is a problem
-\item Understand how to avoid overfitting}
-\usepackage{../../style/lmu-lecture}
-
-\let\code=\texttt
-\let\proglang=\textsf
-
-\setkeys{Gin}{width=0.9\textwidth}
-
-\title{Introduction to Machine Learning}
-% \author{Bernd Bischl, Christoph Molnar, Daniel Schalk, Fabian Scheipl}
-\institute{\href{https://compstat-lmu.github.io/lecture_i2ml/}{compstat-lmu.github.io/lecture\_i2ml}}
-\date{}
-
-\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
-
-
-
-\begin{document}
-% Introduction to Machine Learning
-% Day 3
-
-% Set style/preamble.Rnw as parent.
-
-
-% Load all R packages and set up knitr
-
-% This file loads R packages, configures knitr options and sets preamble.Rnw as parent file
-% IF YOU MODIFY THIS, PLZ ALSO MODIFY setup.Rmd ACCORDINGLY...
-
-
-
-
-
-
-
-
-%! includes: evaluation-intro
-
-\lecturechapter{Evaluation: Overfitting}
-\lecture{Introduction to Machine Learning}
-
-\begin{vbframe}{Overfitting}
-
-\begin{columns}[T,onlytextwidth]
-\column{0.5\textwidth}
-Overfitting learner \\
-\vspace{0.5cm}
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=\textwidth]{figure/eval_ofit_1} 
-
-}
-
-
-
-\end{knitrout}
-Better training set performance (seen examples)
-
-\column{0.5\textwidth}
-Non-overfitting learner \\
-\vspace{0.5cm}
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=\textwidth]{figure/eval_ofit_2} 
-
-}
-
-
-
-\end{knitrout}
-Better test set performance (unseen examples)
-\end{columns}
-
-
+\begin{vbframe}{Motivation}
+\lz
+\begin{itemize}
+\item The graphical way of representing simple functions/models, like logistic regression. Why is that useful?
+\lz
+\item Because individual neurons can be used as building blocks of more complicated functions.
+\lz
+\item Networks of neurons can represent extremely complex hypothesis spaces.
+\lz
+\item Most importantly, it allows us to define the \enquote{right} kinds of hypothesis spaces to learn functions that are more common in our universe in a data-efficient way (see Lin, Tegmark et al. 2016).
+\end{itemize}
 \framebreak
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
-  \item Happens when algorithm models patterns beyond the data- generating process,
-    e.g., noise or artefacts in the training data
-  \item Reason: too many hypotheses and not enough data to tell them apart
-  \item Less in bigger data sets
-  \item If hypothesis space is not constrained, there may never be enough data
-  \item Many learners have a parameter that allows constraining (\textit{regularization})
-  % \item In this unit we will only give a very basic definition, and not really talk
-  %   about measures against overfitting (see regularization!)
-  \item Check for overfitting by validating on a new unseen test data set
+\item As a single neuron is restricted to learning only linear decision boundaries, its performance on the following task is quite poor:
+\begin{figure}
+\centering
+\scalebox{0.25}{\includegraphics{../plots/cartesian.png}}
+\end{figure}
+\item However, the neuron can easily separate the classes if the original features are transformed (e.g., from Cartesian to polar coordinate): 
+\begin{figure}
+\centering
+\scalebox{0.25}{\includegraphics{../plots/polar.png}}
+\end{figure}
 \end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{itemize}
+\item Instead of classifying the data in the original representation,
+\begin{figure}
+\centering
+\scalebox{1}{\includegraphics{../plots/repold_f.png}}
+\end{figure}
+\item we classify it in a new feature space.
+\begin{figure}
+\centering
+\scalebox{1}{\includegraphics{../plots/repnew_f.png}}
+\end{figure}
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+\item Analogously, instead of a single neuron, 
+\begin{figure}
+\centering
+\scalebox{0.6}{\includegraphics{../plots/oldrep_n_f.png}}
+\end{figure}
+\item we use more complex networks.
+\begin{figure}
+\centering
+\scalebox{0.65}{\includegraphics{../plots/newrep_n_f.png}}
+\end{figure}
+\end{itemize}
 \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{vbframe} {Representation Learning}
+  \begin{itemize}
+    \vspace{5mm}
+    \item It is therefore \textit{very} critical to feed a classifier the \enquote{right} features in order for it to perform well.
+    \vspace{7mm}
+    \item Before deep learning took off, features for tasks like machine vision and speech recognition were \enquote{hand-designed} by domain experts. This step of the machine learning pipeline is called \textbf{feature engineering}.
+    \vspace{7mm}
+    \item The single biggest reason DL is so important is that it automates feature engineering. This is called \textbf{representation learning}.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \begin{vbframe}{Overfitting and Noise}
-% \begin{itemize}
-%   \item Overfitting is seriously exacerbated by \textit{noise} (errors in the training data)
-%   \item An unconstrained learner will start to model that noise
-%   \item It can also arise when relevant features are missing in the data
-%   \item In general it's better to make some mistakes on training data ("ignore some observations") than trying to get all correct
-% \end{itemize}
-% \end{vbframe}
+\begin{vbframe}{Single Hidden Layer Networks}
+\textbf{Single neurons} perform a 2-step computation:
+\begin{enumerate}
+\item \textbf{Affine Transformation:} a weighted sum of inputs plus bias.
+\item \textbf{Activation:} a non-linear transformation on the weighted sum.
+\end{enumerate}
+\vspace{.5cm}
+\textbf{Single hidden layer networks} consist of two layers:
+\begin{enumerate}
+\item \textbf{Hidden Layer:} having a set of neurons.
+\item \textbf{Output Layer:} having one (potentially more) output neuron.
+\end{enumerate}
+\vspace{.5cm}
+\begin{itemize}
+\item Multiple inputs are simultaneously fed to the network.
+\vspace{.2cm}
+\item Each neuron in the hidden layer performs a 2-step computation.
+\vspace{.2cm}
+\item The final output of the network is then calculated by another 2-step computation performed by the neuron in the output layer.
+\end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \begin{vbframe}{Avoiding Overfitting}
-% \begin{itemize}
-%   \item You should never believe your model until you've \textit{verified it on data that the learner didn't see}
-%   \item Scientific method applied to machine learning: model must make new predictions that can be experimentally verified
-%   \item Use less complex models 
-%   \item Get more, or better data
-%   \item Some learner can do "early stopping" before perfectly fitting (i.e., overfitting) the training data
-%   \item Use regularization
-% \end{itemize}
-% \end{vbframe}
+\begin{frame} {Single Hidden Layer Networks: Example}
+Each neuron in the hidden layer performs an \textbf{affine transformation} on the inputs:
+\begin{figure}
+\centering
+\only<1>{\scalebox{.8}{\includegraphics{../plots/singlelay_1.png}}}
+\only<2>{\scalebox{.8}{\includegraphics{../plots/singlelay_2.png}}}
+\only<3>{\scalebox{.8}{\includegraphics{../plots/singlelay_3.png}}}
+\only<4>{\scalebox{.8}{\includegraphics{../plots/singlelay_4.png}}}
+\only<5>{\scalebox{.8}{\includegraphics{../plots/singlelay_5.png}}}
+\end{figure}
+\end{frame}
 
-% \begin{vbframe}{Triple Trade-Off}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% In all learning algorithms that are trained from data, there is a trade-off between three factors:
-% \begin{itemize}
-  % \item The complexity of the hypothesis we fit to the training data
-  % \item The amount of training data (in terms of both instances and informative features)
-  % \item The generalization error on new examples
-% \end{itemize}
-% If the capacity of the learning algorithm is large enough to a) approximate the data generating process and b) exploit the information contained in the data, the generalization error will decrease as the amount of training data increases.
+\begin{frame} {Single Hidden Layer Networks: Example}
+Each hidden neurons perform a non-linear \textbf{activation} transformation on the weight sum:
+\begin{figure}
+\centering
+\only<1>{\scalebox{.83}{\includegraphics{../plots/singlelay_6.png}}}
+\end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% For a fixed size of training data, the generalization error decreases first and then starts to increase (overfitting) as the complexity of the hypothesis space $H$ increases.
-% \end{vbframe}
+\begin{frame} {Single Hidden Layer Networks: Example}
+The output neuron performs an \textbf{affine transformation} on its inputs:
+\begin{figure}
+\centering
+\only<1>{\scalebox{.83}{\includegraphics{../plots/singlelay_7.png}}}
+\only<2>{\scalebox{1}{\includegraphics{../plots/singlelay_8.png}}}
+\end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Trade-Off Between Generalization Error and Complexity}
+\begin{frame} {Single Hidden Layer Networks: Example}
+The output neuron performs a non-linear \textbf{activation} transformation on the weight sum:
+\begin{figure}
+\centering
+\only<1>{\scalebox{.8}{\includegraphics{../plots/singlelay_9.png}}}
+\end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Apparent error (on the training data) and real error (prediction error on new data) evolve in the opposite direction with increasing complexity:
+\begin{vbframe}{Hidden Layer: Activation Function}
+\textbf{Note:} if the hidden layer does not have a non-linear activation, the network can only learn linear decision boundaries.
+\begin{blocki}{ReLU Activation:}
+\item Currently the most popular choice is the ReLU (rectified linear unit):
+$$ \sigma (v) = \max(0,v) $$
+\end{blocki}
+\begin{figure}
+\scalebox{1}{\includegraphics{../plots/relu.png}}
+\end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocki}{Hyperbolic Tangent Activation:}
+\item Another choice might be the hyperbolic tangent function:
+$$ \sigma (v) = \text{tanh}(v) = \frac{\text{sinh}(v)}{\text{cosh}(v)} = 1 - \frac{2}{\exp(2v) + 1}$$
+\end{blocki}
+\begin{figure}
+\scalebox{1}{\includegraphics{../plots/tanh.png}}
+\end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocki}{Sigmoid Activation Function:}
+\item The sigmoid function can be used even in the hidden layer:
+$$ \sigma(v) = \frac{1}{1+\exp (-v)} $$
+\end{blocki}
+\begin{figure}
+\scalebox{1}{\includegraphics{../plots/sigmoid.png}}
+\end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Deep Feedforward Network}
+  \lz
+  \begin{figure}
+    \centering
+      \includegraphics[width=10.5cm]{../plots/deepneuralnet_new.png}
+      \caption{Structure of a deep neural network with $l$ hidden layers.}
+  \end{figure}
+\end{vbframe}  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Why add more layers?}
+\begin{itemize}
+\item Multiple layers allow for the extraction of more and more abstract
+representations.
+\lz
+\item Each layer in a feed-forward neural network adds its own degree of non-linearity to the model.
+\end{itemize}
+\lz
+\begin{figure}
+\centering
+\includegraphics[width=10.5cm]{../plots/folding}
+\caption{An intuitive, geometric explanation of the exponential advantage of deeper networks formally (Mont\'{u}far et al. (2014)).}
+\end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Deep neural networks}
+
+Neural networks today can have dozens or even hundreds of hidden layers. The greater the number of layers, the "deeper" the network. Historically, however, deep neural networks were very challenging to train for several reasons:
+\lz
+\begin{enumerate}
+\item For one thing, the use of sigmoid activations (e.g., logistic sigmoid and tanh) significantly slowed down training due to a phenomenon known as \enquote{vanishing gradients}. The introduction of the ReLU activation largely solved this problem.
+\item Training deep neural networks on CPUs was too slow to be practical. Switching over to GPUs cut down training time by more than an order of magnitude.
+\item Another reason neural networks were not popular until the late '00s is that when dataset sizes are small, other models (such as SVMs) and techniques (such as feature engineering) outperform them. 
+\end{enumerate}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{itemize}
+\item The availability of large datasets and novel architectures that are capable to handle even complex tensor-shaped data (e.g. CNNs for image data), faster hardware, and better optimization and regularization methods made it feasible to successfully implement deep neural networks in the last decade.
+\lz
+
+\item An increase in depth often translates to an increase in performance on a given task. State-of-the-art neural networks, however, are much more sophisticated than the simple architectures we have encountered so far.
 
 \lz
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=0.95\textwidth]{figure/eval_ofit_3} 
-
-}
-
-
-
-\end{knitrout}
-
-\lz
-$\Rightarrow$ Optimization regarding model complexity is desirable:\\ 
-Find the right amount of complexity for the given amount of data where generalization error becomes minimal.
-
+\item The term "\textbf{deep learning}" encompasses all of these developments and refers to the field as a whole.
+\end{itemize}
 \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture
-\end{document}

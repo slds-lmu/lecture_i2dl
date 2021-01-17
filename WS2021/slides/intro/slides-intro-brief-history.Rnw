@@ -1,0 +1,204 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+<<size = "scriptsize", include=FALSE>>=
+source("../rsrc/functions.R")
+@
+
+\input{../latex-math/basic-math}
+\input{../latex-math/basic-ml}
+\input{../latex-math/ml-nn}
+
+\lecturechapter{2}{Brief History}
+\lecture{Brief History}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{A brief history of neural networks}
+\begin{itemize}
+\item \pkg{1943:} The first artificial neuron, the "Threshold Logic Unit (TLU)", was proposed by Warren McCulloch \& Walter Pitts.
+\begin{figure}
+\includegraphics[width=7cm]{../plots/mp_neuron.png}
+\end{figure}
+\begin{itemize}
+\item The model is limited to binary inputs.
+\vspace{2mm}
+\item The MP-neuron fires a $+1$ if the input exceeds a certain threshold $\theta$.
+\vspace{2mm}
+\item The weight are not adjustable, so learning could only be achieved by changing the threshold $\theta$.
+\end{itemize}
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+\begin{itemize}
+\item \pkg{1957:} The perceptron was invented by Frank Rosenblatt. 
+\begin{figure}
+\includegraphics[width=7cm]{../plots/perceptron_new.png}
+\end{figure}
+\begin{itemize}
+\vspace{2mm}
+\item The inputs are not restricted to be binary.
+\vspace{2mm}
+\item In perceptron, the weights are adjustable and can be learned by learning algorithms.
+\vspace{2mm}
+\item Similar to the MP-neuron, the threshold is adjustable, and decision boundaries are linear.
+\end{itemize}
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+\item \pkg{1960:} Adaptive Linear Neuron (ADALINE) was invented by Bernard Widrow \& Ted Hoff; weights are now adjustable according to the weighted sum of the inputs.
+\vspace{.1cm}
+\begin{figure}
+\includegraphics[width=6cm]{../plots/adaline.png}
+\end{figure}
+\vspace{1cm}
+\item \pkg{1965:} Group method of data handling (also known as polynomial neural networks) by Alexey Ivakhnenko. The first learning algorithm for supervised deep feedforward multilayer perceptrons.
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item \pkg{1969:} The first \enquote{AI Winter} kicked in.
+\begin{itemize}
+\item Marvin Minsky \& Seymour Papert proved that a perceptron cannot solve the XOR-Problem (linear separability).
+\item Less funding $\Rightarrow$ Standstill in AI/DL research
+\end{itemize}
+\end{itemize}
+\begin{figure}
+\includegraphics[width=7cm]{../plots/orvsxor.png}
+\end{figure}
+\begin{itemize}
+\item \pkg{1985:} Multi-layered perceptron with backpropagation by David Rumelhart, Geoffrey Hinton and Ronald Williams.
+\begin{itemize}
+\item Efficiently compute derivatives of composite functions.
+\item Backpropagation was developed already in 1970 by Linnainmaa.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item \pkg{1985:} The second \enquote{AI Winter} kicked in.
+
+\begin{itemize}
+\footnotesize\item Overly optimistic expectations concerning potential of AI/DL.
+\footnotesize\item The phrase \enquote{AI} even reached a pseudoscience status.
+\footnotesize\item Kernel machines and graphical models both achieved good results on many important tasks.
+\footnotesize\item Some fundamental mathematical difficulties in modeling long sequences were identified.
+\end{itemize}
+\begin{figure}
+\includegraphics[width=8cm]{../plots/ai_winter.jpg}
+\\
+\tiny{Credit: https://emerj.com/ai-executive-guides/will-there-be-another-artificial-intelligence-winter-probably-not/}
+\end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item \pkg{2006:} Age of deep neural networks began.
+
+\begin{itemize}
+\footnotesize\item Geoffrey Hinton showed that a deep belief network could be efficiently trained using \textit{greedy layer-wise pretraining}.
+\footnotesize\item This wave of research popularized the use of the term deep learning to emphasize that researchers were now able to train deeper neural networks than had been possible before.
+\footnotesize\item At this time, deep neural networks outperformed competing AI systems based on other ML technologies as well as hand-designed functionality.
+\end{itemize}
+\begin{figure}
+\includegraphics[width=7cm]{../plots/dl_feature2.png}
+\\
+\tiny{Credit: https://towardsdatascience.com/cnn-application-on-structured-data-automated-feature-extraction-8f2cd28d9a7e}
+\end{figure}
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\textbf{Why now and not earlier?}
+\begin{enumerate}
+\vspace{2mm}
+\item Significantly bigger datasets.
+\vspace{2mm}
+\item Better algorithms resolving the vanishing gradient problem.
+\vspace{2mm}
+\item Better regularization.
+\vspace{2mm}
+\item Unsupervised representation learning.
+\vspace{2mm}
+\item More layers lead to a significant increase of parameters.
+\vspace{2mm}
+\item Deep neural networks are trained on GPUs, rather than CPUs. So processing power can handle huge amounts of parameters.
+\vspace{2mm}
+\item Investment by industries and universities.
+\vspace{2mm}
+\item DL tools make learning and applying DL easier.
+\end{enumerate}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\scalebox{1.1}{\includegraphics{../plots/dl_timeline.png}}
+\tiny{Credit: Favio Vazquez}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\scalebox{1.1}{\includegraphics{../plots/DL_tools.png}}
+\end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{../plots/bostondynamic.png}
+\caption{Boston Dynamics (\href{https://www.youtube.com/watch?v=fUyU3lKzoio&ab_channel=BostonDynamics}{click here})}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item Boston Dynamics is a world leader in mobile robots founded in 1992 as a spin-off from the Massachusetts Institute of Technology.
+\vspace{.1cm}
+\item The company is best known for the development of a series of dynamic highly-mobile robots, including BigDog, Spot, Atlas, and Handle.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{../plots/ibmsupercomputer.jpg}
+\caption{IBM Supercomputer}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item Watson is a question-answering system capable of answering questions posed in natural language, developed in IBM's DeepQA project.
+\vspace{.1cm}
+\item In 2011, Watson competed on \textit{Jeopardy!} against champions Brad Rutter and Ken Jennings, winning the first place prize of $\$ 1$ million.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{../plots/selfdriving.jpg}
+\caption{Google self driving car (Waymo)}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item Google's development of self-driving technology began on January 17, 2009, at the company's secretive X lab.
+\vspace{.1cm}
+\item By January 2020, $20$ million miles of self-driving on public roads had been completed by Waymo.
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\centering
+\includegraphics[width=7cm]{../plots/alphafold.jpg}
+\\
+\tiny {Credit: DeepMind}
+\end{figure}
+\footnotesize
+\begin{itemize}
+\item\textbf{AlphaFold} is a deep learning system developed by Google DeepMind, to solve determine a protein's 3D shape from its amino-acid sequence.
+\vspace{.1cm}
+\item In 2018 and 2020, AlphaFold placed first in the overall rankings of the Critical Assessment of Techniques for Protein Structure Prediction (CASP).
+\end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture
