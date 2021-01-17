@@ -1,12 +1,8 @@
 
  slidedirs <- c(
-   "ml-basics", 
-   "supervised-regression", 
-   "supervised-classification",
-   "evaluation", 
-   "trees", 
-   "forests", 
-   "tuning"
+   "introduction", 
+   "mlps", 
+   "optimization-and-regularization",
  )
 
 

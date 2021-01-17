@@ -1,6 +1,6 @@
-## Introduction to Machine Learning
+## Introduction to Deep Learning
 
-This repository contains the slides for the "Introduction to machine learning" course.
+This repository contains the slides for the "Introduction to deep learning" course.
 [See also the moodle page](https://moodle.lmu.de/course/view.php?id=3001).
 
 ## Contributing

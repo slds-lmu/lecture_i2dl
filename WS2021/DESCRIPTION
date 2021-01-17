@@ -1,6 +1,6 @@
-Package: intro2ml
+Package: intro2dl
 Type: Package
-Title: Lecture about introduction to machine learning
+Title: Lecture about introduction to deep learning
 Version: 1.0
 Authors@R: c(
   person(given = "Bernd", family = "Bischl", email = "bernd_bischl@gmx.net", role = "aut"),
@@ -9,7 +9,7 @@ Authors@R: c(
   person(given = "Christoph", family = "Molnar", email = "christoph.molnar@stat.uni-muenchen.de", role = "aut"),
   person(given = "Daniel", family = "Schalk", email = "daniel.schalk@stat.uni-muenchen.de", role = c("aut", "cre")))
 Maintainer: Daniel Schalk <daniel.schalk@stat.uni-muenchen.de>
-Description: This is material for an introductory course to machine learning.
+Description: This is material for an introductory course to deep learning.
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
