@@ -1,6 +1,7 @@
-\input{../latex-math/basic-math}
-\input{../latex-math/basic-ml}
-\input{../latex-math/ml-nn}
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
 
 \begin{document}
 
@@ -52,7 +53,7 @@ This is simply gradient descent in disguise (for one observation).
 
   \begin{figure}
     \centering
-      \scalebox{0.8}{\includegraphics{../plots/forwardprop1_new.png}}
+      \scalebox{0.8}{\includegraphics{figure/forwardprop1_new.png}}
       \caption{A neural network with two neurons in the hidden layer. $W$ and $\biasb$ are the weights and biases of the hidden layer. $\wtu$ and $c$ are the weights and bias of the output layer. Based on the values for the weights (and biases), we will perform one forward and one backward pass.}
   \end{figure}
 \end{vbframe} 
@@ -70,11 +71,11 @@ This is simply gradient descent in disguise (for one observation).
 \end{itemize}
 \begin{figure}
 \centering
-\includegraphics[width=8cm]{../plots/xor_rep.png}
+\includegraphics[width=8cm]{figure/xor_rep.png}
 \end{figure}
 \begin{figure}
 \centering
-\scalebox{0.5}{\includegraphics{../plots/forwardprop2b_new.png}}
+\scalebox{0.5}{\includegraphics{figure/forwardprop2b_new.png}}
 \end{figure}
 \begin{footnotesize}
 \begin{eqnarray*}
@@ -88,7 +89,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 
   \begin{figure}
     \centering
-      \scalebox{0.5}{\includegraphics{../plots/forwardprop3b_new.png}}
+      \scalebox{0.5}{\includegraphics{figure/forwardprop3b_new.png}}
   \end{figure}
 \vspace*{-0.5cm}
   \begin{footnotesize}
@@ -102,7 +103,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 
   \begin{figure}
     \centering
-      \includegraphics[width=5cm]{../plots/forwardprop4b_new.png}
+      \includegraphics[width=5cm]{figure/forwardprop4b_new.png}
   \end{figure}
 
 \vspace*{-0.5cm}
@@ -146,7 +147,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
   \end{itemize}
   \begin{figure}
     \centering
-      \scalebox{0.54}{\includegraphics{../plots/backprop1_new.png}}
+      \scalebox{0.54}{\includegraphics{figure/backprop1_new.png}}
       \caption{\footnotesize{Snippet from our neural network showing the backward path to compute the gradient with respect to weight $u_1$.}}
   \end{figure}
 \framebreak
@@ -161,7 +162,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
     \end{eqnarray*}
     \begin{figure}
       \centering
-        \scalebox{0.6}{\includegraphics{../plots/backprop1_b_new.png}}
+        \scalebox{0.6}{\includegraphics{figure/backprop1_b_new.png}}
         \caption{The first term of our chain rule $\frac{\partial \Lxy}{\partial f_{out}}$}
     \end{figure}
 \framebreak
@@ -177,7 +178,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
       \vspace{-0.5cm}
     \begin{figure}
       \centering
-        \scalebox{0.6}{\includegraphics{../plots/backprop1_c_new.png}}
+        \scalebox{0.6}{\includegraphics{figure/backprop1_c_new.png}}
         \caption{The second term of our chain rule $\frac{\partial f_{out}}{\partial f_{in}}$}
     \end{figure}
 \framebreak
@@ -191,7 +192,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
     \end{eqnarray*}
     \begin{figure}
       \centering
-        \scalebox{0.6}{\includegraphics{../plots/backprop1_d_new.png}}
+        \scalebox{0.6}{\includegraphics{figure/backprop1_d_new.png}}
         \caption{The third term of our chain rule $\frac{\partial f_{in}}{\partial u_1}$}
     \end{figure}
 \framebreak
@@ -206,7 +207,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
   \end{eqnarray*}
     \begin{figure}
       \centering
-        \scalebox{0.6}{\includegraphics{../plots/backprop1_e_new.png}}
+        \scalebox{0.6}{\includegraphics{figure/backprop1_e_new.png}}
         \caption{All three terms of our chain rule $\frac{\partial \Lxy}{\partial u_1} = \frac{\partial \Lxy}{\partial f_{out}} \cdot \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial f_{in}}{\partial u_1}$}
     \end{figure}
 \framebreak
@@ -228,7 +229,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
   \end{itemize}
   \begin{figure}
     \centering
-      \scalebox{0.70}{\includegraphics{../plots/backprop2_new.png}}
+      \scalebox{0.70}{\includegraphics{figure/backprop2_new.png}}
       \caption{Snippet from our neural network showing the backward path to compute the gradient with respect to weight $W_{11}$.}
   \end{figure}
 \framebreak
@@ -238,7 +239,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
     \item We already know $\textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}}$ and $\textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}}$ from the backward pass before for updating $u_1$.
   \begin{figure}
     \centering
-      \scalebox{0.7}{\includegraphics{../plots/backprop2_bc_new.png}}
+      \scalebox{0.7}{\includegraphics{figure/backprop2_bc_new.png}}
       \caption{The first and second term of our chain rule $\frac{\partial \Lxy}{\partial f_{out}}$ and $\frac{\partial f_{out}}{\partial f_{in}}$}
   \end{figure}
 \framebreak
@@ -251,7 +252,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
   \end{eqnarray*}
   \begin{figure}
     \centering
-      \scalebox{0.7}{\includegraphics{../plots/backprop2_d_new.png}}
+      \scalebox{0.7}{\includegraphics{figure/backprop2_d_new.png}}
       \caption{The third term of our chain rule $\frac{\partial f_{in}}{\partial z_{1,out}}$}
   \end{figure}
 \framebreak
@@ -265,7 +266,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
   \end{eqnarray*}
   \begin{figure}
     \centering
-      \scalebox{0.7}{\includegraphics{../plots/backprop2_e_new.png}}
+      \scalebox{0.7}{\includegraphics{figure/backprop2_e_new.png}}
       \caption{The fourth term of our chain rule $\frac{\partial z_{1,out}}{\partial z_{1,in}}$}
   \end{figure}
 \framebreak
@@ -279,7 +280,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
   \end{eqnarray*}
   \begin{figure}
     \centering
-      \scalebox{0.65}{\includegraphics{../plots/backprop2_f_new.png}}
+      \scalebox{0.65}{\includegraphics{figure/backprop2_f_new.png}}
       \caption{The fifth term of our chain rule $\frac{\partial z_{1,in}}{\partial W_{11}}$}
   \end{figure}
 \framebreak
@@ -295,7 +296,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
       \end{eqnarray*}
   \begin{figure}
     \centering
-      \scalebox{0.6}{\includegraphics{../plots/backprop2_g_new.png}}
+      \scalebox{0.6}{\includegraphics{figure/backprop2_g_new.png}}
       \caption{All five terms of our chain rule}
   \end{figure}
 \framebreak
@@ -403,7 +404,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
         \frac{\partial \Lxy}{\partial f_{out}} \cdot  \textcolor{black}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{black}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{black}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{11}}} $$
   \begin{figure}
     \centering
-      \includegraphics[width=9cm]{../plots/backprop_gg1_new.png}
+      \includegraphics[width=9cm]{figure/backprop_gg1_new.png}
       \caption{All five terms of our chain rule}
   \end{figure}
 \end{frame}
@@ -415,7 +416,7 @@ Next, let us compute:
 \frac{\partial \Lxy}{\partial f_{out}} \cdot  \textcolor{black}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{black}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{black}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{21}}}$$
         \begin{figure}
     \centering
-      \includegraphics[width=9cm]{../plots/backprop_gg_new.png}
+      \includegraphics[width=9cm]{figure/backprop_gg_new.png}
       \caption{All five terms of our chain rule}
   \end{figure}
 \end{frame}
@@ -471,7 +472,7 @@ where $\delta_1$ is simply "plugged in".
     \item The output layer will be referred to as layer O.}
    \begin{figure}
     \centering
-      \scalebox{1}{\includegraphics{../plots/backnet.png}}
+      \scalebox{1}{\includegraphics{figure/backnet.png}}
       \tiny{\\Credit: Erik Hallstr\"{o}m}
     \end{figure}
   \end{itemize}
@@ -484,7 +485,7 @@ where $\delta_1$ is simply "plugged in".
 
  \begin{figure}
   \centering
-    \scalebox{0.6}{\includegraphics{../plots/backnet.png}}
+    \scalebox{0.6}{\includegraphics{figure/backnet.png}}
   \end{figure}
   \vspace*{-0.5cm}
   \begin{small}

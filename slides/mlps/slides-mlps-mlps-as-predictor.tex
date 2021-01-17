@@ -1,6 +1,7 @@
-\input{../latex-math/basic-math}
-\input{../latex-math/basic-ml}
-\input{../latex-math/ml-nn}
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
 
 \begin{document}
 
@@ -26,12 +27,12 @@
 \item As a single neuron is restricted to learning only linear decision boundaries, its performance on the following task is quite poor:
 \begin{figure}
 \centering
-\scalebox{0.25}{\includegraphics{../plots/cartesian.png}}
+\scalebox{0.25}{\includegraphics{figure/cartesian.png}}
 \end{figure}
 \item However, the neuron can easily separate the classes if the original features are transformed (e.g., from Cartesian to polar coordinate): 
 \begin{figure}
 \centering
-\scalebox{0.25}{\includegraphics{../plots/polar.png}}
+\scalebox{0.25}{\includegraphics{figure/polar.png}}
 \end{figure}
 \end{itemize}
 \framebreak
@@ -41,12 +42,12 @@
 \item Instead of classifying the data in the original representation,
 \begin{figure}
 \centering
-\scalebox{1}{\includegraphics{../plots/repold_f.png}}
+\scalebox{1}{\includegraphics{figure/repold_f.png}}
 \end{figure}
 \item we classify it in a new feature space.
 \begin{figure}
 \centering
-\scalebox{1}{\includegraphics{../plots/repnew_f.png}}
+\scalebox{1}{\includegraphics{figure/repnew_f.png}}
 \end{figure}
 \end{itemize}
 \framebreak
@@ -56,12 +57,12 @@
 \item Analogously, instead of a single neuron, 
 \begin{figure}
 \centering
-\scalebox{0.6}{\includegraphics{../plots/oldrep_n_f.png}}
+\scalebox{0.6}{\includegraphics{figure/oldrep_n_f.png}}
 \end{figure}
 \item we use more complex networks.
 \begin{figure}
 \centering
-\scalebox{0.65}{\includegraphics{../plots/newrep_n_f.png}}
+\scalebox{0.65}{\includegraphics{figure/newrep_n_f.png}}
 \end{figure}
 \end{itemize}
 \end{vbframe}
@@ -106,11 +107,11 @@
 Each neuron in the hidden layer performs an \textbf{affine transformation} on the inputs:
 \begin{figure}
 \centering
-\only<1>{\scalebox{.8}{\includegraphics{../plots/singlelay_1.png}}}
-\only<2>{\scalebox{.8}{\includegraphics{../plots/singlelay_2.png}}}
-\only<3>{\scalebox{.8}{\includegraphics{../plots/singlelay_3.png}}}
-\only<4>{\scalebox{.8}{\includegraphics{../plots/singlelay_4.png}}}
-\only<5>{\scalebox{.8}{\includegraphics{../plots/singlelay_5.png}}}
+\only<1>{\scalebox{.8}{\includegraphics{figure/singlelay_1.png}}}
+\only<2>{\scalebox{.8}{\includegraphics{figure/singlelay_2.png}}}
+\only<3>{\scalebox{.8}{\includegraphics{figure/singlelay_3.png}}}
+\only<4>{\scalebox{.8}{\includegraphics{figure/singlelay_4.png}}}
+\only<5>{\scalebox{.8}{\includegraphics{figure/singlelay_5.png}}}
 \end{figure}
 \end{frame}
 
@@ -120,7 +121,7 @@ Each neuron in the hidden layer performs an \textbf{affine transformation} on th
 Each hidden neurons perform a non-linear \textbf{activation} transformation on the weight sum:
 \begin{figure}
 \centering
-\only<1>{\scalebox{.83}{\includegraphics{../plots/singlelay_6.png}}}
+\only<1>{\scalebox{.83}{\includegraphics{figure/singlelay_6.png}}}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,8 +130,8 @@ Each hidden neurons perform a non-linear \textbf{activation} transformation on t
 The output neuron performs an \textbf{affine transformation} on its inputs:
 \begin{figure}
 \centering
-\only<1>{\scalebox{.83}{\includegraphics{../plots/singlelay_7.png}}}
-\only<2>{\scalebox{1}{\includegraphics{../plots/singlelay_8.png}}}
+\only<1>{\scalebox{.83}{\includegraphics{figure/singlelay_7.png}}}
+\only<2>{\scalebox{1}{\includegraphics{figure/singlelay_8.png}}}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -139,7 +140,7 @@ The output neuron performs an \textbf{affine transformation} on its inputs:
 The output neuron performs a non-linear \textbf{activation} transformation on the weight sum:
 \begin{figure}
 \centering
-\only<1>{\scalebox{.8}{\includegraphics{../plots/singlelay_9.png}}}
+\only<1>{\scalebox{.8}{\includegraphics{figure/singlelay_9.png}}}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,7 +152,7 @@ The output neuron performs a non-linear \textbf{activation} transformation on th
 $$ \sigma (v) = \max(0,v) $$
 \end{blocki}
 \begin{figure}
-\scalebox{1}{\includegraphics{../plots/relu.png}}
+\scalebox{1}{\includegraphics{figure/relu.png}}
 \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,7 +162,7 @@ $$ \sigma (v) = \max(0,v) $$
 $$ \sigma (v) = \text{tanh}(v) = \frac{\text{sinh}(v)}{\text{cosh}(v)} = 1 - \frac{2}{\exp(2v) + 1}$$
 \end{blocki}
 \begin{figure}
-\scalebox{1}{\includegraphics{../plots/tanh.png}}
+\scalebox{1}{\includegraphics{figure/tanh.png}}
 \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -171,7 +172,7 @@ $$ \sigma (v) = \text{tanh}(v) = \frac{\text{sinh}(v)}{\text{cosh}(v)} = 1 - \fr
 $$ \sigma(v) = \frac{1}{1+\exp (-v)} $$
 \end{blocki}
 \begin{figure}
-\scalebox{1}{\includegraphics{../plots/sigmoid.png}}
+\scalebox{1}{\includegraphics{figure/sigmoid.png}}
 \end{figure}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -180,7 +181,7 @@ $$ \sigma(v) = \frac{1}{1+\exp (-v)} $$
   \lz
   \begin{figure}
     \centering
-      \includegraphics[width=10.5cm]{../plots/deepneuralnet_new.png}
+      \includegraphics[width=10.5cm]{figure/deepneuralnet_new.png}
       \caption{Structure of a deep neural network with $l$ hidden layers.}
   \end{figure}
 \end{vbframe}  
@@ -196,7 +197,7 @@ representations.
 \lz
 \begin{figure}
 \centering
-\includegraphics[width=10.5cm]{../plots/folding}
+\includegraphics[width=10.5cm]{figure/folding}
 \caption{An intuitive, geometric explanation of the exponential advantage of deeper networks formally (Mont\'{u}far et al. (2014)).}
 \end{figure}
 \end{vbframe}

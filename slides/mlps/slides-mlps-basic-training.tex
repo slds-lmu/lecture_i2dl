@@ -1,6 +1,7 @@
-\input{../latex-math/basic-math}
-\input{../latex-math/basic-ml}
-\input{../latex-math/ml-nn}
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
 
 \begin{document}
 
@@ -58,7 +59,7 @@ $$\thetab^{[t + 1 ]}  = \thetab^{[t]} - \alpha \nabla \risk\left(\thetab^{[t]}\r
 \begin{center}
 \begin{figure}
 \centering
-\scalebox{1}{\includegraphics{../plots/hill.pdf}}
+\scalebox{1}{\includegraphics{figure/hill.pdf}}
 \end{figure}
 \vspace{1 cm}
 "Walking down the hill, towards the valley."
@@ -98,7 +99,7 @@ $$\thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nab
 An illustration of the SGD algorithm: on the left is GD and on the right is SGD. The black line depicts the averaged value of $\thetab$.
 
 \begin{figure}
-\scalebox{1}{\includegraphics{../plots/SGD.png}}
+\scalebox{1}{\includegraphics{figure/SGD.png}}
 \tiny{\\ source : Shalev-Shwartz and  Ben-David.
 Understanding machine learning: From theory to algorithms. Cambridge University Press, 2014.}
 \end{figure}
@@ -133,7 +134,7 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
 \end{itemize}
 \begin{figure}
 \centering
-\scalebox{.8}{\includegraphics{../plots/momentum.png}}
+\scalebox{.8}{\includegraphics{figure/momentum.png}}
 \\GD (black) versus momentum (red) when dealing with ravines
 \end{figure}
 \end{vbframe}

@@ -1,6 +1,7 @@
-\input{../latex-math/basic-math}
-\input{../latex-math/basic-ml}
-\input{../latex-math/ml-nn}
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
 
 \begin{document}
 
@@ -146,12 +147,12 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
     \item Weights (and biases) of the network.
   \begin{figure}
     \centering
-      \only<1>{\scalebox{1}{\includegraphics{../plots/sinlay_one.png}}}
-      \only<2>{\scalebox{1}{\includegraphics{../plots/sinlay_two.png}}}
-      \only<3>{\scalebox{1}{\includegraphics{../plots/sinlay_three.png}}}
-      \only<4>{\scalebox{1}{\includegraphics{../plots/sinlay_four.png}}}
-      \only<5>{\scalebox{1}{\includegraphics{../plots/sinlay_five.png}}}
-      \only<6>{\scalebox{1}{\includegraphics{../plots/sinlay_six.png}}}
+      \only<1>{\scalebox{1}{\includegraphics{figure/sinlay_one.png}}}
+      \only<2>{\scalebox{1}{\includegraphics{figure/sinlay_two.png}}}
+      \only<3>{\scalebox{1}{\includegraphics{figure/sinlay_three.png}}}
+      \only<4>{\scalebox{1}{\includegraphics{figure/sinlay_four.png}}}
+      \only<5>{\scalebox{1}{\includegraphics{figure/sinlay_five.png}}}
+      \only<6>{\scalebox{1}{\includegraphics{figure/sinlay_six.png}}}
   \end{figure}
   \begin{figure}
     \centering
@@ -165,12 +166,12 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
   \small{Forward pass through the shallow neural network.}
   \begin{figure}
     \centering
-    \only<1>{\scalebox{1}{\includegraphics{../plots/sinlay_seven.png}}}
-    \only<2>{\scalebox{1}{\includegraphics{../plots/sinlay_eight.png}}}
-    \only<3>{\scalebox{1}{\includegraphics{../plots/sinlay_nine.png}}}
-    \only<4>{\scalebox{1}{\includegraphics{../plots/sinlay_ten.png}}}
-    \only<5>{\scalebox{1}{\includegraphics{../plots/sinlay_eleven.png}}}
-    \only<6>{\scalebox{1}{\includegraphics{../plots/sinlay_twelve.png}}}
+    \only<1>{\scalebox{1}{\includegraphics{figure/sinlay_seven.png}}}
+    \only<2>{\scalebox{1}{\includegraphics{figure/sinlay_eight.png}}}
+    \only<3>{\scalebox{1}{\includegraphics{figure/sinlay_nine.png}}}
+    \only<4>{\scalebox{1}{\includegraphics{figure/sinlay_ten.png}}}
+    \only<5>{\scalebox{1}{\includegraphics{figure/sinlay_eleven.png}}}
+    \only<6>{\scalebox{1}{\includegraphics{figure/sinlay_twelve.png}}}
   \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -209,7 +210,7 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \item Each neuron in the layer will represent a specific class (number of neurons in the output layer = number of classes).
 \begin{figure}
 \centering
-\scalebox{0.75}{\includegraphics[width=10.2cm]{../plots/neuralnet_new.png}}
+\scalebox{0.75}{\includegraphics[width=10.2cm]{figure/neuralnet_new.png}}
 \caption{\footnotesize Structure of a single hidden layer, feed-forward neural network for g-class classification problems (bias term omitted).}
 \end{figure}
 \end{itemize}
@@ -250,14 +251,14 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 Forward pass (Hidden: Sigmoid, Output: Softmax).
   \begin{figure}
     \centering
-      \only<1>{\scalebox{0.95}{\includegraphics{../plots/softie_one.png}}}
-      \only<2>{\scalebox{0.95}{\includegraphics{../plots/softie_two.png}}}
-      \only<3>{\scalebox{0.95}{\includegraphics{../plots/softie_three.png}}}
-      \only<4>{\scalebox{0.95}{\includegraphics{../plots/softie_four.png}}}
-      \only<5>{\scalebox{0.95}{\includegraphics{../plots/softie_five_a.png}}}
-      \only<6>{\scalebox{0.95}{\includegraphics{../plots/softie_five_b.png}}}
-      \only<7>{\scalebox{0.95}{\includegraphics{../plots/softie_six.png}}}
-      \only<8>{\scalebox{0.95}{\includegraphics{../plots/softie_seven.png}}}
+      \only<1>{\scalebox{0.95}{\includegraphics{figure/softie_one.png}}}
+      \only<2>{\scalebox{0.95}{\includegraphics{figure/softie_two.png}}}
+      \only<3>{\scalebox{0.95}{\includegraphics{figure/softie_three.png}}}
+      \only<4>{\scalebox{0.95}{\includegraphics{figure/softie_four.png}}}
+      \only<5>{\scalebox{0.95}{\includegraphics{figure/softie_five_a.png}}}
+      \only<6>{\scalebox{0.95}{\includegraphics{figure/softie_five_b.png}}}
+      \only<7>{\scalebox{0.95}{\includegraphics{figure/softie_six.png}}}
+      \only<8>{\scalebox{0.95}{\includegraphics{figure/softie_seven.png}}}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -311,7 +312,7 @@ where $[y = k] = \begin{cases} 1 & \text{ if } y = k \\
 \lz
 \begin{figure}
 \centering
-\includegraphics[width=10.5cm]{../plots/deepneuralnet_new.png}
+\includegraphics[width=10.5cm]{figure/deepneuralnet_new.png}
 \caption{Structure of a deep neural network with $l$ hidden layers (bias terms omitted).}
   \end{figure}
 \end{vbframe}  
@@ -320,18 +321,18 @@ where $[y = k] = \begin{cases} 1 & \text{ if } y = k \\
 \begin{frame} {Feedforward neural networks: Example}
 \begin{figure}
 \centering
-\only<1>{\scalebox{0.95}{\includegraphics{../plots/deepnet_one.png}}}
-\only<2>{\scalebox{0.95}{\includegraphics{../plots/deepnet_two.png}}}
-\only<3>{\scalebox{0.95}{\includegraphics{../plots/deepnet_three.png}}}
-\only<4>{\scalebox{0.95}{\includegraphics{../plots/deepnet_four.png}}}
-\only<5>{\scalebox{0.95}{\includegraphics{../plots/deepnet_five.png}}}
-\only<6>{\scalebox{0.95}{\includegraphics{../plots/deepnet_six.png}}}
-\only<7>{\scalebox{0.95}{\includegraphics{../plots/deepnet_seven.png}}}
-\only<8>{\scalebox{0.95}{\includegraphics{../plots/deepnet_eight.png}}}
-\only<9>{\scalebox{0.95}{\includegraphics{../plots/deepnet_nine.png}}}
-\only<10>{\scalebox{0.95}{\includegraphics{../plots/deepnet_ten.png}}}
-\only<11>{\scalebox{0.95}{\includegraphics{../plots/deepnet_eleven.png}}}
-\only<12>{\scalebox{0.95}{\includegraphics{../plots/deepnet_twelve.png}}}
+\only<1>{\scalebox{0.95}{\includegraphics{figure/deepnet_one.png}}}
+\only<2>{\scalebox{0.95}{\includegraphics{figure/deepnet_two.png}}}
+\only<3>{\scalebox{0.95}{\includegraphics{figure/deepnet_three.png}}}
+\only<4>{\scalebox{0.95}{\includegraphics{figure/deepnet_four.png}}}
+\only<5>{\scalebox{0.95}{\includegraphics{figure/deepnet_five.png}}}
+\only<6>{\scalebox{0.95}{\includegraphics{figure/deepnet_six.png}}}
+\only<7>{\scalebox{0.95}{\includegraphics{figure/deepnet_seven.png}}}
+\only<8>{\scalebox{0.95}{\includegraphics{figure/deepnet_eight.png}}}
+\only<9>{\scalebox{0.95}{\includegraphics{figure/deepnet_nine.png}}}
+\only<10>{\scalebox{0.95}{\includegraphics{figure/deepnet_ten.png}}}
+\only<11>{\scalebox{0.95}{\includegraphics{figure/deepnet_eleven.png}}}
+\only<12>{\scalebox{0.95}{\includegraphics{figure/deepnet_twelve.png}}}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

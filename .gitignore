@@ -133,3 +133,7 @@ dmypy.json
 latex-math/
 *.aux
 *.fdb_latexmk
+*.nav
+*.snm
+*.gz
+*.toc
