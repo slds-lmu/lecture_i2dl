@@ -129,4 +129,7 @@ dmypy.json
 .pyre/
 .DS_Store
 .Rhistory
-WS2021/latex-math/
+*.fls
+latex-math/
+*.aux
+*.fdb_latexmk
