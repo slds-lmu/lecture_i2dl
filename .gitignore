@@ -21,3 +21,5 @@
 /slides/**/*.pdf
 
 /latex-math
+*.DS_Store
+*.Rhistory
