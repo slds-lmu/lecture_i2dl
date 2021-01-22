@@ -8,13 +8,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}
-\frametitle{Lecture outline}
-\tableofcontents
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Padding}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \frame{
 
@@ -26,15 +19,15 @@
 \only<3>{\item[] That will inevitably reduce the output dimensions.}
 \end{itemize}
 \center
-\only<1>{\scalebox{0.92}{\includegraphics{plots/05_conv_variations/valid/valid_conv_2.jpg}}}%
-\only<2>{\scalebox{1.05}{\includegraphics{plots/05_conv_variations/valid/valid_conv_3.jpg}}}%
-\only<3>{\scalebox{0.92}{\includegraphics{plots/05_conv_variations/valid/valid_conv_1n.png}}}%
+\only<1>{\scalebox{0.92}{\includegraphics{figure/valid_conv_2.jpg}}}%
+\only<2>{\scalebox{1.05}{\includegraphics{figure/valid_conv_3.jpg}}}%
+\only<3>{\scalebox{0.92}{\includegraphics{figure/valid_conv_1n.png}}}%
 \only<3>{\item[] In general, for an input of size $i \:(\times \:i)$ and filter size $k \:(\times \:k)$, the size of the output feature map $o \:(\times \:o)$ claculated by:
     $$ o=  i-k + 1 $$ }
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \frame{
 
 \frametitle{Padding}
@@ -47,10 +40,10 @@
 
   \end{itemize}
   \center
-  \only<1>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same0.png}}%
-  \only<2>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same1.png}}%
-  \only<3>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same2.png}}%
-  \only<4>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same7.png}}%
+  \only<1>{\includegraphics[width=11cm]{figure/same0.png}}%
+  \only<2>{\includegraphics[width=11cm]{figure/same1.png}}%
+  \only<3>{\includegraphics[width=11cm]{figure/same2.png}}%
+  \only<4>{\includegraphics[width=11cm]{figure/same7.png}}%
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -58,7 +51,7 @@
 \frametitle{Padding and Network Depth}
 \begin{figure}
 \center
-  \scalebox{0.58}{\includegraphics{plots/zeropadding.png}}
+\scalebox{0.58}{\includegraphics{figure/zeropadding.png}}
 \caption{\small{\enquote{Valid} versus \enquote{same} convolution. \emph{Top} : Without padding, the width of the feature map shrinks rapidly to 1 after just three convolutional layers (filter width of 6 shown in each layer). This limits how deep the network can be made. {Bottom} : With zero padding (shown as solid circles), the feature map can remain the same size after each convolution which means the network can be made arbitrarily deep. (Goodfellow, \emph{et al.}, 2016, ch.~9)}}
 \end{figure}}
 
