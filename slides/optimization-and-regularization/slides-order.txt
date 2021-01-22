@@ -2,6 +2,6 @@ Suggested order of slides:
 
 - slides-optimization-and-regularization-basic-training
 - slides-optimization-and-regularization-basic-regularization
-- slides-optimization-and-regularization-basic-backpropagation
-
+- slides-optimization-and-regularization-basic-backpropagation1
+- slides-optimization-and-regularization-basic-backpropagation2
 
