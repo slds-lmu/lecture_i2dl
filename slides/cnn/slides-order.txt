@@ -1,0 +1,6 @@
+Suggested order of slides:
+
+- slides-cnn-introduction
+- slides-cnn-conv2d
+- slides-cnn-padding
+- slides-cnn-polling

@@ -1,0 +1,202 @@
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\lecturechapter{4}{CNN: Conv2D}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Filters to extract features}
+    \begin{itemize}
+        \item Filters are widely applied in Computer Vision (CV) since the 70's.
+        \item One prominent example: \textbf{Sobel-Filter}.
+        \item Detects edges in images.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=10cm]{plots/02_filters/sobel_einstein.png}
+        % source: https://github.com/qmegas/sobel-operator/blob/HEAD/images/1.jpg
+        \caption{Sobel-filtered image.}
+    \end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+\item Edges occur where the intensity over neighboring pixels changes fast.
+\item Thus, approximate the gradient of the intensity of each pixel.
+\item Sobel showed that the gradient image $G_x$ of original image $A$ in x-dimension  can be approximated by:
+$$G_x = 
+\begin{bmatrix}
+-1 & 0 & +1 \\
+-2 & 0 & +2 \\
+-1 & 0 & +1 
+\end{bmatrix} * A = S_x * A
+$$
+where $*$ indicates a mathematical operation known as a \textbf{convolution}, not a traditional matrix multiplication.
+\item The filter matrix $S_x$ consists of the product of an \textbf{averaging} and a \textbf{differentiation} kernel: 
+$$
+\underbrace{\begin{bmatrix}
+1 & 2 & 1   
+\end{bmatrix}^{T}}_{averaging}
+\underbrace{\begin{bmatrix}
+-1 & 0 & +1   
+\end{bmatrix}}_{differentiation}
+$$
+\end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \begin{itemize}
+        \item Similarly, the gradient image $G_y$ in y-dimension can be approximated by:
+        $$
+            G_y = 
+            \begin{bmatrix}
+                -1 & -2 & -1  \\
+                0 & 0 & 0 \\
+                +1 & +2 & +1
+            \end{bmatrix} * A = S_y * A
+        $$
+        \item The combination of both gradient images yields a dimension-independent gradient information $G$:
+        $$
+            G = \sqrt{G_x^2 + G_y^2}
+        $$
+        \item These matrix operations were used to create the filtered picture of Albert Einstein.
+    \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Horizontal vs Vertical edges}
+    \begin{figure}
+        \centering
+          \scalebox{0.9}{\includegraphics{plots/02_filters/sobel_bike.png}}
+          \tiny{\\ Source: Wikipedia}
+         \caption{\footnotesize{Sobel filtered images. Outputs are normalized in each case. }}
+    \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+\frametitle{Filters to extract features}
+    \center
+    \only<1>{\includegraphics[width=11cm]{plots/02_filters/sobel1.png}}%
+    \only<2>{\includegraphics[width=11cm]{plots/02_filters/sobel2.png}}%
+    \only<3>{\includegraphics[width=11cm]{plots/02_filters/sobel3.png}}%
+    \only<4>{\includegraphics[width=11cm]{plots/02_filters/sobel4.png}}%
+    \only<5>{\includegraphics[width=11cm]{plots/02_filters/sobel4.png}}%
+    \only<6>{\includegraphics[width=6cm]{plots/02_filters/sobel6.png}}%
+    \only<7>{\includegraphics[width=11cm]{plots/02_filters/sobel8.png}}%
+
+    \begin{itemize}
+        \only<1>{\item Let's do this on a dummy image.}
+        \only<1>{\item How to represent a digital image?}
+        \only<2>{\item Basically as an array of integers.}
+        \only<3>{\item $S_x$ enables us to to detect vertical edges!}
+        \only<4>{\item[]}
+        \only<5>{\item[]
+        \vspace{-0.8cm}
+        \begin{alignat*}{3}
+            (\mathit{G}_x)_{(i,j)} = (I \star S_x)_{(i, j)}
+                 & = -1 \cdot 0 \ \ &&+ \ \ 0 \cdot 255 \ \ &&+ \ \ \textbf{1} \cdot \textbf{255} \\
+                 &\quad - 2 \cdot 0 &&+ \ \ 0 \cdot 0 &&+ \ \ \textbf{2} \cdot \textbf{255} \\
+                 &\quad - 1 \cdot 0 &&+ \ \ 0 \cdot 255 &&+ \ \ \textbf{1} \cdot \textbf{255}
+                 \notag
+        \end{alignat*}
+        }
+
+\only<6>{\item Applying the Sobel-Operator to every location in the input yields us the \textbf{feature map}.}
+\only<7>{\item Normalized feature map reveals vertical edges.
+\item Note the dimensional reduction compared to the dummy image.}
+\end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Why do we need to know all of that?}
+  \begin{itemize}
+    \item What we just did was extracting \textbf{pre-defined} features from our input (i.e. edges).
+    \item A convolutional neural network does almost exactly the same: \enquote{extracting features from the input}.
+    \item[] $\Rightarrow$ The main difference is that we usually do not tell the CNN what to look for (pre-define them), \textbf{the CNN decides itself}.
+    \item In a nutshell:
+    \begin{itemize}
+      \item We initialize a lot of random filters (like the Sobel but just random entries) and apply them to our input.
+      \item Then, a classifier which is generally a feed forward neural net, uses them as input data.
+      \item Filter entries will be adjusted by common gradient descent methods.
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{\frametitle{Why do we need to know all of that?}\center
+\only<1>{\includegraphics[width=11cm]{plots/02_filters/sobel9.png}}
+\only<2>{\includegraphics[width=10.5cm]{plots/02_filters/sobel10.png}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Working with images}
+  \begin{itemize}
+  \item In order to understand the functionality of CNNs, we have to familiarize ourselves with some properties of images.
+  \item Grey scale images:
+  \begin{itemize}
+    \item Matrix with dimensions \textbf{h}eight $\times$ \textbf{w}idth $\times$ 1.
+    \item Pixel entries differ from 0 (black) to 255 (white).
+  \end{itemize}
+  \item Color images:
+  \begin{itemize}
+    \item Tensor with dimensions \textbf{h}eight $\times$ \textbf{w}idth $\times$ 3.
+    \item The depth 3 denotes the RGB values (red - green - blue).
+  \end{itemize}
+  \item Filters:
+  \begin{itemize}
+    \item A filter's depth is \textbf{always} equal to the input's depth!
+    \item In practice, filters are usually square.
+    \item Thus we only need one integer to define its size.
+    \item For example, a filter of size $2$ applied on a color image actually has the dimensions $2 \times 2 \times 3$.
+  \end{itemize}
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{The 2d convolution}
+
+  \begin{itemize}
+
+    \only<1-8>{\item Suppose we have an input with entries $a, b, \dots, i$ (think of pixel values).}
+    \only<1-8>{\item The filter we would like to apply has weights $w_{11}, w_{12}, w_{21} \text{ and } w_{22}$.}
+
+  \end{itemize}
+
+  \center
+  \only<1>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv1.png}}%
+  \only<2>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv2.png}}%
+  \only<3>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv2.png}}%
+  \only<4>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv3.png}}%
+  \only<5>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv4.png}}%
+  \only<6>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv5.png}}%
+  \only<7>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv6.png}}%
+  \only<8>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv6.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item[] }
+    \only<2>{\item[] }
+    \only<3>{\item[] To obtain $s_{11}$ we simply compute the dot product:}
+    \only<3>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<4>{\item[] Same for $s_{12}$:}
+    \only<4>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<5>{\item[] As well as for $s_{21}$:}
+    \only<5>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<6>{\item[] And finally for $s_{22}$:}
+    \only<6>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+    \only<7>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<7>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<7>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<7>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+	\only<8>{\item[] More generally, let $I$ be the matrix representing the input and $W$ be the filter/kernel. Then the entries of the output matrix are defined by $s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ where $m,n$ denote the image size and kernel size respectively.}
+
+\end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endlecture
+

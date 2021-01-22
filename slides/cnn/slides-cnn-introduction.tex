@@ -1,0 +1,122 @@
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\lecturechapter{4}{CNN: Introduction}
+\lecture{Deeplearning}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{vbframe}{Convolutional neural networks}
+  \begin{itemize}
+    \item Convolutional Neural Networks (CNN, or ConvNet) are a powerful family of neural networks that are inspired by biological process in which the connectivity pattern between neurons resembles the organization of the mamel visual cortex.
+    \end{itemize}
+ \begin{figure}
+    \centering
+    \includegraphics[width=8cm]{plots/cortex.png}
+    \caption{The ventral (recognition) pathway in the visual cortex has multiple stage: Retina - LGN - V1 - V2 - V4 - PIT - AIT ...., lots of intermediate representations}
+  \end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+    \item Since 2012, by the success of CNNs model in ImageNet compition, they are state-of-the-art in many fields such as computer vision.
+    \item Common applications of CNN-based architectures in computer vision are:
+    \begin{itemize}
+      \item Image classification.
+      \item Object detection /localization.
+      \item Semantic segmentation.
+    \end{itemize}
+    \item Also widely applied in other domains such as natural language processing (NLP), Speech and even time-series data.
+    \item Basic idea: a CNN automatically extracts visual, or, more generally, spatial features from an input such that it is able to make the optimal prediction based on those features.
+    \item Therefore, it contains different building blocks...
+  \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{CNNs - What for?}
+  \begin{figure}
+    \centering
+    \includegraphics[width=7cm]{plots/tesla_autopilot.jpg}
+    \caption{All Tesla cars being produced now have full self-driving hardware and customers can purchase one today (source Tesla website) .Twenty-nine states from fifty states in the U.S. have enacted legislation related to autonomous vehicles. A convolutional neural network is used to map raw pixels from a single front-facing camera directly into steering commands. With minimum training data from humans, the system learns to drive in traffic on local roads with or without lane markings and on highways.}
+  \end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{plots/cityscapes_visual.png}
+    \caption{Given an input image, first CNN is used to get the feature map of the last convolutional layer, then a pyramid parsing module is applied to harvest different sub-region representations, followed by upsampling and concatenation layers to form the final feature representation, which carries both local and global context information. Finally, the representation is fed into a convolution layer to get the final per-pixel prediction. (Source: pyramid scene parsing network,by Zhao et. al, CVPR 2017) }
+  \end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=6cm]{plots/01_introduction/road_seg.png}
+    \caption{Road segmentation (Mnih Volodymyr (2013)). Aerial images and possibly outdated map pixels are labeled.}
+  \end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{wrapfigure}{R}{0.5\textwidth}
+  \centering
+  \scalebox{0.5}{\includegraphics{plots/coronatrack.jpeg}}
+\end{wrapfigure}
+
+{CNN for personalized medicine: tracking, diagnosis and localization of Covid-19 patient}
+  \begin{itemize}
+    \item CNN based model (RADLogists) for personalized Covid-19 detection: three CT scans from a single coronavirus patient diagnosed by RADLogists 
+  \end{itemize}
+  
+   \begin{figure}
+    \centering
+    \includegraphics[width=6cm]{plots/hitmap.jpeg}
+    \caption{Four COVID-19 lung CT scans (top) with corresponding colored maps showing coronavirus abnormalities (bottom).(source: IEEE Spectrum)}
+  \end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=9cm]{plots/instanceseg.png}
+    \caption{Nuclear segmentation in digital microscopic tissue images can enable extraction of high-quality features for nuclear morphometrics and other analysis in computational pathology. (source: Kummar et. al. IEEE Transaction Medical Imaging) }
+  \end{figure}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/01_introduction/colorization.png}
+    \caption{Colorful Image Colorization (Zhang et al. (2016)). Given a grayscale photograph as input (top row), this network attacks the problem of hallucinating a plausible color version of the photograph (bottom row, i.e. the prediction of the network). Realizing this task manually consumes many hours of time.}
+  \end{figure}
+\framebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \begin{figure}
+    \centering
+    \includegraphics[width=10cm]{plots/01_introduction/speech.png}
+    \caption{Speech recognition (Anand \& Verma (2015)). Convolutional neural network to extract features from audio data in order to classify emotions.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+\frametitle{CNNs - A First Glimpse}
+ \center
+    \only<1>{\includegraphics[width=9cm]{plots/01_introduction/alexnet.png}}%
+    \only<2>{\includegraphics[width=9cm]{plots/01_introduction/alexnet.png}}%
+    \begin{itemize}
+        \only<1>{\item Input layer: contains the input (-image) as data matrices.}
+        \only<1>{\item \textbf{Convolutions}: extract feature maps from a previous layer.}
+        \only<1>{\item \textbf{Pooling}: reduces the dimensionality of any input and filter robust features.}
+        \only<2>{\item Fully connected layer: standard layer that connects feature map elements with the output neurons.}
+        \only<2>{\item Softmax: squashes output values to probability scores.}
+    \end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture
+
