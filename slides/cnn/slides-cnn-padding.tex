@@ -3,11 +3,11 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+\begin{document}
+
 \lecturechapter{4}{CNN: Padding}
-\lecture{Deeplearning}
-
+\lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 \frame{
 
@@ -54,5 +54,7 @@
 \scalebox{0.58}{\includegraphics{figure/zeropadding.png}}
 \caption{\small{\enquote{Valid} versus \enquote{same} convolution. \emph{Top} : Without padding, the width of the feature map shrinks rapidly to 1 after just three convolutional layers (filter width of 6 shown in each layer). This limits how deep the network can be made. {Bottom} : With zero padding (shown as solid circles), the feature map can remain the same size after each convolution which means the network can be made arbitrarily deep. (Goodfellow, \emph{et al.}, 2016, ch.~9)}}
 \end{figure}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture
+\end{document}

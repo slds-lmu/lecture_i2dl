@@ -3,10 +3,12 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\lecturechapter{4}{CNN: Conv2D}
-\lecture{Deeplearning}
+\begin{document}
 
+\lecturechapter{4}{CNN: Conv2D}
+\lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{vbframe}{Filters to extract features}
     \begin{itemize}
         \item Filters are widely applied in Computer Vision (CV) since the 70's.
@@ -194,9 +196,8 @@ $$
 	\only<8>{\item[] More generally, let $I$ be the matrix representing the input and $W$ be the filter/kernel. Then the entries of the output matrix are defined by $s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ where $m,n$ denote the image size and kernel size respectively.}
 
 \end{itemize}
-
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \endlecture
-
+\end{document}
