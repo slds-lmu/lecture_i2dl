@@ -9,15 +9,11 @@
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{
-\frametitle{Max Pooling}
-  
+\begin{frame}{Max Pooling}
 \center
 \only<1>{\includegraphics[width=10cm]{figure/pool1.png}}
 \only<2>{\includegraphics[width=10cm]{figure/pool3.png}}
 \only<3>{\includegraphics[width=10cm]{figure/pool6.png}}
-
-  
 \begin{itemize}
 \only<1>{\item We've seen how convolutions work, but there is one other operation we need to understand.}
 \only<1>{\item We want to downsample the feature map but optimally lose no information.}
@@ -28,10 +24,10 @@
 \only<3>{\item Max pooling brings us 2 properties: 1) dimention reduction and 2) spatial invariance.}
 \item Popular pooling functions: max and (weighted) average.}
 \end{itemize}
-}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{
-\frametitle{Average Pooling}
+\begin{frame}{Average Pooling}
 \center
 \only<1>{\includegraphics[width=10cm]{figure/avgpool0.png}}%
 \only<2>{\includegraphics[width=10cm]{figure/avgpool1.png}}%
@@ -49,7 +45,8 @@
 \only<3>{\item It is not robust to noise. }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \only<4>{\item The final pooled feature map has entries 3.75, 2.5, 4.25 and 1.75. }
-  \end{itemize}}
+\end{itemize}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Comparision of Max and Average Pooling}

@@ -59,12 +59,12 @@ and compute $z_1 = \sigma(W_1^\top \xv + b_1)$, where $b_1$ is the bias of the f
   \begin{itemize}
     \vspace{4mm}
     \item The network has $m$ hidden neurons $z_1, \dots, z_m$ with
-    $$ z_j = \sigma(\Wmat_j^\top \xv + b_j)$$
+    $$ z_j = \sigma(\Maffine + b_j)$$
     \vspace{-0.5cm}
     \begin{itemize}
-    \item $z_{in,j}  = \Wmat_j^\top \xv + b_j$
+    \item $z_{in,j}  = \Maffine + b_j$
     \vspace{2mm}
-    \item $z_{out,j} = \sigma(z_{in,j}) = \sigma(\Wmat_j^\top \xv + b_j)$
+    \item $z_{out,j} = \sigma(z_{in,j}) = \sigma(\Maffine + b_j)$
     \end{itemize}
     \vspace{4mm}
     for $j \in \{1,\ldots,m\}$.
@@ -223,7 +223,7 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \item For $g$-class classification, $g$ output units: $$\mathbf{f} = (f_1, \dots, f_g)$$
 \vspace{4mm}
 \item $m$ hidden neurons $z_1, \dots, z_m$, with
-    $$ z_j = \sigma(\Wmat_j^\top \xv), \quad j = 1,\ldots,m. $$
+    $$ z_j = \sigma(\Maffine), \quad j = 1,\ldots,m. $$
 \item Compute linear combinations of derived features $z$:
     $$ f_{in,k} = \bm{U}_k^\top \hidz, \quad \hidz=(z_1,\dots, z_m)^\top, \quad k = 1,\ldots,g$$
 \end{blocki}

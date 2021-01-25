@@ -77,8 +77,8 @@ $$
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{
-\frametitle{Filters to extract features}
+\begin{frame}{Filters to extract features}
+
     \center
     \only<1>{\includegraphics[width=11cm]{figure/sobel1.png}}%
     \only<2>{\includegraphics[width=11cm]{figure/sobel2.png}}%
@@ -109,7 +109,7 @@ $$
 \only<7>{\item Normalized feature map reveals vertical edges.
 \item Note the dimensional reduction compared to the dummy image.}
 \end{itemize}
-}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{vbframe}{Why do we need to know all of that?}
@@ -127,9 +127,11 @@ $$
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{\frametitle{Why do we need to know all of that?}\center
+\begin{frame}{Why do we need to know all of that?}
+\center
 \only<1>{\includegraphics[width=11cm]{figure/sobel9.png}}
-\only<2>{\includegraphics[width=10.5cm]{figure/sobel10.png}}}
+\only<2>{\includegraphics[width=10.5cm]{figure/sobel10.png}}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{Working with images}
@@ -156,48 +158,40 @@ $$
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{
-
-\frametitle{The 2d convolution}
-
-  \begin{itemize}
-
-    \only<1-8>{\item Suppose we have an input with entries $a, b, \dots, i$ (think of pixel values).}
-    \only<1-8>{\item The filter we would like to apply has weights $w_{11}, w_{12}, w_{21} \text{ and } w_{22}$.}
-
-  \end{itemize}
-
-  \center
-  \only<1>{\includegraphics[width=8cm]{figure/2dconv1.png}}%
-  \only<2>{\includegraphics[width=8cm]{figure/2dconv2.png}}%
-  \only<3>{\includegraphics[width=8cm]{figure/2dconv2.png}}%
-  \only<4>{\includegraphics[width=8cm]{figure/2dconv3.png}}%
-  \only<5>{\includegraphics[width=8cm]{figure/2dconv4.png}}%
-  \only<6>{\includegraphics[width=8cm]{figure/2dconv5.png}}%
-  \only<7>{\includegraphics[width=8cm]{figure/2dconv6.png}}%
-  \only<8>{\includegraphics[width=8cm]{figure/2dconv6.png}}%
-
-  \begin{itemize}
-
-    \only<1>{\item[] }
-    \only<2>{\item[] }
-    \only<3>{\item[] To obtain $s_{11}$ we simply compute the dot product:}
-    \only<3>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
-    \only<4>{\item[] Same for $s_{12}$:}
-    \only<4>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
-    \only<5>{\item[] As well as for $s_{21}$:}
-    \only<5>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
-    \only<6>{\item[] And finally for $s_{22}$:}
-    \only<6>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
-    \only<7>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
-    \only<7>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
-    \only<7>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
-    \only<7>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
-	\only<8>{\item[] More generally, let $I$ be the matrix representing the input and $W$ be the filter/kernel. Then the entries of the output matrix are defined by $s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ where $m,n$ denote the image size and kernel size respectively.}
-
+\begin{frame}{The 2d convolution}
+\begin{itemize}
+\only<1-8>{\item Suppose we have an input with entries $a, b, \dots, i$ (think of pixel values).}
+\only<1-8>{\item The filter we would like to apply has weights $w_{11}, w_{12}, w_{21} \text{ and } w_{22}$.}
 \end{itemize}
-}
+\center
+\only<1>{\includegraphics[width=8cm]{figure/2dconv1.png}}%
+\only<2>{\includegraphics[width=8cm]{figure/2dconv2.png}}%
+\only<3>{\includegraphics[width=8cm]{figure/2dconv2.png}}%
+\only<4>{\includegraphics[width=8cm]{figure/2dconv3.png}}%
+\only<5>{\includegraphics[width=8cm]{figure/2dconv4.png}}%
+\only<6>{\includegraphics[width=8cm]{figure/2dconv5.png}}%
+\only<7>{\includegraphics[width=8cm]{figure/2dconv6.png}}%
+\only<8>{\includegraphics[width=8cm]{figure/2dconv6.png}}%
 
+\begin{itemize}
+\only<1>{\item[] }
+\only<2>{\item[] }
+\only<3>{\item[] To obtain $s_{11}$ we simply compute the dot product:}
+\only<3>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+\only<4>{\item[] Same for $s_{12}$:}
+\only<4>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+\only<5>{\item[] As well as for $s_{21}$:}
+\only<5>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+\only<6>{\item[] And finally for $s_{22}$:}
+\only<6>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+\only<7>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+\only<7>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+\only<7>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+\only<7>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+\only<8>{\item[] More generally, let $I$ be the matrix representing the input and $W$ be the filter/kernel. Then the entries of the output matrix are defined by $s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ where $m,n$ denote the image size and kernel size respectively.}
+\end{itemize}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \endlecture
 \end{document}

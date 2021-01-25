@@ -10,14 +10,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Convolutional neural networks}
-  \begin{itemize}
-    \item Convolutional Neural Networks (CNN, or ConvNet) are a powerful family of neural networks that are inspired by biological process in which the connectivity pattern between neurons resembles the organization of the mamel visual cortex.
-    \end{itemize}
- \begin{figure}
-    \centering
-    \includegraphics[width=8cm]{figure/cortex.png}
-    \caption{The ventral (recognition) pathway in the visual cortex has multiple stage: Retina - LGN - V1 - V2 - V4 - PIT - AIT ...., lots of intermediate representations}
-  \end{figure}
+\begin{itemize}
+\item Convolutional Neural Networks (CNN, or ConvNet) are a powerful family of neural networks that are inspired by biological process in which the connectivity pattern between neurons resembles the organization of the mamel visual cortex.
+\end{itemize}
+\begin{figure}
+\centering
+\includegraphics[width=8cm]{figure/cortex.png}
+\caption{The ventral (recognition) pathway in the visual cortex has multiple stage: Retina - LGN - V1 - V2 - V4 - PIT - AIT ...., lots of intermediate representations}
+\end{figure}
+\framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
@@ -29,9 +30,9 @@
       \item Semantic segmentation.
     \end{itemize}
     \item Also widely applied in other domains such as natural language processing (NLP), Speech and even time-series data.
-    \item Basic idea: a CNN automatically extracts visual, or, more generally, spatial features from an input such that it is able to make the optimal prediction based on those features.
-    \item Therefore, it contains different building blocks...
-  \end{itemize}
+\item Basic idea: a CNN automatically extracts visual, or, more generally, spatial features from an input such that it is able to make the optimal prediction based on those features.
+\item Therefore, it contains different building blocks...
+\end{itemize}
 \end{vbframe}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,7 +46,7 @@
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  \begin{figure}
+\begin{figure}
     \centering
     \includegraphics[width=5cm]{figure/cityscapes_visual.png}
     \caption{Given an input image, first CNN is used to get the feature map of the last convolutional layer, then a pyramid parsing module is applied to harvest different sub-region representations, followed by upsampling and concatenation layers to form the final feature representation, which carries both local and global context information. Finally, the representation is fed into a convolution layer to get the final per-pixel prediction. (Source: pyramid scene parsing network,by Zhao et. al, CVPR 2017) }
@@ -104,19 +105,18 @@
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{
-\frametitle{CNNs - A First Glimpse}
- \center
-    \only<1>{\includegraphics[width=9cm]{figure/alexnet.png}}%
-    \only<2>{\includegraphics[width=9cm]{figure/alexnet.png}}%
-    \begin{itemize}
-        \only<1>{\item Input layer: contains the input (-image) as data matrices.}
-        \only<1>{\item \textbf{Convolutions}: extract feature maps from a previous layer.}
-        \only<1>{\item \textbf{Pooling}: reduces the dimensionality of any input and filter robust features.}
-        \only<2>{\item Fully connected layer: standard layer that connects feature map elements with the output neurons.}
-        \only<2>{\item Softmax: squashes output values to probability scores.}
-    \end{itemize}
-}
+\begin{frame}{CNNs - A First Glimpse} 
+\center
+\only<1>{\includegraphics[width=9cm]{figure/alexnet.png}}%
+\only<2>{\includegraphics[width=9cm]{figure/alexnet.png}}%
+\begin{itemize}
+\only<1>{\item Input layer: contains the input (-image) as data matrices.}
+\only<1>{\item \textbf{Convolutions}: extract feature maps from a previous layer.}
+\only<1>{\item \textbf{Pooling}: reduces the dimensionality of any input and filter robust features.}
+\only<2>{\item Fully connected layer: standard layer that connects feature map elements with the output neurons.}
+\only<2>{\item Softmax: squashes output values to probability scores.}
+\end{itemize}
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture

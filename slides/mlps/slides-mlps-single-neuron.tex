@@ -15,7 +15,7 @@
 \vspace{5mm}
 \item The hypothesis space of logistic regression can be written as follows, where $\tau(z) = (1 + \exp(-z))^{-1}$ is the logistic sigmoid function:
 \begin{small} 
-$$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R \right\},$$ \end{small}
+$$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\Saffine\right), \wtw \in \R^p, b \in \R \right\},$$ \end{small}
 \vspace{3mm}
 \item It is straightforward to represent $\fx$ graphically as a neuron.
 \vspace{5mm}
@@ -38,7 +38,7 @@ $$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_
 \vspace{.2cm}
 \item It is a weighted sum of input values, transformed by $\tau$:
 \vspace{-1mm}
-$$y = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(w^\top x+b)$$
+$$y = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(\Vaffine+b)$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,10 +48,10 @@ $$y = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(w^\top x+b)$$
 \vspace{.5cm}
 \begin{itemize}
 \item The identity function gives us the simple \textbf{linear regression}:
-$$y = \tau(w^\top x) = w^\top x$$
+$$y = \tau(\Vaffine) = \Vaffine$$
 \vspace{.5cm}
 \item The logistic function gives us the \textbf{logistic regression}:
-$$y = \tau(w^\top x) = \frac{1}{1 + \exp(-w^\top x)}$$
+$$y = \tau(\Vaffine) = \frac{1}{1 + \exp(-\Vaffine)}$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -136,7 +136,7 @@ Therefore, a neuron performs a 2-step computation:
 \begin{itemize}
 \item The hypothesis space that is formed by single neuron architectures is 
 \begin{small}
-$$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R\right\}.$$ 
+$$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\Saffine\right), \wtw \in \R^p, b \in \R\right\}.$$ 
 \end{small}
 \item Both logistic regression and linear regression are subspaces of $\Hspace$ (if $\tau$ is the logistic sigmoid / identity function).  \end{itemize}
 \vspace*{-0.48cm}
