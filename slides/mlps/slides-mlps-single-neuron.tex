@@ -13,7 +13,9 @@
 \begin{itemize}
 \item To illustrate the types of functions that neural networks can represent, let us begin with a simple model: logistic regression.
 \vspace{5mm}
-\item The hypothesis space of logistic regression can be written as follows, where $\tau(z) = (1 + \exp(-z))^{-1}$ is the logistic sigmoid function:\begin{small} $$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R \right\},$$ \end{small}
+\item The hypothesis space of logistic regression can be written as follows, where $\tau(z) = (1 + \exp(-z))^{-1}$ is the logistic sigmoid function:
+\begin{small} 
+$$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R \right\},$$ \end{small}
 \vspace{3mm}
 \item It is straightforward to represent $\fx$ graphically as a neuron.
 \vspace{5mm}
@@ -46,16 +48,16 @@ $$y = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(w^\top x+b)$$
 \vspace{.5cm}
 \begin{itemize}
 \item The identity function gives us the simple \textbf{linear regression}:
-$$y = \tau(w^Tx) = w^Tx$$
+$$y = \tau(w^\top x) = w^\top x$$
 \vspace{.5cm}
 \item The logistic function gives us the \textbf{logistic regression}:
-$$y = \tau(w^Tx) = \frac{1}{1 + \exp(-w^Tx)}$$
+$$y = \tau(w^\top x) = \frac{1}{1 + \exp(-w^\top x)}$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe} {A Single Neuron}
-We consider a logistic regression model for $p = 3$, i.e. $f(\xv) = \tau(w_1\textcolor{red}{x_1} + w_2\textcolor{red}{x_2} + w_3\textcolor{red}{x_3} + b)$.
+We consider a logistic regression model for $p = 3$, i.e. $\fx = \tau(w_1\textcolor{red}{x_1} + w_2\textcolor{red}{x_2} + w_3\textcolor{red}{x_3} + b)$.
 \begin{itemize}
 \item First, features of $\xv$ are represented by nodes in the \enquote{input layer}.
 \begin{figure}
