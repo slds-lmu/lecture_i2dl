@@ -1,0 +1,7 @@
+Suggested order of slides:
+
+- slides-opt-and-regu-basic-training
+- slides-opt-and-regu-basic-regularization
+- slides-opt-and-regu-early-stopping
+- slides-opt-and-regu-basic-backpropagation1
+- slides-opt-and-regu-basic-backpropagation2
