@@ -1,0 +1,163 @@
+\input{../../style/preamble4tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\begin{document}
+
+\lecturechapter{4}{CNN: Application}
+\lecture{I2DL}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Application - Image Classification}
+    \begin{itemize}
+        \item One of use case for CNNs is image classification.
+        \item There exist a broad variety of battle-proven image classification architecture such as the AlexNet , the Inception Net or the ResNet which will be discussed in detail in the next lecture.
+        \item All those architectures rely on a set of subsequent convolutional filters and aim to learn the mapping from an image to a probability score over a set of classes.
+    \end{itemize}
+\framebreak
+    \begin{figure}
+        \centering
+        \includegraphics[width=7cm]{figure/recognition.png}
+        \caption{Image classification with Cifar 10: famous benchmark dataset with 60000 images and 10 classes (Alex Krizhevsky (2009)). There is also a much more difficult version with 60000 images and 100 classes.}
+    \end{figure}
+\framebreak
+    \begin{figure}
+        \centering
+        \includegraphics[width=4cm]{figure/cifar_frog.png}
+        \caption{One example of the Cifar10 data: A highly pixelated, coloured image of a frog with dimension [32, 32, 3]. }
+    \end{figure}
+\framebreak
+    \begin{figure}
+        \centering
+          \scalebox{1}{\includegraphics{figure/cifar10_eg.png}}
+        \caption{An example of a CNN architecture for classification on the Cifar10 dataset (FC = Fully Connected). }
+    \end{figure}  
+\end{vbframe}
+
+\begin{frame} {CNN vs a Fully Connected net on Cifar10}
+  \begin{figure}
+        \centering
+          \scalebox{0.75}{\includegraphics{figure/cnn_vs_dense_1.png}}
+        \caption{Performance of a CNN and a fully connected neural net ("Dense") on Cifar-10. Both networks have roughly the same number of layers. They were trained using the same learning rate, weight decay and dropout rate. Of course, the CNN performs better because it has less learnable parameters and the right inductive bias for the task.}
+    \end{figure} 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Application - Image Colorization}
+    \begin{itemize}
+        \item Basic idea (introduced by Zhang et al., 2016):
+        \begin{itemize}
+            \item Train the net on pairs of grayscale and coloured images.
+            \item Force it to make a prediction on the colour-value \textbf{for each pixel} in the grayscale input image.
+            \item Combine the grayscale-input with the colour-output to yield a colorized image.
+        \end{itemize}
+        \item Very comprehensive material on the method is provided on the author's website. \href{http://richzhang.github.io/colorization/}{\beamergotobutton{Click here}}
+            \end{itemize}
+            \framebreak
+            \begin{figure}
+            \centering
+            \includegraphics[width=11cm]{figure/fish_lab.png}
+            \caption{The CNN learns the mapping from grayscale (L) to color (ab) for each pixel in the image. The L and ab maps are then concatenated to yield the colorized image. The authors use the LAB color space for the image representation.}
+            \end{figure}
+            \framebreak
+            \begin{figure}
+            \centering
+            \includegraphics[width=5cm]{figure/lab.png}
+            \caption{The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and that with the highest softmax-score is taken as predicted color value. The bin is then mapped back to the corresponding, numeric (a,b) values. The network is optimized using a multinomial cross entropy loss over the 313 quantized (a,b) bins.}
+            \end{figure}
+            \framebreak
+            \begin{figure}
+            \centering
+            \includegraphics[width=11.5cm]{figure/color_architecture.png}
+            \caption{The architecture consists of stacked CNN layers which are upsampled towards the end of the net. It makes use of \textit{dilated convolutions} and \textit{upsampling layers} which are explained in the next lecture. The output is a tensor of dimension [64, 64, 313] that stores the 313 probabilities for each element of the final, downsampled 64x64 feature maps.} 
+            \end{figure}
+            \framebreak
+            \begin{figure}
+            \centering
+            \includegraphics[width=11.5cm]{figure/color_architecture.png}
+            \caption{This block is then upsampled to a dimension of 224x224 and the predicted color bins are mapped back to the (a,b) values yielding a depth of 2. Finally, the L and the ab maps are concatenated to yield a colored image.} 
+            \end{figure}
+            \end{vbframe}
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                \begin{vbframe}{Application - Object localization}
+            \begin{itemize}
+            \item Until now, we used CNNs for \textit{single}-class classification of images - \textbf{which object is on the image?}
+            \item Now we extend this framework - \textbf{is there an object in the image and if yes, where and which?}
+            \end{itemize}
+            \begin{figure}
+            \centering
+            \includegraphics[width=4cm]{figure/localize_cat.png}
+            \caption{Classify and detect the location of the cat.}
+            \end{figure}
+            \framebreak
+            \begin{itemize}
+            % source1:  https://medium.com/machine-learning-bites/deeplearning-series-objection-detection-and-localization-yolo-algorithm-r-cnn-71d4dfd07d5f
+            % source2: https://leonardoaraujosantos.gitbooks.io/artificial-inteligence/content/object_localization_and_detection.html
+            \item Bounding boxes can be defined by the location of the left lower corner as well as the height and width of the box: [$b_x$, $b_y$, $b_h$, $b_w$].
+            \item We now combine three tasks (detection, classification and localization) in one architecture.
+            \item This can be done by adjusting the label output of the net.
+            \item Imagine a task with three classes (cat, car, frog).
+            \item In standard classification we would have: 
+                $$
+                \text{label vector}
+            \begin{bmatrix}
+            c_{cat}\\
+            c_{car} \\
+            c_{frog}
+            \end{bmatrix}
+            \text{and softmax output}
+            \begin{bmatrix}
+            P(y = cat| X, \theta)\\
+            P(y = car| X, \theta)\\
+            P(y = frog| X, \theta)
+            \end{bmatrix}
+            $$
+                \end{itemize}
+            \framebreak
+            \begin{itemize}
+            \item We include the information, if there is a object as well as the bounding box parametrization in the label vector.
+            \item This gives us the following label vector:
+                $$
+                \begin{bmatrix}
+            b_x\\
+            b_y \\
+            b_h \\
+            b_w.\\
+            c_o \\
+            c_{cat} \\
+            c_{car} \\
+            c_{frog} \\
+            \end{bmatrix} =             
+                \begin{bmatrix}
+            \text{x coordinate box}\\
+            \text{y coordinate box} \\
+            \text{height box} \\
+            \text{width box}.\\
+            \text{presence of object, binary} \\
+            \text{class cat, one-hot} \\
+            \text{class car, one-hot}\\
+            \text{class frog, one-hot} \\
+            \end{bmatrix}
+            $$
+                \end{itemize}
+            \framebreak
+            \begin{figure}
+            \centering
+            \includegraphics[width=8cm]{figure/naive_localization.png}
+            \end{figure}
+            \begin{itemize}
+            \item Naive approach: use a CNN with two heads, one for the class classification and one for the bounding box regression.
+            \item But: What happens, if there are two cats in the image?
+                \item Different approaches: "Region-based" CNNs (R-CNN, Fast R-CNN and Faster R-CNN) and "single-shot" CNNs (SSD and YOLO).
+            \end{itemize}
+
+            \end{vbframe}
+         
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endlecture
+\end{document}

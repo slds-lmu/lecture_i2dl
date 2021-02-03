@@ -4,3 +4,6 @@ Suggested order of slides:
 - slides-cnn-conv2d
 - slides-cnn-padding
 - slides-cnn-pooling
+- slides-cnn-input-channel
+- slides-cnn-architecture
+- slides-cnn-application
