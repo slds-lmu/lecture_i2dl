@@ -39,7 +39,7 @@ This is simply gradient descent in disguise (for one observation).
   \begin{itemize}
     \item Let us recall the XOR example, but this time with randomly initialized weights.
     \item As activations in both the hidden and output layers we apply the \textbf{sigmoidal logistic function}.
-    \item To perform one forward and one backward pass we feed our neural network with example $\xb = (1,0)^\top$ (positive sample).
+    \item To perform one forward and one backward pass we feed our neural network with example $\xb = (1,0)^T$ (positive sample).
     \item We will optimize the model using the squared error between the binary 0-1 labels and the predicted probabilities instead of the Bernoulli loss. This is
       a bit unusual but computations become simpler for this instructive example.
     \item Then we compute the backward pass and apply backpropagation to update the weights.
@@ -79,7 +79,7 @@ This is simply gradient descent in disguise (for one observation).
 \end{figure}
 \begin{footnotesize}
 \begin{eqnarray*}
-z_{1,in} &=& \Wmat_1^\top \xb + b_1 =  1 \cdot (-0.07) + 0 \cdot 0.22 + 1 \cdot (-0.46) = -0.53 \\
+z_{1,in} &=& \Wmat_1^T \xb + b_1 =  1 \cdot (-0.07) + 0 \cdot 0.22 + 1 \cdot (-0.46) = -0.53 \\
 z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[round-mode=places,round-precision=4]{0.3705169}
 \end{eqnarray*}
 \end{footnotesize}
@@ -94,7 +94,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 \vspace*{-0.5cm}
   \begin{footnotesize}
     \begin{eqnarray*}
-    z_{2,in} &=& \Wmat_2^\top \xb + b_2 = 1 \cdot 0.94 + 0 \cdot 0.46 + 1 \cdot 0.1 = 1.04 \\
+    z_{2,in} &=& \Wmat_2^T \xb + b_2 = 1 \cdot 0.94 + 0 \cdot 0.46 + 1 \cdot 0.1 = 1.04 \\
     z_{2,out} &=& \sigma\left(z_{2,in}\right) = \frac{1}{1+\exp(-1.04)} = \num[round-mode=places,round-precision=4]{0.73885}
     \end{eqnarray*}
   \end{footnotesize}
@@ -110,7 +110,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 
   \begin{footnotesize}
     \begin{eqnarray*}
-    f_{in} &=& \bm{u}^\top \bm{z} + c = \num[round-mode=places,round-precision=4]{0.3705169} \cdot (-0.22) + \num[round-mode=places,round-precision=4]{0.73885} \cdot 0.58 + 1 \cdot 0.78 = \num[round-mode=places,round-precision=4]{1.112242} \\
+    f_{in} &=& \bm{u}^T \bm{z} + c = \num[round-mode=places,round-precision=4]{0.3705169} \cdot (-0.22) + \num[round-mode=places,round-precision=4]{0.73885} \cdot 0.58 + 1 \cdot 0.78 = \num[round-mode=places,round-precision=4]{1.112242} \\
     f_{out} &=& \tau\left(f_{in}\right) = \frac{1}{1+\exp(\num[round-mode=places,round-precision=4]{-1.112242})} = \num[round-mode=places,round-precision=4]{0.7525469}
     \end{eqnarray*}
   \end{footnotesize}

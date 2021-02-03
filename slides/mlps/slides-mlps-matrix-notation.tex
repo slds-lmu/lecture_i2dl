@@ -49,7 +49,7 @@ $$\Wmat =
       \vdots  \\
       w_{p,1}
      \end{pmatrix}$$
-and compute $z_1 = \sigma(W_1^\top \xv + b_1)$, where $b_1$ is the bias of the first hidden neuron and $\sigma: \R \to \R$ is an activation function. 
+and compute $z_1 = \sigma(W_1^T \xv + b_1)$, where $b_1$ is the bias of the first hidden neuron and $\sigma: \R \to \R$ is an activation function. 
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,12 +59,12 @@ and compute $z_1 = \sigma(W_1^\top \xv + b_1)$, where $b_1$ is the bias of the f
   \begin{itemize}
     \vspace{4mm}
     \item The network has $m$ hidden neurons $z_1, \dots, z_m$ with
-    $$ z_j = \sigma(\Maffine + b_j)$$
+    $$ z_j = \sigma(\mathbf{W}_j^T \xv + b_j)$$
     \vspace{-0.5cm}
     \begin{itemize}
-    \item $z_{in,j}  = \Maffine + b_j$
+    \item $z_{in,j}  = \mathbf{W}_j^T \xv + b_j$
     \vspace{2mm}
-    \item $z_{out,j} = \sigma(z_{in,j}) = \sigma(\Maffine + b_j)$
+    \item $z_{out,j} = \sigma(z_{in,j}) = \sigma(\mathbf{W}_j^T \xv + b_j)$
     \end{itemize}
     \vspace{4mm}
     for $j \in \{1,\ldots,m\}$.
@@ -74,8 +74,8 @@ and compute $z_1 = \sigma(W_1^\top \xv + b_1)$, where $b_1$ is the bias of the f
 
 \item Vectorized notation:
 \begin{itemize}
-\item $ \hidz_{in} = (z_{in,1}, \dots, z_{in,m})^\top = \Wmat^\top \xv + \biasb$ \\ (Note: $\Wmat^\top \xv$ = $(\xv^\top \Wmat)^\top$)
-\item $ \hidz = \hidz_{out} = \sigma(\hidz_{in}) = \sigma(\Wmat^\top \xv + \biasb)$, where the (hidden layer) activation function $\sigma$ is applied element-wise to $\hidz_{in}$.  
+\item $ \hidz_{in} = (z_{in,1}, \dots, z_{in,m})^T = \Wmat^T \xv + \biasb$ \\ (Note: $\Wmat^T \xv$ = $(\xv^T \Wmat)^T$)
+\item $ \hidz = \hidz_{out} = \sigma(\hidz_{in}) = \sigma(\Wmat^T \xv + \biasb)$, where the (hidden layer) activation function $\sigma$ is applied element-wise to $\hidz_{in}$.  
 \end{itemize}
 \item Bias term:         
 \begin{itemize}
@@ -92,9 +92,9 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
     \vspace{4mm}
     \item For regression or binary classification: one output unit $f$ where
       \begin{itemize}
-        \item $f_{in} = \wtu^\top \hidz + c$ , i.e. a linear combination of derived features plus the bias term $c$ of the output neuron, and
+        \item $f_{in} = \wtu^T \hidz + c$ , i.e. a linear combination of derived features plus the bias term $c$ of the output neuron, and
         \vspace{2mm}
-        \item $\fx= f_{out} = \tau(f_{in}) = \tau(\wtu^\top \hidz + c)$ , where $\tau$ is the output activation function.
+        \item $\fx= f_{out} = \tau(f_{in}) = \tau(\wtu^T \hidz + c)$ , where $\tau$ is the output activation function.
       \end{itemize}
     \item For regression $\tau$ is the identity function.
     \item For binary classification, $\tau$ is a sigmoid function.
@@ -181,9 +181,9 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \item It is important to note that if the hidden layer does not have a non-linear activation, the network can only learn linear decision boundaries.
 \item For simplification purposes, we drop the bias terms in notation and let $\sigma = \text{id}$. Then:
     \begin{eqnarray*}
-        \fx & = & \tau(\wtu^\top \hidz) = \tau(\wtu^\top \sigma(\Wmat^\top \xv)) \\
-         & = & \tau(\wtu^\top \sigma(\Wmat^\top \xv)) \\
-         & = & \tau(\wtu^\top\Wmat^\top \xv) = \tau(\mathbf{v}^\top \xv)
+        \fx & = & \tau(\wtu^T \hidz) = \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
+         & = & \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
+         & = & \tau(\wtu^T\Wmat^T \xv) = \tau(\mathbf{v}^T \xv)
       \end{eqnarray*}
       where $ \mathbf{v} = \Wmat\wtu$. It can be seen that $\fx$ can only yield a linear decision boundary.
   \end{itemize}
@@ -223,9 +223,9 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \item For $g$-class classification, $g$ output units: $$\mathbf{f} = (f_1, \dots, f_g)$$
 \vspace{4mm}
 \item $m$ hidden neurons $z_1, \dots, z_m$, with
-    $$ z_j = \sigma(\Maffine), \quad j = 1,\ldots,m. $$
+    $$ z_j = \sigma(\mathbf{W}_j^T \xv), \quad j = 1,\ldots,m. $$
 \item Compute linear combinations of derived features $z$:
-    $$ f_{in,k} = \bm{U}_k^\top \hidz, \quad \hidz=(z_1,\dots, z_m)^\top, \quad k = 1,\ldots,g$$
+    $$ f_{in,k} = \bm{U}_k^T \hidz, \quad \hidz=(z_1,\dots, z_m)^T, \quad k = 1,\ldots,g$$
 \end{blocki}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -239,10 +239,10 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
     \vspace{2mm}
     \item This is the same transformation used in softmax regression!
     \vspace{4mm}
-    \item Derivative $ \frac{\delta\tau(\mathbf{f}_{in})}{\delta \mathbf{f}_{in}} = \text{diag}(\tau(\mathbf{f}_{in})) - \tau(\mathbf{f}_{in}) \tau(\mathbf{f}_{in})^\top $
+    \item Derivative $ \frac{\delta\tau(\mathbf{f}_{in})}{\delta \mathbf{f}_{in}} = \text{diag}(\tau(\mathbf{f}_{in})) - \tau(\mathbf{f}_{in}) \tau(\mathbf{f}_{in})^T $
     \vspace{4mm}
     \item It is a \enquote{smooth} approximation of the argmax operation,
-        so $\tau((1, 1000, 2)^\top) \approx (0, 1, 0)^\top$ (picks out 2nd element!).
+        so $\tau((1, 1000, 2)^T) \approx (0, 1, 0)^T$ (picks out 2nd element!).
   \end{itemize}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -272,7 +272,7 @@ where $[y = k] = \begin{cases} 1 & \text{ if } y = k \\
 0 & \text{ otherwise }
 \end{cases}$. 
 \vspace{5mm}
-\item This is equivalent to the cross-entropy loss when the label vector $\bm{y}$ is one-hot coded (e.g. $\mathbf{y} = (0,0,1,0)^\top$). 
+\item This is equivalent to the cross-entropy loss when the label vector $\bm{y}$ is one-hot coded (e.g. $\mathbf{y} = (0,0,1,0)^T$). 
 \item Optimization:  Again, there is no analytic solution.
 \end{itemize}
 \end{frame}
