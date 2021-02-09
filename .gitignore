@@ -18,7 +18,7 @@
 /slides/**/*.synctex.gz
 /slides/**/*-concordance.tex
 
-/slides/**/*.pdf
+
 
 /latex-math
 *.DS_Store
