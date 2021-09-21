@@ -19,29 +19,29 @@ Please observe the following rules when creating and editing the lecture and exe
 Topics will be added or remade, the normal ones are already in the slides:
 
 
-1. Introduction, Overview, and a breif history of deep learning 
+1. Introduction, Overview, and a Brief History of Deep Learning 
 
-2. Deep Forward Neural Network, Gradient Descent, Backpro, Hard ware and Software
+2. Deep Feed-Forward Neural Networks, Gradient Descent, Backpropagation, Hardware and Software
 
-3. Regularization of NNs, early stopping
+3. Regularization of Neural Networks, Early Stopping
 	
-4. Dropout and challenge in optimization
+4. Dropout and Challenges in Optimization
 
-5. Advance in Optimization
+5. Advances in Optimization
 
-6. Activation Function and Initialization
+6. Activation Functions and Initialization
 
-7. Convolutional Neural Network, Variant CNN, Applications
+7. Convolutional Neural Networks, Variants of CNNs, Applications
 
-8. Modern CNN and Overview of some applications
+8. Modern CNNs and Overview of some Applications
 
-9. Recurrent Neural Network
+9. Recurrent Neural Networks
 
-10. Modern RNN and applications
+10. Modern RNNs and Applications
 
 11. Deep Unsupervised Learning 
 
-12. Autoencoders, AE Regularization and Variant
+12. Autoencoders, AE Regularization and Variants
 
 13. Manifold Learning
 
