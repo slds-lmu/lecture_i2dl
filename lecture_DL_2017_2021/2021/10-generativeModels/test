@@ -1,0 +1,69 @@
+\begin{frame} {Minimax Loss for GANs}
+\begin{tcolorbox}
+$\min \limits_G \max \limits_D V(D,G) = \E_{\mathbf{x}\sim p_{\text{data}}(\mathbf{x})}[\log D(\mathbf{x})] + \E_{\mathbf{z}\sim p(\mathbf{z})}[\log (1 - D(G(\mathbf{z})))]$
+    \end{tcolorbox}
+\begin{itemize}
+\vspace{6mm}
+\item $G(\mathbf{z})$ is the output of the generator for a given state $\mathbf{z}$ of the latent variables.
+\vspace{6mm}
+\item $D(\mathbf{x})$ is the output of the discriminator for a real sample $\mathbf{x}$.
+\vspace{6mm}
+\item $D(G(\mathbf{z}))$ is the output of the discriminator for a fake sample $G(\mathbf{z})$ synthesized by the generator.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame} {Minimax Loss for GANs}
+\begin{tcolorbox}
+$\min \limits_G \max \limits_D V(D,G) = \E_{\mathbf{x}\sim p_{\text{data}}(\mathbf{x})}[\log D(\mathbf{x})] + \E_{\mathbf{z}\sim p(\mathbf{z})}[\log (1 - D(G(\mathbf{z})))]$
+    \end{tcolorbox}
+\begin{itemize}
+\vspace{6mm}
+\item $p_{\text{data}}(\mathbf{x})$ is our target, the data distribution.
+\vspace{6mm}
+\item Recall that we defined the generator to be a neural network mapping a latent random vector $\mathbf{z}$ to generated samples $G(\mathbf{z})$. So even if the generator is a determinisic function, we have random outputs, i.e. variability. 
+%\item Because a neural network (the generator) is a deterministic function, we feed a latent random vector $\mathbf{z}$ to the generator to induce variability in its outputs.
+\vspace{6mm}
+\item $p(\mathbf{z})$ is usually a uniform distribution or an isotropic Gaussian. It is typically fixed and not adapted during training.
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame} {Minimax Loss for GANs}
+\begin{tcolorbox}
+$\min \limits_G \max \limits_D V(D,G) = \E_{\mathbf{x}\sim p_{\text{data}}(\mathbf{x})}[\log D(\mathbf{x})] + \E_{\mathbf{z}\sim p(\mathbf{z})}[\log (1 - D(G(\mathbf{z})))]$
+    \end{tcolorbox}
+\begin{itemize}
+\item Roughly speaking, $\E_{\mathbf{x}\sim p_{\text{data}}(\mathbf{x})}[\log D(\mathbf{x})]$ is the log-probability of correctly classifying real data points as real. 
+\vspace{2mm}
+\item $\E_{\mathbf{z}\sim p(\mathbf{z})}[\log (1 - D(G(\mathbf{z})))]$ is the log-probability of correctly classifying fake samples as fake.
+\vspace{2mm}
+\item Therefore, with each gradient update, the discriminator tries to push $D(\mathbf{x})$ toward 1 and $D(G(\mathbf{z})))$ toward 0. This is the same as maximizing V(D,G).
+\vspace{2mm}
+\item The generator, on the other hand, only has control over $D(G(\mathbf{z}))$ and tries to push that toward 1 with each gradient update. This is the same as minimizing V(D,G).
+\end{itemize}
+\end{frame}
+
+\begin{frame} {GAN training: Pseudocode}
+\begin{algorithm}[H]
+\footnotesize
+\caption{Minibatch stochastic gradient descent training of GANs}
+The number of steps $k$ to apply to the discriminator is a hyperparameter.
+\begin{algorithmic}[1]
+\For{number of training iterations}
+\For{k steps}
+\State Sample minibatch of $m$ noise samples $\{\mathbf{z}^{(1)} \ldots \mathbf{z}^{(m)}$\} from the noise prior $p(\mathbf{z})$
+    \State Sample minibatch of $m$ examples $\{\mathbf{x}^{(1)} \ldots \mathbf{x}^{(m)}$\} from the data \item[] \hspace{0.8 cm}
+generating distribution $p_{\text{data}}(\mathbf{x})$.
+\State Update the discriminator by ascending its stochastic gradient: \item[]
+\hspace{2.5 cm}          $\nabla_{{\theta}_d} \frac {1}{m} \sum \limits_{i=1} \limits^{m} \left [ \log D(\mathbf{x}^{(i)}) + \log (1 - D(G(\mathbf{z}^{(i)}))) \right]$
+    % + \log (1 - D(G(\mathbf{z}^{(i)})))}\right]$
+    \EndFor
+\State Sample minibatch of $m$ noise samples $\{\mathbf{z}^{(1)} \ldots \mathbf{z}^{(m)}$\} from the noise prior $p(\mathbf{z})$
+    \State Update the generator by descending its stochastic gradient: \item[]
+\hspace{2.5 cm}       $\nabla_{{\theta}_g} \frac {1}{m} \sum \limits_{i=1} \limits^{m} \log (1 - D(G(\mathbf{z}^{(i)})))$
+    \EndFor
+\end{algorithmic}
+\end{algorithm}
+\end{frame}

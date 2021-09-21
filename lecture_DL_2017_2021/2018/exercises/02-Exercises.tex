@@ -1,0 +1,127 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{verbatimbox}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+\usepackage{hyperref}
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+\input{commands.tex}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\title{	
+\normalfont \normalsize 
+\textsc{Faculty of Mathematics, Ruhr University Bochum} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Deep Learning\\{\Large Exercise Sheet 3}\\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Asja Fischer} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+
+\maketitle % Print the title
+\section{In Class}
+\begin{enumerate} 
+%\item \textbf{Transfer function}\\
+%Consider the sigmoid transfer function
+%\begin{align*}
+%   \sigma(u) = \frac{1}{1 + e^{-u}} \enspace,
+% \end{align*}
+% Show that its derivative fulfills
+% \begin{align*}
+%    \sigma'(u) = \big( 1 - \sigma(u) \big) \cdot \sigma(u) \enspace.
+%   \end{align*}
+
+\item \textbf{Chain rule}\\
+Let $g: \mathbb{R}^3 \to \mathbb{R}^2$ and $f: \mathbb{R}^2 \to \mathbb{R}$ be given by $g(x_1, x_2, x_3)=(x_1^2+x_2^3+x_3, x_1x_2x_3)$ and $f(y_1, y_2)=y_1^2+y_2^2$.
+\begin{itemize}
+\item[a)] Calculate the gradient of $f$ and Jakobi matrix of $g$.
+\item[b)] Calculate the gradient of the concatenation of $f \circ g$.
+\end{itemize} 
+
+
+
+\item \textbf{Derivative of sigmoid}\\
+Consider the sigmoid transfer function
+\begin{align*}
+   \sigma(u) = \frac{1}{1 + e^{-u}} \enspace,
+ \end{align*}
+ Show that its derivative fulfills
+ \begin{align*}
+    \sigma'(u) = \big( 1 - \sigma(u) \big) \cdot \sigma(u) \enspace.
+   \end{align*}
+   
+   
+\item  \textbf{Gradient descent} \\
+\begin{itemize}
+\item[a)] What is (stochastic) gradient descent?
+\item[b)] What the difference between batch, mini-batch and online learning?
+\end{itemize}
+
+   
+\item \textbf{Backpropagation}\\
+\begin{itemize}
+\item[a)] What is the goal of the backpropagation algorithm? 
+\item[b)]Given is a tiny neural network, with 1 input neuron, 2 hidden neurons and 1 neuron in the output layer. As activation function for all units the sigmoid function is used  and the network is trained with the mean squared loss. Calculate the gradient for each of the 4 parameters.
+\end{itemize}
+%TODO: Maybe put some image to illustrate it.
+  
+\end{enumerate}
+
+
+%\section{At Home}
+%\begin{enumerate}
+%\item ... some example of actually computing knowledge graph embeddings ...
+%\end{enumerate}
+\end{document}

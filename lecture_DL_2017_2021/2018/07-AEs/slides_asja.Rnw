@@ -1,0 +1,1033 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+
+@
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{8}{Autoencoders}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Unsupervised learning}
+\begin{vbframe}{Unsupervised Learning}
+  \begin{itemize}
+    \item So far, we were dealing with different types of neural networks designed for classification and regression tasks.
+    \item In these \textbf{supervised learning} scenarios, we exploit information of class memberships (or numeric values) to train our algorithm. That means in particular, that we have access to labeled data.
+    \item Recall from the very first lecture, that there exists another learning paradigm, \textbf{unsupervised learning}, where :
+  %  \item Think of mnist:
+    \begin{itemize}
+   %   \item We know the ground truth for each image of our dataset.
+    %  \item Our goal was to train a network that predicts the class labels.
+   \item training data consists of unlabeled input points $\pmb{x}^{(1)}, \dots, \pmb{x}^{(n)}$
+\item and one aims at finding and describing intrinsic structure in the data.
+    \end{itemize}
+    \item There is much more unlabeled data than labeled! But what can we learn from it?
+  \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Unsupervised Learning - Examples}
+  \begin{itemize}
+    \item[] \textbf{1. Clustering.}
+  \end{itemize}
+  \begin{figure}
+    \centering
+    % \includegraphics[width=6cm]{plots/unsupervised_2.png}
+    \scalebox{1}{\includegraphics{plots/clustering_2.png}}
+    \caption{\footnotesize{Different cluster analysis results on a dataset. True labels (the colors in the original data) are shown here but the algorithms only operate on unlabelled data. (Source : Wikipedia)}}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item[] \textbf{2. Dimensionality reduction/manifold learning.}
+    \ \begin{itemize}
+    \item E.g.~for  visualisation in a low dimensional space.
+    \end{itemize}
+  \end{itemize}
+  %\begin{minipage}{0.43\textwidth}
+  %  \begin{itemize}
+  %    \item Principle Component Analysis (PCA)
+  %    \item Linear Discriminant Analysis (LDA)
+  %    \item Filter Methods
+  %    \end{itemize}
+ % \end{minipage}\hfill
+ %   \begin{minipage}{0.53\textwidth}
+    \begin{figure}
+        \only<1-2>{\includegraphics[width=6.cm]{plots/unsupervised_3.png}}
+        \caption{\footnotesize{Principal Component Analysis (PCA)}}
+    \end{figure}
+%  \end{minipage}
+\framebreak
+  \begin{itemize}
+    \item[] \textbf{2. Dimensionality reduction/manifold learning.}
+    \ \begin{itemize}
+    \item E.g.~for  image compression.
+    \end{itemize}
+  \end{itemize}
+  %\begin{minipage}{0.43\textwidth}
+  %  \begin{itemize}
+  %    \item Principle Component Analysis (PCA)
+  %    \item Linear Discriminant Analysis (LDA)
+  %    \item Filter Methods
+  %    \end{itemize}
+ % \end{minipage}\hfill
+ %   \begin{minipage}{0.53\textwidth}
+    \begin{figure}
+        \only<1-2>{\includegraphics[width=5.cm]{plots/imagecompression.jpg}}
+        \caption{from \url{https://de.slideshare.net/hcycon/bildkompression}}
+    \end{figure}
+%  \end{minipage}
+%\framebreak
+
+\end{vbframe}
+
+
+
+
+\begin{vbframe} {Unsupervised Learning - Examples}
+  \begin{itemize}
+    \item[] \textbf{3. Feature extraction/representation learning.}
+    \item[]
+  \end{itemize}
+   \begin{figure}
+        \only<1-2>{\includegraphics[width=4.cm]{plots/feature_extraction.png}}
+        \caption{Source: Wikipedia}
+    \end{figure}
+    \begin{itemize}
+    \item  E.g.~for \textbf{semi-supervised learning}: features learned from an unlabeled dataset are employed to improve performance in a supervised setting. 
+    \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item[] \textbf{4. Density fitting/learning a generative model.}
+    \item[]
+  \end{itemize}
+   \begin{figure}
+        \only<1-2>{\scalebox{1}{\includegraphics{plots/BHM.png}}}
+        \caption{A generative model can reconstruct the missing portions of the images. (Bornschein, Shabanian, Fischer \& Bengio, ICML, 2016)}
+    \end{figure}
+    
+
+\end{vbframe}
+
+
+%\frame{
+%\frametitle{Unsupervised Learning}
+%
+%\begin{itemize}
+%\item 
+%%Training data: training data consists of unlabeled input points. TODO: 
+%Training data: A set of unlabeled i.i.d.~examples $x_1, x_2,\dots, x_n \sim p_{\text{data}}$. 
+%%sampled from unknown distribution. 
+%\item  Task: find and describe intrinsic structure in the data.
+%\end{itemize}
+%
+%\vspace{0.5cm}
+%\hspace{2cm} clustering \hspace{2cm} density fitting  
+%\vspace{-1cm}
+%\begin{figure}
+%\centering
+%\includegraphics[width=5cm]{clustering.png}
+%\includegraphics[width=6cm]{kerneldist.png}
+%\end{figure}
+%}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{Manifold learning}
+
+  \begin{itemize}
+        \item \textbf{Manifold hypothesis}: 
+        Data of interest lies on an embedded non-linear manifold within the higher-dimensional space.
+    %    Data is concentrated around a low-dimensional \textit{manifold} or a small set of such manifolds
+        %    \pause
+        % \item In mathematics, a manifold is a topological space that locally resembles Euclidean space near each point 
+        \item A \textbf{manifold}: 
+        \begin{itemize}
+        \item  is a topological space that locally resembles the Euclidean space.
+        \item  in ML, more loosely refers to a connected set of points that can be approximated well by considering only a small number of dimensions. % embedded in a higher-dimensional space
+        \end{itemize}
+          \begin{figure}[h]
+                \centering
+                \includegraphics[width=5  cm]{plots/manifold.png}
+                \caption{
+                from Goodfellow et. al%Data sampled from a distribution in a 2D space that is actually concentrated near a 1D manifold.
+                }
+            \end{figure}
+           \end{itemize}    
+       \framebreak
+ 
+\begin{itemize}
+    \item An important characterization of a manifold is the set of its tangent planes.
+    \item \textbf{Definition}: At a point $\pmb{x}$ on a $d$-dimensional manifold, the \textbf{tangent plane} is given by $d$ basis vectors that span the local directions of variation allowed on the manifold.
+    
+\end{itemize} 
+        \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.8\linewidth]{plots/tangent_plane.png}
+            \caption{A pictorial representation of the tangent space of a single point, \textbf{\textit{x}}, on a manifold (Goodfellow et al. (2016)).}
+        \end{figure}
+     
+       \framebreak
+       
+      
+        \begin{itemize}
+        \item Manifold hypothesis does not need to  hold true.
+        %assumption that the data lies along a low-dimensional manifold may notalways be correct
+        \item In the context of AI tasks (e.g.~processing images, sound, or text) it seems to be at least approximately correct, since :
+        \begin{itemize}
+        \item probability distributions over images, text strings, and sounds that occur in real life are highly concentrated (randomly sampled pixel values do not look like images, randomly sampling letters is unlikely to result in a meaningful sentence).
+        \item samples are connected to each other by other samples, with each sample surrounded by other highly similar samples that can be reached by applying transformations (E.g. for images: Dim or brighten the lights, move or rotate objects, change the colors of objects,  etc).
+     \end{itemize}
+      % TODO: add more on the manifold view ?
+    \end{itemize} 
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{vbframe}{Revision of PCA}
+% \begin{itemize}
+%   \item The purpose of PCA is to project the data $\mathbf{x}^{(1)}, \dots, \mathbf{x}^{(n)}$ onto a lower-dimensional subspace (e.g. to save memory). \\
+%   \item For each point $\mathbf{x}^{(i)} \in \mathbb{R}^p$ we need to find a corresponding code vector $\mathbf{c}^{(i)} \in \mathbb{R}^l$ with $l < p$. That step is accomplished by the encoding function which produces the code for an input: $$f(\mathbf{x}) = \mathbf{c}$$
+%   \item  Additionally, we need a decoding function to produce the reconstruction of the input given its code: $$\mathbf{x} \approx g(f(\mathbf{x}))$$
+%   %\item PCA is then defined by the choice of the encoding and decoding function.
+%   \item We can choose matrix multiplication to map the data back into $\mathbb{R}^{p}$: $g(\mathbf{c}) = \mathbf{Dc}$, with $\mathbf{D} \in \mathbb{R}^{p \times l}$, defining the decoding.
+% \framebreak
+%   \item To keep the encoding problem easy, PCA constrains the columns of $\mathbf{D}$ to be orthogonal.
+%   %\item We begin with the optimal code $\mathbf{c}^{*}$ for each input. We could achieve this by minimizing the distance between the input $\mathbf{x}$ and its reconstruction $g(\mathbf{c})$ (PCA is a linear transformation with minimum reconstruction error)
+%   \item One way to obtain the optimal code $\mathbf{c}^{*}$ is to minimize the distance between the input $\mathbf{x}$ and its reconstruction $g(\mathbf{c})$ (that means, linear transformation with minimum reconstruction error):
+%    $$\mathbf{c}^{*} = \displaystyle\argmin_{\mathbf{c}} ||\mathbf{x} - g(\mathbf{c})||^2_2$$
+%   \item Solving this optimization problem leads to
+%   $$\mathbf{c} = \mathbf{D}^T\mathbf{x}$$
+%   \item Thus, to encode a vector, we apply the encoder function
+%   $$f(\mathbf{x}) = \mathbf{D}^T \mathbf{x}$$
+% \end{itemize}
+%\framebreak
+% \begin{itemize}
+%   \item We can also define the PCA as the reconstruction operation:
+%   $$r(\mathbf{x}) = g(f(\mathbf{x})) = \mathbf{DD}^T \mathbf{x}$$
+%   \item To find the encoding matrix $\mathbf{D^*}$, we minimize the Frobenius norm of the matrix of errors computed over all dimensions and points:
+%   $$\mathbf{D^*} = \displaystyle\argmin_{\mathbf{D}} \sqrt{\displaystyle\sum_{i,j} \Big(x^{(i)}_j - r(x^{(i)})_j\Big)^2}, \text{ subject to } \mathbf{D^T}\mathbf{D} = \mathbf{I}_l$$
+%   \item for $l = 1$, $\mathbf{D^*}$ collapses to a single vector and we can rewrite the equation as
+%   $$\mathbf{d^*} = \displaystyle\argmin_{\mathbf{d}} ||\mathbf{X} - \mathbf{X}\mathbf{d}\mathbf{d}^T||^2_F, \text{ subjected to } \mathbf{d}^T\mathbf{d} = 1$$
+%   \item The optimal $\mathbf{d^*}$ is given by the eigenvector of $\mathbf{X}^T\mathbf{X}$ corresponding to the largest eigenvalue.
+% \end{itemize}
+%\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Unsupervised Deep Learning}
+Given i.i.d. (unlabeled) data $\mathbf{x}_1, \mathbf{x}_2,\dots, \mathbf{x}_n \sim  p_{\text{data}}$, 
+ in unsupervised deep learning, one usually trains :
+
+ \begin{itemize}
+ 
+ \item  an autoencoder (a special kind of neural network) for \textbf{representation learning} (feature extraction, dimensionality reduction, manifold learning, ...), or, \\
+ %$\righarrow$ This neural networks are 
+
+ \pause
+ 
+  \item a \textbf{generative model}, i.e.~a probabilistic model of the  data generating distribution  $p_{\text{data}}$ 
+  % (predictions, missing feature estimation, reconstruction, denoising, sampling, outlier detection, ...).
+  (data generation, outlier detection, missing feature extraction, reconstruction, denoising or planning in reinforcement learning, ...). 
+  
+  %full probabilistic model of all variables
+  
+ \end{itemize}
+
+\end{frame} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Autoencoder}
+
+\begin{vbframe}{Autoencoder (AE)-task and structure}
+
+  \begin{itemize}
+  \item Autoencoders (AEs) are a special kind of feedforward neural networks.
+  \item  Task: reconstruction of  the input.     
+  \item They consist of two parts:
+  \begin{itemize}
+            \item \textbf{encoder} function $\mathbf{z} = f(\mathbf{x})$.
+            \item \textbf{decoder} that produces the reconstruction ${\mathbf{r}} = g(\mathbf{z})$.
+  \end{itemize}
+    \item Loss function: $L\left(\mathbf{x}, g(f(\mathbf{x}))\right)$.
+    \item Goal: Learn good \textbf{internal representations} $\mathbf{z}$ (also called \textbf{code}).
+
+  \end{itemize}
+  
+%  \begin{itemize}
+%    \item The basic idea of an autoencoder is to obtain a neural network, that is able to \textbf{reconstruct its input}.
+%    \item[] $\Rightarrow$ Traditionally used for dimensionality reduction!
+%    \item (Very) simple example: given the input vector (1, 0, 1, 0, 0), an autoencoder will try to output (1, 0, 1, 0, 0).
+%    \item Therefore, we do not need class labels and pass over into the world of \textbf{unsupervised learning}.
+%  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Autoencoder (AE)- computational graph}
+%  \begin{itemize}
+%    \item An autoencoder maps an input $x$ to an output $r$ (reconstruction)
+%    \item We can distinguish its general architecture in the following manner:
+%    \begin{itemize}
+%      \item an encoder $z = enc(x)$ and
+%      \item a decoder $r = dec(z)$ 
+%    \end{itemize}
+%    \item[] to generate the reconstruction.
+%    \item We call $z$ the \textbf{internal representation} or \textbf{code}
+%  \end{itemize}
+%\framebreak
+  The general structure of an AE as a computational graph:
+  \begin{figure}
+    \centering
+    \includegraphics[width=5.5cm]{plots/autoencoder_basic_structure.png}
+  \end{figure}
+  \begin{itemize}
+    \item An AE has two computational steps:
+    \begin{itemize}
+      \item the encoder $enc$, mapping $\mathbf{x}$ to $\mathbf{z}$.
+      \item the decoder $dec$, mapping $\mathbf{z}$ to $\mathbf{r}$.
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{Use case}
+%
+%Todo: Remove this slide?
+%
+%  \begin{itemize}
+%    \item Practitioners utilize autoencoders, although they have access to labeled data.
+%    \item[] $\Rightarrow$ Why?
+%    \item Autoencoders may be used for:
+%    \begin{itemize}
+%      \item Learning a representation of the input data\\ $\Rightarrow$ dimensionality reduction \& pretraining
+%      \item Advanced: some variants of the autoencoder can be regarded as generative models \\ $\Rightarrow$ may be used to draw synthetic data
+%    \end{itemize}
+%  \end{itemize}
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% 
+% \frametitle{Autoencoders - use case}
+% 
+%   \begin{itemize}
+% 
+%     \only<1-2>{\item Practitioners utilize autoencoders, although they have access to labeled data.}
+%     \only<1-2>{\item[] $\Rightarrow$ Why?}
+%     \only<2-2>{\item Autoencoders may be used for:}
+%     \only<2>{\begin{itemize}
+%       \only<2>{\item Learning a representation of the input data\\ $\Rightarrow$ dimensionality reduction \& pretraining}
+%       \only<2>{\item Advanced: some variants of the autoencoder can be regarded as generative models \\ $\Rightarrow$ may be used to draw synthetic data}
+%     \end{itemize}}
+% 
+%   \end{itemize}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Undercomplete Autoencoders}
+  \begin{itemize}
+    \item If an AE simply learns the identity $dec(enc(\mathbf{x})) = \mathbf{x}$, it would be of no use. In fact, we want the AE to learn a representation $\mathbf{z}$ that encodes \enquote{useful} or \enquote{significant} properties of the data.
+    \item %To extract such \enquote{useful} or \enquote{significant} properties, we introduce the \textbf{undercomplete autoencoder}.
+    One possibility to do so is to 
+    %\item Therefore, we 
+    restrict the architecture, such that \\ %$$dim(z) < dim(x)$$ 
+     \textbf{code dimension $<$ input dimension}.
+        \item Such an AE is called  \textbf{undercomplete}.
+  
+ %   \item Consequently, the undercomplete autoencoder tries to learn a \enquote{compressed} representation of the input.
+  \end{itemize}
+  
+    \begin{figure}
+    \centering
+    \includegraphics[width=3.5cm]{plots/autoencoder_simple_example.png}
+  %  \caption{Potential architecture. On a first glimpse, the architecture looks just like a standard feed forward neural network.}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+   \item In other words: In an undercomplete AE, the hidden layer has fewer neurons than the input layer.
+    \item[] $\Rightarrow$ That will force the AE to 
+\begin{itemize}
+\item  capture only the most salient features of the training data!
+\item  learn a \enquote{compressed} representation of the input.
+\end{itemize}    
+    \item %Learning such a net is 
+    Training an AE is done by minimizing a loss function %$$\uauto$$ 
+    which penalizes the reconstruction  $dec(enc(\mathbf{x}))$ for differing from $\mathbf{x}$. The MSE, $ ||\mathbf{x}-g(f(\mathbf{x}))||^2_2$, is a typical choice.
+%    \begin{itemize}
+%      \item Typical choice: MSE
+%    \end{itemize}
+%    \item[]
+    \item For optimization, the very same optimization techniques as for standard feed-forward nets are applied (SGD, RMSProp, ADAM,...).
+    \item[]
+ %   \item How could a potential architecture of an undercomplete autoencoder look like for our (very) simple example?
+  %  \item[] Reminder: $x = (1, 0, 1, 0, 0)$
+  \end{itemize}
+  \framebreak
+   
+  \begin{itemize}
+  \item  Example: For an undercomplete AE with :
+  \begin{itemize}
+  \item  linear decoder $g(\pmb{z})= W \pmb{z}$
+  \item  mean squared error loss $L=||\pmb{x}-g(f(\pmb{x}))||^2_2$
+  \item  input normalized to have zero mean
+  \end{itemize}
+  optimal encoder corresponds to \textbf{Principal Component Analysis (PCA)}.
+  \item PCA is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of values of linearly uncorrelated variables called \textbf{principal components}. 
+  \item Transformation is defined in such a way that the first principal component has the largest possible variance (that is, accounts for as much of the variability in the data as possible)
+  
+\framebreak  
+
+ \begin{figure}
+    \centering
+    \includegraphics[width=3.5cm]{plots/PCA.png}
+  %  \caption{Potential architecture. On a first glimpse, the architecture looks just like a standard feed forward neural network.}
+  \end{figure}  
+  
+  
+  \item An AE with a non-linear decoder/encoder can be seen as a non-linear generalization of PCA.
+  \item Problem: If an AE is \textbf{overcomplete} (code dimension $>$ input dimension) or encoder and decoder are too powerful, the AE can learn to simply copy the input.
+  \end{itemize}
+    
+
+\end{vbframe}
+
+
+\begin{vbframe}{Overcomplete AE -- problem}
+
+  Example 1: Overcomplete AE (code dimension $\geq$ input dimension). \\ 
+            $\Rightarrow$ even a linear AE can copy the input to the output without learning anything useful.
+ 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\linewidth]{plots/oae_problem.png}
+    \caption{Overcomplete AE that learned to copy its inputs to the hidden layer and then to the output layer (Credits to A.-L. Popkes and P. Wenker).} \end{figure}
+    
+    
+    \end{vbframe}
+
+
+\begin{vbframe}{To powerful AE -- problem}
+
+  
+Example 2:  Very powerful nonlinear AE that learns a 1D code:
+        \begin{itemize}
+            \item Encoder: learns to map each training example $\mathbf{x}^{(i)}$ to the code $i$.
+            \item Decoder: learns to map these integer indices back to the values of specific training examples.
+        \end{itemize}
+  
+    
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Experiment: Learn to encode MNIST}
+  \begin{itemize}
+    \item Let us try to compress the MNIST data as good as possible.
+    \item Therefore, we will fit an undercomplete autoencoder to learn the best possible representation,
+    \item[] $\Rightarrow$ as few as possible dimensions in the internal representation $\mathbf{z}$.
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/autoencoder_mnist_problem.png}
+    \caption{Flow chart of our our autoencoder: reconstruct the input with fixed dimensions $dim(\mathbf{z}) << dim(\mathbf{x})$.}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Experiment: Learn to encode MNIST}
+  \begin{figure}
+    \centering
+    \includegraphics[width=6.5cm]{plots/autoencoder_mnist_example.png}
+    \caption{Architecture of the autoencoder.}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Experiment: Learn to encode MNIST}
+
+<<mxnet1, size = "footnotesize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+z = c(784, 256, 64, 32, 16, 8, 4, 2, 1)
+
+input = mx.symbol.Variable("data") # mnist with 28x28 = 784
+encoder = mx.symbol.FullyConnected(input, num_hidden = z[i])
+decoder = mx.symbol.FullyConnected(encoder, num_hidden = 784)
+activation = mx.symbol.Activation(decoder, "sigmoid")
+output = mx.symbol.LinearRegressionOutput(activation)
+
+model = mx.model.FeedForward.create(output,
+  X = train.x, y = train.x,
+  num.round = 50, 
+  array.batch.size = 32,
+  optimizer = "adam",
+  initializer = mx.init.uniform(0.01), 
+  eval.metric = mx.metric.mse
+)
+@
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Experiment: Learn to encode MNIST}
+  
+  \center
+  \begin{figure}
+  
+    \only<1>{\includegraphics[width=11.2cm]{plots/784.png}}%
+    \only<2>{\includegraphics[width=11.2cm]{plots/256.png}}%
+    \only<3>{\includegraphics[width=11.2cm]{plots/64.png}}%
+    \only<4>{\includegraphics[width=11.2cm]{plots/32.png}}%
+    \only<5>{\includegraphics[width=11.2cm]{plots/16.png}}%
+    \only<6>{\includegraphics[width=11.2cm]{plots/8.png}}%
+    \only<7>{\includegraphics[width=11.2cm]{plots/4.png}}%
+    \only<8>{\includegraphics[width=11.2cm]{plots/2.png}}%
+    \only<9>{\includegraphics[width=11.2cm]{plots/1.png}}%
+    \caption{The top row shows the original digits, the bottom row the reconstructed ones.}
+    
+  \end{figure}
+  
+  \vspace{-0.3cm}
+  
+  \begin{itemize}
+  
+    \only<1>{\item $dim(\mathbf{z}) = 784 = dim(\mathbf{x})$.}
+    \only<2>{\item $dim(\mathbf{z}) = 256$.}
+    \only<3>{\item $dim(\mathbf{z}) = 64$.}
+    \only<4>{\item $dim(\mathbf{z}) = 32$.}
+    \only<5>{\item $dim(\mathbf{z}) = 16$.}
+    \only<6>{\item $dim(\mathbf{z}) = 8$.}
+    \only<7>{\item $dim(\mathbf{z}) = 4$.}
+    \only<8>{\item $dim(\mathbf{z}) = 2$.}
+    \only<9>{\item $dim(\mathbf{z}) = 1$.}
+    
+  \end{itemize}
+  
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Regularized Autoencoder}
+
+
+  \begin{frame}
+  \frametitle{Regularized Autoencoder}
+  
+ 
+  %\begin{overlayarea}  
+    \begin{itemize}
+       \item Goal: choose code dimension and capacity of encoder/decoder based on the problem.
+       \item \textbf{Regularized AEs} modify the original loss function to:
+       \begin{itemize}
+       \item prevent the network from trivially copying the inputs.
+       \item encourage additional properties.
+       \end{itemize}
+       
+     
+       %    \pause
+       %\item The model is encouraged to have additional properties
+       %    \pause
+        \item Examples:
+            \begin{itemize}
+                \item \textbf{Sparse AE:} sparsity of the representation.
+               %     \pause
+                \item \textbf{Denoising AE}: robustness to noise.%and outliers
+             %       \pause
+                \item \textbf{Contractive AE}: small derivatives of the representation w.r.t.~input.
+                 %   \pause
+            \end{itemize}
+   
+    \end{itemize} 
+    $\Rightarrow$ 
+    A regularized AE can be overcomplete and nonlinear but still learn something useful about the data distribution!  
+  
+  
+\end{frame}
+
+%\begin{vbframe}{Undercomplete Autoencoders}
+%
+%
+%  \begin{itemize}
+%    \item If our decoder is linear and the loss function the mean squared error, the undercomplete autoencoder learns to span the same subspace as principal component analysis.
+%    \item Autoencoders with nonlinear encoder and nonlinear decoder functions can learn more powerful gerneralizations of PCA.
+%    \item Overcomplete autoencoders without \textbf{regularization} make no sense. Even a linear encoder and linear decoder will just learn to copy the complete input layer and thus, extract no meaningful features.
+%    \item[] $\Rightarrow$ we will introduce variants of \textbf{regularized} autoencoders, including \textbf{sparse} and \textbf{denoising} autoencoders.
+%  \end{itemize}
+%\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{vbframe}{Sparse autoencoder}
+%  \begin{itemize}
+%    \item Idea: Encourage the AE
+%    %he goal of a sparse autoencoder is 
+%    to have as many inactive neurons in the hidden layer as possible.
+%    \item That means in particular, if we use the sigmoidal activation function, we want each neuron to be
+% \begin{itemize}
+%       \item active, if its output is close to $1$ and
+%       \item inactive, if its output is close to $0$
+%     \end{itemize}
+%     \item The average activation of hidden unit $j$ (over the training set) is given by $$\hat\sigma = \frac{1}{m} \displaystyle\sum_{i=1}^N (\sigma_j(x^{(i)}))$$ 
+%     \item We would like to impose a \textbf{sparsity parameter} $\rho$ on the average activation of each hidden unit, such that $$\hat\sigma \leq \rho$$ 
+%     \item To obtain alot of inactive units in the hidden layer, the value for $\rho$ must be set close to $0$ (e.g. $0.05$).
+%        \item Add explicit regularization term 
+%       %on the code $\pmb{h}$
+%        to the reconstruction loss:\\
+%           \begin{center}
+%       $L(\pmb{x}, g(f(\pmb{x})) + \color{red}{\lambda \Vert \frac{\partial f(\pmb{x})}{\partial \pmb{x}} \Vert^2_F}$ 
+%     \item Furthermore, we need a penalty term $\Omega(h)$ for our internal representation, that measures how distinct $\hat\sigma$ and $\rho$ are.
+%     \item A common variant is the Kullback Leibler Divergence: $$KL(\rho||\hat\sigma) = \displaystyle\sum_{j=1}^{M} \rho \ log \ \frac{\rho}{\hat\sigma} + (1 - \rho) \ log \ \frac{(1 - \rho)}{(1 - \hat\sigma)}$$
+%     \item Thus, our new objective evolved to $$\uauto + \Omega(h)$$
+%    % \item That is equivalent to a feedforward network with regularization (chapter 2) whose task is to copy the input to the output.
+%   %  \item An autoencoder that has been regularized to be sparse must respond to unique statistical features of the dataset, rather than simply acting as an identity function.
+% \framebreak
+%     \item One nice way to view the sparse autoencoder model is to think of a \enquote{Jack of all trades}-person.
+%     \begin{itemize}
+%       \item If a person is able to exert many jobs, then in general, he or she is not a master of those. On the other hand, if someone does only one or two jobs, he or she is alot more likely to be a specialist.
+%       \item Similarly, if a neuron is forced to activate for any input, even if those are enormously different, then that unit will most likely not work well for all samples.
+%     \end{itemize}
+%     \item A typical use case for sparse autoencoders is to learn features for another objective (like classification tasks).
+%   \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Denoising autoencoder (DAE)}
+
+
+    \begin{itemize}
+       \item Idea: representation should be robust to introduction of noise.
+       \item Produce corrupted version $\tilde{\mathbf{x}} $ of  input $\mathbf{x}$, e.g.~by
+     \begin{itemize}  
+        \item random assignment of subset of inputs to 0.
+      \item adding Gaussian noise.
+       \end{itemize}
+        %\item 
+        \item Modified reconstruction loss: $L(\mathbf{x}, \color{red}{g(f(\tilde{\mathbf{x}})})$ \\ %instead of $L(\pmb{x}, g(f(\pmb{x}))$   
+            %\begin{itemize}
+            %\item $\tilde{\pmb{x}}$ is a copy of $\pmb{x}$ corrupted with some form of noise\\
+           % \end{itemize}
+           $\Rightarrow$ denoising AEs must learn to undo this corruption.
+         %   $\Rightarrow$ $f$ and $g$ implicitly learn the structure of $p_{data}(\pmb{x})$
+    \end{itemize}
+  
+\framebreak
+
+  \begin{itemize}
+   % \item A denoising autoencoder minimizes $$\dauto$$ where $\tilde{x}$ is a copy of x, which has been corrupted by noise.
+    \item %Denoising autoencoders must therefore undo this corruption rather than simply copying their input. Training forces f and g to implicitly learn the structure of $p_{data}(x)$. 
+    %The stochastic corruption process turns the DAE into a stochastic AE.
+    With the  corruption process, we induce stochasticity  into the DAE.
+    \item Formally: let $C(\tilde{\mathbf{x}}|\mathbf{x})$ present the conditional distribution of corrupted samples $\tilde{\mathbf{x}}$, given a data sample $\mathbf{x}$.
+    \item  Like feedforward NNs can model a distribution over targets $p(\mathbf{y}|\mathbf{x})$, output units and loss function of an AE can be chosen such that one gets a stochastic decoder $p_{decoder}(\mathbf{x}|\mathbf{z})$.
+    \item E.g.~linear output units to parametrize the mean of Gaussian distribution for real valued $\mathbf{x}$ and negative log-likelihood loss (which is equal to MSE).
+    \item The DAE then learns a  reconstruction distribution $p_{reconstruct}(\mathbf{x}|\tilde{\mathbf{x}})$ from training pairs $(\mathbf{x}, \tilde{\mathbf{x}})$.
+  \item (Note that the encoder could also be made stochastic, modelling $p_{encoder}(\mathbf{z}|\tilde{\mathbf{x}})$.)
+  \end{itemize}
+\framebreak
+  The general structure of a DAE as a computational graph:
+  \begin{figure}
+    \centering
+    \includegraphics[width=4.5cm]{plots/denoising_autoencoder_basic_structure.png}
+    \caption{Denoising autoencoder: \enquote{making the learned representation
+robust to partial corruption of the input pattern.}}
+  \end{figure}
+\framebreak
+  \begin{algorithm}[H]
+    \caption{Training denoising autoencoders}
+    \begin{algorithmic}[1]
+    \State Sample a training example $\mathbf{x}$ from the training data.
+    \State Sample a corrupted version $\tilde{\mathbf{x}}$ from $C(\tilde{\mathbf{x}}|\mathbf{x})$
+    \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Use $(\mathbf{x}, \tilde{\mathbf{x}})$ as a training example for estimating the AE reconstruction $p_{reconstruct}(\mathbf{x}|\tilde{\mathbf{x}}) = p_{decoder}(\mathbf{x}|\mathbf{z})$, where \\ 
+    - $\mathbf{z}$ is the output of the encoder $enc(\tilde{\mathbf{x}})$ and \\
+    - $p_{decoder}$ defined by a decoder $dec(\mathbf{z})$}
+    \end{algorithmic}
+  \end{algorithm}
+  \begin{itemize}
+   \item All we have to do to transform an AE into a DAE is to add a stochastic corruption process on the input.
+    \item The DAE still tries to preserve the information about the input (encode it), but also to undo the effect of a corruption process!
+  \end{itemize} 
+\framebreak
+  \begin{figure}
+    \centering
+    % \includegraphics[width=4.5cm]{plots/denoising_autoencoder.png}
+    \scalebox{0.7}{\includegraphics{plots/denoising_autoencoder.png}}
+    \caption{Denoising autoencoders - \enquote{manifold perspective} (Ian Goodfellow et al. (2016))}
+  \end{figure}
+    A DAE is trained to map a corrupted data point $\tilde{\mathbf{x}}$ back to
+the original data point $\mathbf{x}$.
+  \framebreak
+\begin{figure}
+    \centering
+    \includegraphics[width=4.5cm]{plots/denoising_autoencoder.png}
+    % \scalebox{0.7}{\includegraphics{plots/denoising_autoencoder.png}}
+    \caption{Denoising autoencoders - \enquote{manifold perspective} (Ian Goodfellow et al. (2016))}
+  \end{figure}
+  \begin{itemize}
+    \item The corruption process $C(\tilde{\mathbf{x}}|\mathbf{x})$ is displayed by the gray circle of equiprobable corruptions
+    \item Training a DAE  by minimizing  $||dec(enc(\tilde{\mathbf{x}})) - \mathbf{x}||^2$ corresponds to minimizing $
+    \mathbb{E}_{\mathbf{x},\tilde{\mathbf{x}}\sim p_{data}(\mathbf{x})C(\tilde{\mathbf{x}}|\mathbf{x})}[\log p_{decoder}(\mathbf{x}|f(\tilde{\mathbf{x}}))]$.
+  \end{itemize}
+\framebreak
+\begin{figure}
+    \centering
+    \includegraphics[width=4.5cm]{plots/denoising_autoencoder.png}
+    \caption{Denoising autoencoders - \enquote{manifold perspective} (Ian Goodfellow et al. (2016))}
+  \end{figure}
+  \begin{itemize}
+ 
+    \item The vector $dec(enc(\tilde{\mathbf{x}})) - \tilde{\mathbf{x}}$ points approximately towards the nearest point in the  data manifold, since $dec(enc(\tilde{\mathbf{x}}))$ estimates the center of mass of clean points $\mathbf{x}$ which could have given rise to $\tilde{\mathbf{x}}$.
+    \item Thus, the DAE learns a vector field $dec(enc(\mathbf{x})) - \mathbf{x}$ indicated by the green arrows.
+  \end{itemize}
+  
+\framebreak
+
+An example of a vector field learned by a DAE. 
+  
+  \begin{figure}
+    \centering
+    \includegraphics[width=4.5cm]{plots/DAE-vectorfield.png}
+    \caption{ source :  Ian Goodfellow et al. (2016)}
+  \end{figure}
+  
+  
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Experiment: Encode MNIST with a DAE}
+  \begin{itemize}
+    \item We will now corrupt the MNIST data with Gaussian noise and then try to denoise it as good as possible.
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/denoised_autoencoder_mnist_problem.png}
+    \caption{Flow chart of our our autoencoder: denoise the corrupted input.}
+  \end{figure}  
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Experiment: Encode MNIST with a DAE}
+  \begin{itemize}
+    \item To corrupt the input, we randomly add or subtract values from a uniform distribution to each of the image entries.
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[width=9cm]{plots/mnist_noise.png}
+    \caption{Top row: original data, bottom row: corrupted mnist data.}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Experiment: Encode MNIST with a DAE}
+
+<<mxnet2, size = "footnotesize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+z = c(1568, 784, 256, 64, 32, 16, 8)
+
+input = mx.symbol.Variable("data") # mnist with 28x28 = 784
+encoder = mx.symbol.FullyConnected(input, num_hidden = z[i])
+decoder = mx.symbol.FullyConnected(encoder, num_hidden = 784)
+activation = mx.symbol.Activation(decoder, "sigmoid")
+output = mx.symbol.LinearRegressionOutput(activation)
+
+model = mx.model.FeedForward.create(output,
+  X = train.x, y = train.x,
+  num.round = 50, 
+  array.batch.size = 32,
+  optimizer = "adam",
+  initializer = mx.init.uniform(0.01), 
+  eval.metric = mx.metric.mse
+)
+@
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Experiment: Encode MNIST with a DAE}
+  
+  \center
+  \begin{figure}
+
+    \only<1>{\includegraphics[width=10.7cm]{plots/denoised_1568_2.png}}%  
+    \only<2>{\includegraphics[width=10.7cm]{plots/denoised_784_2.png}}%
+    \only<3>{\includegraphics[width=10.7cm]{plots/denoised_256_2.png}}%
+    \only<4>{\includegraphics[width=10.7cm]{plots/denoised_64_2.png}}%
+    \only<5>{\includegraphics[width=10.7cm]{plots/denoised_32_2.png}}%
+    \only<6>{\includegraphics[width=10.7cm]{plots/denoised_16_2.png}}%
+    \only<7>{\includegraphics[width=10.7cm]{plots/denoised_8_2.png}}%
+    \caption{The top row shows the original digits, the intermediate one the corrupted and the bottom row the denoised/reconstructed digits (prediction).}
+    
+  \end{figure}
+  
+  \vspace{-0.3cm}
+  
+  \begin{itemize}
+  
+ \only<1>{\item $dim(\pmb{z}) = 1568$ (overcomplete).}
+    \only<2>{\item $dim(\pmb{z}) = 784$ ($= dim(\pmb{x})$).}
+    \only<3>{\item $dim(\pmb{z}) = 256$.}
+    \only<4>{\item $dim(\pmb{z}) = 64$.}
+    \only<5>{\item $dim(\pmb{z}) = 32$.}
+    \only<6>{\item $dim(\pmb{z}) = 16$.}
+    \only<7>{\item $dim(\pmb{z}) = 8$.}
+    
+  \end{itemize}
+  
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Experiment: Encode MNIST with a DAE}
+
+  \begin{itemize}
+  
+    \only<1>{\item Let us increase the amount of noise and see how the autoencoder with $dim(z) = 64$ deals with it (for science!).}
+    \only<2>{\item A lot of noise.}
+    \only<3>{\item \textbf{A lot} of noise.}
+    
+  \end{itemize}
+  
+  \center
+  \begin{figure}
+
+    \only<2>{\includegraphics[width=10.7cm]{plots/denoised_alot_64.png}}%  
+    \only<3>{\includegraphics[width=10.7cm]{plots/denoised_alot2_64.png}}%
+    
+  \end{figure}
+  
+}
+
+
+
+\begin{frame}[t]{Contractive Autoencoder}
+   \begin{itemize}
+       %\item Remember: contractive autoencoders are regularized autoencoders
+   %     \pause
+       \item Idea: extract features that only reflect variations found in the training set.
+   %     \pause
+       \item Add explicit regularization term 
+       %on the code $\pmb{h}$
+        to the reconstruction loss:\\
+           \begin{center}
+       $L(\pmb{x}, g(f(\pmb{x})) + \color{red}{\lambda \Vert \frac{\partial f(\pmb{x})}{\partial \pmb{x}} \Vert^2_F}$ 
+   \end{center}
+   
+%        \pause
+  $\Rightarrow$  Derivatives of the encoder function w.r.t.~the input are encouraged to be small. \\
+%        \pause
+    $\Rightarrow$ Only a small number of input directions will have significant derivatives.\\ 
+%        \pause
+  $\Rightarrow$ The encoder function is encouraged to resist infinitesimal perturbations of the input.
+   \end{itemize} 
+
+\end{frame}
+
+
+\begin{frame}[t]{DAE vs. CAE}
+    \begin{table}[h!]
+        \centering
+        \label{tab:}
+        \begin{tabular}{p{5cm}|p{5cm}}
+            \textbf{DAE} & \textbf{CAE}\\
+            \hline
+%            \pause
+            the \textit{decoder} function is trained to resist infinitesimal perturbations of the input. & the \textit{encoder} function is trained to resist infinitesimal perturbations of the input.
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Which Autoencoder?}
+
+\begin{itemize}
+\item Both the denoising and contractive autoencoders perform well.
+\item Advantage of denoising autoencoder: simpler to implement
+\begin{itemize}
+\item  requires adding one or two lines of code to regular AE.
+\item  no need to compute Jacobian of hidden layer.
+\end{itemize}
+\item Advantage of contractive autoencoder: gradient is deterministic
+\begin{itemize}
+\item can use second order optimizers (conjugate gradient, LBFGS, etc.).
+\item might be more stable than the denoising autoencoder, which uses a sampled gradient.
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Specific AEs and applications}
+\begin{vbframe}{Convolutional autoencoder (ConvAE)}
+  \begin{itemize}
+    \item %n the last example, we have seen that autoencoder inputs are images. So, it makes sense to ask whether a convolutional architecture can work better than the autoencoder architectures discussed previously.
+    For the image domain, using convolutions is advantageous. Can we also make use of them in AEs?     
+    \item In a ConvAE, the encoder consists of convolutional layers. The decoder, on the other hand, consists of transpose convolution layers or simple upsampling operations.
+   % \begin{itemize}
+  %    \item Instead of convolving a filter mask with an image, to get a set of activations as in a CNN, we are trying to infer the activations that when convolved with the filter mask, would yield the image.
+   % \end{itemize}
+   % \item The original aim was to learn a hierarchy of features in an unsupervised manner. However, now its more commonly being used to invert the downsampling that takes place in a convolutional network and \enquote{expand} the image back to its original size.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/convolutional_autoencoder3.png}
+    \caption{Potential architecture of a convolutional autoencoder.}
+  \end{figure}
+  We now apply this architecture to denoise MNIST.
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=6.3cm]{plots/convolutional_autoencoder2.png}
+    \caption{Top row: noised data, second row: AE with $dim(\pmb{z}) = 32$ (roughly 50k params), third row: ConvAE (roughly 25k params), fourth row: ground truth.}
+  \end{figure}
+%\framebreak
+%  Convolutional autoencoders may also be used for image segmentation:
+%  \begin{figure}
+%    \centering
+%    \includegraphics[width=11cm]{plots/convolutional_autoencoder.png}
+%    \caption{SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation (Vijay Badrinarayanan et al. (2016))}
+%  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{AEs for unsupervised pretraining}
+  \begin{itemize}
+    \item Stacked AEs can be used for layer-wise unsupervised pretraining of deep neural networks.
+    \item This corresponds to subsequently training each layer as an AE.  
+    \item It aims  at yielding better weight initializations for the actual supervised training.
+    \item This usually eliminates the risk of vanishing gradients in feed forward nets.
+    \item It played an important role in the past before general techniques for stabilizing optimization were invented (e.g.~ReLUs, batch normalization, dropout, etc.)
+  \end{itemize}
+\end{vbframe}
+
+
+\begin{vbframe}{Real-world Applications}
+
+Today, autoencoders are still used for tasks such as: 
+\begin{itemize}
+\item  data de-noising,
+\item  compression,
+\item and dimensionality reduction for the purpose of visualization.
+\end{itemize}
+
+\framebreak 
+  \textbf{Medical image denoising} using convolutional denoising autoencoders
+  \begin{figure}
+    \centering
+    \includegraphics[width=6.5cm]{plots/denoising_autoencoder_application.png}
+    \caption{Top row : real image, second row   : noisy version, third row : results of a (convolutional) denoising autoencoder and fourth row : results of a median filter (Lovedeep Gondara (2016))}
+  \end{figure}
+  
+  \framebreak
+  AE-based \textbf{image compression}.
+  \begin{figure}
+    \centering
+    \includegraphics[width=6.5cm]{plots/image-compression.png}
+    \caption{from Theis et al. }
+    \end{figure}
+  
+  
+\end{vbframe}
+
+
+\begin{vbframe}{Learning Manifolds with AEs}
+  
+    \begin{itemize}
+        \item AEs training procedures involve a compromise between two forces:
+
+            \begin{enumerate}
+                \item Learning a representation $\pmb{z}$ of a training example $\pmb{x}$ such that $\pmb{x}$ can be approximately recovered from $\pmb{z}$ through a decoder.
+
+                \item Satisfying an architectural constraint or regularization penalty.
+            \end{enumerate}
+   
+       \item Together, they force the hidden units to capture information about the structure of the data generating distribution 
+       
+       \item important principle: AEs can afford to 
+       represent only the variations that are needed to reconstruct training examples.
+       
+         \item If the data-generating distribution concentrates near a low-dimensional manifold, this yields representations that implicitly capture a local coordinate system for the manifold. 
+         
+         \framebreak
+       
+   \item Only the variations tangent to the manifold around $\pmb{x}$ need to correspond to changes in $\pmb{z}=f(\pmb{x})$. Hence the encoder learns a mapping from the input space to a representation space that is only sensitive to changes along the manifold directions, but that is insensitive to changes orthogonal to the manifold.  
+       
+       \begin{figure}
+    \centering
+    \includegraphics[width=4cm]{plots/AE-manifold.jpg}
+    \caption{from Goodfellow et al. (2016) }
+    \end{figure}
+    
+   \end{itemize}
+
+\framebreak
+
+    \begin{itemize}
+        \item Common setting: a representation (embedding) for the points on the manifold is learned.
+        \item Two different approaches
+            \begin{enumerate}
+                \item Non-parametric methods: learn an embedding for each training example.
+                \item Learning a more general mapping for \textit{any} point in the input space.
+            \end{enumerate}
+        \item %Non-parametric approaches have problems with complicated manifolds\\
+        AI problems can have very complicated structures that can be difficult to capture from only local interpolation.\\
+            $\Rightarrow$ Motivates use of \textbf{distributed representations} and deep learning!
+    \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Contractive autoencoder (CAE)}
+%   \begin{itemize}
+%     \item Explicit regularizer on the code $h$: $$\Omega(h) = \lambda \Big|\Big|\frac{\delta enc(x)}{\delta x}\Big|\Big|_F^2$$
+%     \item $\Omega(h)$ is called squared Frobenius norm (sum of squared elements) of the Jacobian matrix of partial derivatives associated with the encoder function.
+%   \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{vbframe}{Variational autoencoder (VAE)}
+%  \begin{itemize}
+%    \item VAEs stand for Variational Autoencoders. By its name, you can probably tell that a VAE is pretty similar to an autoencoder, and it technically is, but with one major twist.
+%    \item While an autoencoder just has to reproduce its input, a variational autoencoder has to reproduce its output, \textbf{while keeping its hidden neurons to a specific distribution}.
+%    \begin{itemize}
+%      \item That means, the output of the network will have to get used to the hidden neurons output based on a distribution, and so we can generate new images, just by sampling from that distribution, and inputting it into the network's hidden layer.
+%    \end{itemize}
+%  \end{itemize}
+%\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Lovedeep Gondara., 2016]{2} Lovedeep Gondara (2016)
+\newblock Medical image denoising using convolutional denoising autoencoders
+\newblock \emph{\url{https://arxiv.org/abs/1608.04667}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Vijay Badrinarayanan et al., 2015]{3} Vijay Badrinarayanan, Alex Kendall and Roberto Cipolla (2016)
+\newblock SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation
+\newblock \emph{\url{https://arxiv.org/abs/1511.00561}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Theis at al., 2017]{4} Theis, Lucas; Shi, Wenzhe; Cunningham, Andrew; Huszár, Ferenc (2017)
+\newblock Lossy Image Compression with Compressive Autoencoders
+\newblock \emph{\url{https://arxiv.org/abs/1703.00395}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endlecture

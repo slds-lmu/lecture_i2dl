@@ -1,0 +1,279 @@
+\documentclass[11pt,compress,t,notes=noshow]{beamer}
+
+\usepackage[english]{babel}
+\usepackage{dsfont}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{csquotes}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{enumerate}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{psfrag}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{eqnarray}
+\usepackage{multimedia}
+\usepackage{media9}
+\usepackage{arydshln}
+\usepackage{tabularx}
+\usepackage{placeins}
+\usepackage{tikz}
+\usepackage{setspace}
+\usepackage{wrapfig}
+\usepackage{tcolorbox}
+\usepackage[export]{adjustbox}
+\usepackage{siunitx}
+\usetikzlibrary{shapes,arrows,automata,positioning,calc}
+\tikzset{
+  %Define standard arrow tip
+  >=stealth',
+  %Define style for boxes
+  punkt/.style={
+    rectangle,
+    rounded corners,
+    draw=black, very thick,
+    text width=6.5em,
+    minimum height=2em,
+    text centered},
+  % Define arrow style
+  pil/.style={
+    ->,
+    thick,
+    shorten <=2pt,
+    shorten >=2pt,}
+}
+\usepackage{subfig}
+
+%new environments
+
+\newenvironment{vbframe}  %frame with breaks and verbatim
+{
+ \begin{frame}[containsverbatim,allowframebreaks]
+}
+{
+\end{frame}
+}
+
+\newenvironment{vframe}  %frame with verbatim without breaks (to avoid numbering one slided frames)
+{
+ \begin{frame}[containsverbatim]
+}
+{
+\end{frame}
+}
+
+\newenvironment{blocki}[1]   % itemize block
+{
+ \begin{block}{#1}\begin{itemize}
+}
+{
+\end{itemize}\end{block}
+}
+
+\newenvironment{fragileframe}[2]{  %fragile frame with framebreaks
+\begin{frame}[allowframebreaks, fragile, environment = fragileframe]
+\frametitle{#1}
+#2}
+{\end{frame}}
+
+
+\newcommand{\myframe}[2]{  %short for frame with framebreaks
+\begin{frame}[allowframebreaks]
+\frametitle{#1}
+#2
+\end{frame}}
+
+\newcommand{\remark}[1]{
+  \textbf{Remark:} #1
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{ngerman}
+\usepackage{graphicx}
+\usepackage{multimedia}
+\usepackage{lmodern}
+\usepackage{alltt}
+\usepackage{epsfig,psfrag}
+%\usetheme[usetitleprogressbar,nooffset]{m}
+%\usetheme{Copenhagen}
+%\usetheme{CambridgeUS}
+%\setbeamercovered{transparent}
+%\PrerenderUnicode{}
+%\logo{\includegraphics[width=2cm]{logo_modern.pdf}}
+%\setbeamertemplate{navigation symbols}{}
+%\setbeamertemplate{footline}{}
+
+%\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{relsize}
+
+\usepackage{xfrac}
+
+% For algorithms
+\usepackage{algorithm}
+% \usepackage{algorithmic}
+
+
+\DeclareMathOperator*{\argmax}{argmax}
+
+\graphicspath{{../arxiv/figures/}}
+
+%\renewcommand{\vec}[1]{{\mathbf{#1}}}
+\renewcommand{\vec}[1]{{\boldsymbol{ #1}}}
+\newcommand{\Bernoulli}{\mathcal{B}}
+\newcommand{\DD}{{\cal D}}
+\newcommand{\LL}{{\cal L}}
+\renewcommand{\k}{\ensuremath{k}}
+\newcommand{\N}{\ell}
+\newcommand{\Energy}{E}
+\newcommand{\E}{{\mathbb E}}
+\newcommand{\sigmoid}{\sigma}
+\newcommand{\KL}{\operatorname{KL}}
+\newcommand{\ub}[2]{\underset{#1}{\underbrace{#2}}}
+\newcommand{\fub}[2]{\underset{\begin{minipage}{3cm}\footnotesize\centering
+      #2\end{minipage}}{\underbrace{#1}}}
+
+
+
+
+\newcommand\Perp{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\newcommand{\NPerp}{\not\Perp}
+\newcommand{\pri}[1]{#1'}
+
+\newcommand{\F}{\ensuremath{\mathcal H}}
+\newcommand{\X}{\ensuremath{\mathcal X}}
+\newcommand{\Y}{\ensuremath{\mathcal Y}}
+\newcommand{\x}{\ensuremath{\vec x}}
+\newcommand{\z}{\ensuremath{\vec z}}
+
+\newcommand{\wb}{{\vec{w}}}
+\newcommand{\Sigmab}{\vec{\Sigma}}
+\newcommand{\xb}{\vec{x}}
+%\newcommand{\argmax}{\operatorname{argmax}}
+\newcommand{\Xb}{\vec{X}}
+\newcommand{\Zb}{\vec{Z}}
+\newcommand{\zb}{\vec{Z}}
+\newcommand{\mub}{\vec{\mu}}
+
+%\newcommand{\E}[2]{\mathop{\mathlarger{\mathbb{E}} }_{#1}\left[#2\right]}
+\newcommand{\prob}[2]{p\left(#1 \, | \, #2\right)}
+\newcommand{\qrob}[2]{q\left(#1 \, | \, #2\right)}
+
+\newcommand{\kk}{{(k)}}
+\newcommand{\mm}{{(l)}}
+\newcommand{\ps}{p^*}
+\newcommand{\pts}{\tilde{p}^*}
+\newcommand{\ph}{\hat{p}}
+\newcommand{\phs}{\hat{p}^*}
+%\newcommand{\x}{\vec{x}}
+\newcommand{\y}{\vec{y}}
+%\newcommand{\z}{\vec{z}}
+\newcommand{\h}{\vec{h}}
+\newcommand{\norm}[1]{||{#1}||_2}
+\newcommand{\Li}[1]{\mathcal{L}ip_{#1}}
+
+\newcommand{\xVec}{\vec{x}}
+\newcommand{\hVec}{\vec{h}}
+\newcommand{\yVec}{\vec{y}}
+\newcommand{\aVec}{\vec{a}}
+\newcommand{\bVec}{\vec{b}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% basic latex stuff
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}} %fontstyle for R packages
+\newcommand{\lz}{\vspace{0.5cm}} %vertical space
+\newcommand{\dlz}{\vspace{1cm}} %double vertical space
+\newcommand{\oneliner}[1] % Oneliner for important statements
+{\begin{block}{}\begin{center}\begin{Large}#1\end{Large}\end{center}\end{block}}
+
+
+%\usetheme{lmu-lecture}
+\usepackage{../style/lmu-lecture}
+
+\let\code=\texttt
+\let\proglang=\textsf
+
+\setkeys{Gin}{width=0.9\textwidth}
+
+<<include=FALSE>>=
+library(knitr)
+options(digits = 3, width = 65, str = strOptions(strict.width = "cut", vec.len = 3))
+
+opts_chunk$set(
+  echo        = FALSE,
+  prompt      = FALSE,
+  keep.source = TRUE,
+  strip.white = TRUE,
+  cache       = TRUE,
+  tidy        = FALSE,
+
+  message     = FALSE,
+  warning     = FALSE,
+
+  size        = 'scriptsize',
+
+  fig.height  = 5.8,
+  fig.width   = 8,
+  fig.pos     = "h!",
+  small.mar   = TRUE,
+  eps         = FALSE,
+  crop        = TRUE,
+  fig.align   = "center",
+  out.width   = "0.95\\textwidth"
+  # fig.path    = "knit-figure/prada1-"
+)
+
+library(ggplot2)
+theme_update(axis.line = element_line(colour = "black"),
+  panel.grid.major = element_line(colour = "grey80"),
+  panel.grid.minor = element_line(colour = "grey80"),
+  panel.border = element_blank(),
+  panel.background = element_blank())
+
+#' Plot animation over several beamer slides.
+#' Important: code chunk option: results="asis"
+#'
+#' @param plotFunction
+#'   a function that plots the i-th iteration of a series of plots
+#' @param iterations
+#'   Vector of integers. Iterations that should be shown in the beamer slides.
+#' @examples
+#'   see cim2/2017/08-boosting
+plotAnimation = function(plotFunction, iterations) {
+  for(i in iterations){
+    cat('\\begin{only}<', i, '>', sep = '')
+    plotFunction(i)
+    cat('\\end{only}')
+    #cat('\n\\framebreak\n')
+  }
+}
+@
+
+\title{Deep Learning}
+\author{Bernd Bischl}
+\institute{Department of Statistics -- LMU Munich}
+\date{Winter term 2019}
+
+\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
+
+\begin{document}
+\sloppy
+\end{document}

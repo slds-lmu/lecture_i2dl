@@ -1,0 +1,31 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../../style/preamble_ueb.Rnw")
+@
+
+
+\kopf{2}
+
+Solution exercise 3:
+
+
+\[
+f(x) = \sum^m_{j=1}\sigma(Wx)v_j
+\]
+
+\[
+\sum^n_{i=1}(f(x^{(i)}) - y^{(i)})^2 = E
+\]
+
+\[
+\frac{\partial E}{\partial v_k} = 2(f(x) - y)\sigma(w_k^T x)
+\]
+
+For $w_j = 0 \Longrightarrow \frac{\partial E}{\partial v_k} = 0$ since $\sigma(0) = tanh(0) = 0$
+
+
+\[
+\frac{\partial E}{\partial w_k} = 2(f(x) - y)v_k\sigma\prime(w_k^T x)x = 0
+\]
+
+since $v_k = 0$.

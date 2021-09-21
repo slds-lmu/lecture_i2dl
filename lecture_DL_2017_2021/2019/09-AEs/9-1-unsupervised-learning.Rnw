@@ -1,0 +1,139 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+
+@
+
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{9}{Unsupervised Learning}
+\lecture{Deeplearning}
+
+
+\begin{vbframe}{Unsupervised Learning}
+  \begin{itemize}
+    \item So far, we were dealing with different types of neural networks designed for classification and regression tasks.
+    \item In these \textbf{supervised learning} scenarios, we exploit information of class memberships (or numeric values) to train our algorithm. That means in particular, that we have access to labeled data.
+    \item % Recall from the very first lecture, that t 
+    There exists another learning paradigm, \textbf{unsupervised learning}, where:
+  %  \item Think of mnist:
+    \begin{itemize}
+   %   \item We know the ground truth for each image of our dataset.
+    %  \item Our goal was to train a network that predicts the class labels.
+   \item training data consists of unlabeled input points $\pmb{x}^{(1)}, \dots, \pmb{x}^{(n)}$
+\item and one aims at finding and describing intrinsic structure in the data.
+    \end{itemize}
+    \item There is much more unlabeled data than labeled! But what can we learn from it?
+  \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Unsupervised Learning - Examples}
+  \begin{itemize}
+    \item[1.] \textbf{Clustering} \\
+    Goal: Identify the intrinsic grouping in a set of unlabeled data
+  \end{itemize}
+  \begin{figure}
+    \centering
+    % \includegraphics[width=6cm]{plots/unsupervised_2.png}
+    \scalebox{1}{\includegraphics[width = 0.8\textwidth]{plots/clustering.png}}
+    \caption{\footnotesize{Two different clustering results on a dataset (Source: Wikipedia). }}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item[2.] \textbf{Dimensionality Reduction} \\
+    Goal: Reduce dimensionality of data, for example 
+    \ \begin{itemize}
+    \item to visualize the data in a lower dimensional space.
+    \end{itemize}
+  \end{itemize}
+  %\begin{minipage}{0.43\textwidth}
+  %  \begin{itemize}
+  %    \item Principle Component Analysis (PCA)
+  %    \item Linear Discriminant Analysis (LDA)
+  %    \item Filter Methods
+  %    \end{itemize}
+ % \end{minipage}\hfill
+ %   \begin{minipage}{0.53\textwidth}
+    \begin{figure}
+        \only<1-2>{\includegraphics[width=0.9\textwidth]{plots/PCA_2.png}}
+        \caption{\footnotesize{A dataset, where dimensionality has been reduced by Principal Component Analysis (PCA) (source: M. Scholz, Approaches to analyse and interpret biological profile data). }}
+    \end{figure}
+%  \end{minipage}
+\framebreak
+  \begin{itemize}
+    \item[2.] \textbf{Dimensionality Reduction}
+    \ \begin{itemize}
+    \item to reduce the size of the dataset (e.g. image compression)
+    \end{itemize}
+  \end{itemize}
+  %\begin{minipage}{0.43\textwidth}
+  %  \begin{itemize}
+  %    \item Principle Component Analysis (PCA)
+  %    \item Linear Discriminant Analysis (LDA)
+  %    \item Filter Methods
+  %    \end{itemize}
+ % \end{minipage}\hfill
+ %   \begin{minipage}{0.53\textwidth}
+    \begin{figure}
+        \only<1-2>{\includegraphics[width=5.cm]{plots/imagecompression.jpg}}
+        \caption{Image compression via discrete cosine transformation (DCT) and discrete wavelet transformation (DWT) (source: \url{https://de.slideshare.net/hcycon/bildkompression})}
+    \end{figure}
+%  \end{minipage}
+%\framebreak
+
+\end{vbframe}
+
+
+\begin{vbframe} {Unsupervised Learning - Examples}
+  \begin{itemize}
+    \item[3.] \textbf{Feature extraction/representation learning} \\
+    Goal: Extract an informative set of features from the original dataset
+    \item[]
+  \end{itemize}
+   \begin{figure}
+        \only<1-2>{\includegraphics[width=4.cm]{plots/feature_extraction.png}}
+        \caption{Source: Wikipedia}
+    \end{figure}
+    \begin{itemize}
+    \item  E.g.~for \textbf{semi-supervised learning}: features learned from an unlabeled dataset are employed to improve performance in a supervised setting. 
+    \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item[4.] \textbf{Density fitting/learning a generative model} \\
+    Goal: learn the data generating distribution 
+  \end{itemize}
+   \begin{figure}
+        \only<1-2>{\scalebox{1}{\includegraphics{plots/BHM.png}}}
+        \caption{A generative model can reconstruct the missing portions of the images (Bornschein, Shabanian, Fischer \& Bengio, ICML, 2016). }
+    \end{figure}
+    
+
+\end{vbframe}
+
+\begin{frame}[fragile]
+\frametitle{Unsupervised Deep Learning}
+Given i.i.d. (unlabeled) data $\xv_1, \xv_2,\dots, \xv_n \sim  \P_x$, 
+ in unsupervised deep learning, one usually trains:
+
+ \begin{itemize}
+ 
+ \item  an autoencoder (a special kind of neural network) for \textbf{representation learning} (feature extraction, dimensionality reduction, manifold learning, ...), or, \\
+ %$\righarrow$ This neural networks are  
+  \item a \textbf{generative model}, i.e.~a probabilistic model of the  data generating distribution  $\P_x$ 
+  % (predictions, missing feature estimation, reconstruction, denoising, sampling, outlier detection, ...).
+  (data generation, outlier detection, missing feature extraction, reconstruction, denoising or planning in reinforcement learning, ...). 
+  
+  %full probabilistic model of all variables
+  
+ \end{itemize}
+
+\end{frame} 
+
+
+
+\endlecture
+
+
+

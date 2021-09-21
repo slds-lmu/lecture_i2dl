@@ -1,0 +1,24 @@
+# General Process/Plan for the Labs for the DL lecture
+
+- We have 2 hours a week from 12 - 14 in the CIP-Pool
+- Students will work at this time while Janek (and maybe a HiWi) is present for questions
+- More focus on Programming / applying NNs
+- They don't have to do anything at home
+- We still provide solution material online
+- Solutions will be provided in R
+- We use Keras instead of mxnet (https://github.com/rstudio/cheatsheets/raw/master/keras.pdf !!!)
+
+# Exercises
+
+
+- We take these as solutions and create exercises around them: https://github.com/ja-thomas/deep-learning-with-r-notebooks
+- For RL we take Xudongs package
+- For HPO we can take some material from the tutorial at WhyR
+
+
+
+ToDos:
+
+- Look for more stuff that can be used as exercise
+- Distribute intro blocks according to lecture material
+- Extend (some) of the exercises with Kaggle challenges

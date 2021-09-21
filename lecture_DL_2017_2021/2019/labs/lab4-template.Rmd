@@ -1,0 +1,569 @@
+---
+title: "Lab 4"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
+```
+
+Welcome to the fourth lab. In this lab, we will derive the backpropagation equations, code the training procedure, and test it on the XOR problem. Additionally, there will be a couple of theoretical questions about weight decay (or L2 regularization) that should give you some intuition on how it works.
+
+## Exercise 1
+Derive the back-propagation algorithm. You might find the results of the second exercise of the previous lab a useful reference.
+
+ - Consider a neural network with $L$ layers and a loss function $\mathcal{L}$ composed of a generic error term $\mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})$ and weight decay term $\mathcal{R}_\lambda(\textbf{W})$. Call the output of the $\ell$-th layer $\textbf{y}^\ell=\phi_\ell(\textbf{z}^\ell)$ with $\textbf{z}^\ell=\textbf{W}^\ell\textbf{y}^{\ell-1}+\textbf{b}^\ell$ its pre-activation output. Finally, consider a vector $\delta^\ell=\nabla_{\textbf{z}^\ell}\mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})$ containing the gradient of the loss with respect to the pre-activation outputs of layer $\ell$.
+ - Compute $\delta^L$.
+ - Compute $\nabla_{\textbf{W}^\ell}\mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})$ in terms of $\textbf{y}^{\ell-1}$ and $\delta^\ell$.
+ - Compute $\nabla_{\textbf{b}^\ell}\mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})$ in terms of $\textbf{y}^{\ell-1}$ and $\delta^\ell$.
+ - Compute $\delta^{\ell-1}$ from $\delta^\ell$.
+ - Use vectorized operations (i.e. operations with vectors and matrices): they will make your code in the next exercise _much_ faster!
+ - Optional: Extend the vectorized operations to handle data in batches. Call $\textbf{Y}^\ell$ and $\Delta^\ell$ the matrices whose $i$-th rows contains the activations $\textbf{y}^\ell$ and deltas $\delta^\ell$ of the $i$-th training example in the batch.
+ - Hint: make sure that the results have the right shape. The deltas should be vectors, and the gradients should have the same shape as the respective parameters.
+
+<!--#!solutionbegin-->
+### Solution
+Note that backpropagation is not needed on the regularization term, since it can be differentiated directly with respect to the weights.
+
+Note that $\delta^\ell_i=\partial \mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})/\partial z^\ell_i$. By applying the chain rule, we have, for the last layer:
+
+\begin{align}
+\delta^L_i&=\frac{\partial\mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})}{\partial y^L_i}\cdot\frac{\partial y^L_i}{\partial z^L_i} \\
+&=\frac{\partial\mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})}{\partial y^L_i}\cdot\phi^\prime_L(y^L_i)
+\end{align}
+
+Where the first term depends on the loss function. By the same reasoning, the derivatives of the parameters of a generic layer $\ell$ are:
+
+\begin{align}
+\frac{\partial \mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})}{\partial w^\ell_{ij}}
+&=\frac{\partial \mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})}{\partial z^\ell_i}\cdot\frac{\partial z^\ell_i}{\partial w^\ell_{ij}}
++\frac{\partial \mathcal{R}(w_{ij}^\ell)}{\partial w^\ell_{ij}}
+=\delta^\ell_i\cdot y^{\ell-1}_j + \frac{\lambda}{2} w^\ell_{ij} \\
+\frac{\partial \mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})}{\partial b^\ell_{j}}
+&=\frac{\partial \mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})}{\partial z^\ell_i}\cdot\frac{\partial z^\ell_i}{\partial b^\ell_{j}}=\delta^\ell_i
+\end{align}
+
+As for the deltas:
+
+$$
+\delta^{\ell-1}_i
+=\sum_j\frac{\partial \mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})}{\partial z^\ell_j}\cdot\frac{\partial z^\ell_j}{\partial y^{\ell-1}_i}\cdot\frac{\partial y^{\ell-1}_i}{\partial z^{\ell-1}_i}
+=\phi^\prime_{\ell-1}(y^{\ell-1}_i)\cdot\sum_j\delta^\ell_j\cdot w^\ell_{ji}
+$$
+
+In vectorized form:
+
+\begin{align}
+\delta^L&=\nabla_{\textbf{y}^L}\mathcal{E}(\textbf{y}^L,\hat{\textbf{y}})\odot\phi^\prime_L(\textbf{y}^L) \\
+\delta^{\ell-1}&=\left(\delta^\ell\textbf{W}^\ell\right)\odot\phi_{\ell-1}^\prime(\textbf{y}^{\ell-1}) \\
+\nabla_{\textbf{W}^\ell}\mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})&=\left(\textbf{y}^{\ell-1}\right)\otimes{\delta^\ell}^T+\frac{\lambda}{2}\textbf{W}^\ell \\
+\nabla_{\textbf{b}^\ell}\mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})&=\delta^\ell
+\end{align}
+
+with $\odot$ denoting the element-wise product of two vectors and $\otimes$ the outer product. For two vectors $\textbf{a}$ and $\textbf{b}$, if $\textbf{c}=\textbf{a}\odot\textbf{b}$ and $\textbf{D}=\textbf{a}\otimes\textbf{b}^T$, then $c_i=a_i\cdot b_i$ and $D_{ij}=a_i\cdot b_j$.
+
+We now extend these formulas to handle batched data. $\nabla_{\textbf{Y}^L}\mathcal{L}(\textbf{Y}^L,\hat{\textbf{Y}})$ and $\phi^\prime_L(\textbf{Y}^L)$ are both matrices of the same size, and the element-wise product still works as intended:
+
+$$
+\Delta^L=\nabla_{\textbf{Y}^L}\mathcal{L}(\textbf{Y}^L,\hat{\textbf{Y}})\odot\phi^\prime_L(\textbf{Y}^L)
+$$
+As for $\Delta^{\ell-1}$, its $i$-th row $\delta^{\ell-1}_i$ is computed using the $i$-th row of $\Delta^\ell$, $\delta^\ell_i$: we are trying to transform a matrix of size $N\times n^\ell$ into a matrix of size $N\times n^{\ell-1}$. Since $\textbf{W}^\ell$ is of size $n^\ell\times n^{\ell-1}$, dimensional analysis suggests we can just swap the order of the matrix multiplication (as we did for the forward pass in dense layers), and keep the element-wise product as before:
+
+$$
+\Delta^{\ell-1}=\left(\left(\textbf{W}^\ell\right)^T \Delta^\ell \right)\odot\phi^\prime_{\ell-1}(\textbf{Y}^{\ell-1})
+$$
+
+Indeed, the $i$-th row of the result is the dot-product of the $i$-th row of $\Delta^\ell$ with each column of $\textbf{W}^\ell$, followed by the element-wise multiplication with $\phi^\prime_{\ell-1}$ computed on the $i$-th row of $\textbf{Y}^\ell$, exactly as before.
+
+The gradient of $\textbf{W}^\ell$ is a bit more involved to compute, as it results in a three-dimensional tensor: the first dimension is for the samples, the second dimension is for the neurons of the $\ell$-th layer, and the third dimension for the neurons of the $(\ell-1)$-th layer. In other words, the element indexed by $i,j,k$ is the derivative of the loss of the $i$-th sample in the batch with respect to $w_{jk}$:
+
+$$
+\left(\nabla_{\textbf{W}^\ell}\mathcal{L}(\textbf{y}^L,\hat{\textbf{y}})\right)_{ijk}
+=\frac{\partial \mathcal{L}(\textbf{Y}^L_i,\hat{\textbf{Y}}_i)}{\partial w^\ell_{jk}}
+=\delta^\ell_{ij}\cdot\textbf{Y}^{\ell-1}_{ik}+\frac{\lambda}{2} w^\ell_{jk}
+$$
+
+Which is the outer product of the $i$-th row of $\Delta^\ell$ with the (transposed) $i$-th row of $\textbf{Y}^{\ell-1}$. This vectorized operation is not exactly standard, and cannot be done in plain R, but other languages/frameworks allow this type of operations.
+
+Finally, the biases are straightforward:
+
+$$
+\nabla_{\textbf{b}^\ell}\mathcal{L}(\textbf{Y}^L,\hat{\textbf{Y}})=\Delta^\ell
+$$
+Note that we have to sum over the first dimension of the gradients for $\textbf{W}^\ell$ and $\textbf{b}^\ell$ to obtain the average of the gradient over the batch.
+<!--#!solutionend-->
+
+## Exercise 2
+In this exercise, we will code the backpropagation algorithm and apply it to a very simple example: the XOR problem. We will use reference classes to keep the code modular and organized.
+
+ 1. Create a class that computes the binary cross entropy and its derivative.
+ 2. Create a class that computes the ReLU activation and its derivative.
+ 3. Create a class that computes the sigmoid activation and its derivative.
+ 4. Create a class that computes the tanh activation and its derivative (which is $1-\tanh(x)^2$)
+ 5. Create a class that performs one step of gradient descent.
+ 6. Write a function for the forward pass and for backpropagation.
+ 7. Create a neural network with a suitable architecture and train it on the XOR problem.
+ 8. Visualize the weights and biases of the trained network. Can you explain how the network makes predictions?
+ 9. Test different activation functions, learning rates, initializations, number of layers and their sizes.
+ 10. Optional: implement the softmax activation, the categorical cross entropy loss function, and train a network on the MNIST dataset.
+
+Hint: you can check that the gradients you compute are correct by comparing them with the "empirical" gradients obtained through the finite differences method.
+
+Hint: If you do this exercise in a R script, you will be able to debug the code and see where things are not going according to plan.
+
+Note: all these functions should process the data in batches, i.e. matrices where every row is a different sample of the same batch.
+
+```{r}
+loss_function = setRefClass(  # base class for loss functions
+  "loss_function",
+  methods = list(
+    forward = function(y_true, y_pred) NA,
+    backward = function(y_true, y_pred) NA
+  )
+)
+
+binary_crossentropy = setRefClass(
+  "binary_crossentropy",
+  contains = "loss_function",
+  methods = list(
+    forward = function(y_true, y_pred) {
+      #!hwbegin TODO compute the binary cross entropy loss
+      # we add a small constant to avoid having a NaN result from log(0)
+      -sum(
+        y_true * log(y_pred + 1e-9) + (1 - y_true) * log(1 - y_pred + 1e-9)
+      ) / nrow(y_true)
+      #!hwend
+    },
+    backward = function(y_true, y_pred) {
+      #!hwbegin TODO compute the gradient of the cross entropy loss
+      # we add a small constant to avoid dividing by zero
+      -(
+        y_true / (y_pred + 1e-9) - (1 - y_true) / (1 - y_pred + 1e-9)
+      ) / nrow(y_true)
+      #!hwend
+    }
+  )
+)
+
+y_true = matrix(c(0, 0, 0, 1, 1, 0), ncol=3)
+y_pred = matrix(c(0.2, 0.5, 0.3, 0.8, 0.1, 0.1), ncol=3)
+loss = binary_crossentropy()
+
+loss$forward(y_true, y_pred)
+loss$backward(y_true, y_pred)
+```
+
+```{r}
+activation = setRefClass(  # base class for activation functions
+  "activation",
+  methods = list(
+    forward = function(x) NA,
+    backward = function(x) NA
+  )
+)
+
+
+relu = setRefClass(
+  "relu",
+  contains = "activation",
+  methods = list(
+    forward = function(x) {
+      #!hwbegin TODO compute the relu activation on x
+      ifelse(x > 0, x, 0)
+      #!hwend
+    },
+    backward = function(x) {
+      #!hwbegin TODO compute the gradient of the relu activation
+      ifelse(x > 0, 1, 0)
+      #!hwend
+    }
+  )
+)
+
+x = matrix(c(-0.1, 0.3, 0.7, 0.5, -1.0, 0.7), ncol=3)
+act = relu()
+
+act$forward(x)
+act$backward(x)
+```
+
+```{r}
+sigmoid = setRefClass(
+  "sigmoid",
+  contains = "activation",
+  methods = list(
+    forward = function(x) {
+      #!hwbegin TODO compute the sigmoid activation
+      1 / (1 + exp(-x))
+      #!hwend
+    },
+    backward = function(x) {
+      #!hwbegin TODO compute the gradient of the sigmoid activation
+      exp(-x) / (1 + exp(-x))^2
+      #!hwend
+    }
+  )
+)
+
+x = matrix(c(2, 0, -2, 0.5, -0.25, 0.25), ncol=3)
+act = sigmoid()
+
+act$forward(x)
+act$backward(x)
+```
+
+
+```{r}
+htan = setRefClass(
+  "htan",
+  contains = "activation",
+  methods = list(
+    forward = function(x) {
+      #!hwbegin TODO compute the tanh activation
+      tanh(x)
+      #!hwend
+    },
+    backward = function(x) {
+      #!hwbegin TODO compute the gradient of the tanh activation
+      1 - tanh(x)^2
+      #!hwend
+    }
+  )
+)
+
+act = htan()
+
+act$forward(x)
+act$backward(x)
+```
+
+
+```{r}
+gradient_descent_optimizer = setRefClass(
+  "gradient_descent_optimizer",
+  fields = list(
+    learning_rate = "numeric"
+  ),
+  methods = list(
+    step = function(x, gradient) {
+      #!hwbegin TODO perform one step of gradient descent on x
+      x - learning_rate * gradient
+      #!hwend
+    }
+  )
+)
+
+opt = gradient_descent_optimizer(learning_rate = 0.1)
+opt$step(10, 10)
+```
+
+```{r}
+dense_neural_network = setRefClass(
+  "dense_neural_network",
+  fields = list(
+    weights = "list",
+    biases = "list",
+    activations = "list",
+    loss = "loss_function",
+    optimizer = "gradient_descent_optimizer"
+  ),
+  methods = list(
+    
+    predict = function(batch_x) {
+      result = batch_x
+      
+      #!hwbegin TODO perform the forward pass to get the predictions
+      for(i in 1:length(weights)) {
+        bias_matrix = matrix(
+          rep(biases[[i]], nrow(batch_x)),
+          nrow = nrow(batch_x), byrow = TRUE
+        )
+
+        result = result %*% weights[[i]] + bias_matrix
+        result = activations[[i]]$forward(result)
+      }
+      #!hwend
+      
+      result
+    },
+    
+    train_on_batch = function(batch_x, batch_y, iter, lrate) {
+      intermediate_activations = list(batch_x)
+      
+      #!hwbegin TODO perform the forward pass to get the predictions\n# and put the intermediate activations in the list
+      result = batch_x
+      for(i in 1:length(weights)) {
+        bias_matrix = matrix(
+          rep(biases[[i]], nrow(batch_x)),
+          nrow = nrow(batch_x), byrow = TRUE
+        )
+        
+        result = result %*% weights[[i]] + bias_matrix
+        result = activations[[i]]$forward(result)
+        intermediate_activations[[i + 1]] = result
+      }
+      #!hwend
+      
+      batch_loss = loss$forward(
+        batch_y,
+        intermediate_activations[[length(intermediate_activations)]]
+      )
+      
+      weight_gradients = list()
+      bias_gradients = list()
+      
+      #!hwbegin TODO use backpropagation to compute the gradients,\n# accumulate them in the lists, then use the optimizer\n# to apply the gradients to the parameters
+      output = intermediate_activations[[length(intermediate_activations)]]
+      for(i in 1:nrow(batch_x)) {
+        deltas = (loss$backward(
+          batch_y[i,,drop=FALSE],
+          output[i,,drop=FALSE]
+        ) * activations[[length(activations)]]$backward(
+          output[i,,drop=FALSE]
+        ))[1,]
+        
+        for(j in length(activations):1) {
+          stopifnot(any(!is.na(deltas)))
+          
+          wg = intermediate_activations[[j]][i,] %o% deltas
+          bg = deltas
+
+          if(length(weight_gradients) > 0 && !is.null(weight_gradients[[j]])) {
+            weight_gradients[[j]] = weight_gradients[[j]] + wg
+            bias_gradients[[j]] = bias_gradients[[j]] + bg
+          }
+          else {
+            weight_gradients[[j]] = wg
+            bias_gradients[[j]] = bg
+          }
+
+          if(j > 1) {
+            deltas = (
+              weights[[j]] %*% deltas *
+                activations[[j - 1]]$backward(intermediate_activations[[j]][i,])
+            )
+            
+            # keep as vector, not matrix, so that the outer product
+            # will be a matrix instead of 3d tensor
+            deltas = deltas[,1]
+          }
+        }
+      }
+      
+      for(i in 1:length(activations)) {
+          weights[[i]] <<- optimizer$step(weights[[i]], weight_gradients[[i]])
+          biases[[i]] <<- optimizer$step(biases[[i]], bias_gradients[[i]])
+      }
+      #!hwend
+
+      batch_loss
+    }
+  )
+)
+
+
+# just an utility function to create networks
+build_dense_neural_network = function(input_size, layers, loss, optimizer) {
+  weights = list()
+  biases = list()
+  activations = list()
+  
+  last_layer_size = input_size
+  for(i in 1:length(layers)) {
+    if(class(layers[[i]]) == "numeric") {
+      sd = sqrt(2 / (last_layer_size + layers[[i]]))
+      vals = rnorm(n = last_layer_size * layers[[i]], mean = 0, sd = sd)
+      vals = ifelse(vals > 2 * sd, 2 * sd, vals)
+      vals = ifelse(vals < -2 * sd, -2 * sd, vals)
+      weights[[length(weights) + 1]] = matrix(
+        vals, ncol = layers[[i]], nrow = last_layer_size
+      )
+      biases[[length(biases) + 1]] = rep(0, layers[[i]])
+      last_layer_size = layers[[i]]
+    }
+    else {
+      activations[[length(activations) + 1]] = layers[[i]]
+    }
+  }
+
+  dense_neural_network(
+    weights = weights,
+    biases = biases,
+    activations = activations,
+    loss = loss,
+    optimizer = optimizer
+  )
+}
+
+
+data.x = matrix(c(
+  -1, -1,
+  -1, 1,
+  1, -1,
+  1, 1
+), nrow = 4, ncol = 2, byrow = TRUE)
+
+
+data.y = matrix(c(
+  0, 1, 1, 0
+), nrow = 4, ncol = 1)
+
+
+network = build_dense_neural_network(
+  input_size = 2,
+  layers = list(2, htan(), 1, sigmoid()),
+  loss = binary_crossentropy(),
+  optimizer = gradient_descent_optimizer(learning_rate = 0.25)
+)
+
+
+losses = lapply(1:250, function(i) network$train_on_batch(data.x, data.y))
+network$predict(data.x)
+plot(1:length(losses), losses)
+```
+
+```{r}
+network$weights
+network$biases
+```
+
+## Exercise 3
+This exercise should improve your understanding of weight decay (or L2 regularization).
+
+  1. Consider a quadratic error function $E(\textbf{w})=E_0+\textbf{b}^T\textbf{w}+1/2\cdot\textbf{w}^T\textbf{H}\textbf{w}$ and its regularized counterpart $E'(\textbf{w})=E(\textbf{w})+\tau/2 \cdot\textbf{w}^T\textbf{w}$, and let $\textbf{w}^*$ and $\tilde{\textbf{w}}$ be the minimizers of $E$ and $E'$ respectively. We want to find a formula to express $\tilde{\textbf{w}}$ as a function of $\textbf{w}^*$, i.e. find the displacement introduced by weight decay.
+
+      - Find the gradients of $E$ and $E'$. Note that, at the global minimum, we have $\nabla E(\textbf{w}^*)=\nabla E'(\hat{\textbf{w}})=0$.
+      - In the equality above, express $\textbf{w}^*$ and $\tilde{\textbf{w}}$ as a linear combination of the eigenvectors of $\textbf{H}$.
+      - Through algebraic manipulation, obtain $\tilde{\textbf{w}}_i$ as a function of $\textbf{w}^*_i$.
+      - Interpret this result geometrically.
+      - Note: $\textbf{H}$ is square, symmetric, and positive definite, which means that its eigenvectors are perpendicular, and its eigenvalues are positive.
+  
+  2. Consider a linear network of the form $y=\textbf{w}^T\textbf{x}$ and the mean squared error as a loss function. Assume that every observation is corrupted with Gaussian noise $\epsilon\sim\mathcal{N}(\textbf{0}, \sigma^2\textbf{I})$. Compute the expectation of the gradient under $\epsilon$ and, show that adding gaussian noise to the inputs has the same effect of weight decay.
+
+
+<!--#!solutionbegin-->
+### Solution
+
+#### Question 1
+
+The error is computed as:
+
+$$
+E(\textbf{w})=E_0+\sum_i w_ib_i+\frac 1 2 \sum_i\sum_j w_iw_jh_{ij}
+$$
+
+The derivative with respect to $w_i$ is, then:
+
+$$
+\frac{\partial E}{\partial w_i}=b_i+\sum_j w_jh_{ij}
+$$
+
+Where the factor $1/2$ was removed since the pair $w_i$ and $w_j$ is multiplied together twice, and $h_{ij}=h_{ji}$. In vector form:
+
+$$
+\nabla_{\textbf{w}} E(\textbf{w})=\textbf{b}+\textbf{H}\textbf{w}
+$$
+
+The same reasoning applied to $E'$ yields:
+
+$$
+\nabla_{\textbf{w}} E'(\textbf{w})=\textbf{b}+\textbf{H}\textbf{w}+\tau\textbf{w}
+$$
+
+Now let $\textbf{u}_i$ and $\lambda_i$ be the eigenvectors and eigenvalues of $\textbf{H}$, so that $\textbf{H}\textbf{u}_i=\lambda_i\textbf{u}_i$. Any vector $\textbf{v}$ can then be expressed as $\textbf{v}=\sum_i\gamma_i\textbf{u}_i$. Now, note that
+
+$$
+\textbf{H}\textbf{v}=\sum_i\gamma_i\textbf{H}\textbf{u}_i=\sum_i\gamma_i\lambda_i\textbf{u}_i
+$$
+
+
+Moreover, at the global minimum, both gradients equal zero, hence:
+
+$$
+\textbf{b}+\underbrace{
+  \sum_i\alpha_i\lambda_i\textbf{u}_i
+}_{
+  \textbf{H}\textbf{w}^*
+}
+=
+\textbf{b}+\underbrace{
+  \sum_i\beta_i\lambda_i\textbf{u}_i
+}_{
+  \textbf{H}\tilde{\textbf{w}}
+}+\tau\underbrace{
+  \sum_i\beta_i\textbf{u}_i
+  }_{
+    \tilde{\textbf{w}}
+  }
+\Longleftrightarrow
+\sum_i\left( \alpha_i\lambda_i-\beta_i\lambda_i-\tau\beta_i \right)\textbf{u}_i=\textbf{0}
+$$
+
+Since the eigenvectors are pairwise orthogonal, the above expression is zero only when each term inside the sum is zero, i.e.
+
+$$
+\alpha_i\lambda_i-\beta_i\lambda_i-\tau\beta_i=0
+\Longleftrightarrow \beta_i=\frac{\lambda_i}{\lambda_i+\tau}\alpha_i
+$$
+
+Now, by replacing this into the expression for $\hat{\textbf{w}}$, we get:
+
+$$
+\tilde{\textbf{w}}=\sum_i\beta_i\textbf{u}_i=\sum_i\frac{\lambda_i}{\lambda_i+\tau}\alpha_i\textbf{u}_i=\textbf{d}\odot\textbf{w}^*
+$$
+
+With $\odot$ being the element-wise product, and $d_i=\lambda_i(\lambda_i+\tau)^{-1}$.
+
+The eigenvalues of $\textbf{H}$ indicate how much the error changes by moving in the direction of the corresponding eigenvector, with larger changes associated to smaller eigenvalues. In light of this, the formula above is saying that the largest changes are applied to the weights that have little influence on the error, while "important" weights are not perturbed much.
+
+#### Question 2
+
+The prediction for $\tilde{\textbf{x}}=\textbf{x}+\epsilon$ is:
+
+$$
+\tilde{y}=\textbf{w}^T\left(\textbf{x}+\epsilon\right)=\textbf{w}^T\textbf{x}+\textbf{w}^T\epsilon
+$$
+
+The error of this sample is
+
+$$
+\tilde{E}=\frac 1 2 \left(\hat{y}-\textbf{w}^T\textbf{x}-\textbf{w}^T\epsilon\right)^2
+$$
+
+And its gradient with respect to a single weight is
+
+\begin{align*}
+\frac{\partial\tilde{E}}{\partial w_i}
+&=\left(\hat{y}-\textbf{w}^T\textbf{x}-\textbf{w}^T\epsilon\right)(-x_i-\epsilon_i) \\
+&=-x_i\left(\hat{y}-\textbf{w}^T\textbf{x}-\textbf{w}^T\epsilon\right)-\epsilon_i\left(\hat{y}-\textbf{w}^T\textbf{x}-\textbf{w}^T\epsilon\right)
+\end{align*}
+
+The expectation with respect to $\epsilon$ is
+
+\begin{align*}
+\mathbb{E}\left[\frac{\partial\tilde{E}}{\partial w_i}\right]
+&=\mathbb{E}\left[
+-x_i\left(\hat{y}-\textbf{w}^T\textbf{x}-\textbf{w}^T\epsilon\right)
+\right]+\mathbb{E}\left[
+-\epsilon_i\left(\hat{y}-\textbf{w}^T\textbf{x}-\textbf{w}^T\epsilon\right)
+\right] \\
+&= -x_i\left(\hat{y}-\textbf{w}^T\textbf{x}\right)+\mathbb{E}\left[
+-\epsilon_i\hat{y}+\epsilon_i\textbf{w}^T\textbf{x}+\epsilon_i\textbf{w}^T\epsilon
+\right] \\
+&\stackrel{*}{=} \frac{\partial E}{\partial w_i}+\sum_j w_j\mathbb{E}\left[\epsilon_i\epsilon_j\right] \\
+&= \frac{\partial E}{\partial w_i}+w_i\sigma^2    
+\end{align*}
+
+Where we used $\partial E/\partial w_i$ to denote the gradient of the error of the de-noised sample, and the step marked with $*$ follows because $\mathbb{E}[\epsilon_i\epsilon_j]=\text{Cov}\left[\epsilon_i, \epsilon_j\right]=\delta_{ij}\sigma^2$.
+
+Clearly, the gradient is the same that results from weight decay.
+<!--#!solutionend-->
+
+
+
+
+
+
+
+
+

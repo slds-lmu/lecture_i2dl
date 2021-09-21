@@ -1,0 +1,321 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble_mina.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+@
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{8}{Modern Recurrent Neural Networks}
+\lecture{Deeplearning}
+
+\begin{frame}
+\frametitle{Lecture outline}
+\tableofcontents
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{vbframe}{Long Short-Term Memory  (LSTM)}
+%  \begin{itemize}
+%    \item The LSTM provides a different way of dealing with vanishing gradients and modelling long-term dependencies.
+%    \item A cell state $s^{[t]}$ is introduced, which can be manipulated by different \textbf{gates} to forget old information, add new information and read information out of it.
+%    \item Each gate is a vector of the same size as the cell state and each element of the vector is a
+%number between $0$ and $1$, with $0$ meaning \enquote{let nothing pass} and 1 \enquote{let everything pass}.
+%    \item The gates are computed as a parametrized function of the previous hidden state $z^{[t-1]}$ and the input at the current time step $x^{[t]}$ multiplied by \textbf{gate-specific weights} and typically squashed through a sigmoid function into the range of $[0, 1]$.
+%    \item The cell state allows the recurrent neural network to keep information over long time ranges. %and therefore overcome the vanishing gradient problem.
+%  \end{itemize}
+%\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Long Short-Term Memory (LSTM)}
+
+\frame{
+\frametitle{Long Short-Term Memory (LSTM)}
+The LSTM provides a way of dealing with vanishing gradients and modelling long-term dependencies.
+  \begin{figure}
+    \only<1>{\includegraphics[width=8.5cm]{plots/rnnvslstm3.png}}%
+    \only<2>{\includegraphics[width=8.5cm]{plots/rnnvslstm4.png}}%
+  \end{figure}
+  \begin{itemize}
+    \only<1-2>{\item Until now, we simply computed $$\bm{z}^{[t]} = \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})$$}
+    \only<2>{\item Now we introduce the LSTM cell (which is a small network on its own). }
+  \end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% \frametitle{Long Short-Term Memory - LSTM}
+%   \begin{itemize}
+%     \item[]
+%   \end{itemize}
+%   \begin{minipage}{0.51\textwidth}
+%     \only<1-2>{\includegraphics[width=2.5cm]{plots/vanilla_rnn.png}}%
+%     \begin{itemize}
+%       \only<1-2>{\item Untill now, we simply computed $$z^{[t]} = \sigma(b + Wz^{[t-1]} + Ux^{[t]})$$}
+%       \only<2>{\item Now we introduce the lstm cell (this is where the fun begins).}
+%     \end{itemize}
+%   \end{minipage}\hfill
+%   \vspace{-0.7cm}
+%   \begin{minipage}{0.41\textwidth}
+%     \only<1>{\includegraphics[width=2.5cm]{plots/vanilla_lstm1.png}}%
+%     \only<2>{\includegraphics[width=2.5cm]{plots/vanilla_lstm2.png}}%
+%     \begin{itemize}
+%       \only<1-2>{\item[] \textcolor{white}{with} $$\textcolor{white}{z^{(t)} = \sigma(b + Wz^{[t-1]} + Ux^{[t]})}$$}
+%       \only<2>{\item[] \textcolor{white}{Now we introduce the lstm cell (this is where the fun begins).}}
+%     \end{itemize}
+%   \end{minipage}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Long Short-Term Memory (LSTM)}
+
+  \center
+  \only<1>{\includegraphics[width=4.75cm]{plots/lstm1a.png}}%
+  \only<2>{\includegraphics[width=4.75cm]{plots/lstm1b.png}}%
+  \only<3-4>{\includegraphics[width=4.75cm]{plots/lstm1c.png}}%
+  \only<5-7>{\includegraphics[width=4.75cm]{plots/lstm3b.png}}%
+  \only<8-9>{\includegraphics[width=4.75cm]{plots/lstm4.png}}%
+  
+  \begin{itemize}
+
+    \only<1>{\item The key to LSTMs is the \textbf{cell state} $\bm{s}^{[t]}$.}
+    \only<1>{%\item The LSTM does have the ability to remove or add information to the cell state, carefully regulated by structures called gates.
+    \item $\bm{s}^{[t]}$ can be manipulated by different \textbf{gates} to forget old information, add new information, and read information out of it.}
+\only<1>{\item Each gate is a vector of the same size as the $\bm{s}^{[t]}$ with elements between 0 ("let nothing pass") and 1 ("let everything pass").
+}
+    
+    \only<2>{\item \textbf{Forget gate}  $\bm{f}^{[t]}$: indicates which information of the old cell state we should forget. 
+    \item Intuition: Think of a model trying to predict the next word based on all the previous ones. The cell state might include the gender of the present subject, so that the correct pronouns can be used. When we now see a new subject, we want to forget the gender of the old one.}
+    \only<3>{\item We obtain the forget gate by computing 
+%    $$f^{[t]} = \sigma(b^{(f)} + V^{(f)T} z^{[t-1]} + W^{(f)T} x^{[t]})$$
+    $$\bm{f}^{[t]} = \sigma(\bm{b}_{f} + \bm{V}_f^\top \bm{z}^{[t-1]} + \bm{W}_f^\top \xv^{[t]})$$}
+    \only<3>{\item $\sigma()$ is  a sigmoid, squashing the values to $[0,1]$, and $\bm{V}_f, \bm{W}_f$ are forget gate specific weights.}
+    \only<4>{\item To compute the cell state $\bm{s}^{[t]}$, the first step is to multiply (element-wise) the previous cell state $\bm{s}^{[t-1]}$ by the forget gate $\bm{f}^{[t]}$. $$\bm{f}^{[t]} \odot \bm{s}^{[t-1]}, \text{ with } \bm{f}^{[t]} \in [0,1]$$}
+    \only<5>{\item \textbf{Input gate} $i^{[t]}$: indicates which new information should be added to  $\bm{s}^{[t]}$.}
+    %\only<5>{\item We again incorporate the information in the previous hidden state $z^{[t-1]}$.}
+    \only<5>{\item Intuition: In our example, this is where we add the new information about the gender of the new subject.}
+   % \only<6>{\item The cell recurrent connection needs a function whose derivatives sustain for a long span to address the vanishing gradient problem.}
+    \only<6>{\item The new information is given by $\tilde{\bm{s}}^{[t]} = \text{tanh}(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]}) \in [-1, 1]$.}
+    \only<6>{\item The input gate is given by $\bm{i}^{[t]} = \sigma(\bm{b}_i + \bm{V}_i^\top \bm{z}^{[t-1]} + \bm{W}_i^\top \xv^{[t]}) \in [0,1]$.}
+   \only<6>{\item $\bm{W}$ and $\bm{V}$ are weights of the new information, $\bm{W}_i$ and $\bm{V}_i$ the weights of the input gate.}
+    \only<7>{\item Now we can finally compute the cell state $\bm{s}^{[t]}$: 
+    $$\bm{s}^{[t]} = \bm{f}^{[t]} \odot \bm{s}^{[t-1]} + \bm{i}^{[t]} \odot \tilde{\bm{s}}^{[t]}$$}
+    %\only<7>{\item[] By the way: this does not mean that our lstm is complete! }
+   % \only<8>{\item In order to complete the lstm cell, one final ingredient is missing.}
+   % \only<8>{\item The output of the LSTM cell will be a filtered version of our cell state.}
+    \only<8>{\item %First, we run a sigmoid layer which decides what parts of the cell
+   \textbf{Output gate} $\bm{q}^{[t]}$:  Indicates which information form the cell state is filtered.
+   \item It is given by $\bm{q}^{[t]} = \sigma(\bm{b}_q + \bm{V}_q^\top \bm{z}^{[t-1]} + \bm{W}_q^\top \yv^{[t]})$, with specific weights $\bm{W}_q, \bm{V}_q$.}
+    %\only<8>{\item }
+    \only<9>{\item Finally, the new state $\bm{z}^{[t]}$ of the LSTM is a function of the cell state, multiplied by the output gate: $$\bm{z}^{[t]} = \bm{q}^{[t]} \odot \text{tanh}(\bm{s}^{[t]})$$}
+
+  \end{itemize}
+
+}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gated Recurrent Units (GRU)}
+\frame{
+\frametitle{Gated Recurrent Units (GRU)}
+
+   \begin{itemize}
+     \item The key distinction between regular RNNs and GRUs is that the latter support gating of the hidden state. 
+     \item Here, we have dedicated mechanisms for when a hidden state should be updated and also when it should be reset.
+     \item These mechanisms are learned and they address the listed concerns: 
+     \begin{itemize}
+           \item avoid the vanishing/exploding gradient problem which comes with a standard recurrent neural network.
+           \item GRU's are able to solve the vanishing gradient problem by using an update gate and a reset gate. 
+           \item the update gate controls information that flows into memory, and the reset gate controls the information that flows out of memory. 
+     \end{itemize}
+   \end{itemize}
+   
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Reset Gates and Update Gates}
+    \begin{figure}
+      \centering
+      \scalebox{0.5}{\includegraphics{plots/gru_1.png}}
+      \caption{\footnotesize{Reset and update gate in a GRU.}}
+  \end{figure}
+  \begin{itemize}
+    \item as shown by Figure1, given the current time step input $X_t$ and the hidden state of the previous time step $H_{t-1}$. The output is given by a fully connected layer with a sigmoid as its activation function.
+    \item For a given time step $t$ , the minibatch input is $\mathbf{X}_t \in \mathbb{R}^{n \times d}$ (number of examples:$n$, number of inputs:$d$) and the hidden state of the last time step is $\mathbf{H}_{t-1} \in \mathbb{R}^{n \times h}$(number of hidden states:$h$). Then, the reset gate $\mathbf{R}_t \in \mathbb{R}^{n \times h}$ and update gate $\mathbf{Z}_t \in \mathbb{R}^{n \times h}$ are computed as follows:
+   \item $\mathbf{R}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xr} + \mathbf{H}_{t-1} \mathbf{W}_{hr} + \mathbf{b}_r)$
+   \item $\mathbf{Z}_t = \sigma(\mathbf{X}_t \mathbf{W}_{xz} + \mathbf{H}_{t-1} \mathbf{W}_{hz} + \mathbf{b}_z)$
+    \item Here,$\mathbf{W}_{xr}, \mathbf{W}_{xz} \in \mathbb{R}^{d \times h}$ and $\mathbf{W}_{hr}, \mathbf{W}_{hz} \in \mathbb{R}^{h \times h}$ are weight parameters and $\mathbf{b}_r, \mathbf{b}_z \in \mathbb{R}^{1 \times h}$ are biases. We use a sigmoid function to transform input values to the interval $(0,1)$.
+  \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Reset Gates in Action}
+     \begin{figure}
+      \centering
+      \scalebox{0.6}{\includegraphics{plots/gru_2.png}}
+      \caption{\footnotesize{Candidate hidden state computation in a GRU. The multiplication is carried out elementwise.}}
+  \end{figure}
+  \begin{itemize}
+   \item We begin by integrating the reset gate with a regular latent state updating mechanism. In a conventional RNN, we would have an hidden state update of the form: 
+   \item $\mathbf{H}_t = \tanh(\mathbf{X}_t \mathbf{W}_{xh} + \mathbf{H}_{t-1}\mathbf{W}_{hh} + \mathbf{b}_h).$
+   %\item If we want to be able to reduce the influence of the previous states we can multiply $H_{t−1}$ with $R_t$ elementwise. 
+  % Whenever the entries in the reset gate $R_t$ are close to 1, we recover a conventional RNN. For all entries of the reset gate $R_t$ that are close to 0, the hidden state is the result of an MLP with $X_t$ as input. Any pre-existing hidden state is thus reset to defaults. This leads to the following candidate hidden state (it is a candidate since we still need to incorporate the action of the update gate).
+  \item  $\tilde{\mathbf{H}}_t = \tanh(\mathbf{X}_t \mathbf{W}_{xh} + \left(\mathbf{R}_t \odot \mathbf{H}_{t-1}\right) \mathbf{W}_{hh} + \mathbf{b}_h).$
+  \end{itemize}
+ 
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Update Gates in Action}
+  \begin{itemize}
+  \item Next we need to incorporate the effect of the update gate $Z_t$.
+  %\item This determines the extent to which the new state $H_t$ is just the old state $H_{t-1}$ and by how much the new candidate state $\tilde{\mathbf{H}}_t$ is used. 
+  \item The gating variable $Z_t$ can be used for this purpose, simply by taking elementwise convex combinations between both candidates. 
+  \item This leads to the final update equation for the GRU.
+  \item $\mathbf{H}_t = \mathbf{Z}_t \odot \mathbf{H}_{t-1}  + (1 - \mathbf{Z}_t) \odot \tilde{\mathbf{H}}_t.$
+  \end{itemize}
+   \begin{figure}
+      \centering
+      \scalebox{0.6}{\includegraphics{plots/gru_3.png}}
+      \caption{\footnotesize{Hidden state computation in a GRU. As before, the multiplication is carried out elementwise.}}
+  \end{figure}
+  
+  These designs can help us to eleminate the vanishing gradient problem in RNNs and capture better dependencies for time series with large time step distances. In summary, GRUs have the following two distinguishing features:
+  \begin{itemize}
+    \item Reset gates help capture short-term dependencies in time series.
+    \item Update gates help capture long-term dependencies in time series.
+  \end{itemize}
+
+  \begin{figure}
+      \centering
+      \scalebox{0.6}{\includegraphics{plots/lstmvsgru.png}}
+      \caption{\footnotesize{LSTM vs GRU}}
+  \end{figure}
+
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bidirectional RNNs}
+
+
+\begin{vbframe}{Bidirectional RNNs}
+  \begin{itemize}
+    \item Another generalization of the simple RNN are bidirectional RNNs.
+    \item These allow us to process sequential data depending on both past and future inputs, e.g. an application predicting missing words, which probably depend on both preceding and following words.
+    \item One RNN processes inputs in the forward direction from $x^{[1]}$ to $x^{[T]}$ computing a sequence of hidden states $(z^{[1]}, \dots, z^{(T)})$, another RNN in the backward direction from $x^{[T]}$ to $x^{[1]}$ computing hidden states $(g^{[T]}, \dots, g^{[1]})$
+    \item Predictions are then based on both hidden states, which could be \textbf{concatenated}.
+    \item With connections going back in time, the whole input sequence must be known in advance
+to train and infer from the model.
+    \item Bidirectional RNNs are often used for the encoding of a sequence in machine translation.
+  \end{itemize}
+\framebreak  
+\textbf{Computational graph of an bidirectional RNN:}
+  \begin{figure}
+    \includegraphics[width=4.5cm]{plots/bi_rnn.png}
+    \caption{A bidirectional RNN consists of a forward RNN processing inputs from left to right
+and a backward RNN processing inputs backwards in time.}
+  \end{figure} 
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{RNN with output recurrence}
+%   \begin{figure}
+%     \includegraphics[width=5.5cm]{plots/output_recurrence.png}
+%   \end{figure}
+%   \begin{itemize}
+%     \item Such an RNN is less powerful (can express a smaller set of functions).
+%     \item However, it may be easier to train because each time step it can be trained in isolation from the others, allowing greater parallelization during training.
+%   \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Teacher Forcing}
+%   \begin{itemize}
+%     \item Teacher forcing is a procedure that emerges from the maximum likelihood criterion, in which during training the model receives the ground truth output $y^{[t]}$ as input at time $[t + 1]$.
+%   \end{itemize}
+%   \begin{minipage}{0.51\textwidth}
+%     \begin{figure}
+%       \includegraphics[width=3.8cm]{plots/teacher_forcing_train.png}
+%     \end{figure}  
+%     \begin{itemize}
+%       \item At training time
+%     \end{itemize}
+%   \end{minipage}
+%   \begin{minipage}{0.45\textwidth}
+%     \begin{figure}
+%       \includegraphics[width=3.8cm]{plots/teacher_forcing_test.png}
+%     \end{figure} 
+%     \begin{itemize}
+%       \item At testing time
+%     \end{itemize}
+%   \end{minipage}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{One-output RNN}
+%   \begin{itemize}
+%     \item Recurrent Neural Networks do not need to have an output at each time step, instead they can
+% only have outputs at a few time steps.
+%     \item A common variant is an RNN with only one output at the end of the sequence.
+%     \item Information from the whole input sequence is incorporated into the final hidden state, which is then used to create an output, e.g. a sentiment (\enquote{positive}, \enquote{neutral} or \enquote{negative}) for a movie review.
+%     \item  Other applications of such an architecture are sequence labeling, e.g. classify an article into different categories (\enquote{sports}, \enquote{politics} etc.)
+%   \end{itemize}
+% \framebreak
+%   \begin{figure}
+%     \includegraphics[width=6.5cm]{plots/one_output_rnn.png}
+%     \caption{A Recurrent Neural Network with one output at the end of the sequence. Such a
+% model can be used for sentiment analysis ($<$eos$>$ = \enquote{end of sequence}).}
+%   \end{figure}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame} {Stacked RNNs}
+% \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Recursive neural networks}
+%   \begin{itemize}
+%     \item Recursive Neural Networks are a generalization of Recurrent Neural Networks. 
+%     \item A tree structure instead of a chain structure is used for the computations of the RNN.
+%     \item A fixed set of weights is repeatedly applied to the nodes of the tree.
+%     \item Recursive neural networks have been successfully applied to sentiment analysis!
+%   \end{itemize}
+% \framebreak  
+%   \begin{figure}
+%     \includegraphics[width=5.8cm]{plots/recursive_neural_network.png}
+%     \caption{A recursive neural network}
+%   \end{figure} 
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Michael Nguyen, 2018]{1} Michael Nguyen (2018)
+\newblock Illustrated Guide to LSTM's and GRU's: A step by step explanation
+newblock \emph{\url{https://towardsdatascience.com/illustrated-guide-to-lstms-and-gru-s-a-step-by-step-explanation-44e9eb85bf21}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture

@@ -1,0 +1,27 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+
+\lecturechapter{1}{Chaptertitle}
+\lecture{Fortgeschrittene Computerintensive Methoden}
+
+\begin{vbframe} %frame with breaks and verbatim
+
+\end{vbframe}
+
+\endlecture
+
+
+
+
+
+
+
+

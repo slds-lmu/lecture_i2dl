@@ -1,0 +1,214 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+@
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{10}{LSTMs and GRUs}
+\lecture{Deeplearning}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{vbframe}{long short-term memory  (LSTM)}
+%  \begin{itemize}
+%    \item The LSTM provides a different way of dealing with vanishing gradients and modelling long-term dependencies.
+%    \item A cell state $s^{[t]}$ is introduced, which can be manipulated by different \textbf{gates} to forget old information, add new information and read information out of it.
+%    \item Each gate is a vector of the same size as the cell state and each element of the vector is a
+%number between $0$ and $1$, with $0$ meaning \enquote{let nothing pass} and 1 \enquote{let everything pass}.
+%    \item The gates are computed as a parametrized function of the previous hidden state $z^{[t-1]}$ and the input at the current time step $x^{[t]}$ multiplied by \textbf{gate-specific weights} and typically squashed through a sigmoid function into the range of $[0, 1]$.
+%    \item The cell state allows the recurrent neural network to keep information over long time ranges. %and therefore overcome the vanishing gradient problem.
+%  \end{itemize}
+%\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{long short-term memory (LSTM)}
+The LSTM provides a way of dealing with vanishing gradients and modelling long-term dependencies.
+  \begin{figure}
+    \only<1>{\includegraphics[width=8.5cm]{plots/rnnvslstm3.png}}%
+    \only<2>{\includegraphics[width=8.5cm]{plots/rnnvslstm4.png}}%
+  \end{figure}
+  \begin{itemize}
+    \only<1-2>{\item Until now, we simply computed $$\bm{z}^{[t]} = \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})$$}
+    \only<2>{\item Now we introduce the LSTM cell (which is a small network on its own). }
+  \end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% \frametitle{long short-term memory - LSTM}
+%   \begin{itemize}
+%     \item[]
+%   \end{itemize}
+%   \begin{minipage}{0.51\textwidth}
+%     \only<1-2>{\includegraphics[width=2.5cm]{plots/vanilla_rnn.png}}%
+%     \begin{itemize}
+%       \only<1-2>{\item Untill now, we simply computed $$z^{[t]} = \sigma(b + Wz^{[t-1]} + Ux^{[t]})$$}
+%       \only<2>{\item Now we introduce the lstm cell (this is where the fun begins).}
+%     \end{itemize}
+%   \end{minipage}\hfill
+%   \vspace{-0.7cm}
+%   \begin{minipage}{0.41\textwidth}
+%     \only<1>{\includegraphics[width=2.5cm]{plots/vanilla_lstm1.png}}%
+%     \only<2>{\includegraphics[width=2.5cm]{plots/vanilla_lstm2.png}}%
+%     \begin{itemize}
+%       \only<1-2>{\item[] \textcolor{white}{with} $$\textcolor{white}{z^{(t)} = \sigma(b + Wz^{[t-1]} + Ux^{[t]})}$$}
+%       \only<2>{\item[] \textcolor{white}{Now we introduce the lstm cell (this is where the fun begins).}}
+%     \end{itemize}
+%   \end{minipage}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{long short-term memory (LSTM)}
+
+  \center
+  \only<1>{\includegraphics[width=4.75cm]{plots/lstm1a.png}}%
+  \only<2>{\includegraphics[width=4.75cm]{plots/lstm1b.png}}%
+  \only<3-4>{\includegraphics[width=4.75cm]{plots/lstm1c.png}}%
+  \only<5-7>{\includegraphics[width=4.75cm]{plots/lstm3b.png}}%
+  \only<8-9>{\includegraphics[width=4.75cm]{plots/lstm4.png}}%
+  
+  \begin{itemize}
+
+    \only<1>{\item The key to LSTMs is the \textbf{cell state} $\bm{s}^{[t]}$.}
+    \only<1>{%\item The LSTM does have the ability to remove or add information to the cell state, carefully regulated by structures called gates.
+    \item $\bm{s}^{[t]}$ can be manipulated by different \textbf{gates} to forget old information, add new information, and read information out of it.}
+\only<1>{\item Each gate is a vector of the same size as the $\bm{s}^{[t]}$ with elements between 0 ("let nothing pass") and 1 ("let everything pass").
+}
+    
+    \only<2>{\item \textbf{Forget gate}  $\bm{f}^{[t]}$: indicates which information of the old cell state we should forget. 
+    \item Intuition: Think of a model trying to predict the next word based on all the previous ones. The cell state might include the gender of the present subject, so that the correct pronouns can be used. When we now see a new subject, we want to forget the gender of the old one.}
+    \only<3>{\item We obtain the forget gate by computing 
+%    $$f^{[t]} = \sigma(b^{(f)} + V^{(f)T} z^{[t-1]} + W^{(f)T} x^{[t]})$$
+    $$\bm{f}^{[t]} = \sigma(\bm{b}_{f} + \bm{V}_f^\top \bm{z}^{[t-1]} + \bm{W}_f^\top \xv^{[t]})$$}
+    \only<3>{\item $\sigma()$ is  a sigmoid, squashing the values to $[0,1]$, and $\bm{V}_f, \bm{W}_f$ are forget gate specific weights.}
+    \only<4>{\item To compute the cell state $\bm{s}^{[t]}$, the first step is to multiply (element-wise) the previous cell state $\bm{s}^{[t-1]}$ by the forget gate $\bm{f}^{[t]}$. $$\bm{f}^{[t]} \odot \bm{s}^{[t-1]}, \text{ with } \bm{f}^{[t]} \in [0,1]$$}
+    \only<5>{\item \textbf{Input gate} $i^{[t]}$: indicates which new information should be added to  $\bm{s}^{[t]}$.}
+    %\only<5>{\item We again incorporate the information in the previous hidden state $z^{[t-1]}$.}
+    \only<5>{\item Intuition: In our example, this is where we add the new information about the gender of the new subject.}
+   % \only<6>{\item The cell recurrent connection needs a function whose derivatives sustain for a long span to address the vanishing gradient problem.}
+    \only<6>{\item The new information is given by $\tilde{\bm{s}}^{[t]} = \text{tanh}(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]}) \in [-1, 1]$.}
+    \only<6>{\item The input gate is given by $\bm{i}^{[t]} = \sigma(\bm{b}_i + \bm{V}_i^\top \bm{z}^{[t-1]} + \bm{W}_i^\top \xv^{[t]}) \in [0,1]$.}
+   \only<6>{\item $\bm{W}$ and $\bm{V}$ are weights of the new information, $\bm{W}_i$ and $\bm{V}_i$ the weights of the input gate.}
+    \only<7>{\item Now we can finally compute the cell state $\bm{s}^{[t]}$: 
+    $$\bm{s}^{[t]} = \bm{f}^{[t]} \odot \bm{s}^{[t-1]} + \bm{i}^{[t]} \odot \tilde{\bm{s}}^{[t]}$$}
+    %\only<7>{\item[] By the way: this does not mean that our lstm is complete! }
+   % \only<8>{\item In order to complete the lstm cell, one final ingredient is missing.}
+   % \only<8>{\item The output of the LSTM cell will be a filtered version of our cell state.}
+    \only<8>{\item %First, we run a sigmoid layer which decides what parts of the cell
+   \textbf{Output gate} $\bm{q}^{[t]}$:  Indicates which information form the cell state is filtered.
+   \item It is given by $\bm{q}^{[t]} = \sigma(\bm{b}_q + \bm{V}_q^\top \bm{z}^{[t-1]} + \bm{W}_q^\top \yv^{[t]})$, with specific weights $\bm{W}_q, \bm{V}_q$.}
+    %\only<8>{\item }
+    \only<9>{\item Finally, the new state $\bm{z}^{[t]}$ of the LSTM is a function of the cell state, multiplied by the output gate: $$\bm{z}^{[t]} = \bm{q}^{[t]} \odot \text{tanh}(\bm{s}^{[t]})$$}
+
+  \end{itemize}
+
+}
+
+\begin{frame} {Gated Recurrent Unit (GRU)}
+A popular alternative to LSTM is the Gated Recurrent Unit (GRU). Its performance can match and sometimes exceed that of an LSTM.
+  \begin{figure}
+    \scalebox{1}{\includegraphics{plots/gru.png}}
+    \tiny{\\Credit: Michael Nguyen}
+    \caption{\footnotesize A GRU has fewer gates and is faster is to train.}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{RNN with output recurrence}
+%   \begin{figure}
+%     \includegraphics[width=5.5cm]{plots/output_recurrence.png}
+%   \end{figure}
+%   \begin{itemize}
+%     \item Such an RNN is less powerful (can express a smaller set of functions).
+%     \item However, it may be easier to train because each time step it can be trained in isolation from the others, allowing greater parallelization during training.
+%   \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Teacher Forcing}
+%   \begin{itemize}
+%     \item Teacher forcing is a procedure that emerges from the maximum likelihood criterion, in which during training the model receives the ground truth output $y^{[t]}$ as input at time $[t + 1]$.
+%   \end{itemize}
+%   \begin{minipage}{0.51\textwidth}
+%     \begin{figure}
+%       \includegraphics[width=3.8cm]{plots/teacher_forcing_train.png}
+%     \end{figure}  
+%     \begin{itemize}
+%       \item At training time
+%     \end{itemize}
+%   \end{minipage}
+%   \begin{minipage}{0.45\textwidth}
+%     \begin{figure}
+%       \includegraphics[width=3.8cm]{plots/teacher_forcing_test.png}
+%     \end{figure} 
+%     \begin{itemize}
+%       \item At testing time
+%     \end{itemize}
+%   \end{minipage}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{One-output RNN}
+%   \begin{itemize}
+%     \item Recurrent Neural Networks do not need to have an output at each time step, instead they can
+% only have outputs at a few time steps.
+%     \item A common variant is an RNN with only one output at the end of the sequence.
+%     \item Information from the whole input sequence is incorporated into the final hidden state, which is then used to create an output, e.g. a sentiment (\enquote{positive}, \enquote{neutral} or \enquote{negative}) for a movie review.
+%     \item  Other applications of such an architecture are sequence labeling, e.g. classify an article into different categories (\enquote{sports}, \enquote{politics} etc.)
+%   \end{itemize}
+% \framebreak
+%   \begin{figure}
+%     \includegraphics[width=6.5cm]{plots/one_output_rnn.png}
+%     \caption{A Recurrent Neural Network with one output at the end of the sequence. Such a
+% model can be used for sentiment analysis ($<$eos$>$ = \enquote{end of sequence}).}
+%   \end{figure}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame} {Stacked RNNs}
+% \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Recursive neural networks}
+%   \begin{itemize}
+%     \item Recursive Neural Networks are a generalization of Recurrent Neural Networks. 
+%     \item A tree structure instead of a chain structure is used for the computations of the RNN.
+%     \item A fixed set of weights is repeatedly applied to the nodes of the tree.
+%     \item Recursive neural networks have been successfully applied to sentiment analysis!
+%   \end{itemize}
+% \framebreak  
+%   \begin{figure}
+%     \includegraphics[width=5.8cm]{plots/recursive_neural_network.png}
+%     \caption{A recursive neural network}
+%   \end{figure} 
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Michael Nguyen, 2018]{1} Michael Nguyen (2018)
+\newblock Illustrated Guide to LSTM's and GRU's: A step by step explanation
+newblock \emph{\url{https://towardsdatascience.com/illustrated-guide-to-lstms-and-gru-s-a-step-by-step-explanation-44e9eb85bf21}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture

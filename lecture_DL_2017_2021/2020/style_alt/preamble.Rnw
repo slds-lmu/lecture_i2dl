@@ -1,0 +1,284 @@
+\documentclass[11pt,compress,t,notes=noshow]{beamer}
+
+\usepackage[english]{babel}
+
+\usepackage{dsfont}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{csquotes}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{enumerate}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{psfrag}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{eqnarray}
+\usepackage{arydshln}
+\usepackage{tabularx}
+\usepackage{placeins}
+\usepackage{tikz}
+\usepackage{setspace}
+\usetikzlibrary{shapes,arrows,automata,positioning,calc}
+\usepackage{subfig}
+\usepackage{siunitx}
+\usepackage{hyperref}
+
+% math spaces
+\newcommand{\N}{\mathds{N}} % naturals
+\newcommand{\Z}{\mathds{Z}} % integers
+\newcommand{\Q}{\mathds{Q}} % rationals
+\newcommand{\R}{\mathds{R}} % reals
+\newcommand{\C}{\mathds{C}} % complex
+\newcommand{\HS}{\mathcal{H}}  % hilbertspace
+
+% basic math stuff
+\newcommand{\fx}{f(x)} %f(x)
+\newcommand{\fhat}{\hat{f}} %f(x) hat
+\def\argmax{\mathop{\sf arg\,max}} % argmax
+\def\argmin{\mathop{\sf arg\,min}} % argmin
+\newcommand{\sign}{\operatorname{sign}} % signum
+\newcommand{\I}{\mathbb{I}} % indicator
+\newcommand{\order}{\mathcal{O}} % order
+\newcommand{\fp}[2]{\frac{\partial #1}{\partial #2}} % partial derivative
+\newcommand{\continuous}{\mathcal{C}} %space of continuous functions
+\newcommand{\distas}[1]{\overset{#1}{\sim}}
+
+% linear algebra
+\newcommand{\one}{\boldsymbol{1}} % unitvector
+\newcommand{\id}{\mathrm{I}}      %identity
+\newcommand{\diag}{\operatorname{diag}} %diagonal
+\newcommand{\trace}{\operatorname{tr}} % trace
+\newcommand{\spn}{\operatorname{span}} % span
+\newcommand{\scp}[2]{\left\langle #1, #2 \right\rangle} % scalarproduct 
+
+% basic probability + stats 
+\renewcommand{\P}{\mathds{P}} % probability
+\newcommand{\E}{\mathds{E}} % expectation
+\newcommand{\var}{\mathsf{Var}} % variance
+\newcommand{\cov}{\mathsf{Cov}} % covariance
+\newcommand{\corr}{\mathsf{Corr}} % correlation
+\newcommand{\normal}{\mathcal{N}} % N of the normal distribution
+\newcommand{\yhat}{\hat{y}} %y hat for prediction of target
+\newcommand{\phat}{\hat{p}} %p hat for predicted probability in binary classif
+
+% machine learning
+\newcommand{\targets}{y = (y_1,\ldots ,y_K)}
+\newcommand{\inputs}{x = (x_1,\dots, x_p)}
+\newcommand{\risk}{\mathcal{R}} % risk function
+\newcommand{\sv}{\operatorname{SV}} % supportvectors
+\newcommand{\nset}{\{1, \ldots, n\}} % set from 1 to n
+\newcommand{\pset}{\{1, \ldots, p\}} % set from 1 to p
+\newcommand{\D}{\{ (x_1, y_1), \ldots, (x_n,  y_n)\}} % data
+\newcommand{\Dtrain}{D_{\text{train}}} % training set
+\newcommand{\Dtest}{D_{\text{test}}} % test set
+\newcommand{\Lxy}{L(y, f(x))} %loss %FIXME
+\newcommand{\Xspace}{\mathcal{X}}
+\newcommand{\Yspace}{\mathcal{Y}}
+\newcommand{\Hspace}{\mathcal{H}}
+\newcommand{\LS}{\mathfrak{L}}
+\newcommand{\TS}{\mathfrak{T}}
+\newcommand{\neurons}{z_1,\dots,z_M} % vector of neurons
+\newcommand{\costs}{\mathcal{C}} % costs
+\newcommand{\Celite}{\theta^*} % elite configurations
+\newcommand{\instances}{\mathcal{I}} % sequence of instances
+\newcommand{\budget}{\mathcal{B}} % computational budget
+\newcommand{\errtrain}{\text{err}_{\text{train}}} % training error
+\newcommand{\errtest}{\text{err}_{\text{test}}} % training error
+\newcommand{\errexp}{\overline{\text{err}_{\text{test}}}} % training error
+
+% deep learning
+
+
+% basic latex stuff
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}} %fontstyle for R packages
+\newcommand{\lz}{\vspace{0.5cm}} %vertical space
+\newcommand{\mat}[1]{ %short pmatrix command
+  \begin{pmatrix}
+    #1
+  \end{pmatrix}
+}
+\newcommand{\oneliner}[1] % Oneliner for important statements
+{\begin{block}{}\begin{center}\begin{Large}#1\end{Large}\end{center}\end{block}}
+
+
+
+%new environments
+
+\newenvironment{vbframe}  %frame with breaks and verbatim
+{
+ \begin{frame}[containsverbatim,allowframebreaks]
+}
+{
+\end{frame}
+}
+
+\newenvironment{vframe}  %frame with verbatim without breaks (to avoid numbering one slided frames)
+{
+ \begin{frame}[containsverbatim]
+}
+{
+\end{frame}
+}
+
+\newenvironment{blocki}[1]   % itemize block
+{
+ \begin{block}{#1}\begin{itemize}
+}
+{
+\end{itemize}\end{block}
+}
+
+\newenvironment{fragileframe}[2]{  %fragile frame with framebreaks
+\begin{frame}[allowframebreaks, fragile, environment = fragileframe]
+\frametitle{#1}
+#2}
+{\end{frame}}
+
+
+\newcommand{\myframe}[2]{  %short for frame with framebreaks
+\begin{frame}[allowframebreaks]
+\frametitle{#1}
+#2
+\end{frame}}
+
+
+
+% ???? remove this 
+% \newcommand{\LS}{\mathfrak{L}}
+% \newcommand{\TS}{\mathfrak{T}}
+% \newcommand{\bmat}{\begin{pmatrix}}
+% \newcommand{\emat}{\end{pmatrix}}
+% \newcommand{\const}{\mathop{const}}
+% \newcommand{\dist}{\operatorname{dist}}
+% \newcommand{\D}{\displaystyle}
+%\newcommand{\op}[1]{\operatorname{#1}}
+
+%\usetheme{lmu-lecture}
+\usepackage{../style/lmu-lecture}
+
+\let\code=\texttt
+\let\proglang=\textsf
+
+\setkeys{Gin}{width=0.9\textwidth}
+
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(
+echo=TRUE, dev='pdf', fig.height=5, fig.width=8.5, tidy=FALSE, cache = TRUE
+)
+
+@
+
+<<echo=FALSE, include=FALSE>>=
+library("grid")
+library("coin")
+Colors <- colorspace::rainbow_hcl(3)
+Colors_trans <- apply(rbind(col2rgb(colorspace::rainbow_hcl(3)), alpha = 100, maxColorValue = 255), 2, 
+                      function(x) do.call("rgb", as.list(x)))
+plot_rectangles <- function(obj, x, y, class, depth) {
+  xname <- paste(deparse(substitute(x), 500), collapse = "\n")
+  yname <- paste(deparse(substitute(y), 500), collapse = "\n")
+  grid.newpage()
+  pushViewport(plotViewport(c(5, 4, 2, 2)))
+  pushViewport(dataViewport(x,
+                            y,
+                            name="plotRegion"))
+  grid.points(x, y, pch = 19,
+              gp=gpar(cex=0.5, col = Colors[class]))
+  grid.rect()
+  grid.xaxis()
+  grid.yaxis()
+  grid.text(xname, y=unit(-3, "lines"))
+  grid.text(yname, x=unit(-3, "lines"), rot=90)
+  seekViewport("plotRegion")
+  plot_rect(obj@tree, xname = xname, depth)
+  grid.points(x, y, pch = 19,
+              gp=gpar(cex=0.5, col = Colors[class]))
+}
+
+plot_rect <- function(obj, xname, depth) {
+  if (!missing(depth)) {
+    if (obj$nodeID >= depth) return()
+  }
+  if (obj$psplit$variableName == xname) {
+    x <- unit(rep(obj$psplit$splitpoint, 2), "native")
+    y <- unit(c(0, 1), "npc")
+  } else {
+    x <- unit(c(0, 1), "npc")
+    y <- unit(rep(obj$psplit$splitpoint, 2), "native")
+  }
+  grid.lines(x, y)
+  if (obj$psplit$variableName == xname) {
+    pushViewport(viewport(x = unit(current.viewport()$xscale[1], "native"),
+                          width = x[1] - unit(current.viewport()$xscale[1], "native"),
+                          xscale = c(unit(current.viewport()$xscale[1], "native"), x[1]),
+                          yscale = current.viewport()$yscale,
+                          just = c("left", "center")))
+  } else {
+    pushViewport(viewport(y = unit(current.viewport()$yscale[1], "native"),
+                          height = y[1] - unit(current.viewport()$yscale[1], "native"),
+                          xscale = current.viewport()$xscale,
+                          yscale = c(unit(current.viewport()$yscale[1], "native"), y[1]),
+                          just = c("center", "bottom")))
+  }
+  pred <- ifelse(length(obj$left$prediction) == 1, as.integer(obj$left$prediction > 0.5) + 1, which.max(obj$left$prediction))
+  grid.rect(gp = gpar(fill = "white"))
+  grid.rect(gp = gpar(fill = Colors_trans[pred]))
+  if (!is(obj$left, "TerminalNode")) {
+    plot_rect(obj$left, xname, depth)
+  } 
+  popViewport()
+  if (obj$psplit$variableName == xname) {
+    pushViewport(viewport(x = unit(x[1], "native"),
+                          width = unit(current.viewport()$xscale[2], "native")-x[1],
+                          xscale = c(x[1], unit(current.viewport()$xscale[2], "native")),
+                          yscale = current.viewport()$yscale,
+                          just = c("left", "center")))
+  } else {
+    pushViewport(viewport(y = unit(y[1], "native"),
+                          height = unit(current.viewport()$yscale[2], "native")-y[1],
+                          xscale = current.viewport()$xscale,
+                          yscale = c(y[1], unit(current.viewport()$yscale[2], "native")),
+                            just = c("center", "bottom")))
+  }
+  pred <- ifelse(length(obj$right$prediction) == 1, as.integer(obj$right$prediction > 0.5) + 1, which.max(obj$right$prediction)) 
+  grid.rect(gp = gpar(fill = "white"))
+  grid.rect(gp = gpar(fill = Colors_trans[pred]))
+  if (!is(obj$right, "TerminalNode")) { 
+    plot_rect(obj$right, xname, depth)
+  } 
+  popViewport()
+}
+@ 
+
+
+<<echo=FALSE>>=
+prettyPrint <- function(x, width = 80) {
+  x <- strsplit(x, ", ")[[1]]
+  LENGTH <- cumsum(nchar(x))
+  index <- LENGTH <= width
+  if (sum(!index) > 0) {
+    return(paste(paste(x[index], collapse = ", "),
+                 prettyPrint(paste(x[!index], collapse = ", "), width = width),
+                 sep = ",\n     "))
+  } else {
+    return(paste(x[index], collapse = ", "))
+  }
+}
+@ 
+
+
+\title{Deeplearning}
+\author{Bernd Bischl}
+\institute{Department of Statistics -- LMU Munich}
+\date{WS 2017}
+
+
+
+\begin{document}
+\sloppy
+\end{document}
+

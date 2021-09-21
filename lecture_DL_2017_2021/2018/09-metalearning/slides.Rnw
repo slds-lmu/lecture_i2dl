@@ -1,0 +1,1170 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble_metalrn.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+@
+
+\newcommand{\E}{\mathds{E}}
+
+\lecturechapter{10}{Automatic Parameter Tuning and Architecture Search}
+\lecture{Deeplearning}
+
+\begin{frame}{Machine Learning}
+  \begin{itemize}
+    \item Successful, but requires human labor and expertise
+    \begin{itemize}
+      \item Pre-process data
+      \item Select/ engineer features
+      \item Select a model family
+      \item Optimize hyperparameters (algorithm parameters)
+      \item $\cdots$
+    \end{itemize}
+    \item Deep learning lets us automatically learn features
+    \begin{itemize}
+      \item Automates feature engineering step, with large amount of data
+      \item Even more sensitive to architectures, hyperparameters, $\cdots$
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Automatic Machine Learning}
+  \begin{itemize}
+    \item Can algorithms be trained to automatically build end-to-
+end machine learning systems?
+  \end{itemize}
+  
+  Use machine learning to do better machine learning
+  
+   \begin{itemize}
+    \item Can we turn \\
+   \textit{Solution = data + manual exploration + computation}
+    \item Into \\
+    \textit{Solution = data + computation (x100)}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Automatic Machine Learning}
+\begin{center}
+  \scalebox{0.9}{\includegraphics{plots/autodl.png}}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Automatic Machine Learning}
+  
+  \textbf{Not about automating data scientists}
+  \vspace{3mm}
+    \begin{itemize}
+    \item Efficient exploration of techniques
+    \begin{itemize}
+    \item Automate the tedious aspects (inner loop)
+    \item Make every data scientist a super data scientist
+  \end{itemize}
+    \item Democratisation
+    \begin{itemize}
+    \item Allow individuals, small companies to use machine
+learning effectively (at lower cost)
+\item Open source tools and platforms
+  \end{itemize}
+    \item Data Science
+    \begin{itemize}
+    \item Better understand algorithms, develop better ones
+    \item Self-learning algorithms
+  \end{itemize}
+
+  \end{itemize}
+
+\end{frame}
+  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Machine Learning Pipelines}
+\begin{center}
+  \includegraphics[width = \textwidth]{plots/automl1.png}
+  \end{center}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Automating Machine Learning Pipelines}
+\begin{center}
+  \includegraphics[width = \textwidth]{plots/automl2.png}
+  \end{center}
+  \end{frame}
+  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Automatic Machine Learning: Techniques}
+  \begin{itemize}
+    \item \textbf{Bayesian Optimization:} Intelligently optimize pipelines/ architectures by iteratively choosing better ones
+\item \textbf{Genetic algorithms:} Evolve pipelines/architectures to work better for a given application
+\item \textbf{Meta-learning:} learn from previous applications to predict useful pipelines/ architectures for new problems
+\item \textbf{Transfer Learning:} train models on one problem, then transfer (parts) of good solutions to solve new problems.
+\item \textbf{Reinforcement Learning:} Train many models, use performance as "reward" for certain approaches
+\item \textbf{Combinations of all of these}
+  \end{itemize}
+\end{frame}
+
+\section{Sequential model-based optimization}
+
+\begin{frame}{Expensive Black-Box Optimization}
+  \begin{minipage}{0.33\linewidth}
+  \includegraphics[width = \linewidth]{plots/gears.png}
+  \end{minipage}
+  %
+  \begin{minipage}{0.65\linewidth}
+    \begin{align}
+        y &= f(\boldsymbol{x}) \ , \quad f: \mathbb{X} \rightarrow \mathbb{R} \\
+        \boldsymbol{x}^* &= \argmin\limits_{\boldsymbol{x} \in \mathbb{X}} f(\boldsymbol{x})
+    \end{align}
+    \begin{itemize}
+        \item{$y$}, target value
+        \item{$\boldsymbol{x} \in \mathbb{X} \subset \mathbb{R}^d$}, domain
+        \item{$f(\boldsymbol{x})$} function with considerably long runtime
+        \item{Goal:} Find optimum $\boldsymbol{x}^*$
+    \end{itemize}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Sequential model-based optimization}
+    \begin{itemize}
+      \item Setting: Expensive black-box problem $f: x \rightarrow \mathbb{R} = min!$ 
+      \item Classical problem: Computer simulation with a bunch of control parameters and 
+        performance output; or algorithmic performance on 1 or more problem instances; 
+        we often optimize ML pipelines
+      \item Idea: Let's approximate $f$ via regression!
+    \end{itemize}
+  \begin{block}{Generic MBO Pseudo Code}
+    \begin{itemize}
+      \item \small{Create initial space filling design and evaluate with $f$
+      \item In each iteration:}
+        \begin{itemize}
+          \item \small{Fit regression model on all evaluated points to \\ 
+                predict \fhx~and uncertainty \shx
+          \item Propose point via infill criterion
+            \[ \operatorname{EI}(x)\uparrow \;\Longleftrightarrow\; \fhx \downarrow \; \wedge \; \shx \uparrow \]
+          \item Evaluate proposed point and add to design
+          \item EGO proposes kriging (aka Gaussian Process) and EI\\
+            \textit{Jones 1998, Efficient Global Opt. of Exp. Black-Box Functions}}
+        \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% \begin{frame}{Latin Hypercube Designs}
+% \begin{figure}
+% \centering
+% \includegraphics[height = 4cm]{fig/initdes.png}
+% \end{figure}
+% \begin{itemize}
+% \item Initial design to train first regression model
+% \item Not too small, not too large
+% \item LHS / maximin designs: Min dist between points is maximized
+% \item But: Type of design usually has not the largest effect on MBO, and unequal distances between points
+%   could even be beneficial
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}[fragile]{R package ParamHelpers}
+
+%   \begin{itemize}
+%     \item R package ParamHelpers contains mini-language for param spaces
+%       \url{https://github.com/berndbischl/ParamHelpers}
+%     \item Many param types: num, int, cat, bool, vectors, subordinate
+%     \item Can construct a wide variety of different designs, for all param types
+%     \item Arbitrary value-trafos to work on e.g. logscale
+%     \item Many further operations to program on params and sets  
+%   \end{itemize}
+ 
+%   \begin{lstlisting}
+%   par.set = makeParamSet(
+%     makeDiscreteParam("kernel",
+%       values=c("vanilladot", "rbfdot")),
+%     makeNumericParam("C", lower=-10, upper=1,
+%       trafo=function(x) 2^x),
+%     makeNumericParam("sigma", lower=-10, upper=10,
+%       trafo=function(x) 2^x,
+%       requires=quote(kernel=="rbfdot"))
+%   )
+%   des = generateDesign(n=10, par.set=par.set)
+%   \end{lstlisting}
+% \end{frame}
+
+
+% \begin{frame}{Kriging and local uncertainty prediction}
+ 
+% Model: Zero-mean GP $Y(x)$ with const. trend and cov. kernel $k_\theta(x_1, x_2)$.
+% \begin{itemize}
+% \item $\vecy = (y_1, \ldots, y_n)^T$, $\matK = (k(\vecx_i, \vecx_j))_{i,j=1,\ldots,n}$
+% \item $\kstarx = (k(\vecx_1, \vecx), \ldots, k(\vecx_n, \vecx))^T$
+% \item $\muh = \vecone^T \matK^{-1} \vecy / \vecone^T \matK^{-1} \vecone$ (BLUE)
+% \item Prediction: $ \fhx = E[ Y(x) | Y(x_i) = y_i, i=1, \ldots, n ] = $ \\
+% $\hat{\mu} + \textbf{k}_n(x)^T K^{-1} (\textbf{y} - \hat{\mu} \textbf{1})$
+% \item Uncertainty: $\vhx = Var[ Y(x) | Y(x_i) = y_i, i=1, \ldots, n ] = $\\
+% $ \sigma^{2} - \textbf{k}^T_n(x) K^{-1} \textbf{k}_n(x) + \frac{(1 - \textbf{1}^T K^{-1} \textbf{k}^T_n(x))^2}{\textbf{1}^T K^{-1} \textbf{1}}$
+% \end{itemize}
+ 
+ 
+% \begin{figure}
+% \centering
+% \includegraphics[width = 9cm, height = 4cm]{fig/Grafik2}
+% \end{figure}
+ 
+ 
+% \end{frame}
+
+\begin{frame}{Kriging / GP is a spatial model}
+  \begin{itemize}
+    \item Correlation between outcomes $(y_1, y_2)$ depends on dist of $x_1, x_2$\\
+      E.g. Gaussian covar kernel $k(x_1, x_2) = exp(\frac{-||x_1-x_2||}{2\sigma})$
+    \item Useful smoothness assumption for optimization
+    \item Posterior uncertainty at new $x$ increases with dist to design points  
+    \item Allows to enforce exploration
+    \end{itemize}
+    \begin{figure}
+      \centering
+      \includegraphics[height = 5cm]{plots/gp.png}
+    \end{figure}
+  \end{frame}
+
+  \begin{frame}{Infill Criteria: Expected Improvement}
+\begin{itemize}
+\item Define improvement at $x$ over best visited point 
+      with $y=f_{min}$  as random variable
+      $I(x) = |f_{min} - Y(x)|^+ $ 
+\item For kriging $Y(x) \sim N(\fhx, \vhx)$ (given $x=x$)
+\item Now define $EI(x) = E[ I(x)| x = x ]$
+\item Expectation is integral over normal density starting at $f_{min}$
+\item Alternative: Lower confidence bound (LCB) $\fhx - \lambda\shx$
+\end{itemize}
+Result: $ EI(x) = \left( f_{min} - \fhx \right) \Phi \left( \frac{f_{min} - \fhx)}{\shx} \right) +
+         \shx \phi \left( \frac{f_{min} - \fhx}{\shx} \right) $
+%\[
+%EI(\hat{y}, \hat{s}, f_{min}) = \int^{\infty}_{-\infty} I(y, f_{min})\underbrace{\Phi_{(\hat{y},\hat{s})}(y)}_{PDF(y)} dy = 				\int^{\int_{min}}_{-\infty} (f_{min} - y)\Phi_{(\hat{y},\hat{s})}(y) dy
+%\]		
+\begin{figure}[b]
+\includegraphics[width = \textwidth, height = 3.5cm]{plots/Grafik3}
+\end{figure}
+\end{frame}
+
+% \begin{frame}{Focussearch}
+%     \begin{itemize}
+%       \item EI optimization is multimodal and not that simple
+%       \item But objective is now cheap to evaluate
+%       \item Many different algorithms exist, from gradient-based methods with restarts to 
+%         evolutionary algorithms
+%       \item We use an iterated, focusing random search coined \enquote{focus search}
+%       \item In each iteration a random search is performed
+%       \item We then shrink the constraints of the feasible region towards the best point in the current 
+%         iteration (focusing) and iterate, to enforce local convergence
+%       \item Whole process is restarted a few times
+%       \item Works also for categorical and hierarchical params
+%     \end{itemize}
+% \end{frame}
+
+
+\begin{frame}
+  \begin{figure}[H]
+  \centering %page 1,10
+  \only<1>{\includegraphics[page=1, width=\linewidth]{plots/mbo-example0-1.pdf}}
+  \only<2>{\includegraphics[page=1, width=\linewidth]{plots/mbo-example1-1.pdf}}
+  \only<3>{\includegraphics[page=1, width=\linewidth]{plots/mbo-example2-1.pdf}}
+  \only<4>{\includegraphics[page=1, width=\linewidth]{plots/mbo-example3-1.pdf}}
+  \only<5>{\includegraphics[page=1, width=\linewidth]{plots/mbo-example4-1.pdf}}
+  \only<6>{\includegraphics[page=1, width=\linewidth]{plots/mbo-example20-1.pdf}}
+ \end{figure}
+\end{frame}
+
+
+
+\begin{frame}{mlrMBO: Model-Based Optimization Toolbox}
+\begin{minipage}{0.4\linewidth}
+    \begin{itemize}
+      \item \small{Any regression from mlr
+      \item Arbitrary infill
+      \item Single - or multi-crit
+      \item Multi-point proposal
+      \item Via parallelMap and batchtools
+        runs on many parallel backends and clusters
+      \item Algorithm configuration
+      \item Active research}
+    \end{itemize}
+
+\end{minipage}
+\begin{minipage}{0.55\linewidth}
+    \includegraphics[width = \textwidth]{plots/mlrMBO1.pdf}
+\end{minipage}
+\begin{center}
+    \begin{itemize}
+      \item \small{mlr:
+        \url{https://github.com/mlr-org/mlr}
+      \item mlrMBO:
+        \url{https://github.com/mlr-org/mlrMBO}
+      \item mlrMBO Paper on arXiv:
+        \url{https://arxiv.org/abs/1703.03373}}
+    \end{itemize}
+\end{center}
+\end{frame}
+
+
+% \begin{frame}
+% \frametitle{When to use mlrMBO?}
+% \setlength\tabcolsep{1pt}
+% \begin{columns}
+% \begin{column}{0.6\textwidth}
+% \begin{tabular}{rl}
+% % & \texttt{optim(par, $f(x)$)} is not enough! \\
+% Answer: When & $f(\mathbf x)$ is \emph{expensive}. \\
+% %& \light{($\rightarrow$ that's why GAs won't work!)} \\
+% & $f(\mathbf x)$ is not convex. \\
+% & $f(\mathbf x)$ is noisy. \\
+% & $\mathbf x$ is not only numeric.
+% \end{tabular} \\
+% \vspace{1.5cm}
+% \begin{tabular}{ll}
+% \color{red} \xmark & space filling search methods \\
+% \color{red} \xmark & quasi-newton algorithms \\
+% \color{red} \xmark & evolutionary  algorithms \\
+% \color{green} \cmark & model-based optimization (mlrMBO)
+% \end{tabular}
+% \end{column}
+% \begin{column}{0.39\textwidth}
+%   \begin{figure}
+% \centering %page 1,10
+% \includegraphics[page=1, width=0.75\linewidth, trim =5.5cm 2cm 4cm 1cm]{fig/plot_when_to_use_mbo-1.pdf} \\
+% \includegraphics[page=1, width=0.75\linewidth, trim =5.5cm 2cm 4cm 1cm]{fig/plot_when_to_use_mbo-2.pdf}
+% \end{figure}
+% \end{column}
+% \end{columns}
+
+% %\begin{minipage}{0.7\linewidth}
+
+% %\end{minipage} %
+% %\begin{minipage}{0.25\linewidth}
+
+% %\end{minipage}
+% \end{frame}
+
+
+
+\begin{frame}{Hyperparameter Tuning}
+\vfill
+\includegraphics[width=\textwidth]{plots/res1.png}
+\vfill
+\end{frame}
+
+
+
+\begin{frame}{From Normal SMBO to Hyperparameter Tuning}
+  \begin{itemize}
+    \item Objective function is resampled performance measure
+  % \item Chain mlr operations (e.g. feature filter + ML model) 
+    % so we can jointly optimize complex systems 
+\item Parameter space  $\theta \in \Theta$\\
+      might be discrete and dependent / hierarchical
+\item No derivative for $f(\cdot, \theta)$, black-box
+\item Objective is stochastic / noisy
+\item Objective is expensive to evaluate
+\item In general we face a problem of algorithm configuration:
+\item $\leadsto$ \textcolor{blue}{Usual approaches: racing or model-based / bayesian optimization}
+\end{itemize}
+\end{frame}
+
+\begin{frame} {Evolutionary algorithms}
+  \begin{figure}
+    \centering
+      \scalebox{0.75}{\includegraphics{plots/evo_1.png}}
+  \end{figure}
+  
+  "Breed" new configurations using:
+  \begin{itemize}
+    \item Selection
+    \item Recombination
+    \item Mutation
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Complex Parameter Space}
+\vspace{-0.5cm}
+\begin{figure}[t]
+\center 
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
+                    thick,circ/.style={circle,draw,font=\sffamily\scriptsize},
+                    rect/.style={rectangle,draw,font=\sffamily\scriptsize}]
+  \node[rect] (20) at (3, 4.5) {Parameter Set};
+  \node[circ] (18) at (0, 3.5) {cl.weights};
+  \node[circ]  (1) at (6, 3.5) {learner};
+  \node[rect] (19) at (-0.5, 2) {$2^{[-7,...,7)}$};
+  \node[rect]  (2) at (2, 2) {randomForest};
+  \node[rect]  (3) at (4, 2) {L2 LogReg};
+  \node[rect]  (4) at(6, 2) {svm};
+  \node[circ]  (5) at (0, 0.5) {mtry};
+  \node[circ]  (6) at (2, 0.5) {nodesize};
+  \node[circ]  (7) at (4, 0.5) {cost};
+  \node[circ]  (8) at (6, 0.5) {cost};
+  \node[circ]  (9) at(8, 2) {kernel};
+  \node[rect] (10) at (8.5, 1){radial};
+  \node[rect] (17) at (7, 1){linear};
+  \node[circ] (11) at(8, 0) {$\gamma$};
+  \node[rect] (12) at (-0.5, -1) {$\{0.1p,..., 0.9p\}$};
+  \node[rect] (13) at (2, -1) {$\{1,..., 0.5n\}$};
+  \node[rect] (14) at (4, -1) {$2^{[-15, 15]}$};
+  \node[rect] (15) at (6, -1) {$2^{[-15, 15]}$};
+  \node[rect] (16) at (8, -1) {$2^{[-15, 15]}$};
+  \path[every node/.style={font=\sffamily\small}]
+    (1) edge node {}(2)
+        edge node {}(3)
+        edge node {}(4)
+    (2) edge node {}(5)
+        edge node {}(6)
+    (3) edge node {}(7)
+    (4) edge node {}(8)
+        edge node {}(9)
+    (5) edge node {}(12)
+    (6) edge node {}(13)
+    (7) edge node {}(14)
+    (8) edge node {}(15)
+    (9) edge node {}(10)
+        edge node {}(17)
+    (10) edge node {}(11)
+    (11) edge node {}(16)
+    (18) edge node {}(19)
+    (20) edge node {}(1)
+         edge node {}(18);
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame} {Complex Parameter Space}
+  \begin{figure}
+    \centering
+      \scalebox{0.93}{\includegraphics{plots/complex_DL.png}}
+  \end{figure}
+  
+  \small{Problems: Categorical parameters, hierarchical parameter space, cyclical parameter space...}
+  
+\end{frame}
+
+
+
+
+
+
+% \section{MBO for algorithm configuration}
+
+% \begin{frame}{Overview}
+% \end{frame}
+
+
+% \begin{frame}{Extensions for mixed parameter spaces: Initial design}
+
+% \begin{itemize}
+%   \item In theory: Every DoE technique could be used.
+%   \item Popular choice: Latin Hypercube Sampling (LHS).
+%   \item Unfortunately: LHS is defined for only numerical parameter spaces.
+% \end{itemize}
+
+% \vspace{0.5cm}
+
+% \textbf{LHS for categorical parameters}
+% \begin{itemize}
+%   \item Map the parameter values to uniform intervals in $[0, 1]$.
+% \end{itemize}
+
+
+% \vspace{0.5cm}
+
+% \textbf{LHS for dependent parameters}:\\
+% \textbf{Idea}: Oversampling
+% \begin{itemize}
+%   \item Generate many more valid point as required. \\
+%   \item Remove point with smallest distance until design is small enough. \\
+%   \item Gower distance for mixed parameter spaces.
+% \end{itemize}
+% \end{frame}
+
+% \begin{frame}{From Normal SMBO to Hyperarameter Tuning}
+
+%   \begin{itemize}
+%   \item Initial design: LHS principle can be extended, or just use random
+%   \item Focus search: Can be (easily) extended, as it is based on random search.
+%     To zoom in for categorical parameters we randomly drop a category for each param
+%     which is not present in the currently best configuration.
+% \end{itemize}
+
+ 
+%   \begin{itemize}
+%   \item Few approaches for GPs with categorical params exist (usually with new covar kernels), not very established
+% \item Alternative: Random regression forest (mlrMBO, SMAC)
+%   \item Estimate uncertainty / confidence interval for mean response by
+%   efficient bootstrap technique\footnote{Sexton et al, \enquote{Standard errors for bagged and random forest estimators, 2009.}}, or jackknife, so we can define $EI(x)$ for the RF
+%   \item Dependent params in mlrMBO: Imputation:
+%   % \begin{itemize}
+%   % \item categorical parameters: Introduce new class
+%   % \item numerical parameters: Impute 2 times the maximum
+%   % \end{itemize}
+%   \item Many of the current techniques to handle these problems are (from a theoretical standpoint) somewhat crude
+%   \end{itemize}
+% \end{frame}
+
+% \begin{frame}{Surrogate models}
+% \begin{itemize}
+% \item GPs defined for purely numerical spaces
+%   \item Few approaches for GPs with categorical params exist (usually with new covar kernels), not very established
+% \item Random regression forest (mlrMBO, SMAC)
+%   \item Estimate uncertainty / confidence interval for mean response by
+%   efficient bootstrap technique\footnote{Sexton et al, \enquote{Standard errors for bagged and random forest estimators, 2009.}}, or jackknife, so we can define $EI(x)$ for the RF
+%   \item Dependent params in mlrMBO: Imputation:
+%   \begin{itemize}
+%   \item categorical parameters: Introduce new class
+%   \item numerical parameters: Impute 2 times the maximum
+%   \end{itemize}
+%   \item Many of the current techniques to handle these problems are (from a theoretical standpoint) somewhat crude
+%   \end{itemize}
+% \end{frame}
+% 
+% 
+% 
+% % \begin{frame}{Tuning as Black-Box Optimization}
+% %   \begin{minipage}{0.33\linewidth}
+% %   \includegraphics[width = \linewidth]{fig/gears2.png}
+% %   \end{minipage}
+% %   %
+% %   \begin{minipage}{0.65\linewidth}
+% %   \textbf{mlrMBO} can be used for:
+% %   \begin{itemize}
+% %   \item Expensive black-box optimization
+% %   \item Hyperparameter tuning for machine learning methods
+% %   \item Machine learning pipeline configuration
+% %   \item Algorithm configuration
+% %   \item ...
+% %   \end{itemize}
+% %   \end{minipage}
+% % \end{frame}
+% 
+% % \begin{frame}{Hyperparameter Tuning}
+% %  \begin{itemize}
+% %     \item Still common practice: grid seach\\
+% %     For a SVM it might look like:
+% %     \begin{itemize}
+% %       \item $C \in (2^{-12}, 2^{-10}, 2^{-8}, \ldots, 2^{8}, 2^{10}, 2^{12})$
+% %       \item $\gamma \in (2^{-12}, 2^{-10}, 2^{-8}, \ldots, 2^{8}, 2^{10}, 2^{12})$
+% %       \item Evaluate all $13^2 = 169$ combinations $C \times \gamma$
+% %     \end{itemize}
+% %     \item Bad beacause:
+% %     \begin{itemize}
+% %       \item optimum might be "off the grid"
+% %       \item lots of evaluations in bad areas
+% %       \item lots of costy evaluations
+% %     \end{itemize}
+% %     \item How bad?
+% %   \end{itemize}
+% % \end{frame}
+% 
+% % \begin{frame}{Hyperparameter Tuning}
+% % \begin{center}
+% % \includegraphics[width=0.5\textwidth]{fig/grid1.png}
+% % \end{center}
+% % \begin{itemize}
+% % \item Because of budget restrictions grid might even be smaller!
+% % \item Unpromising area quite big!
+% % \item Lots of costly evaluations!
+% % \end{itemize}
+% % With \textbf{mlrMBO} it is not hard to do it better!
+% 
+% 
+% % More interesting applications to time-series regression and cost-sensitive classification\footnote{Koch, Bischl et al:\textit{Tuning and evolution of support vector kernels}, EI 2012}
+% 
+% % \end{frame}
+% 
+% % \begin{frame}{Hyperparameter Tuning}
+% % \vfill
+% % \includegraphics[width=\textwidth]{fig/res2.png}
+% % \vfill
+% % \end{frame}
+% 
+% 
+% 
+% \begin{frame}{HPOlib}
+% \begin{itemize}
+% \item HPOlib is a set of standard benchmarks for hyperparameter optimizer
+% \item Allows comparison with
+% \begin{itemize}
+% \item Spearmint
+% \item SMAC
+% \item Hyperopt (TPE)
+% \end{itemize}
+% \item Benchmarks:
+% \begin{itemize}
+% \item Numeric test functions 
+% \item Numeric machine learning problems (lda, SVM, logistic regression)
+% \item Deep neural networks and deep belief networks with $15$ and $35$ parameters.
+% \end{itemize}
+% \item For benchmarks with discrete and dependent parameters (hpnnet, hpdbnet) a random forest with standard error estimation is used. 
+% \end{itemize}
+% \end{frame}
+% 
+% \begin{frame}{MBO: HPOlib}
+% \begin{center}
+%   \includegraphics[width = 1.01\textwidth]{plots/hpolib-1.pdf}
+% \end{center}
+% \end{frame}
+
+\section{Hyperband}
+
+\begin{frame} {Learning curves}
+  \begin{itemize}
+    \item It is extremely expensive to train complex models such as deep neural networks on large datasets.
+    \item In such a scenario, evaluating even a single hyperparameter configuration can take many hours/days.
+    \item For many configurations, it might be clear early on that further training is not likely to significantly improve the performance.
+    \item More importantly, the relative ordering of configurations (for a given set) can also become evident early on.
+    \item Therefore, fully training every single configuration can be quite wasteful.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Learning curves}
+    \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/iteration.png}}
+      \tiny{\\credit : Ameet Talwalkar}
+  \end{figure}
+    
+    \textbf{Main idea} : Terminate training for configurations that aren't promising and instead allocate more resources to training configurations that are likely to perform better.
+\end{frame}
+
+\begin{frame} {Successive-Halving}
+  \begin{itemize}
+    \item To "weed out" poor configurations during training, one simple approach is \textbf{Successive-Halving}.
+    \item Given an initial set of configurations to evaluate :
+      \begin{itemize}
+        \item Train all configurations for a small initial budget.
+        \item Remove the half that performed worst and then double the budget.
+        \item Continue training the remaining configurations until this new budget is exhausted.
+        \item Again, remove the half that performed worst and double the budget.
+        \item Repeat until only a single configuration remains...
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+% \begin{frame} {Multi-Armed Bandits}
+%   \begin{itemize}
+%     \item Imagine a gambler in a casino who wants to maximize his profit.
+%     \item He is free to choose between $n$ different slot machines and has a fixed budget $B$.
+%     \item He begins to spend $b$ units of budget for each machine, such that $b \cdot n \ll B$
+%     \item While he loses some of his budget $B$, he also gains a bit of information concerning each machine's return rates.
+%     \lz
+%     \item How should a gambler allocate his remaining budget on bandits?
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame} {Successive-halving}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/hyperband3.png}}
+      \tiny{\\credit: automl.org}
+      \caption{\footnotesize{Illustration of successive halving for eight algorithms/configurations. After evaluating all algorithms on 1/8 of the total budget, half of them are dropped and the budget given to the remaining algorithms is doubled.}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Successive-halving - Example}
+Budget $B = 1000$ and $n = 100$ configurations/"arms" : 
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/hyperband1.png}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {The $n$ versus $B/n$ problem}
+  \begin{itemize}
+    \item A major drawback of Successive-Halving is that the user has to specify the number of configurations, $n$, beforehand.
+    \item Ideally, we would like to explore the configuration space and evaluate a large number of configurations.
+    \item However, for a fixed budget, as $n$ increases, the budget $B/n$ that can be spent on any single one of those configurations decreases.
+    \item Therefore, the user can either :
+      \begin{itemize}
+        \item train a large number of configuration for a small number of iterations, or,
+        \item train a small number of configurations for a large number of iterations.
+      \end{itemize}
+    \item As $B/n$ decreases, it becomes harder to "pick out" the most promising configurations from a limited number of training iterations.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {The $n$ versus $B/n$ problem}
+In general, the relative ordering (in terms of validation loss) of two arbitrary neural networks can vary during training:
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/val_err.png}}
+  \end{figure}
+  
+In the early stages of training, Model B looks more promising than Model A even though the latter ultimately performs better. Therefore, we must be careful not to prematurely terminate training for Model A.
+
+\end{frame}
+
+\begin{frame} {Hyperband in a nutshell}
+  \begin{itemize}
+    \item Hyperband tries to tackle the $n$ versus $B/n$ problem by considering \textbf{several} values of $n$ for a fixed $B$.
+    \item Each distinct $n$ corresponds to a different "bracket".
+    \item In every bracket, a new set of $n$ random configurations is sampled and then solved by a mutation of the Successive Halving algorithm.
+    \item Therefore, it represents a "hedging strategy" which tries to \textit{simultaneously} minimize the risks of under-exploration (small $n$) and premature elimination (small $B/n$).
+    \item In simple terms, it is a clever way to "have your cake and eat it too".
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Hyperband in a nutshell} 
+  \begin{itemize}
+    \item Hyperband requires the user to specify two parameters :
+      \begin{itemize}
+        \item $R$ corresponds to the maximum budget that can be spent on any specific configuration.
+        \item $\eta$ corresponds to the proportion of configurations that are discarded in each round of Successive Halving.
+      \end{itemize}
+    \item For example, if $\eta$ = 3, then only a third of the configurations survive a given round.
+    \item Based on these two parameters, the number of brackets that are tried is $s_{\text{max}} + 1$, where, $s_{\text{max}} = \lfloor \log_{\eta}R \rfloor$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Hyperband - Example}
+Hyperband for $R = 81$ and $\eta = 3$
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/hyperband2.png}}
+  \end{figure}
+  
+  \begin{itemize}
+    \item $n_i$ and $r_i$ are the number of configurations and the budget-per-configuration, respectively.
+    \item The bracket corresponding to $s = 4$ is designed to maximize exploration. 
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame} {Hyperband - Example}
+Hyperband for $R = 81$ and $\eta = 3$
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/hyperband2.png}}
+  \end{figure}
+  \begin{itemize}
+    \item Within each bracket, Successive Halving is performed on a randomly sampled set of $n$ configurations.
+    \item Note : Each bracket uses approximately the same amount of resources.
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame} {Hyperband - Pseudocode}
+  \begin{figure}
+    \centering
+      \scalebox{1.1}{\includegraphics{plots/hyp_pseudo.png}}
+      \tiny{\\source : Li et al. (2016)}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Hyperband - Performance}
+  \begin{figure}
+    \centering
+      \scalebox{0.75}{\includegraphics{plots/comparison_1.png}}
+      \tiny{\\credit: automl.org}
+      \caption{\footnotesize{Illustration of typical results obtained exemplary for optimizing six hyperparameters of a neural network. The curves give the immediate regret of the best configuration found by 4 methods as a function of time.}}
+  \end{figure}
+
+  \begin{itemize}
+    \item \small{For small to medium budgets, Hyperband outperforms random search and Bayesian Optimization (BO).
+    \item For larger budgets, the model-based approach of BO seems to outperform Hyperband.}
+  \end{itemize}
+\end{frame}
+  
+\begin{frame} {Hyperband - Performance}
+  \begin{figure}
+    \centering
+      \scalebox{0.75}{\includegraphics{plots/comparison_1.png}}
+      \tiny{\\credit: automl.org}
+      \caption{\footnotesize{Illustration of typical results obtained exemplary for optimizing six hyperparameters of a neural network. The curves give the immediate regret of the best configuration found by 4 methods as a function of time.}}
+  \end{figure}
+ 
+ BOHB is an algorithm which tries to get the best of both worlds by combining Hyperband with Bayesian Optimization.
+\end{frame}
+
+\section{Neural Architecture Search}
+
+\begin{frame} {Neural Architecture Search}
+  \begin{itemize}
+    \item The success of state-of-the-art CNNs like GoogLeNet (Inception), ResNet, etc is primarily due to innovations in network architecture.
+    \item However, designing these architectures is slow, error-prone and takes a lot of expert knowledge.
+    \item Automating the search for new architectures has the potential to discover breakthrough architectures and significantly reduce the level of human effort involved (albeit at a much higher computational cost.)
+    \item In this lecture, we'll look at two different search strategies to find new architectures :
+      \begin{itemize}
+        \item Reinforcement Learning (RL)
+        \item Evolutionary methods
+      \end{itemize}
+    \item The first method, introduced by Zoph et al. (2016), is based on RL.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Neural Architecture Search}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/neu_arch_search_two.png}}
+  \end{figure}
+  \begin{itemize}
+    \item  The architecture of a neural network can be typically encoded as a variable-length string.
+      \begin{itemize}
+        \item "Filter Width : 5, Filter Height : 3, Num Filters : 24"
+      \end{itemize}
+    \item Key idea : Use an RNN, known as the "controller", to generate such a string. 
+    \item The architecture corresponding to this string is referred to as the "child network".
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Neural Architecture Search}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/neu_arch_search_two.png}}
+  \end{figure}
+  \begin{itemize}
+    \item The child network is then trained from scratch and evaluated on a validation set.
+    \item This validation accuracy is then used as a reward signal to the train the controller RNN.
+    \item As a result, in the next iteration, the controller will give higher probabilities to architectures that receive high accuracies.  
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame} {Neural Architecture Search}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/neu_arch_search_one.png}}
+        \tiny{\\Credit : Zoph,Le}
+      \caption{An illustration of how the controller RNN samples a simple convolutional network. It
+predicts filter height, filter width, stride height, stride width, and number of filters for one layer and
+repeats. Every prediction is carried out by a softmax classifier and then fed into the next time step
+as input.}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Cell Search Spaces}
+    Successful architectures such as Inception and Resnet contain cells/modules that are stacked together.
+  \begin{figure}
+    \centering
+      \scalebox{0.77}{\includegraphics{plots/incept_dim_reduction.png}}
+      \tiny{\\Credit : Szegedy et al. (2014)}
+      \caption{\footnotesize{The Inception module}}
+    \end{figure}
+\end{frame}
+
+\begin{frame} {Cell Search Spaces}
+  \begin{itemize}
+    \item \small{Therefore, instead of using an RNN to predict the topology of the entire network, in the 'NASNet' paper, Zoph et al. (2017) search for such cells/modules instead using RL.
+    \item Cells which perform well can then be chained sequentially to build networks of arbitrary depth.}
+  \end{itemize}
+    \begin{figure}
+    \centering
+      \scalebox{0.44}{\includegraphics{plots/cellspace.png}}
+      \tiny{\\Credit : automl.org}
+      \caption{\footnotesize{Illustration of the cell search space. \textit{Left :} Two different cells, e.g., a normal cell (top) and a reduction cell (bottom). \textit{Right :} an architecture built by stacking cells sequentially.}}
+    \end{figure}
+\end{frame}
+
+\begin{frame} {NASNet - Search Space}
+  \begin{figure}
+    \centering
+      \scalebox{0.14}{\includegraphics{plots/nasnet5.png}}
+      \caption{\footnotesize{The architecture above consists of two repeated motifs termed \textit{Normal cell} and \textit{Reduction cell}. The choice for the number of times the Normal cells get stacked, N, can vary.}}
+  \end{figure}
+    \small{Instead of generating the entire architecture of a CNN, the RNN only generates of two types of cells : Normal Cell (preserves spatial dimensions) and Reduction Cell (reduces spatial dimensions).}
+\end{frame}
+
+\begin{frame} {NASNet - Search Space}
+  \begin{figure}
+    \centering
+      \scalebox{0.14}{\includegraphics{plots/nasnet5.png}}
+      \caption{\footnotesize{The architecture above consists of two repeated motifs termed \textit{Normal cell} and \textit{Reduction cell}. The choice for the number of times the Normal cells get stacked, N, can vary.}}
+  \end{figure}
+    \small{For a fixed depth, searching for the best architecture is reduced to searching for the best cell structure.}
+\end{frame}
+
+\begin{frame} {NASNet - Search Space}
+  \begin{itemize}
+    \item The NASNet search space only consists of two types of cells : Normal cell and Reduction cell.
+    \item Each cell consists of B \textbf{blocks}, where B is a parameter that is set manually. In this experiment, $B = 5$.
+    \item The RNN samples a single block over 5 timesteps. Therefore, to sample 2 cells with 5 blocks each, the RNN is unrolled for $2 \times 5 \times 5 = 50$ timesteps.
+    \item The first 25 time-steps correspond to the Normal cell and the other 25 time-steps correspond to the Reduction cell.
+    \item Again, the search method employed to discover cells (by training the RNN) is Reinforcement Learning.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Nasnet - RNN controller}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/nasnet4.png}}
+      \tiny{\\source : Zoph et al. (2017)}
+      \caption{\footnotesize{All of these choices are sampled from distinct softmax classifiers. An entire cell is then constructed by repeating this B times.}}
+  \end{figure}
+\small{The RNN constructs a single block over 5 time-steps by :}
+  \begin{itemize}
+    \item \small{Steps 1\&2 : choosing two hidden layers from a set of available hidden layers.
+    \item These hidden layers can either be the outputs of the two previous cells or the outputs of other blocks in the same cell.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Nasnet - RNN controller}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/nasnet4.png}}
+      \tiny{\\source : Zoph et al. (2017)}
+      \caption{\footnotesize{All of these choices are sampled from distinct softmax classifiers. An entire cell is then constructed by repeating this B times.}}
+  \end{figure}
+\small{The RNN constructs a single block over 5 time-steps by :}
+  \begin{itemize}
+    \item \small{Steps 3\&4 : applying a different operation (such as 3x3 dilated conv, 5x5 max-pooling, etc) to each, and,
+    \item Step 5 : combining them by applying a 'merge' operation (such as element-wise addition or depthwise concatenation of feature maps).}
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Nasnet - RNN controller}
+  \begin{figure}
+    \centering
+      \scalebox{0.98}{\includegraphics{plots/nasnet3.png}}
+      \caption{\footnotesize{An example of a 'block' generated by the RNN. A cell consists of B such blocks, where each block is generated sequentially by the RNN. While constructing the other blocks for this cell, the RNN can use the output of this block as one of the hidden layers.}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Nasnet-A}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/nasnet_block.png}}
+      \caption{\footnotesize{Architecture of the best convolutional cells (named NASNet-A) with B = 5 blocks identified for the CIFAR-10 dataset. $h_i$ and $h_{i-1}$ are the outputs of the two previous cells.}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Nasnet-A}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/nasnet2.png}}
+      \caption{\footnotesize{Architecture of the best convolutional cells (named NASNet-A) with B = 5 blocks identified for the CIFAR-10 dataset. $h_i$ and $h_{i-1}$ are the outputs of the two previous cells.}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Nasnet-A : Performance}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/neu_arch_search_three.png}}
+            \tiny{\\source : Zoph et al. (2017)}
+      \caption{\footnotesize Architectures with varying numbers of NASNet-A cells outperform comparable (in terms of \# of params) architectures  on the ImageNet challenge.}
+  \end{figure}
+
+\end{frame}
+
+\begin{frame} {Evolutionary methods}
+  \begin{itemize}
+    \item To discover new architectures, an alternative to RL is \textbf{evolution}.
+    \item These methods are modelled after natural selection in biological populations.
+    \item Evolutionary approaches were first applied to neural networks in 1989.
+    \item Back then, they were used only to learn the weights of a \textit{fixed} network.
+    \item Instead, Real et al (2016) use evolution to search for new architectures, but each architecture is trained by gradient descent.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Evolutionary methods}
+  \begin{itemize}
+    \item A population of models (about 1000) is evolved where each individual in the population is a trained network.
+    \item The \textit{fitness} of an individual is it's validation accuracy.
+    \item At each step, two individuals are chosen at random. The one with the worse fitness is killed and the remaining one is chosen to be a \textbf{parent}.
+    \item A copy of the parent is created and then modified by applying a mutation to the copy, which results in a \textbf{child}.
+    \item A child is then added to the population after it has been trained and evaluated.
+    \item This type of repeated pairwise competitions between individuals is known as \textbf{tournament selection}.
+    \item To achieve scale, all of this happens in a massively-parallel and lock-free manner where many workers (computers) operate asynchronously.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Evolutionary methods - Mutations}
+
+  \begin{itemize}
+    \item Once a parent has been copied, a mutation is applied to the copy by sampling randomly from a set of possible mutations.
+    \item Some examples are:
+      \begin{itemize}
+        \item Alter learning rate
+        \item Reset weights to random 
+        \item Insert/remove convolutions
+        \item Add/remove skip connections
+        \item Change filter size / number of filters
+      \end{itemize}
+    \item Children inherit weights wherever possible.
+    \item Some mutations preserve all the weights (e.g, learning-rate mutation), some preserve none (resetting weights) but most preserve some.
+    \item The child model is then trained for about 25k iterations before being added to the population.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Evolutionary methods}
+  \begin{figure}
+    \centering
+      \scalebox{0.97}{\includegraphics{plots/nas_evo1.png}}
+      \tiny{\\source : Real et al. (2016)}
+      \caption{\footnotesize{\footnotesize Progress of an evolution experiment. Each dot represents an individual in the population. Blue dots (top-right) are still alive. The others have been killed. C = Conv, BN = BatchNorm and R = ReLU.}}
+  \end{figure}
+  
+  \small{The 4 diagrams correspond to the architectures of the best-individual (right-most) and three of its ancestors.}
+  
+\end{frame}
+
+\begin{frame} {AmoebaNet - Introduction}
+  \begin{itemize}
+    \item In the 'AmoebaNet' paper (Real et al. (2018)), ideas from the two previous approaches are combined.
+    \item New architectures are discovered by evolutionary methods.
+    \item The tournament selection method is modified to favour newer/younger individuals in the population (that is, older individuals are more likely to be killed).
+    \item Only individual cells are evolved, instead of entire architectures. 
+    \item In particular, the search space is identical to that of NASNet.
+    \item Working with the NASNet search space also makes it possible to do a direct comparison of the two search strategies (RL vs evolution).
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {AmoebaNet - Mutations}
+  \begin{figure}
+    \centering
+      \scalebox{0.4}{\includegraphics{plots/amoeba2.png}}
+      \tiny{\\source : Real et al. (2018)}
+      \caption{\footnotesize{Illustration of the two mutation types.}}
+  \end{figure}
+  Two main types of mutation are possible :
+  \begin{itemize}
+    \item A 'hidden-state' mutation changes the connectivity pattern in the cell.
+    \item An 'op' mutation changes the type of operation in a randomly selected node.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {AmoebaNet}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/amoeba1.png}}
+            \tiny{\\source : Real et al. (2018)}
+      \caption{\footnotesize{The structure of the best-performing cells discovered by AmoebaNet. On the left is a Normal cell and on the right is a Reduction cell.}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {AmoebaNet}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/amoeba3.png}}
+      \tiny{\\source : Real et al. (2018)}
+      \caption{\footnotesize{Comparison between evolution, reinforcement learning and random search.}}
+  \end{figure}
+  \begin{itemize}
+    \item \small{Evolution discovers more accurate architecture in the earlier stages of training, compared to RL. 
+    \item The models discovered by evolution also reach high accuracy while using fewer floating-point operations (in the forward pass).
+    \item Both evolution and RL outperform random search, but only by a narrow margin.}
+  \end{itemize}
+\end{frame}
+
+% \begin{frame} {DARTS - Introduction}
+%   \begin{itemize}
+%     \item The search spaces we've seen in evolution and RL-based approaches so far have been discrete.
+%     \item DARTS (Differentiable ARchitecture Search), introduced in Liu et al. (2018), defines a continuous search space and finds the optimal architecture by \textbf{gradient descent}.
+%     \item In particular, this means that the validation set performance is differentiable.
+%     \item DARTS can be used to discover both convolutional and recurrent architectures.
+%     \item The performance of the architectures discovered by DARTS is on par with those discovered by the other approaches.
+%   \end{itemize}
+% \end{frame}
+% 
+% \begin{frame} {DARTS - Directed Acyclic Graph}
+%   \begin{itemize}
+%     \item Similar to the other approaches we've seen so far, DARTS searches for cells.
+%     \item Each cell is represented as a DAG with N ordered nodes.
+%       \begin{itemize}
+%         \item Each node $x^{(i)}$ in the graph represents hidden states (such as a feature map in a CNN), and,
+%         \item Each directed edge $(i,j)$ is associated with some operation $o^{(i,j)}$ that transforms $x^{(i)}$.
+%   \end{itemize}
+%     \item For convolutional cells, the inputs to a given cell are the outputs of the previous two cells.
+%     \item For recurrent cells, they are the input at the current time-step and the hidden state of the previous time step.
+%   \end{itemize}
+% \end{frame}
+% 
+% \begin{frame} {Darts - Directed Acyclic Graph}
+%   \begin{figure}
+%     \centering
+%       \scalebox{0.20}{\includegraphics{plots/darts3.png}}
+%       \caption{\footnotesize{A cell represented as a DAG. Nodes correspond to hidden states and the arrows correspond to different operations.}}
+%   \end{figure}
+%   \begin{itemize}
+%     \item \small{Each intermediate node $x^{(i)}$ is computed based on all previous nodes :
+%     $$ x^{(i)} = \sum_{j < i} o^{(i,j)} (x^{(j)})$$
+%     \item A special \textit{zero} operation indicates a lack of connection between nodes.}
+%   \end{itemize}
+% \end{frame}
+% 
+% \begin{frame} {Darts - Training}
+%   \begin{itemize}
+%     \item Let $\mathcal{O}$ be the set of candidate operations (e.g, convolution, max-pooling) at a node.
+%     \item Instead of choosing between these discrete choices, all operations can be applied where each operation is weighted by the corresponding element of a softmax.
+%           $$ \bar{o}^{(i,j)} = \sum_{o \in \mathcal{O}} \frac {\exp(\alpha_o^{(i,j)})} {\sum_{o' \in \mathcal{O}} \exp(\alpha_{o'}^{(i,j)})} o(x) $$
+%     \item Therefore, learning a good architecture is now equivalent to learning a set of continuous variables $\alpha = \alpha^{(i,j)}$
+%     \item A discrete architecture can then be obtained by replacing each mixed operation with the argmax over the corresponding $\alpha_o^{(i,j)}$.
+%   \end{itemize}
+% \end{frame}
+% 
+% \begin{frame} {Darts - Training}
+%   \begin{itemize} 
+%     \item The goal is to jointly learn the architecture, encoded in $\alpha$ \textit{and} the weights $w$ corresponding the operations.
+%     \item This results in a bi-level optimization problem :
+%     \begin{gather*}
+%       \min_{\alpha} L_{\text{val}} (w^*(\alpha), \alpha) \\
+%       \text{s.t.  } w^*(\alpha) = \argmin_w L_{\text{train}}(w,a)
+%     \end{gather*}
+%     where $L_{\text{val}}$ and $L_{\text{train}}$ are the training and validation losses, respectively.
+%     \item This can be approximated by alternating gradient descent.
+%     \item Note : In the previous approaches, the search for new architectures was done using RL or evolutionary algorithms and individual architectures were then trained using gradient descent. DARTS, on the other hand, uses regular gradient descent for both. 
+%   \end{itemize}
+% \end{frame}
+% 
+% \begin{frame} {DARTS - Illustration}
+%   \begin{figure}
+%     \centering
+%       \scalebox{1}{\includegraphics{plots/darts1.png}}
+%       \caption{\footnotesize{An overview of DARTS: (a) Operations on the edges are initially unknown. (b) Continuous relaxation of the search space by placing a mixture of candidate operations on each edge. (c) Joint optimization of the mixing probabilities and the network weights by solving a bilevel optimization problem. (d) Inducing the final architecture from the learned mixing probabilities.}}
+%   \end{figure}
+%   
+% \end{frame}
+% 
+% \begin{frame} {Darts - Cells}
+%   \begin{figure}
+%     \centering
+%       \scalebox{0.60}{\includegraphics{plots/darts2.png}}
+%       \caption{\footnotesize{Convolutional cells learned by DARTS.}}
+%   \end{figure}
+% \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zoph et al., 2016]{1} Barret Zoph, Quoc V. Le (2016)
+\newblock Neural Architecture Search with Reinforcement Learning
+\newblock \emph{\url{https://arxiv.org/abs/1611.01578}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zoph et al., 2017]{2} Barret Zoph, Vijay Vasudevan, Jonathon Shlens, Quoc V. Le (2017)
+\newblock Learning Transferable Architectures for Scalable Image Recognition
+\newblock \emph{\url{https://arxiv.org/abs/1707.07012}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Real et al., 2017]{3} Esteban Real, Sherry Moore, Andrew Selle, Saurabh Saxena, Yutaka Leon Suematsu, Jie Tan, Quoc Le, Alex Kurakin (2017)
+\newblock Large-Scale Evolution of Image Classifiers
+\newblock \emph{\url{https://arxiv.org/abs/1703.01041}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Real et al., 2018]{4} Esteban Real, Alok Aggarwal, Yanping Huang, Quoc V Le (2018)
+\newblock Regularized Evolution for Image Classifier Architecture Search
+\newblock \emph{\url{https://arxiv.org/abs/1802.01548}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Liu et al., 2018]{5} Hanxiao Liu, Karen Simonyan, Yiming Yang (2018)
+\newblock DARTS: Differentiable Architecture Search
+\newblock \emph{\url{https://arxiv.org/abs/1806.09055}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+
+
+\endlecture

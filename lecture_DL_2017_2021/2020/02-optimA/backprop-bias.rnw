@@ -1,0 +1,121 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+<<size = "scriptsize", include=FALSE>>=
+source("code/functions.R")
+@
+
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\definecolor{dg}{rgb}{0.0,0.42,0.24}
+\definecolor{lg}{rgb}{0.53,0.66,0.42}
+\definecolor{lb}{rgb}{0.6,0.73,0.89}
+\definecolor{db}{rgb}{0.0,0.48,0.65}
+
+% SOURCE for animations: 
+% --- 
+% https://docs.google.com/presentation/d/1kLU5RxNlDq8ohJNSp6UmNu9Y4I6J1BWI2Ax5bOAASK0/edit
+% --- 
+
+\begin{frame}
+\scriptsize
+We want to update $c$ with a gradient descent step: 
+      \begin{equation*}
+          c^{[new]}  &=& c^{[old]} - \alpha \cdot  \frac{\partial \Lxy}{\partial c}
+      \end{equation*}
+To do that we need to calculate the derivative:        
+    \scriptsize
+      \begin{eqnarray*}
+         \frac{\partial \Lxy}{\partial c} &=& 
+         \frac{\partial \Lxy}{\partial f_{out}} \cdot  \frac{\partial f_{out}}{\partial f_{in}} \cdot  \frac{\partial f_{in}}{\partial c}  \\
+         &=& 
+         \frac{\partial \Lxy}{\partial f_{out}} \cdot  \frac{\partial f_{out}}{\partial f_{in}} \cdot  \frac{\partial (u_1 \cdot z_{1,out} + c \cdot z_{2,out} + c \cdot 1)}{\partial c} \\
+         &=& 
+         \frac{\partial \Lxy}{\partial f_{out}} \cdot  \frac{\partial f_{out}}{\partial f_{in}} \cdot  1
+        \\ &=& (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot 1
+        \\ &=& \num[round-mode=places,round-precision=4]{-0.04608074}
+      \end{eqnarray*}
+      \scriptsize
+      With $\alpha = 0.5$ we obtain:
+      \begin{equation*}
+          c^{[new]}  &=& c^{[old]} - \alpha \cdot  \frac{\partial \Lxy}{\partial c}
+                  &=& 0.78 - 0.5 \cdot \num[round-mode=places,round-precision=4]{-0.04608074} = \num[round-mode=places,round-precision=4]{ 0.8030404}
+      \end{equation*}
+      
+\end{frame}
+
+
+\begin{frame}
+\scriptsize
+We want to update $b_1$ with a gradient descent step: 
+      \begin{equation*}
+          b_{1}^{[new]}  &=& b_1^{[old]} - \alpha \cdot  \frac{\partial \Lxy}{\partial b_1}
+      \end{equation*}
+To do that we need to calculate the derivative:        
+    \scriptsize
+      \begin{eqnarray*}
+         \frac{\partial \Lxy}{\partial b_{1}} &=& 
+         \frac{\partial \Lxy}{\partial f_{out}} \cdot  \frac{\partial f_{out}}{\partial f_{in}} \cdot  \frac{\partial f_{in}}{\partial z_{1,out}} \cdot  \frac{\partial z_{1,out}}{\partial z_{1,in}} \cdot  \frac{\partial z_{1,in}}{\partial b_{1}} \\
+         &=& 
+         \frac{\partial \Lxy}{\partial f_{out}} \cdot \frac{\partial f_{out}}{\partial f_{in}} \cdot  \frac{\partial f_{in}}{\partial z_{1,out}} \cdot \frac{\partial z_{1,out}}{\partial z_{1,in}} \cdot  \frac{\partial x_1 \cdot W_{11} + x_2 \cdot W_{21} + b_1 \cdot 1}{\partial b_{1}} 
+        \\ &=& (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot (-0.22) \cdot \num[round-mode=places,round-precision=4]{0.2332} \cdot 1 
+        \\ &=& \num[round-mode=places,round-precision=4]{0.0023645}
+      \end{eqnarray*}
+      \scriptsize
+      With $\alpha = 0.5$ we obtain:
+      \begin{equation*}
+          b_{1}^{[new]}  &=& b_1^{[old]} - \alpha \cdot  \frac{\partial \Lxy}{\partial b_1}
+                  &=& -0.46 - 0.5 \cdot \num[round-mode=places,round-precision=4]{0.002364319} = \num[round-mode=places,round-precision=4]{-0.4611822}
+      \end{equation*}
+      
+\end{frame}
+
+
+\begin{frame}
+\scriptsize
+We want to update $b_2$ with a gradient descent step: 
+      \begin{equation*}
+          b_2^{[new]}  &=& b_2^{[old]} - \alpha \cdot  \frac{\partial \Lxy}{\partial b_2}
+      \end{equation*}
+To do that we need to calculate the derivative:        
+    \scriptsize
+      \begin{eqnarray*}
+         \frac{\partial \Lxy}{\partial b_2} &=& 
+         \frac{\partial \Lxy}{\partial f_{out}} \cdot  \frac{\partial f_{out}}{\partial f_{in}} \cdot  \frac{\partial f_{in}}{\partial z_{2,out}} \cdot  \frac{\partial z_{2,out}}{\partial z_{2,in}} \cdot  \frac{\partial z_{2,in}}{\partial b_2} \\
+         &=& 
+         (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot  \frac{\partial (u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + c \cdot 1)}{\partial z_{2,out}} \cdot  \frac{\partial z_{2,out}}{\partial z_{2,in}} \cdot  \frac{\partial z_{2,in}}{\partial b_2} \\
+         &=& 
+         (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot  u_2 \cdot  \frac{\partial \frac{1}{1+e^{z_{2,in}}}}{\partial z_{2,in}}\cdot  \frac{\partial z_{2,in}}{\partial b_2} \\
+                  &=& 
+          (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot 0.58  \cdot \sigma(z_{2,in}) \cdot (1-\sigma(z_{2,in}))  \cdot  \frac{\partial z_{2,in}}{\partial b_2} \\
+         &=& 
+          (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot  0.58 \cdot \num[round-mode=places,round-precision=4]{0.1929268} \cdot  \frac{\partial x_1 \cdot W_{11} + x_2 \cdot W_{21} + b_2 \cdot 1}{\partial b_2} 
+        \\ &=&  (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot  0.58 \cdot \num[round-mode=places,round-precision=4]{0.1929268} \cdot 1 
+        \\ &=& \num[round-mode=places,round-precision=4]{-0.005156322}
+      \end{eqnarray*}
+      \scriptsize
+      With $\alpha = 0.5$ we obtain:
+      \begin{equation*}
+          b_2^{[new]}  &=& b_2^{[old]} - \alpha \cdot  \frac{\partial \Lxy}{\partial b_2}
+                  &=& 0.1 - 0.5 \cdot (\num[round-mode=places,round-precision=4]{-0.005156322}) = \num[round-mode=places,round-precision=4]{0.1025782}
+      \end{equation*}
+      
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\endlecture

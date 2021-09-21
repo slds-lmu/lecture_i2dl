@@ -1,0 +1,1273 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\newcommand{\Dsubtrain}{\mathcal{D}_{\text{subtrain}}}
+\newcommand{\Dval}{\mathcal{D}_{\text{val}}}
+
+\lecturechapter{3}{Regularization}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Revision of overfitting}
+%   \begin{itemize}
+%     \item A model finds a pattern in the data that is actually not true in the real world. That means the model \textbf{overfits} the data.
+%       \begin{itemize}
+%         \item Humans also overfit when they overgeneralize from an incomplete picture of the world.
+%         \item Every powerful model can \enquote{hallucinate} patterns.
+%       \end{itemize}
+%     \item Happens when you have too many hypotheses and not enough data to tell them apart.
+%     \begin{itemize}
+%       \item The more data, the more \enquote{bad} hypotheses are eliminated.
+%       \item If the hypothesis space is not constrained, there may never be enough data.
+%       \item There is often a parameter that allows you to constrain (\textbf{regularize}) the model.
+%     \end{itemize}
+%   \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Avoiding overfitting}
+%   \begin{itemize}
+%     \item You should never believe your model until you've \textit{verified it on data that it didn't see}.
+%     \item Scientific method applied to machine learning: model must make new predictions that can be experimentally verified.
+%     \item Randomly divide the data into:
+%       \begin{itemize}
+%         \item \textit{Training set} $\Dtrain$, which we will feed the model with.
+%         \item \textit{Test set} $\Dtest$, which we will hide to verify its predictive performance.
+%       \end{itemize}
+%   \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}{Overfitting and noise}
+%   \begin{itemize}
+%     \item Overfitting is seriously exacerbated by \textit{noise} (errors in the training data).
+%     \item An unconstrained learner will model that noise.
+%     \item A popular misconception is that overfitting is always caused by noise.
+%     \item It can also arise when relevant features are missing in the data.
+%     \item In general, it's better to make some mistakes on training data (\enquote{ignore some observations}) than trying to get all correct.
+%   \end{itemize}
+% \end{frame}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Triple trade-off}
+% 
+% In all learning algorithms that are trained from example data, there is a trade-off between three factors:
+% 
+%   \begin{itemize}
+%     \item the complexity of the hypothesis we fit to data
+%     \item the amount of training data
+%     \item the generalization error on new examples
+%   \end{itemize}
+% 
+% The generalization error decreases with the amount of training data.
+% 
+% As the complexity of the hypothesis space $H$ increases, the generalization error decreases first and then starts to increase (overfitting).
+% 
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}
+%   \begin{itemize}
+%     \item Training error and test error evolve in the opposite direction with increasing complexity:
+%   \end{itemize}
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/overfitting_2.png}
+%       \caption{Underfitting vs. overfitting (Goodfellow et al. (2016))}
+%   \end{figure}
+% 
+% \vspace{-0.2cm}
+% $\Rightarrow$ Optimization regarding the model complexity is desirable!
+% 
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Generalization Error}
+% 
+% The \textit{generalization error} is defined as the error that occurs when a model $\fh_{\D}$ that was trained on observed data $\D$ is applied to (unseen) data:
+% 
+%   $$\GE{\D} = \E( L(y, \fh_{\D}(x)) | \D),$$
+% 
+%   where
+% 
+% \begin{itemize}
+%   \item $\fh_{\D}$ is the prediction model that was estimated using the data $\D$,
+%   \item the expectation is conditional on $\D$ that was used to build the prediction model and
+%   \item $L$ is an \textit{outer} loss function that tries to measure the model performance
+%   (which can be different from the \textit{inner} loss function that was used for the empirical risk minimization).
+% \end{itemize}
+% 
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe} {Bias-Variance decomposition}
+% 
+% % Let's take a closer look at the generalized prediction error, given by
+% %   $$\GE{\D} = \E( L(y, \fh_{\D}(x)) | \D).$$
+% % Assuming the normal linear regression model
+% %   $$y = f(x) + \epsilon$$
+% % with $\epsilon \sim N(0, \sigma^2)$, we get
+% % \begin{eqnarray*}
+% %   \GE{\D} &=& \E( L(y, \fh_{\D}(x)) | \D) = \E((y - \fh_{\D}(x))^2) \\
+% %   &=& \E(y^2) + \E(\fh_{\D}(x)^2) - \E(2y\fh_{\D}(x)) \\
+% %   &=& \var(y) + \E(y)^2 + \var(\fh_{\D}(x)) + \E(\fh_{\D}(x))^2 - 2f(x)\E(\fh_{\D}(x)) \\
+% %   &=& \var(y) + \var(\fh_{\D}(x)) + \E(f(x)-\fh_{\D}(x))^2 \\
+% %   &=& \sigma^2 + \var(\fh_{\D}(x)) + \text{Bias}(\fh_{\D}(x))^2.
+% % \end{eqnarray*}
+% %
+% % \framebreak
+% 
+% % So for the squared error loss, the generalized prediction error can be decomposed into:
+% % \begin{itemize}
+% %   \item \textbf{Noise}: Intrinsic error, independent from the learner, cannot be avoided.
+% %   \item \textbf{Variance}: Models tendency to learn random things irrespective of the real signal (\emph{overfitting}).
+% %   \item \textbf{Bias}: Models tendency to \emph{consistently} misclassify certain instances (\emph{underfitting}).
+% % \end{itemize}
+% %
+% % \framebreak
+% 
+% \begin{columns}[T,onlytextwidth]
+%   \column{0.6\textwidth}
+%     \includegraphics{plots/biasvariance.png}
+%   \vspace{0.05cm}
+%   \\
+%   Reduce variance $\Rightarrow$ Reduce overfitting \\ $\Rightarrow$ make model less flexible \\ $\Rightarrow$ \textbf{regularization}, or add more data.
+% 
+%   \column{0.38\textwidth}
+%   \vspace{1cm}
+%   Reduce bias \\ $\Rightarrow$ reduce underfitting \\$\Rightarrow$ make model more flexible.
+% \end{columns}
+% 
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Overfitting in regression}
+% <<echo=FALSE, warning=FALSE, message=FALSE, results="hide">>=
+% 
+% library("mlr")
+% set.seed(1337L)
+% n = 50L
+% x = sort(10 * runif(n))
+% y = sin(x) + 0.2 * rnorm(x)
+% df = data.frame(x = x, y = y)
+% tsk = makeRegrTask("sine function example", data = df, target = "y")
+% plotLearnerPrediction("regr.nnet", tsk, size = 1L, maxit = 1000)
+% plotLearnerPrediction("regr.nnet", tsk, size = 5L, maxit = 1000)
+% plotLearnerPrediction("regr.nnet", tsk, size = 11L, maxit = 1000)
+% 
+% @
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Overfitting in classification}
+%   \begin{columns}[T,onlytextwidth]
+%     \column{0.5\textwidth}
+%       \begin{itemize}
+%         \item Non-overfitting model
+%       \end{itemize}
+%       \vspace{0.5cm}
+% <<echo=FALSE, results='hide', fig.height=6.5>>=
+% library("mlr")
+% library("mlbench")
+% library("BBmisc")
+% library("MASS")
+% set.seed(21L)
+% Sigma = matrix(c(1,0,0,1), nrow = 2)
+%  d1 = mvrnorm(n = 50, c(3,3), Sigma, tol = 1e-6, empirical = FALSE, EISPACK = FALSE)
+%  d2 = mvrnorm(n = 50, c(1,1), Sigma, tol = 1e-6, empirical = FALSE, EISPACK = FALSE)
+% d1 = as.data.frame(d1)
+% d1$classes = "3"
+% d2 = as.data.frame(d2)
+% d2$classes = "1"
+% data = rbind(d1,d2)
+% #data = as.data.frame(mlbench.2dnormals(n = 75, cl = 3))
+% #data$classes = mapValues(data$classes, "3", "1")
+% colnames(data) = c("x1","x2","class")
+% data$class
+% data$class = as.factor(data$class)
+% task = makeClassifTask(data = data, target = "class")
+% lrn = makeLearner("classif.nnet")
+% 
+% plotLearnerPrediction("classif.nnet", task, size = 5L, maxit = 1000, pointsize = 4)
+% 
+% @
+%       \begin{itemize}
+%         \item[] Better test accuracy
+%       \end{itemize}
+%     \column{0.5\textwidth}
+%       \begin{itemize}
+%         \item Overfitting model
+%       \end{itemize}
+%       \vspace{0.5cm}
+% <<echo=FALSE, results='hide', fig.height=6.5>>=
+% 
+% plotLearnerPrediction("classif.nnet", task, size = 50L, maxit = 1000, pointsize = 4)
+% 
+% @
+%       \begin{itemize}
+%         \item[] Better training accuracy
+%       \end{itemize}
+%   \end{columns}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame} {Regularization}
+  \begin{itemize}
+    \item Recall, the goal of regularization is to penalize the complexity of the model in the risk cost function to minimize the chances of overfitting.
+    \item Regularization is important in DL because NNs can have extremely high capacity (millions of parameters).
+    \item In the very first lecture, we studied an important regularization technique : parameter norm penalties. However, regularization is much broader than this. 
+    \item Any technique that is designed to reduce the test error possibly at the expense of increased training error can be considered a form of regularization.
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Revision : Parameter Norm Penalties}
+  \begin{itemize}
+%    \item Norm penalization aims to limit the complexity of the model.
+    \item By adding a parameter norm penalty term \(J(\theta)\) to the empirical risk $\risket$ we obtain a regularized cost function:
+
+      $$\Oreg = \Ounreg + \lambda \text{\(J(\theta)\)}$$
+
+      with hyperparamater $\lambda \in [0, \infty)$, that weights the penalty term,
+      relative to the unconstrained objective function $\Ounreg$.
+
+    \item Therefore, instead of pure \textbf{empirical risk minimization}, we add a penalty
+for complex (read: large) parameters \(\theta\).
+    \item Declaring $\lambda = 0$ obviously results in no penalization.
+    \item We can choose between different parameter norm penalties \(J(\theta)\).
+    \item In general, we do not penalize the bias.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Reg. Risk Min.: Weight decay}
+
+Let's optimize the L2-regularized risk of a model $\fxt$
+
+\[
+    \min_{\theta} \riskrt = \risket + \frac{\lambda}{2}||\theta||^2
+\]
+  
+\begin{itemize}
+    \item Shrinks all of our params towards 0.
+    \item Most used regularization technique.
+    \item We now prove that this is equivalent to reducing weights in each gradient descent iteration.
+\end{itemize}
+
+\framebreak
+
+Let's look at the GD formula for:
+
+\[
+    \min_{\theta} \riskrt = \risket + \frac{\lambda}{2} ||\theta||^2
+\]
+
+The gradient is:
+
+\[
+\nabla \riskrt = \nabla \risket + \lambda \theta
+\]
+
+and iteratively update $\theta$ by step size \(\alpha\) times the
+negative gradient
+
+\[
+\theta^{[new]} = \theta^{[old]} - \alpha \left(\nabla \risket + \lambda \theta^{[old]}\right) =
+\theta^{[old]} (1 - \alpha \lambda) - \alpha \nabla \risket
+\]
+
+The term \(\lambda \theta^{[old]}\) causes the parameter
+(\textbf{weight}) to \textbf{decay} in proportion to its size. This is a
+very well-known technique in deep learning - simply L2-regularization
+in disguise.
+
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{L2 Regularization (Weight decay)}
+%   \begin{itemize}
+%     \item Analogue to \textbf{ridge regression}: $\text{\(J(w)\)} = \frac{1}{2}||w||_2^2$ such that 
+%     $$ \Oregweight = \Oweight + \frac{\lambda}{2} w^Tw $$
+%     with corresponding gradient: 
+%     $$ \triangledown_w \Oregweight = \triangledown_w \Oweight + \lambda w $$
+%     \item One weight update using gradient descent is
+%       \begin{eqnarray*}
+%         w^{[t+1]} &=& w^{[t]} - \alpha (\lambda w^{[t]} + \triangledown_w \mathnormal{R}_{emp}(w^{[t]}|X,y)) \\
+%               &=& \underbrace{(1 - \alpha \lambda)}_{<1}w - \alpha \triangledown_{w^{[t]}} \mathnormal{R}_{emp}(w^{[t]}|X,y))
+%       \end{eqnarray*}
+%     \item Therefore termed \textbf{weight decay} in neural net applications
+%   \end{itemize}
+%\framebreak
+% \begin{enumerate}
+%   \item Quadratic Taylor-approximation of unregularized $\Oweight$ at minimum $w^* = argmin_w \Oweight$:
+%     \begin{eqnarray*}
+%       \Oopt &=& \Oweightopt \\
+%              &+& \frac{1}{1!}\frac{\delta \Oweightopt}{\delta w} (w - w^*) \\
+%              &+& \frac{1}{2!}\frac{\delta^2 \Oweightopt}{\delta w \delta w} (w - w^*)^2 \\
+%              &=& \Oweightopt + \frac{1}{2} (w - w^*)^T H (w - w^*)
+%     \end{eqnarray*}
+%     with $H$ being the positive-semidefinite Hessian $\Oweight$ at $w^*$.
+%     \item The minimum of $\Oopt$ where its first derivative equals 0:
+%     $$ \triangledown_w \Oopt = H(w - w^*) = 0 $$
+% \framebreak
+%     \item Transform into regularized version:
+%       \begin{eqnarray*}
+%         H(\tilde{w} - w^*) + \alpha \tilde{w} &=& 0 \\ 
+%         \Leftrightarrow (H + \alpha I) \tilde{w} &=& Hw^* \\
+%         \tilde{w} &=& (H + \alpha I)^{-1} H w^*
+%       \end{eqnarray*}
+%     \item Now apply eigendecomposition, such that $H=Q\Lambda Q^T$ (H is real and symmetric);
+%       \begin{eqnarray*}
+%         \tilde{w} &=& Q(\Lambda + \alpha I)^{-1} \Lambda Q^T w^* \\
+%               &\Rightarrow& \text{ collapses to } w^* \text{ for } \alpha = 0
+%       \end{eqnarray*}
+%       With
+%       \begin{itemize}
+%         \item $\Lambda = diag(\lambda_1, \dots, \lambda_d)$ and $\lambda_i$ the eigenvalue $i$ of $H$.  
+%         \item $Q$ the orthonormal basis of eigenvectors $v_i, i = 1, \dots, d$
+%       \end{itemize}
+% \framebreak
+%     \item Effect on weight i:
+%       \begin{eqnarray*}
+%         \tilde{w_i} &=& v_i \frac{\lambda_i}{\lambda_i + \alpha} v_i^T w_i^* \\
+%         &\overset{v_i v_i^T = 1}{=}& \frac{\lambda_i}{\lambda_i + \alpha} w_i^* \\
+%         &\Rightarrow& \text{ \textbf{rescaling} of } w^* \text{ with eigenvalues of the Hessian }
+%       \end{eqnarray*}
+%       \begin{itemize}
+%         \item For $\lambda_i$ we can think of a parameter describing the \enquote{importance} of each weight $w_i$.
+%         \item If $\lambda_i > \alpha$: high curvature $\rightarrow$ important weight $\rightarrow$ low shrinkage of update
+%         \item If $\lambda_i < \alpha$: low curvature $\rightarrow$ less important weight $\rightarrow$ heavy shrinkage
+%       \end{itemize}
+% \end{enumerate}
+  \begin{vbframe} {Weight decay in Neural Networks}
+  \begin{figure}
+    \centering
+      \scalebox{0.9}{\includegraphics{plots/weight_decay_3.png}}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Weight decay example}
+  \begin{itemize}
+    \item Let's fit the following huge neural network on a smaller fraction of MNIST (5000 train and 1000 test observations):
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/mxnet_regulariation_1.png}
+  \end{figure}
+  \begin{itemize}
+      \item Weight decay: $\lambda \in (10^{-2}, 10^{-3}, 10^{-4}, 10^{-5}, 0)$
+  \end{itemize}
+  
+\framebreak
+
+<<fig.height=5.5>>=
+require("ggplot2")
+
+wdTrain = read.csv("code/mnist_weight_decay_wdTrain", header = TRUE)
+options(scipen=999)
+#wdTrain$variable = factor(wdTrain$variable)
+wdTrain$variable = factor(wdTrain$variable, labels = c("0","10^(-5)","10^(-4)","10^(-3)","10^(-2)") )
+
+
+ggplot(data = wdTrain, aes(x = epoch, y = value, colour = variable)) +
+  geom_line() +
+  scale_y_continuous(name = "train error", limits = c(0, 0.1)) + 
+  scale_x_continuous(labels = function (x) floor(x), 
+    name = "epochs") + 
+  labs(colour = "weight decay")
+@
+
+\framebreak
+
+<<fig.height=5.5>>=
+wdTest = read.csv("code/mnist_weight_decay_wdTest", header = TRUE)
+options(scipen=999)
+wdTest$variable = factor(wdTest$variable, labels = c("0","10^(-5)","10^(-4)","10^(-3)","10^(-2)"))
+
+ggplot(data = wdTest, aes(x = epoch, y = value, colour = variable)) +
+  geom_line() +
+  scale_y_continuous(name = "test error", limits = c(0, 0.1)) + 
+  scale_x_continuous(labels = function (x) floor(x), 
+    name = "epochs") + 
+  labs(colour = "weight decay")
+@
+
+% \framebreak
+% 
+%   \begin{itemize}
+%     \item The misclassification accuracy of a neural network can still improve even if we reach 100\% training accuracy.
+%     \item Consider a binary classification problem with labels 0 and 1.
+%     \begin{itemize}
+%       \item Assume a training sample with label 0 is assigned output probabilities $[0.75, 0.25]$ by the neural net.
+%       \item Thus, the training error with respect to this point it 0, because the predicted label is 0.
+%       \item Applying the negative log-likelihood (cross entropy) as loss function may still lead to improvements in the neural networks \enquote{confidence}, even after training error reaches 0\% (i.e.$[0.9, 0.1]$).
+%     \end{itemize}
+%     \item Note that this is a theoretical concept and in practice we will almost always overfit by the time we reach 100\% training accuracy.
+%   \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{L1 Regularization}
+%   \begin{itemize}
+%     \item Analogue to \textbf{lasso regression}: $\Pen = ||w||_1$ such that
+%       $$\Oregweight = \Oweight + \alpha ||w||_1$$
+%     leading to gradient:
+%       $$\triangledown_w \Oregweight = \triangledown_w \Oweight + \alpha sign(w)$$
+%     \item Harder penalization: shrinks weights \textbf{and} sets some to 0
+%     \item Creates \textbf{sparse} models and is therefore used for \textbf{feature selection}
+%   \end{itemize}
+% \framebreak
+%   \begin{itemize}
+%     \item Quadratic Taylor-approximation of $\hat J(\theta)$
+%       \begin{itemize}
+%         \item Assumption: uncorrelated inputs $\rightarrow H = diag(H_{1,1},...,H_{n,n}), H_{i,i} > 0$
+%         \item L1 regularized objective function:
+%         $$\Oopt = \Oweightopt + \sum_i  \bigg[ \frac{1}{2}H_{i,i}(w_i - w_i^*)^2 + \alpha|w_i| \bigg] $$
+%       \end{itemize}
+%     \item Solution of the minimization problem:
+%   $$\tilde w_i = sign(w_i^*)max \bigg[ |w_i^*|-\frac{\alpha}{H_{i,i}},0 \bigg]$$
+%   with two possible situations given $w_i^* > 0$:
+%     \begin{itemize}
+%       \item High $H_{i,i} \rightarrow$ high curvature $\rightarrow$ low penalization of  \enquote{necessary} weight $\rightarrow$ weight is just shrinked $\rightarrow 0 < \tilde w_i < w_i^*$
+%       \item Low $H_{i,i}\rightarrow$ low curvature $\rightarrow$ hard penalization of \enquote{unnecessary} weight $\rightarrow w_i^* \leq \frac{\alpha}{H_{i,i}} \rightarrow \tilde w_i = 0$
+%     \end{itemize}
+%   \end{itemize}
+% \framebreak
+%   \begin{itemize}
+%     \item Compare both methods with $\lambda_i=H_{i,i}$ and $ w_i^*>0$:
+%     $$L2: \tilde w_{i} = \frac{H_{i,i}}{H_{i,i}+\alpha} w_i^* \text{ }\text{ }\text{ } \text{ vs. } \text{ }\text{ }\text{ } L1: \tilde w_i= max \bigg[ |w_i^*|-\frac{\alpha}{H_{i,i}},0 \bigg]$$
+%   \end{itemize}
+%   L2-penalization solely shrinks weights towards 0 and L1-penalization furthermore eradicates weights.
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=5cm]{plots/lasso_ridge.png}
+%       \caption{(Hastie et al. (2009))}
+%   \end{figure}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Early Stopping}
+  \begin{itemize}
+    \item Goal: find optimal number of epochs.
+    \item Stop algorithm early, before generalization error increases.
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/overfitting.png}
+      \caption{Underfitting vs. overfitting (Goodfellow et al. (2016))}
+  \end{figure}
+\framebreak
+  How early stopping works:
+  \begin{enumerate}
+    \item Split training data $\Dtrain$ into $\Dsubtrain$ and $\Dval)$ (e.g. with a ratio of 2:1).
+    \item Use $\Dsubtrain$ and evaluate model using the validation set $\Dval$.
+    \item Stop training when validation error stops decreasing (after a range of \enquote{patience} steps).
+    \item Use parameters of the previous step for the actual model.
+  \end{enumerate}
+  More sophisticated forms also apply cross-validation.
+\framebreak
+  \begin{table}
+    \begin{tabular}{p{4cm}|p{6cm}}
+    Strengths & Weaknesses \\
+    \hline
+    \hline
+    Effective and simple & Periodical evaluation of validation error\\
+    \hline
+    Applicable to almost any model without adjustment \note{of objective function, parameter space, training procedure} & Temporary copy of $\theta^{*}$ (we have to save the whole model at each iteration). \\
+    \hline
+    Combinable with other regularization methods & Less data for training $\rightarrow$ include $\Dval$ afterwards
+    \end{tabular}
+  \end{table}
+  \begin{itemize}
+    \item Relation between optimal early stopping iteration $T_{\text{stop}}$ and weight decay penalization parameter $\lambda$ for learning rate $\alpha$ (see Goodfellow et al. (2016) page 251-252 for proof):
+  \end{itemize}
+    \begin{equation*}
+      T_{\text{stop}} \approx \frac{1}{\alpha \lambda} 
+        \Leftrightarrow \lambda \approx \frac{1}{T_{\text{stop}} \alpha}
+    \end{equation*}
+  \begin{itemize}
+    \item Small $\lambda$ (low penalization) $\Rightarrow$ high $T_{\text{stop}}$ (deep model/lots of updates)
+  \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item[]
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=11cm]{plots/early_stopping}
+      \caption{Optimization path of early stopping (left) and weight decay (right) (Goodfellow et al. (2016))}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Dropout}
+  \begin{itemize}
+    \item Dropout is a regularization technique for reducing overfitting in neural networks by preventing complex co-adaptations amongst neurons.
+    \item Method : During training, random subsets of the neurons are removed from the network (they are "dropped out").This is done by artificially setting the activations of those neurons to zero.
+    \item Whether a given unit/neuron is dropped out or not is completely independent of the other units.
+    \item The networks that result when units are dropped out are called 'subnetworks'.
+    \item If the network has $N$ (input/hidden) units , applying dropout to these units can result in $2^N$ possible subnetworks.
+    \item Because these subnetworks are derived from the same 'parent' network, many of the weights are shared.
+    \item Dropout can be seen as a form of "model averaging".
+  \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/dropout.png}}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics[width=10cm]{plots/subnet1.png}}
+  \end{figure}
+  In each iteration, for each training example (in the forward pass), a different (random) subset of neurons are dropped out.
+\framebreak
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics[width=10cm]{plots/subnet2.png}}
+  \end{figure}
+  In each iteration, for each training example (in the forward pass), a different (random) subset of neurons are dropped out.
+\framebreak
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics[width=10cm]{plots/subnet3.png}}
+  \end{figure}
+  In each iteration, for each training example (in the forward pass), a different (random) subset of neurons are dropped out.
+\end{vbframe}
+% \framebreak
+%   \begin{itemize}
+%     \item Bagging: all models are independent.
+%     \item Dropout: models not independent as they share parameters!
+%       \begin{itemize}
+%         \item Each subnets archtitecture is defined by a \enquote{mask} $\mu$. The mask $\mu$ randomly determines the in-or exclusion of units (neurons) and is trained on one randomly sampled training data point $(x, y)$ (or mini batch).
+%         \item The mask $\mu$ is a vector of length $d$ (total number of units (neurons) in the network) with $\mu = (\mu_1, \mu_2, \dots, \mu_d), \ \mu_i = \{0,1\}$ and $P(\mu_i = 1) = p$.
+%         \item Thus, each subnet inherits a different subset of parameters from the parent neural network.
+%         \item Parameter sharing makes it possible to represent huge number of of models with particular amount of memory (hardware limitation!).
+%       \end{itemize}
+%    \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% 
+% \frametitle{Parameter sharing}
+% 
+%   \begin{itemize}
+%     \item Parameter sharing:
+%     \begin{itemize}
+%       \item In the case of bagging, the models are all independent.
+%       \item In dropout on the other hand, all models share parameters. That means each model inherits a different subset of parameters from the parent neural network.
+%     \end{itemize}
+%   \end{itemize}
+% 
+%   \center
+%   \only<1>{\includegraphics[width=7cm]{plots/dropout_param_sharing.png}}%
+%   \only<2>{\includegraphics[width=7cm]{plots/subnet1_param_sharing.png}}%
+%   \only<3>{\includegraphics[width=7cm]{plots/subnet2_param_sharing.png}}%
+%   \only<4>{\includegraphics[width=7cm]{plots/subnet3_param_sharing.png}}%
+%   \only<5>{\includegraphics[width=7cm]{plots/subnet1_param_sharing2.png}}%
+%   \only<6>{\includegraphics[width=7cm]{plots/subnet2_param_sharing2.png}}%
+%   \only<7>{\includegraphics[width=7cm]{plots/subnet3_param_sharing2.png}}%
+% 
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \framebreak
+%   \begin{itemize}
+%     \item Consider we would like to update some parameters with SGD. 
+%       \begin{itemize}
+%         \item We have a total number of $\eta$ weights, with $\theta_i$, $i = 1, \dots, \eta$
+%         \item m training samples $(X^{(j)}, y^{(j)})$
+%         \item A learning rate $\alpha$
+%         \item An objectice funtion $\Ounreg$, which is a loss function
+%       \end{itemize}
+%   \end{itemize}
+%   \begin{algorithm}[H]
+%   \caption{Simplified version of SGD}
+%     \begin{algorithmic}[1]
+%       \State randomly shuffle training samples
+%       \Repeat
+%       \For{$m=1,...,j$}
+%       \For{$i=1,..,\eta$}
+%       \State $\theta_{i,(i+1)} = \theta_{i,(i)} - \alpha \frac{\delta \Ounreg} {\delta \theta_i}$
+%       \EndFor
+%       \EndFor
+%       \Until{stop criterion is reached}
+%     \end{algorithmic}
+%   \end{algorithm}
+% \framebreak
+%   \begin{itemize}
+%     \item Now we add the mask $\mu$ to determine the architecture of our subnet $i$.
+%   \end{itemize}
+%   \begin{algorithm}[H]
+%   \caption{Simplified version of SGD with dropout}
+%     \begin{algorithmic}[1]
+%       \State randomly shuffle training samples
+%       \Repeat 
+%       \For{ $i=1,...,m$}
+%       \State randomly draw mask $\mu$ for sub-net $i$
+%       \For{$j=1,..,\eta$}
+%       \State $\theta_{j,(i+1)} = \theta_{j,(i)} - \alpha \frac{\delta \Odropout_i} {\delta \theta_j}$
+%       \EndFor
+%       \EndFor
+%       \Until{stop criterion is reached}
+%     \end{algorithmic}
+%   \end{algorithm}
+% \begin{vbframe}
+%   \begin{itemize}
+%     \item Models output \textbf{probability distributions}:  $p(y=y_j|x,\mu)$
+%     \item Bagging: arithmetic mean: $$\tilde p_{ensemble} (y = y_k|x)  =\frac{1}{B}\sum_{i=1}^B p^{(i)}(y = y_k| x)$$
+%     \item Dropout: more robust weighting via geometric mean:
+%       $$\tilde{p}_{ensemble} (y = y_k|x) = \sqrt[2^B]{\prod_{\mu}p(y = y_k|x, \mu)}$$
+%       and normalized for prediction:
+%       $$p_{ensemble} (y = y_k|x) = \frac{\tilde p_{ensemble} (y = y_k |x)}{\sum_{j}\tilde p_{ensemble} (y = y_k |x)}$$
+%   \end{itemize}
+% \end{vbframe}
+% \begin{frame}
+% \frametitle{Illustration geometric mean in dropout}
+%   \begin{table}[ht]
+%   \centering
+%     \begin{tabular}{c|c|c|c|c}
+%     \scriptsize
+%     & $P(y = y_1|x)$ & $P(y = y_2|x)$ & $P(y = y_3|x)$ & $\sum$\\
+%       \hline
+%     Model 1 & 0.20 & 0.70 & 0.10 & 1.00 \\ 
+%       Model 2 & 0.10 & 0.80 & 0.10 & 1.00 \\ 
+%       Model 3 & 0.05 & 0.90 & 0.05 & 1.00 \\ 
+%       Model 4 & 0.05 & 0.90 & 0.05 & 1.00 \\ 
+%       \textbf{Model 5} & \textbf{0.80} & \textbf{0.10} & \textbf{0.10} & \textbf{1.00} \\ 
+%       \hline
+%       Arithmetic mean & 0.24 & 0.68 & 0.08 & 1.00 \\ 
+%       Geometric mean & 0.13 & 0.54 & 0.08 & 0.75 \\ 
+%       Re-normalized & 0.18 & 0.72 & 0.10 & 1.00 \\ 
+%     \end{tabular}
+%   \end{table}
+%   \begin{equation*}
+%     \begin{split}
+%     &mean_{arithmetic}(x_1,...,x_n) = \frac{1}{n}\sum_{i=1}^n x_i\\
+%     &mean_{geometric}(x_1,...,x_n) = \sqrt[n]{\prod_{i=1}^n x_i} \text{ with } x_i > 0 \forall i = 1,..,n
+%     \end{split}
+%   \end{equation*}
+% \end{frame}
+% \begin{vbframe}{Dropout}
+%   \begin{table}
+%   \centering
+%     \begin{tabular}{p{1.8cm} || c | p{4cm}}
+%       & Bagging & Dropout \\
+%       \hline
+%       \hline
+%       Basic Idea & \multicolumn{2}{|c}{model averaging} \\
+%       \hline
+%       \hline
+%       \# models & $B$ & up to $2^{B}$\\
+%       \hline
+%       Prediction& atrithmetic mean & geometric mean \\
+%       \hline
+%       Parameters & B independent models & parameter sharing\\
+%       \hline
+%       Train method& each model to convergence & each sub-net trained on mini batch restricted by $\mu$ \\
+%     \end{tabular}
+%   \end{table}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}{Dropout: theory vs practice}
+%   \begin{itemize}
+%     \item Because multiple subnetworks are used in training, dropout can be seen as a form of "model averaging".
+%     \item The probability of dropping units in the network is a hyper- parameter known as the 'dropout rate' (usually 0.5 works well).
+%   \end{itemize}
+%   \begin{algorithm}[H]
+%   \caption{Training a neural network with dropout rate $p$}
+%     \begin{algorithmic}[1]
+%       \State Define parent network and initialize weights
+%       \For{each training sample: }
+%       \State Draw mask $\mu$ using $p$
+%       \State Compute forward pass for $network_{\mu}$
+%       \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Update the weights of $network_{\mu}$, e.g. by performing a gradient step with weight decay}
+%       \EndFor
+%     \end{algorithmic}
+%   \end{algorithm}
+%   \begin{itemize}
+%     \item For prediction: use weight scaling rule.
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}{Dropout}
+  \begin{itemize}
+    \item \small{The probability of dropping units in the network is a hyper- parameter known as the 'dropout rate' (usually 0.5 works well).}
+  \begin{algorithm}[H]
+  \caption{Training a (parent) neural network with dropout rate $p$}
+    \begin{algorithmic}[1]
+      \State Define parent network and initialize weights
+      \For{each training iteration: }
+        \For{each training sample: }
+        \State Draw mask $\mu$ using $p$
+        \State Compute forward pass for $network_{\mu}$
+%        \State Compute the gradient of the loss for $network_{\mu}$
+        \EndFor
+        \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Update the weights of of the (parent) network by performing a gradient descent step with weight decay}
+      \EndFor
+    \end{algorithmic}
+  \end{algorithm}
+  \item \small{The gradients for each parameter are averaged over the training cases in each mini-batch. Any training case which does not use a parameter contributes a gradient of zero for that parameter.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Dropout}
+  \begin{itemize}
+    \item \small{At test time, it is not feasible to explicitly average the predictions from exponentially many subnetworks. However, a very simple approximate averaging method works well in practice: Weight scaling.
+    \item That is, we multiply shared weights of the trained model coming out of unit (neuron) $i$ by $p$
+  \begin{figure}
+    \includegraphics[width=10cm]{plots/dropout_neuron.png}
+    \caption{(Goodfellow et al. (2016))}
+  \end{figure}
+    \item Weight scaling ensures that the expected total input to a neuron/unit at test time is roughly the same as the expected total input to that unit at train time, even though many of the units at train time were missing on average.}
+  \end{itemize}
+\end{frame}
+% $\theta_{\mu, (i+1)} = \theta_{\mu, (i)} - \alpha \cdot \frac{\delta\Lxy_{\mu}}{\delta \theta_{\mu, (i)}}$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{copy pasta}
+% <<mxnet, size = "scriptsize", cache = FALSE, eval = FALSE, echo = TRUE>>=
+%     drop0 = mx.symbol.Dropout(data, p = dropoutInputValues)
+%     fc1 = mx.symbol.FullyConnected(drop0, name = "fc1", num_hidden = 512)
+%     act1 = mx.symbol.Activation(fc1, name = "relu1", act_type = "relu")
+%     drop1 = mx.symbol.Dropout(act1, p = dropoutLayerValues)
+%     fc2 = mx.symbol.FullyConnected(drop1, name = "fc2", num_hidden = 512)
+%     act2 = mx.symbol.Activation(fc2, name = "relu2", act_type = "relu")
+%     drop2 = mx.symbol.Dropout(act2, p = dropoutLayerValues)
+%     fc3 = mx.symbol.FullyConnected(drop2, name = "fc3", num_hidden = 512)
+%     act3 = mx.symbol.Activation(fc3, name = "relu3", act_type = "relu")
+%     drop3 = mx.symbol.Dropout(act3, p = dropoutLayerValues)
+%     fc4 = mx.symbol.FullyConnected(drop3, name = "fc4", num_hidden = 10)
+%     softmax = mx.symbol.SoftmaxOutput(fc4, name = "sm")
+% @
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}{Dropout}
+%   \begin{itemize}
+%     \item Weight scaling rule (Hinton et al. (2012)):
+%     \item[]
+%       \begin{itemize}
+%         \item Approximate $p_{ensemble}$ by inspection of the \textbf{complete model}
+%         \item Multiply shared weights of the trained model coming out of unit (neuron) $i$ by $p$
+%       \end{itemize}
+%   \end{itemize}
+%   \begin{figure}
+%     \includegraphics[width=10cm]{plots/dropout_neuron.png}
+%     \caption{(Goodfellow et al. (2016))}
+%   \end{figure}
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame} {Dropout}
+%   \begin{itemize}
+%     \item Dropout can be thought of as making bagging practical for ensembles of many large neural networks!
+%     \item In ensemble learning we take a number of weaker classifiers, train them separately and finally average them.
+%     \item Since each classifier has been trained independently, it has learned different \enquote{aspects} of the data.
+%     \item Combining them helps to produce an stronger classifier, which is less prone to overfitting (e.g. random forests).
+%   \end{itemize}
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Dropout - Example}
+  \begin{itemize}
+    \item To demonstrate how dropout can easily improve generalization we compute various models 
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/mxnet_regulariation_2.png}
+  \end{figure}
+  \begin{itemize}
+    \item We compute the following models : $(0,0) , (0.2,0.2) \text{ and } (0.6,0.5)$ where the first element of each tuple is in dropoutInputValues and the second element is in dropoutLayerValues.
+  \end{itemize}
+  
+\framebreak
+
+<<fig.height=5.5>>=
+require("ggplot2")
+require("reshape2")
+
+mnist_dropout_dropoutTrain = read.csv("code/mnist_dropout_dropoutTrain", header = TRUE, check.names = FALSE)
+dropoutTrain = melt(mnist_dropout_dropoutTrain, id = "epoch")
+
+#subset dataset
+#dropoutTrain = dropoutTrain[which(dropoutTrain$variable %in% c("(0;0)","(0;0.2)","(0;0.5)","(0.2;0)","(0.2;0.2)","(0.2;0.5)","(0.6;0)","(0.6;0.2)","(0.6;0.5)")),]
+dropoutTrain = dropoutTrain[which(dropoutTrain$variable %in% c("(0;0)","(0.2;0.2)","(0.6;0.5)")),]
+
+ggplot(data = dropoutTrain, aes(x = epoch, y = value, colour = variable)) +
+  geom_line() +
+  scale_y_continuous(name = "train error", limits = c(0, 0.1)) + 
+  scale_x_continuous(labels = function (x) floor(x), 
+    name = "epochs") + theme(legend.title.align = 0.5) +
+  labs(colour = "Dropout rate:\n(Input; Hidden Layers)")
+@
+
+\framebreak
+
+<<fig.height=5.5>>=
+require("ggplot2")
+require("reshape2")
+
+mnist_dropout_dropoutTest = read.csv("code/mnist_dropout_dropoutTest", header = TRUE, check.names = FALSE)
+# dropoutTest = mnist_dropout_dropoutTest[, -c(8:25)]
+
+#try new
+dropoutTest = mnist_dropout_dropoutTest[, c(1,2,10,25)]
+
+dropoutTest = melt(dropoutTest, id = "epoch")
+
+#subset
+# dropoutTest1 = dropoutTest[1:200,c("epoch", "(0;0)","(0;0.2)","(0;0.5)")]
+#dropoutTest = dropoutTest[1:200,c(epoch, (0;0),(0;0.2),(0;0.5))]
+
+ggplot(data = dropoutTest, aes(x = epoch, y = value, colour = variable)) +
+  geom_line() +
+  scale_y_continuous(name = "test error", limits = c(0, 0.05)) + 
+  scale_x_continuous(labels = function (x) floor(x), 
+    name = "epochs", limits = c(150, 200)) + theme(legend.title.align = 0.5) +
+  labs(colour = "Dropout rate:\n(Input; Hidden Layers)")
+@
+
+% \framebreak
+% 
+% <<fig.height=5.5>>=
+% require("ggplot2")
+% require("reshape2")
+% 
+% mnist_dropout_dropoutTest = read.csv("code/mnist_dropout_dropoutTest", header = TRUE, check.names = FALSE)
+% 
+% #dropoutTest = mnist_dropout_dropoutTest[, -c(2:7, 14:25)]
+% #try new
+% dropoutTest = mnist_dropout_dropoutTest[, c(1,8,10,13)]
+% 
+% dropoutTest = melt(dropoutTest, id = "epoch")
+% 
+% ggplot(data = dropoutTest, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "test error", limits = c(0, 0.05)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(150, 200)) + theme(legend.title.align = 0.5) +
+%   labs(colour = "Dropout rate:\n(Input; Hidden Layers)")
+% @
+
+% \framebreak
+% 
+% <<fig.height=5.5>>=
+% require("ggplot2")
+% require("reshape2")
+% 
+% mnist_dropout_dropoutTest = read.csv("code/mnist_dropout_dropoutTest", header = TRUE, check.names = FALSE)
+% dropoutTest = mnist_dropout_dropoutTest[, -c(2:13, 20:25)]
+% dropoutTest = melt(dropoutTest, id = "epoch")
+% 
+% ggplot(data = dropoutTest, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "test error", limits = c(0, 0.05)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(150, 200)) + theme(legend.title.align = 0.5) +
+%   labs(colour = "Dropout rate:\n(Input; Hidden Layers)")
+% @
+
+% \framebreak
+% 
+% <<fig.height=5.5>>=
+% require("ggplot2")
+% require("reshape2")
+% 
+% mnist_dropout_dropoutTest = read.csv("code/mnist_dropout_dropoutTest", header = TRUE, check.names = FALSE)
+% 
+% # dropoutTest = mnist_dropout_dropoutTest[, -c(2:19)]
+% #try new
+% dropoutTest = mnist_dropout_dropoutTest[, c(1,20,22,25)]
+% 
+% dropoutTest = melt(dropoutTest, id = "epoch")
+% 
+% ggplot(data = dropoutTest, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "test error", limits = c(0, 0.05)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(150, 200)) + theme(legend.title.align = 0.5) +
+%   labs(colour = "Dropout rate:\n(Input; Hidden Layers)")
+% @
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Dropout, weight decay or both?}
+
+% <<fig.height=5.5>>=
+% require("ggplot2")
+% 
+% errorPlot = read.csv("code/mnist_visualization_model_1_error", header = TRUE)
+% 
+% ggplot(data = errorPlot, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "error", limits = c(0, 0.2)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(0, 500)) + theme(legend.title.align = 0.5) + 
+%   labs(colour = "Unregularized model")
+% @
+% 
+% \framebreak
+% 
+% <<fig.height=5.5>>=
+% require("ggplot2")
+% require("plyr")
+% 
+% errorPlot = read.csv("code/mnist_visualization_model_2_error", header = TRUE)
+% errorPlot$variable = revalue(errorPlot$variable, c("test error dropout" = "test error"))
+% errorPlot$variable = revalue(errorPlot$variable, c("training error dropout" = "training error"))
+% 
+% ggplot(data = errorPlot, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "error", limits = c(0, 0.2)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(0, 500)) + theme(legend.title.align = 0.5) + 
+%   labs(colour = "Dropout model: \n (0.4; 0.2)")
+% @
+% 
+% \framebreak
+% 
+% <<fig.height=5.5>>=
+% require("ggplot2")
+% require("plyr")
+% 
+% errorPlot = read.csv("code/mnist_visualization_model_3_error", header = TRUE)
+% errorPlot$variable = revalue(errorPlot$variable, c("test error dropout + wd" = "test error"))
+% errorPlot$variable = revalue(errorPlot$variable, c("training error dropout + wd" = "training error"))
+% 
+% ggplot(data = errorPlot, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "error", limits = c(0, 0.2)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(0, 500)) + theme(legend.title.align = 0.5) + 
+%   labs(colour = "Weight decay \n and \n dropout model: \n (0.4; 0.2)")
+% @
+% 
+% \framebreak
+% 
+% <<fig.height=5.5>>=
+% require("plyr")
+% 
+% errorPlot = read.csv("code/mnist_visualization_model_4_error", header = TRUE)
+% errorPlot$variable = revalue(errorPlot$variable, c("test error dropout + wd" = "test error"))
+% errorPlot$variable = revalue(errorPlot$variable, c("training error dropout + wd" = "training error"))
+% 
+% ggplot(data = errorPlot, aes(x = epoch, y = value, colour = variable)) +
+%   geom_line() +
+%   scale_y_continuous(name = "error", limits = c(0, 0.2)) + 
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "epochs", limits = c(0, 500)) + theme(legend.title.align = 0.5) +
+%   labs(colour = "Weight decay \n only model")
+% @
+% 
+% \framebreak
+
+<<fig.height=5.5>>=
+require("ggplot2")
+
+errorPlot = read.csv("code/mnist_visualization_model_total_error", header = TRUE)
+
+ggplot(data = errorPlot, aes(x = epoch, y = value, colour = variable)) +
+  geom_line() +
+  scale_y_continuous(name = "test error", limits = c(0, 0.2)) + 
+  scale_x_continuous(labels = function (x) floor(x), 
+    name = "epochs", limits = c(0, 500)) + theme(legend.title.align = 0.5) +
+  labs(colour = "Test error \n comparison")
+@
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Dataset Augmentation}
+  \begin{itemize}
+    \item Problem: low generalization because high ratio of $$\frac{\text{complexity of the model}}{\text{\#train data}}$$
+    \item Idea: artificially increase the train data.
+      \begin{itemize}
+        \item Limited data supply $\rightarrow$ create \enquote{fake data}! 
+      \end{itemize}
+    \item Increase variation in inputs \textbf{without} changing the labels.
+    \item Application:
+      \begin{itemize}
+        \item Image and Object recognition (rotation, scaling, pixel translation, flipping, noise injection, vignetting, color casting, lens distortion, injection of random negatives)
+        \item Speech recognition (speed augmentation, vocal tract perturbation)
+      \end{itemize}
+  \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=7cm]{plots/data_augmentation_1.png}
+      \caption{(Wu et al. (2015))}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=6cm]{plots/data_augmentation_2.png}
+      \caption{(Wu et al. (2015))}
+  \end{figure}
+  $\Rightarrow$ careful when rotating digits (6 will become 9 and vice versa)!
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Artificial Noise}
+  \begin{itemize}
+    \item Intentionally inject noise to the model, to make it more robust to small pertubations in the inputs.
+    \item This method may force the model to \enquote{grow} weights in regions of flat minima. Thus, the noisy model may not find perfect minima but its approximations lie in a flatter surrounding.
+    \item Bishop (1995) shows that the injection of artifical noise has the same effect as norm penalization strategies.
+    \item In practice, it is common to apply noise to the outputs. This strategy is termed label smoothing as it incorporates a small noise term on the labels of the classification outputs. The intuition is to account for possible errors in the labeling process.
+  \end{itemize}
+\end{vbframe}
+
+\section{Adversarial Examples}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ \begin{frame} {Adversarial Examples}
+   \begin{itemize}
+     \item An 'adversarial example' is an input to a neural network that is deliberately designed to "fool" the network into misclassifying it.
+     \item The test error of a model is only an indicator of how well the model performs with respect to samples from the data-generating distribution.
+     \item The performance of the same model can be drastically different on samples from a completely different distribution (on the same input space).
+      \item It is possible to make changes to an image that makes a pretrained CNN (a type of neural network) output a completely different predicted class even though the change is imperceptible to the human eye.
+     \item These examples suggest that even models that have very good test set performance do not have a deep understanding of the underlying concepts that determine the correct output label.
+     \end{itemize}
+    \end{frame}
+    
+  \begin{frame} {Adversarial Examples}
+    \begin{itemize}
+      \item Adversarial examples are \textit{not} unique to deep neural nets. Many other models (such as logistic regression) are also susceptible to them.
+      \item They pose serious security concerns in many areas.
+      \item Example : Fooling autonomous cars into thinking that a stop sign is a 45 kmph sign.
+      \item Example : Evading law enforcement by fooling facial recognition systems into misidentifying individuals.
+   \end{itemize}
+ \end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/easyfooled.png}}
+      \tiny{\\Credit : Nguyen et al}
+      \caption{\footnotesize All 8 images above are unrecognizable to humans but are misclassified by state-of-the-art CNNs (in 2014) with higher than 99\% confidence.}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/glasses.png}}
+      \tiny{\\Credit : Sharif et al}
+      \caption{\footnotesize A CNN misidentified each person in the top row (with the funky looking "adversarial" glasses) as the one in the corresponding position in the bottom row.}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Examples : Linearity}
+  \begin{itemize}
+    \item Goodfellow et al. (2014) showed that linear behaviour of models in high dimensional spaces is the reason for the presence of such adversarial examples.
+    \item Neural networks are built from "mostly" linear building blocks. In the case of ReLU activations, the mapping from the input image to the output logits (the inputs to the softmax) is a piece-wise linear function.
+    \item The value of a linear function changes rapidly if it has many inputs. Specifically, if each input is modified by $\epsilon$, a linear function with weights $\mathbf{w}$ can change by as much as $\epsilon \lVert \mathbf{w} \rVert_1$, which can be very large if $\mathbf{w}$ is high-dimensional.
+    \item There is a tradeoff between using models that are easy to train due to their linearity and models that can use non-linear effects to become robust to adversarial perturbations. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{0.9}{\includegraphics{plots/linear_logit.png}}
+      \tiny{\\Credit : Goodfellow}
+  \end{figure}
+  \footnotesize{The figure shows the result of moving along a single direction (not necessarily axis-aligned) in the input space of a CNN. We begin with an image of an automobile (somewhere in the end of the fifth row) and move an $\epsilon$ amount in this direction (negative $\epsilon$ = opposite direction.). The images in the top half are the result of moving in the "negative $\epsilon$" direction and those in the bottom half are the result of moving in the "positive $\epsilon$" direction.}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{0.9}{\includegraphics{plots/linear_logit.png}}
+      \tiny{\\Credit : Goodfellow}
+  \end{figure}
+  \footnotesize{The figure on the right shows the logits (the inputs to the softmax) for each value of $\epsilon$. Each curve is a logit for a specific class. As we move away from the image of the automobile in either direction, the logits for the 'frog' class become extremely high and the images are misclassified by the CNN. The logits for the 'automobile' class are (relatively) high only in the middle of the plot and the CNN correctly classifies these images (yellow boxes on the left).}
+\end{frame}
+
+
+\begin{frame} {Fast Gradient Sign Method}
+  \begin{itemize}
+    \item The Fast Gradient Sign Method (FGSM) is a very simple way to generate adversarial examples.
+    \item Remember, our goal is to find an input $\tilde{x}$ near a datapoint $x$ such that a pretrained neural net (which accurately classifies $x$), ends up misclassifying $\tilde{x}$ even though $\tilde{x}$ is visually indistinguishable from $x$ to human beings.
+    \item When we train a neural network, we calculate the gradient of the loss with respect to the \textit{weights} and move in the opposite direction to decrease the loss.
+    \item By contrast, to find an adversarial example $\tilde{x}$ that is in the vicinity of $x$, the FGSM method computes the gradient of the loss with respect to the \textit{input} and we move an amount $\epsilon$ \textit{roughly} in the direction of this gradient.
+  \end{itemize}
+\end{frame}
+  
+  \begin{frame} {Fast Gradient Sign Method}
+    \begin{itemize}
+    \item Let $\hat{\theta}$ be the (fixed) parameters of a pretrained model, $x$ the input to the model, $y$ the target and $L\left(y, f(x | \hat{\theta}) \right)$ the loss function used to train the network.
+    \item The FGSM algorithm:
+      \begin{itemize}
+        \item Computes:
+      \begin{equation*}
+        \eta = \epsilon sign(\nabla_x L\left(y, f(x | \hat{\theta}) \right))
+      \end{equation*}
+        \item Adds $\eta$ to $x$ : $\tilde{x} = x + \eta = x + \epsilon sign(\nabla_x L\left(y, f(x | \hat{\theta}) \right))$
+        \end{itemize}
+    \item Implicitly, we want to constrain the size of the "step" that we take in the direction of the gradient (because we don't want the adversarial image $\tilde{x}$ to look too different from $x$).
+    \item The (element-wise) $sign$ function is simply a way to enforce this constraint. It basically ensures that no single pixel can change by more than $\epsilon$. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Adversarial Examples : FGSM example}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/fsgm.png}}
+%      \tiny{\\Credit : Goodfellow}
+      \caption{\footnotesize By adding an imperceptibly small vector whose elements are equal to the sign of the elements of the gradient of the cost function with respect to the input, GoogLeNet's classification of the image was changed from 'panda' to 'gibbon'. In this example, the $\epsilon$ is 0.007.}
+  \end{figure}
+\end{frame}
+
+
+
+\begin{frame} {Adversarial Subspaces}
+  \begin{figure}
+    \centering
+      \scalebox{0.85}{\includegraphics{plots/adv_cross.png}}
+      \tiny{\\Credit : Goodfellow}
+      \caption{\footnotesize Each square above represents a 2-dimensional cross section of the input space where the center corresponds to a test example (different squares = different test examples). Moving up or down in a given square indicates moving in a random direction that is orthogonal to the direction of the FGSM. White pixels indicate that the classifier outputs the correct label for the corresponding points and the colored pixels indicate that the classifier misclassifies the corresponding points (different colours = different incorrect classes).}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Subspaces}
+  \begin{figure}
+    \centering
+      \scalebox{0.85}{\includegraphics{plots/adv_cross.png}}
+%      \tiny{\\Credit:Goodfellow}
+  \end{figure}
+   The FGSM method identifies a direction such that moving along \textit{any} direction whose unit vector has a large (positive) dot product with the "FGSM vector" results in an adversarial example. Therefore, adversarial examples live in \textbf{linear subspaces} of the input space.
+\end{frame}
+
+\begin{frame} {Adversarial Subspaces}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/rand_cross.png}}
+%      \tiny{\\Credit:Goodfellow}
+  \end{figure}
+  
+    For a given input, moving in \textit{completely} random directions is unlikely to result in adversarial examples.
+
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{0.47}{\includegraphics{plots/wrong_everywhere.png}}
+      \caption{\footnotesize Each square above corresponds to Gaussian noise that was run through a Cifar-10 classifier.}
+  \end{figure}
+      \small{Instead of measuring the performance of a classifier with respect to the data-generating distribution, if we measure it with respect to a uniform distribution over the whole input space, these classifiers are \textbf{wrong almost everywhere.}}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{0.47}{\includegraphics{plots/wrong_everywhere.png}}
+%      \tiny{\\Credit:Goodfellow}
+      \caption{\footnotesize Each square above corresponds to Gaussian noise that was run through a Cifar-10 classifier.}
+  \end{figure}
+    For all the inputs in the pink boxes, the classifier was reasonably confident (in terms of the softmax values) that the image contained something rather than nothing.
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{0.47}{\includegraphics{plots/wrong_everywhere.png}}
+%      \tiny{\\Credit:Goodfellow}
+      \caption{\footnotesize Each square above corresponds to Gaussian noise that was run through a Cifar-10 classifier.}
+  \end{figure}
+    For the inputs in the yellow boxes, just one step of FGSM was sufficient to convince the model that it was looking at an airplane, specifically.
+\end{frame}
+
+\begin{frame} {Adversarial Examples : Audio}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/adv_speech.png}}
+      \tiny{\\Credit : Carlini et al}
+      \caption{\footnotesize  It is possible to add a small perturbation to any waveform in order to fool a speech-to-text neural network into transcribing it as any desired target phrase. (This was not generated using FGSM.)}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{itemize}
+    \item The FGSM method that we've looked at is only one of \textit{many} different algorithms for generating adversarial examples.
+    \item Athalye et al. (2017) 3-D printed a turtle that fooled the network into classifying it as a rifle from most angles.
+    \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/turtle.png}}
+      \tiny{\\Credit : Athalye}
+  \end{figure}
+\end{itemize}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{itemize}
+    \item Papernot (2016) discusses ways to fool a classifier even if the model (that is, the network structure and the weights) is unknown. Such methods are called \textbf{black-box methods}.
+    \item The library CleverHans can be used to both generate robust adversarial examples and build effective defences against adversarial attacks.
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Hastie et al., 2009]{2} Trevoe Hastie, Robert Tibshirani and Jerome Friedman (2009)
+\newblock The Elements of Statistical Learning
+\newblock \emph{\url{https://statweb.stanford.edu/\%7Etibs/ElemStatLearn/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Hinton et al., 2012]{3} Geoffrey E Hinton, Nitish Srivastava, Alex Krizhevsky Ilya Sutskever and Ruslan Salakhutdinov (2012)
+\newblock Improving neural networks by preventing co-adaptation of feature detectors
+\newblock \emph{\url{http://arxiv.org/abs/1207.0580}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Wu et al., 2015]{4} Wu Ren, Yan Shengen, Shan Yi, Dang Qingqing and Sun Gang (2015)
+\newblock Deep Image: Scaling up Image Recognition
+\newblock \emph{\url{https://arxiv.org/abs/1501.02876}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Bishop, Chris M., 1995]{5} Bishop, Chris M. (1995)
+\newblock Training with Noise is Equivalent to Tikhonov Regularization
+\newblock \emph{\url{https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/bishop-tikhonov-nc-95.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Goodfellow et al., 2014]{5} Goodfellow, Shlens (2014)
+\newblock Explaining and Harnessing Adversarial Examples
+\newblock \emph{\url{https://arxiv.org/abs/1412.6572}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Papernot et al., 2016]{5} Papernot , McDaniel, Goodfellow, Jha, Celik, Swamy (2016)
+\newblock Practical Black-Box Attacks against Machine Learning
+\newblock \emph{\url{https://arxiv.org/abs/1602.02697}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Athalye et al., 2017]{5} Athalye , Engstrom, Ilyas, Kwok (2017)
+\newblock Synthesizing Robust Adversarial Examples
+\newblock \emph{\url{https://arxiv.org/abs/1707.07397}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture

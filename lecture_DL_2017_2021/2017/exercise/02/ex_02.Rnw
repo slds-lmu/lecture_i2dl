@@ -1,0 +1,38 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../../style/preamble_ueb.Rnw")
+@
+
+
+\kopf{1}
+
+
+\aufgabe{
+ Go to \url{https://www.kaggle.com/c/compstat2} where you'll find the second
+ deep learning competition for our lecture.
+ The data looks again similar to the MNIST example you've seen in the lecture (but note the number of classes).
+ Train a deep neural network on the training data \texttt{train.csv} and predict \texttt{test.csv}.
+ Upload a csv file with the predictions and ids to get your score and place on the leaderboard.
+
+ \textbf{Good Luck!}
+}
+
+\dlz
+
+\aufgabe{
+  Implement a simple feed-forward neural network. For now, one layer is sufficient.
+  Allow specification of different activation function. For the output activation restrict yourself to binary classification with logistic output.
+  Train your network on the \texttt{Sonar} dataset from the \texttt{mlbench} package.
+
+  What does happen if you train your network on the \texttt{XOR} example? Compare the results to the perceptron of last exercise.
+
+}
+
+
+\dlz
+
+
+\aufgabe{
+  Show, for a feed-forward network with \texttt{tanh} hidden unit activation functions,
+  and sum-of-squares error function, that the origin in weight space is a stationary point of the error function.
+}

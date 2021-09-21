@@ -1,0 +1,54 @@
+################################################################################################
+Block 1: Introduction and Prerequisites
+
+	part a)	- some cool applications/examples to make things tempting
+		- recap of neural nets 
+
+	part b) - Deep feedforward neworks (Seminar Bodo Burger)
+			- architecture design
+			- gradient based learning
+			- application 
+
+
+################################################################################################
+Block 2-3: Regularization, Optimization and Automatic Hyperparameter Tuning
+
+	part a)	- Regularization (Seminar Jann Goschenhofer)
+			- Regularization for DL (model & data complexity) (Seminar Jann Goschenhofer)
+			- norm penalization
+			- dataset augmentation
+			- early stopping
+			- bagging and ensemble learning
+			- dropout
+			- artificial noise
+			- adversarial training
+
+	part b) - Optimization (no Seminar available)
+			- how learning differs from pure optimization
+			- algorithms
+
+################################################################################################
+####################################### Advances Topics ########################################
+################################################################################################
+Block 4: CNNs (Seminar Niklas Klein)
+
+################################################################################################
+Block 5: Recursive Nets (Seminar Markus Dumke)
+
+################################################################################################
+Block 6: Autoencoders
+
+################################################################################################
+Block 7: Automatic Hyperparameter Tuning for Deep Learning (Seminar Chung Shing Ha)
+
+
+
+
+################################################################################################	
+Ex:
+################################################################################################
+	Deep Learning Software & Required hardware (Seminar Max Kaiser)
+
+	=> very important in my eyes because you can't properly apply deep learning if you don't
+	know about software and in particular hardware limitations
+

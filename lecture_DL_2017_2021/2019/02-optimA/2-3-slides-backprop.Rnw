@@ -1,0 +1,685 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+<<size = "scriptsize", include=FALSE>>=
+source("code/functions.R")
+@
+
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\definecolor{dg}{rgb}{0.0,0.42,0.24}
+\definecolor{lg}{rgb}{0.53,0.66,0.42}
+\definecolor{lb}{rgb}{0.6,0.73,0.89}
+\definecolor{db}{rgb}{0.0,0.48,0.65}
+
+% SOURCE for animations: 
+% --- 
+% https://docs.google.com/presentation/d/1kLU5RxNlDq8ohJNSp6UmNu9Y4I6J1BWI2Ax5bOAASK0/edit
+% --- 
+
+\lecturechapter{2}{Backpropagation}
+\lecture{Deeplearning}
+
+\begin{frame}
+\frametitle{Lecture outline}
+\tableofcontents
+\end{frame}
+
+
+\section{Backpropagation: Basic Idea}
+
+\begin{frame}{Backpropagation: Basic Idea}
+%   \begin{itemize}
+%     \item Backpropagation is the method used to compute the gradient of a neural network. That is, recursively applying the chain rule to obtain the error of each node. 
+%       \begin{itemize}
+%         \item Keep in mind that another algorithm uses this gradient to perform the actual learning (for example stochastic gradient descent).
+%       \end{itemize}
+%   \end{itemize}
+% \framebreak
+  % \begin{itemize}
+     In DL, we aim to optimize the empirical risk by gradient descent 
+      $$\risket = \frac{1}{n} \sumin \Lxyit$$
+      where $\thetab$ are the weights (and biases) of the network. 
+      % Later, we will do something more complex, but that is the basic idea.
+      Training of NNs happens in 2 consecutive steps, for one observation $\xb$:
+      \begin{enumerate}
+        \item \textbf{Forward pass}: The information of the inputs flow through the model to produce a prediction. 
+        Based on that, we compute the empirical loss. We covered that.
+        \item \textbf{Backward pass / Backpropagation}: The information of the error that happened in the prediction of $\xb$ 
+          flows backwards through the model, we calculate the error contribution of each weight to update weights by the negative gradient. 
+        % Thereby we use the error values to calculate the gradient of the loss with respect to each weight. \\
+        % In a final step we update the weights (i.e. \enquote{move} them in the direction of the steepest descent of the loss).
+      \end{enumerate}
+      This is simply gradient descent in disguise (for one observation).
+  % \end{itemize}
+   
+  
+      % \item This is then used by an enveloping optimization algorithm to adjust the weight of each neuron (e.g. SGD, Adam. More on this later.).
+    % \item To apply backpropagation, we first choose a loss function $\Lxy$ , which we would like to minimize.
+    % \vspace{8mm}
+    % \item \footnotesize{(Note: Generally, x and y are vectors. This should hopefully be clear from the context even though we suppress the vector notation.)}
+  % \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Weight update rule}
+  \begin{itemize}
+    \item Backpropagation can then be used to compute the gradient of $\Lxyt$ in an \textbf{extremely} efficient way.
+    \item The weight update per iteration for one $\xb$ with learning rate $\alpha$, is 
+      $$\thetab^{[t+1]} = \thetab^{[t]} - \alpha \cdot \nabla_{\theta}L\left(y, f\left(\xb ~|~ \thetab^{[t]}\right)\right)$$ 
+        \item We will see that, at its core, backpropagation is just a clever implementation of the chain rule. Nothing more!
+      % \item We can think of $\alpha$ as how fast the network will abandon its old beliefs. Thus, as we have seen earlier, we would like to apply a learning rate which is low enough to converge to something useful, but also high enough that we do not have to spend years of training.
+    % \item We will inspect the details of the weight upate in the optimization chapter.
+  \item We could now sum up these gradients for all $\xi$ from $\Dset$ to compute the gradient over the complete training set, to perform a full GD step. But as we want to arrive at stochastic gradient descent, 
+    we stick for now with updates for a single $\xb$.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Backpropagation: XOR Example}
+
+\begin{vbframe}{Backpropagation example}
+  \begin{itemize}
+    \item Let us recall the XOR example, but this time with randomly initialized weights.
+    \item As activations in both the hidden and output layers we apply the \textbf{sigmoidal logistic function}.
+    \item To perform one forward and one backward pass we feed our neural network with example $\xb = (1,0)^\top$ (positive sample).
+    \item We will optimize the model using the squared error between the binary 0-1 labels and the predicted probabilities instead of the Bernoulli loss. This is
+      a bit unusual but computations become simpler for this instructive example.
+    \item Then we compute the backward pass and apply backpropagation to update the weights.
+    \item Finally we evaluate the model with our updated weights.
+  \end{itemize}
+
+\begin{footnotesize}
+  Note: We will only show rounded decimals. 
+\end{footnotesize}
+
+\framebreak
+
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/forwardprop1_new.png}}
+      \caption{A neural network with two neurons in the hidden layer. $W$ and $\biasb$ are the weights and biases of the hidden layer. $\wtu$ and $c$ are the weights and bias of the output layer. Based on the values for the weights (and biases), we will perform one forward and one backward pass.}
+  \end{figure}
+
+\framebreak
+
+    \end{vbframe} 
+
+    \begin{vbframe}{Backprop example: Forward pass}
+
+  \begin{itemize}
+    \item We will divide the forward pass into four steps:
+      \begin{itemize}
+        \item the inputs of $z_i$: $\bm{\textcolor{teal}{z_{i,in}}}$
+        \item the activations of $z_i$: $\bm{\textcolor{teal}{z_{i,out}}}$
+        \item the input of $f$: $\bm{\textcolor{teal}{f_{in}}}$
+        \item and finally the activation of $f$: $\bm{\textcolor{teal}{f_{out}}}$
+      \end{itemize}
+
+    \begin{figure}
+      \centering
+        \includegraphics[width=8cm]{plots/xor_rep.png}%
+        % \caption{A neural network with two neurons in the hidden layer. The matrix $\Wmat$ describes the mapping from $\xb$ to $\hidz$. The vector $\wtu$ from $\hidz$ to $y$.}
+    \end{figure}
+
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/forwardprop2b_new.png}}
+  \end{figure}
+  \begin{footnotesize}
+    \begin{eqnarray*}
+    z_{1,in} &=& \Wmat_1^\top \xb + b_1 =  1 \cdot (-0.07) + 0 \cdot 0.22 + 1 \cdot (-0.46) = -0.53 \\
+    z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[round-mode=places,round-precision=4]{0.3705169}
+    \end{eqnarray*}
+  \end{footnotesize}
+  \end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OLD STYLE: first slide plot of whole network, second slide computations %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/forwardprop2.png}
+%       \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will compute the value of $z_1$.}
+%   \end{figure}
+% \framebreak
+%   \begin{itemize}
+%     \item The input of $z_{1,in}$ is given by: $$1 \cdot (-0.07) + 0 \cdot 0.22 + 1 \cdot (-0.46) = -0.53$$
+%     \item Following up we apply the activation function to obtain $z_{1,out}$: $$\frac{1}{(1+exp(-(-0.53)))} = \num[round-mode=places,round-precision=4]{0.3705169}$$
+%   \end{itemize}
+% \framebreak
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/forwardprop3b_new.png}}
+  \end{figure}
+
+\vspace*{-0.5cm}
+
+  \begin{footnotesize}
+    \begin{eqnarray*}
+    z_{2,in} &=& \Wmat_2^\top \xb + b_2 = 1 \cdot 0.94 + 0 \cdot 0.46 + 1 \cdot 0.1 = 1.04 \\
+    z_{2,out} &=& \sigma\left(z_{2,in}\right) = \frac{1}{1+\exp(-1.04)} = \num[round-mode=places,round-precision=4]{0.73885}
+    \end{eqnarray*}
+  \end{footnotesize}
+
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OLD STYLE: first slide plot of whole network, second slide computations %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/forwardprop3.png}
+%       \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will compute the value of $z_2$.}
+%   \end{figure}
+% \framebreak
+%   \begin{itemize}
+%     \item The input of $z_{2,in}$ is given by: $$1 \cdot 0.94 + 0 \cdot 0.46 + 1 \cdot 0.1 = 1.04$$
+%     \item Following up we apply the activation function to obtain $z_{2,out}$: $$\frac{1}{(1+exp(-1.04))} = \num[round-mode=places,round-precision=4]{0.73885}$$
+%   \end{itemize}
+% \framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=5cm]{plots/forwardprop4b_new.png}
+  \end{figure}
+
+\vspace*{-0.5cm}
+
+  \begin{footnotesize}
+    \begin{eqnarray*}
+    f_{in} &=& \bm{u}^\top \bm{z} + c = \num[round-mode=places,round-precision=4]{0.3705169} \cdot (-0.22) + \num[round-mode=places,round-precision=4]{0.73885} \cdot 0.58 + 1 \cdot 0.78 = \num[round-mode=places,round-precision=4]{1.112242} \\
+    f_{out} &=& \tau\left(f_{in}\right) = \frac{1}{1+\exp(\num[round-mode=places,round-precision=4]{-1.112242})} = \num[round-mode=places,round-precision=4]{0.7525469}
+    \end{eqnarray*}
+  \end{footnotesize}
+
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OLD STYLE: first slide plot of whole network %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/forwardprop4.png}
+%       \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will compute the value of $\hat{y}$.}
+%   \end{figure}
+% \framebreak
+  \begin{itemize}
+    \item The forward pass of our neural network predicted a value of $$f_{out} = 0.7525$$
+    \item Now, we compare the prediction $f_{out} = 0.7525$ and the true label $y = 1$ using the L2-loss: 
+      \begin{eqnarray*}
+        \Lxy &=& \frac{1}{2}(y - \fxit)^2 = \frac{1}{2}\left(y - f_{out}\right)^{2} \\
+                  &=& \frac{1}{2}\left(1 - \num[round-mode=places,round-precision=4]{0.7525469}\right)^2 = \num[round-mode=places,round-precision=4]{0.03061652}
+      \end{eqnarray*}
+    \item The calculation of the gradient is performed backwards (starting from the output layer), so that results can be reused. 
+  \end{itemize}
+
+  \end{vbframe}
+
+  \begin{vbframe}{Backprop example: Weight Updates}
+
+  \begin{itemize}
+    \item We will see that the main ingredients to perform the backward pass are: 
+    \begin{itemize}
+      \item to reuse the results of the forward pass \\ (here:  $\textcolor{teal}{z_{i, in}, z_{i, out}, f_{in},f_{out}}$)
+      \item to reuse the \textcolor{violet}{intermediate results} during the backward pass due to the chain rule 
+      \item to calculate the derivative of some activation functions and some affine functions
+    \end{itemize}
+    \item This is demonstrated by continuing the example above.
+      \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item Assume we would like to know how much and in which direction a change in $u_1$ affects the total error. We recursively apply the chain rule and compute: $$\frac{\partial \Lxy}{\partial u_1} = \frac{\partial \Lxy}{\partial f_{out}} \cdot \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial f_{in}}{\partial u_1}$$
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \scalebox{0.54}{\includegraphics{plots/backprop1_new.png}}
+      \caption{\footnotesize{Snippet from our neural network showing the backward path to compute the gradient with respect to weight $u_1$.}}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item 1st step (backwards): We know $\textcolor{teal}{f_{out}}$ from the forward pass. 
+  \end{itemize}
+    \begin{eqnarray*}
+      \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} &=& \frac{d}{\partial f_{out}} \frac{1}{2}(y - f_{out})^2 = -\underbrace{(y - \textcolor{teal}{f_{out}})}_{\hat{=} \text{residual}} \\
+       &=& -(1 - \num[round-mode=places,round-precision=4]{0.7525469}) = \num[round-mode=places,round-precision=4]{-0.2474531}
+    \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \scalebox{0.6}{\includegraphics{plots/backprop1_b_new.png}}
+        \caption{The first term of our chain rule $\frac{\partial \Lxy}{\partial f_{out}}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item 2nd step (backwards). $f_{out} = \sigma(f_{in})$ and we apply the rule for $\sigma'$ (see Chapter 1-3). We already know $\textcolor{teal}{f_{in}}$ from the forward pass.
+  \end{itemize}
+    \begin{eqnarray*}
+      \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}}  &=& \sigma(\textcolor{teal}{f_{in}})\cdot(1-\sigma(\textcolor{teal}{f_{in}})) \\
+      &=& \num[round-mode=places,round-precision=4]{0.7525469} \cdot (1 - \num[round-mode=places,round-precision=4]{0.7525469}) = \num[round-mode=places,round-precision=4]{0.1862201}
+    \end{eqnarray*}
+      \vspace{-0.5cm}
+    \begin{figure}
+      \centering
+        \scalebox{0.6}{\includegraphics{plots/backprop1_c_new.png}}
+        \caption{The second term of our chain rule $\frac{\partial f_{out}}{\partial f_{in}}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item 3rd step (backwards).  We know $\textcolor{teal}{z_{1, out}}$ from the forward pass.
+  \end{itemize}
+    \begin{eqnarray*}
+      \textcolor{violet}{\frac{\partial f_{in}}{\partial u_1}} = \frac{\partial (u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + c \cdot 1)}{\partial u_1} = \textcolor{teal}{z_{1, out}} = \num[round-mode=places,round-precision=4]{0.3705169}
+    \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \scalebox{0.6}{\includegraphics{plots/backprop1_d_new.png}}
+        \caption{The third term of our chain rule $\frac{\partial f_{in}}{\partial u_1}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Finally we are able to plug all three parts together and obtain:
+  \end{itemize}
+  \begin{eqnarray*}
+    \textcolor{violet}{\frac{\partial \Lxy}{\partial u_1}} &=& \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot \textcolor{violet}{\frac{\partial f_{in}}{\partial u_1}} \\
+                                        &=& \num[round-mode=places,round-precision=4]{-0.2474531} \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot \num[round-mode=places,round-precision=4]{0.3705169} = \num[round-mode=places,round-precision=4]{-0.01707369}
+  \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \scalebox{0.6}{\includegraphics{plots/backprop1_e_new.png}}
+        \caption{All three terms of our chain rule $\frac{\partial \Lxy}{\partial u_1} = \frac{\partial \Lxy}{\partial f_{out}} \cdot \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial f_{in}}{\partial u_1}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Consider a learning rate of $\alpha = 0.5$. Then we obtain:
+  \end{itemize}
+    \begin{eqnarray*}
+      u_1^{[new]} &=& u_1^{[old]} - \alpha \cdot \textcolor{violet}{\frac{\partial \Lxy}{\partial u_1}} \\
+                &=& -0.22 - 0.5 \cdot (\num[round-mode=places,round-precision=4]{-0.01707369}) \\
+                &=& \num[round-mode=places,round-precision=4]{-0.2114632}
+    \end{eqnarray*}
+\framebreak
+  \begin{itemize}
+    \item We now also want to do the same for $W_{11}$. We have to compute: $$\frac{\partial \Lxy}{\partial W_{11}} = \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot \frac{\partial f_{in}}{\partial z_{1,out}} \cdot \frac{\partial z_{1,out}}{\partial z_{1,in}} \cdot \frac{\partial z_{1,in}}{\partial W_{11}}$$
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \scalebox{0.70}{\includegraphics{plots/backprop2_new.png}}
+      \caption{Snippet from our neural network showing the backward path to compute the gradient with respect to weight $W_{11}$.}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item We already know $\textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}}$ and $\textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}}$ from the backward pass before for updating $u_1$.
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/backprop2_bc_new.png}}
+      \caption{The first and second term of our chain rule $\frac{\partial \Lxy}{\partial f_{out}}$ and $\frac{\partial f_{out}}{\partial f_{in}}$}
+  \end{figure}
+\framebreak
+    \item With $f_{in} = u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + c \cdot 1$ we can compute:
+  \end{itemize}
+  \begin{eqnarray*}
+    \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} = u_1 = -0.22
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/backprop2_d_new.png}}
+      \caption{The third term of our chain rule $\frac{\partial f_{in}}{\partial z_{1,out}}$}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Next, we need
+  \end{itemize}
+  \begin{eqnarray*}
+    \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}}  &=& \sigma(\textcolor{teal}{z_{1,in}}) \cdot (1-\sigma(\textcolor{teal}{z_{1,in}})) \\&=&  \num[round-mode=places,round-precision=4]{0.3705169} \cdot (1 - \num[round-mode=places,round-precision=4]{0.3705169}) = \num[round-mode=places,round-precision=4]{0.2332341}
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/backprop2_e_new.png}}
+      \caption{The fourth term of our chain rule $\frac{\partial z_{1,out}}{\partial z_{1,in}}$}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item With $z_{1,in} = x_1 \cdot W_{11} + x_2 \cdot W_{21} + b_1 \cdot 1$ we can compute the last component:
+  \end{itemize}
+  \begin{eqnarray*}
+    \textcolor{violet}{\frac{\partial z_{1,in}}{\partial W_{11}}} = x_1 = 1
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \scalebox{0.65}{\includegraphics{plots/backprop2_f_new.png}}
+      \caption{The fifth term of our chain rule $\frac{\partial z_{1,in}}{\partial W_{11}}$}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Plugging all five components together yields us: 
+      \begin{eqnarray*}
+         \textcolor{violet}{\frac{\partial \Lxy}{\partial W_{11}}} &=& 
+         \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,in}}{\partial W_{11}}} 
+        \\ &=& (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot (-0.22) \cdot \num[round-mode=places,round-precision=4]{0.2332341} \cdot 1 
+        \\ &=& \num[round-mode=places,round-precision=4]{0.0023645}
+      \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \scalebox{0.6}{\includegraphics{plots/backprop2_g_new.png}}
+      \caption{All five terms of our chain rule}
+  \end{figure}
+\framebreak
+    \item Consider the same learning rate of $\alpha = 0.5$. Then we obtain:
+  \end{itemize}
+    \begin{eqnarray*}
+      W_{11}^{[new]}  &=& W_{11}^{[old]} - \alpha \cdot  \textcolor{violet}{\frac{\partial \Lxy}{\partial W_{11}}} \\
+                  &=& -0.07 - 0.5 \cdot \num[round-mode=places,round-precision=4]{0.0023645} = \num[round-mode=places,round-precision=4]{-0.0711823}
+    \end{eqnarray*}
+  \begin{itemize}
+    \item We would now like to check how the performance has improved. Our updated weights are:
+  \end{itemize}
+  \begin{eqnarray*}
+    W = \begin{pmatrix}
+    \num[round-mode=places,round-precision=4]{-0.0711823} & \num[round-mode=places,round-precision=4]{0.9425785} \\
+    0.22 & 0.46
+    \end{pmatrix},
+    b = \begin{pmatrix}
+    \num[round-mode=places,round-precision=4]{-0.4611822} \\
+    \num[round-mode=places,round-precision=4]{0.1025782}
+    \end{pmatrix},
+  \end{eqnarray*}
+  \begin{eqnarray*}
+    u = \begin{pmatrix}
+    \num[round-mode=places,round-precision=4]{-0.2114632} \\
+    \num[round-mode=places,round-precision=4]{0.5970234}
+    \end{pmatrix}
+    \text{and} \ c = \num[round-mode=places,round-precision=4]{0.8030404}\text{.}
+  \end{eqnarray*}
+\framebreak  
+  \begin{itemize}
+    \item Plugging all values into our model yields $$f(\xb ~|~\thetab) = \num[round-mode=places,round-precision=4]{0.7614865}$$ and a squared error of $$\Lxy = \frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7614865})^2 = \num[round-mode=places,round-precision=4]{0.02844434}.$$
+    \item The initial weights predicted $\fx = \num[round-mode=places,round-precision=4]{0.7525469}$ and a slightly higher error value of $\Lxy = \num[round-mode=places,round-precision=4]{0.03061652}$.
+    \lz
+    \item Keep in mind that this is the result of only one training iteration. When applying a neural network, one usually conducts thousands of those.
+  \end{itemize}
+\end{vbframe}
+
+\begin{frame} {Backpropagation example: Summary}
+  \begin{itemize}
+    \item Our goal was to minimize the true/expected risk $$\riskt = \E_{(\xb, y)\sim \Pxy} \left[\Lxyt\right]$$
+    with respect to the true underlying distribution $\Pxy$.
+    \item Because we do not know $\Pxy$, we decided to minimize the empirical risk $$\risket = \frac{1}{n} \sumin \Lxyit$$ w.r.t. the training set and hope for the best.
+    \item However, even this is not possible because there is no way to analytically find a global minimum for deep neural networks.
+    \item Therefore, we decided to use gradient descent to iteratively find a local minimum of the (typically) non-convex loss function.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Backpropagation example: Summary}
+  \begin{itemize}
+      \item To perform gradient descent, we want to compute the gradient of the loss function $\risket$ with respect to \textbf{all} the weights and biases in the network.
+      \item Therefore, the number of components in the gradient is the total number of weights and biases in the network.
+      \item To compute each component in the gradient, we apply the chain rule to the relevant portion of the computational graph.
+      \item In software implementations, a vectorized version of the chain rule is used to compute the derivatives w.r.t. multiple weights simultaneously.
+      \item Loosely speaking, each term in the gradient represents the extent to which the corresponding weight is responsible for the loss. In other words, it is a way to assign "blame" to each weight in the network.
+  \end{itemize}
+\end{frame}
+
+\begin{vbframe} {Backpropagation example: Summary}
+
+  \begin{itemize}
+    \item Gradient descent can be implemented efficiently: 
+    \begin{itemize}
+      \item We can store and reuse results of the forward pass
+      \item We can store and intermediate results due to the chain rule during the backward pass  
+      \item We know how derivates of activation functions and affine functions look like
+    \end{itemize}
+    For example, to compute the derivative of the sigmoid activation at $z_{1,out}$, we \enquote{stored} the derivative of the sigmoid function $\frac{\partial z_{1,out}}{\partial z_{1,in}} = \sigma(z_{1,in})(1-\sigma(z_{1,in}))$ and plugged in $\sigma(z_{1,in}) = \num[round-mode=places,round-precision=4]{0.3705169}$, which was known from the forward pass.
+    % \item All the activations for the inputs that we feed to the network (forward pass) are stored in memory and used to compute the derivatives at each node in the computational graph. 
+    % For example, to compute the derivative of the sigmoid activation at $z_{1,out}$, where $\frac{\partial z_{1,out}}{\partial z_{1,in}} = \sigma(z_{1,in})(1-\sigma(z_{1,in}))$ , we plugged in $\sigma(z_{1,in}) = \num[round-mode=places,round-precision=4]{0.3705169}$.
+
+  \end{itemize}
+
+  \framebreak  
+
+  \begin{itemize}
+  \item In our example, we updated w.r.t. a single training example but typically, we feed subsets of the training set (more on this later).
+    \item The term \enquote{backpropagation} refers to the fact that the computation of the gradient using the chain rule is performed backwards (that is, starting at the output layer and finishing at the first hidden layer). 
+      A \textbf{forward} computation using the chain rule also results in the same gradient but can be computationally expensive (see http://colah.github.io/posts/2015-08-Backprop/).
+ \end{itemize}
+\end{vbframe} 
+
+\begin{frame} {Backpropagation example: Summary}
+  \begin{itemize}
+    \item After computing the gradient (using backpropagation), we subtract the gradient (scaled by the learning-rate $\alpha$) from the current set of weights (and biases) which results in a new set of weights (and biases).
+    \item The empirical loss for this new set of weights is now lower ("walking down the hill").
+    \item Next, we once again compute the forward pass for this new set of weights and store the activations.
+    \item Then, we compute the gradient of the empirical loss using backpropagation and take another step down the hill.
+    \item Rinse and repeat (until the loss stops decreasing substantially). 
+      However, we will see later that this naive approach often results in overfitting!
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Backpropagation: Why Backward?}
+
+
+\begin{frame} {Backward Computation and Caching}
+    In the XOR example, we computed:
+    $$\frac{\partial \Lxy}{\partial W_{11}} = 
+        \frac{\partial \Lxy}{\partial f_{out}} \cdot  \textcolor{black}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{black}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{black}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{11}}} $$
+  \begin{figure}
+    \centering
+      \includegraphics[width=9cm]{plots/backprop_gg1_new.png}
+      \caption{All five terms of our chain rule}
+  \end{figure}
+\end{frame}
+\begin{frame} {Backward Computation and Caching}
+    % \item Recall, in the XOR example, we computed
+    % $$\frac{\partial \Lxy}{\partial W_{11}} = 
+    %     \Bigg( \frac{\partial z_{1,in}}{\partial W_{11}} \Bigg( \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg( \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg( \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial \Lxy}{\partial f_{out}}\Bigg)\Bigg)\Bigg)\Bigg)$$
+      Next, let us compute:
+      $$\frac{\partial \Lxy}{\partial W_{21}} = 
+        %\frac{\partial z_{1,in}}{\partial W_{21}} \Bigg( \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg( \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg( \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial \Lxy}{\partial f_{out}}\Bigg)\Bigg)\Bigg)
+        \frac{\partial \Lxy}{\partial f_{out}} \cdot  \textcolor{black}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{black}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{black}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{21}}}$$
+        \begin{figure}
+    \centering
+      \includegraphics[width=9cm]{plots/backprop_gg_new.png}
+      \caption{All five terms of our chain rule}
+  \end{figure}
+\end{frame}
+\begin{frame} {Backward Computation and Caching}
+  \begin{itemize}
+    \item Examining the two expressions:
+    $$\frac{\partial \Lxy}{\partial W_{11}} = 
+        %\frac{\partial z_{1,in}}{\partial W_{11}} \textcolor{violet}{\Bigg( \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg( \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg( \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial \Lxy}{\partial f_{out}}\Bigg)\Bigg)\Bigg)}
+       \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{11}}}
+        $$
+      $$\frac{\partial \Lxy}{\partial W_{21}} =     
+%        \frac{\partial z_{1,in}}{\partial W_{21}} \textcolor{violet}{\Bigg( \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg( \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg( \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial \Lxy}{\partial f_{out}}\Bigg)\Bigg)\Bigg)}
+ \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{21}}}
+$$
+    \item We see that there is significant overlap / redundancy in the two expressions. A huge chunk of the second expression has already been computed while computing the first one.
+    \item \textbf{Again}: Simply cache these subexpressions instead of recomputing them each time.
+    
+  \end{itemize}
+\end{frame}
+\begin{frame} {Backward Computation and Caching}
+  \begin{itemize}
+    \item Let
+      {\small $$\textcolor{violet}{\delta_1}  = \textcolor{violet}{\frac{\partial \Lxy}{\partial z_{1,in}}} = 
+        %\textcolor{violet}{\Bigg( \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg( \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg( \frac{\partial f_{out}}{\partial f_{in}} \cdot \frac{\partial \Lxy}{\partial f_{out}}\Bigg)\Bigg)\Bigg)}
+ \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}}        
+        $$}
+    be cached. $\delta_1$ can also be seen as an \textbf{error signal} that represents how much the loss $L$ changes when the input $z_{1,in}$ changes.  
+    \item The two expressions of the previous slide now become,
+    {\small
+    $$\frac{\partial \Lxy}{\partial W_{11}} = 
+          \textcolor{violet}{\delta_1} \cdot \frac{\partial z_{1,in}}{\partial W_{11}}  \mbox{ \hspace{0.5cm} \small{and} \hspace{0.5cm}}
+     \frac{\partial \Lxy}{\partial W_{21}} = 
+        \textcolor{violet}{\delta_1} \cdot \frac{\partial z_{1,in}}{\partial W_{21}} $$}
+        where $\delta_1$ is simply "plugged in".
+    \item As you can imagine, caching subexpressions in this way and plugging in where needed can result in \textbf{massive} gains in efficiency for deep and "wide" neural networks. 
+    \item In fact, this simple algorithm, which was first applied to neural networks way back in 1985, is \textbf{still} the biggest breakthrough in deep learning.
+  \end{itemize}
+\end{frame}
+\begin{frame} {Backward Computation and Caching}
+  \begin{itemize}
+    \item On the other hand, if we had done a \textbf{forward} caching of the derivatives
+    {\small $$\frac{\partial \Lxy}{\partial W_{11}} = \Bigg(\Bigg(\Bigg( \frac{\partial z_{1,in}}{\partial W_{11}} \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg)  \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg) \frac{\partial f_{out}}{\partial f_{in}} \Bigg) \frac{\partial \Lxy}{\partial f_{out}}$$}
+      {\small $$\frac{\partial \Lxy}{\partial W_{21}} = 
+        \Bigg(\Bigg(\Bigg( \frac{\partial z_{1,in}}{\partial W_{21}} \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg)  \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg) \frac{\partial f_{out}}{\partial f_{in}} \Bigg) \frac{\partial \Lxy}{\partial f_{out}}$$}
+      there would be no common subexpressions to plug in. We would have to compute the \text{entire} expression for each and every weight!
+    \item This would make the computations too inefficient to make gradient descent tractable for large neural networks.
+  \end{itemize}
+\end{frame}
+
+
+\section{Backpropagation: Formalism}
+
+
+\begin{frame} {Backpropagation: Formalism}
+  \begin{itemize}
+    \item \small{Let us now derive a general formulation of backpropagation.}
+    \item \small{The neurons in layers $i-1$, $i$ and $i+1$ are indexed by $j$, $k$ and $m$, respectively.
+    \item The output layer will be referred to as layer O.}
+   \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/backnet.png}}
+      \tiny{\\Credit: Erik Hallstr\"{o}m}
+    \end{figure}
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{vbframe} {Backpropagation: Formalism}
+
+  \vspace*{-0.3cm}
+
+ \begin{figure}
+  \centering
+    \scalebox{0.6}{\includegraphics{plots/backnet.png}}
+  \end{figure}
+
+  \vspace*{-0.5cm}
+
+  \begin{small}
+  \begin{itemize}
+    \item Let $\delta_{\tilde{k}}^{(i)}$ (also: error signal) for a neuron $\tilde{k}$ in layer $i$ represent how much the loss $L$ changes when the input $z_{\tilde{k},in}^{(i)}$   changes:
+    {\small
+      $$\delta_{\tilde{k}}^{(i)} = \frac{\partial L}{\partial z_{\tilde{k},in}^{(i)}} =  \frac{\partial L}{\partial z_{\tilde{k},out}^{(i)}} \frac{\partial z_{\tilde{k},out}^{(i)}}{\partial z_{\tilde{k},in}^{(i)}}   =  \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial z_{m,in}^{(i+1)}}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial z_{\tilde{k},out}^{(i)}}{\partial z_{\tilde{k},in}^{(i)}} $$}
+    %\item The derivative of the loss $L$ between neuron $j$ in layer $i - 1$ and neuron $k$ in layer $i$ is
+    % \begin{eqnarray*}
+    % \frac{\partial L}{\partial W_{j,k}^{(i)}} &=& \frac{\partial L}{\partial z_{\tilde{k},in}^{(i)}} \frac{\partial z_{\tilde{k},in}^{(i)}}{\partial W_{j,k}^{(i)}} = \frac{\partial L}{\partial z_{\tilde{k},out}^{(i)}} \frac{\partial z_{\tilde{k},out}^{(i)}}{\partial z_{\tilde{k},in}^{(i)}} \frac{\partial z_{\tilde{k},in}^{(i)}}{\partial W_{j,k}^{(i)}} \\ &=&  \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial z_{m,in}^{(i+1)}}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial z_{\tilde{k},out}^{(i)}}{\partial z_{\tilde{k},in}^{(i)}} \frac{\partial z_{\tilde{k},in}^{(i)}}{\partial W_{j,k}^{(i)}}
+    % \end{eqnarray*}
+    \item Note: The sum in the expression above is over all the neurons in layer $i+1$. This is simply an application of the chain rule.
+  \end{itemize}
+  \end{small}
+
+\end{vbframe}
+
+\begin{frame} {Backpropagation: Formalism}
+ Using 
+ \vspace*{-5mm}
+        {\footnotesize \begin{eqnarray*}
+          \textcolor{blue}{z_{\tilde{k},out}^{(i)}} &=& \textcolor{blue}{\sigma(z_{\tilde{k},in}^{(i)})} \\
+          %\textcolor{teal}{z_{\tilde{k},in}^{(i)}} &=& \textcolor{teal}{\sum_j W_{j,k}^{(i)}z_{j,out}^{(i-1)}  + b_k^{(i)}} \\
+          \textcolor{violet}{z_{m,in}^{(i+1)}} &=& \textcolor{violet}{\sum_k W_{k,m}^{(i+1)}z_{k,out}^{(i)} + b_m^{(i+1)}}
+        \end{eqnarray*}}
+we get: 
+      \vspace{-0.2cm}
+      {\footnotesize \begin{eqnarray*}
+      \delta_{\tilde{k}}^{(i)} &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial \textcolor{violet}{z_{m,in}^{(i+1)}}}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial \textcolor{blue}{z_{\tilde{k},out}^{(i)}}}{\partial z_{\tilde{k},in}^{(i)}}  \\
+       &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial \left(\textcolor{violet}{\sum_k W_{k,m}^{(i+1)}z_{k,out}^{(i)} + b_m^{(i+1)}}\right)}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial \textcolor{blue}{\sigma(z_{\tilde{k},in}^{(i)})}}{\partial z_{\tilde{k},in}^{(i)}}  \\
+      &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \textcolor{violet}{W_{\tilde{k},m}^{(i+1)}} \Bigg) \textcolor{blue}{\sigma'(z_{\tilde{k},in}^{(i)})} = \sum_m \Bigg(  \delta_{\tilde{k}}^{(i+1)} \textcolor{violet}{W_{\tilde{k},m}^{(i+1)}} \Bigg) \textcolor{blue}{\sigma'(z_{\tilde{k},in}^{(i)})} 
+      \end{eqnarray*}}\\
+      Therefore, we now have a \textbf{recursive definition} for the error signal of a neuron in layer $i$ in terms of the error signals of the neurons in layer $i+1$ and, by extension, layers \{i+2, i+3 \ldots , O\}!
+\end{frame}
+
+% \begin{frame} {Backpropagation: Formalism}
+%   \begin{itemize}
+    % \item Let $\delta_{\tilde{k}}^{(i)}$ (also: \textbf{error signal}) for a neuron $k$ in layer $i$ represent how much the loss $L$ changes when the input $z_{\tilde{k},in}^{(i)}$ changes:
+    % \begin{footnotesize}
+    % $$ \delta_{\tilde{k}}^{(i)} = \frac{\partial L}{\partial z_{\tilde{k},in}^{(i)}}$$
+    % \end{footnotesize}
+    % \item Using the results from the previous slide, this can be rewritten as
+    % \begin{footnotesize}
+    %     $$ \delta_{\tilde{k}}^{(i)} = \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} W_{k,m}^{(i+1)} \Bigg) \sigma'(z_{\tilde{k},in}^{(i)}),$$ 
+    %     \end{footnotesize}
+    %     which, in turn, can be rewritten as
+    %       \begin{footnotesize}
+    %     $$ \delta_{\tilde{k}}^{(i)} = \sum_m \Bigg( \delta_m^{(i+1)} W_{k,m}^{(i+1)} \Bigg) \sigma'(z_{\tilde{k},in}^{(i)}). $$
+    %       \end{footnotesize}
+%     \item Therefore, we now have a \textbf{recursive definition} for the error signal of a neuron in layer $i$ in terms of the error signals of the neurons in layer $i+1$ and, by extension, layers \{i+2, i+3 \ldots , O\}!
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame} {Backpropagation: Formalism}
+  \begin{itemize}
+    \item Given the error signal $\delta_{\tilde{k}}^{(i)}$ of neuron $\tilde{k}$ in layer $i$, the derivative of loss $L$ w.r.t. to the weight $W_{\tilde{j},\tilde{k}}$ is simply:
+        $$
+           \frac{\partial L}{\partial W_{\tilde{j},\tilde{k}}^{(i)}} = \frac{\partial L}{\partial z_{\tilde{k},in}^{(i)}} \frac{\partial z_{\tilde{k},in}^{(i)}}{\partial W_{\tilde{j},\tilde{k}}^{(i)}} 
+           = \delta_{\tilde{k}}^{(i)} z_{\tilde{j},out}^{(i-1)} $$
+        because $z_{\tilde{k},in}^{(i)} = \sum_j W_{j,\tilde{k}}^{(i)}z_{j,out}^{(i-1)}  + b_{\tilde{k}}^{(i)}$
+    \item Similarly, the derivative of loss $L$ w.r.t. bias $b_{\tilde{k}}^{(i)}$ is:
+      $$ \frac{\partial L}{\partial b_{\tilde{k}}^{(i)}} = \frac{\partial L}{\partial z_{\tilde{k},in}^{(i)}} \frac{\partial z_{\tilde{k},in}^{(i)}}{\partial b_{\tilde{k}}^{(i)}} = \delta_{\tilde{k}}^{(i)}$$
+  \end{itemize}
+\end{frame}
+\begin{frame} {Backpropagation: Formalism}
+  \begin{itemize}
+    \item We have seen how to compute the error signals for individual neurons. It can be shown that the error signal $\bm{\delta}^{i}$ for an entire layer $i$ can be computed as follows ($\odot$ = element-wise product):
+      \begin{itemize}
+        \item $\bm{\delta}^{(O)} = \nabla_{f_{out}}L \odot \tau'(f_{in})$
+        \item $\bm{\delta}^{(i)} = W^{(i+1)}\bm{\delta}^{(i+1)} \odot \sigma'(z_{in}^{(i)})$
+      \end{itemize}
+    \item As we have seen earlier, the error signal for a given layer $i$ depends recursively on the error signals of \textbf{later} layers \{i+1, i+2, \ldots , O\}.
+    \item Therefore, backpropagation works by computing and storing the error signals \textbf{backwards}. That is, starting at the output layer and ending at the first hidden layer. This way, the error signals of later layers \textbf{propagate backwards} to the earlier layers.
+    \item The derivative of the loss $L$ w.r.t. a given weight is computed efficiently by plugging in the cached error signals thereby avoiding expensive and redundant computations. 
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\section{References}
+
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Yann LeCun et al., 1998]{3} Yann Lecun, Leon Bottou, Genevieve B. Orr and Klaus-Robert Muller (1998)
+% \newblock Efficient BackProp
+% \newblock \emph{\url{http://yann.lecun.com/exteal/publis/pdf/lecun-98b.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Geoffrey Hinton and Ruslan Salakhutdinov, 2006]{4} Geoffrey Hinton and Ruslan Salakhutdinov (2006)
+% \newblock Reducing the Dimensionality of Data with Neural Networks
+% \newblock \emph{\url{https://www.cs.toronto.edu/\%7Ehinton/science.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Erik Hallstr\"{o}m , 2016]{2} Erik Hallstr\"{o}m (2016)
+\newblock Backpropagation from the beginning
+\newblock \emph{\url{https://medium.com/@erikhallstrm/backpropagation-from-the-beginning-77356edf427d}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\endlecture
+

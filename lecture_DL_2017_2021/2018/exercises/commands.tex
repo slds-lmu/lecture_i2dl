@@ -1,0 +1,148 @@
+\usepackage{verbatimbox}
+\usepackage[dvipsnames]{xcolor}
+
+\newcommand{\blau}[1]{{\color{blue}#1}}
+\newcommand{\rot}[1]{{\color{WildStrawberry}#1}}
+\newcommand{\violet}[1]{{\color{Plum}#1}}
+\newcommand{\gruen}[1]{{\color{PineGreen}#1}}
+\newcommand{\grau}[1]{{\color{Gray}#1}}
+\newcommand{\cn}[1]{\begin{CJK}{UTF8}{gbsn}#1\end{CJK}}
+
+\newcommand{\jl}[1]{\emph{\textbf{Jens: #1}}}
+\newcommand{\mg}{\mathcal{G}}
+\newcommand{\ten}{\mathcal{T}}
+\newcommand{\rl}{\mathbb{R}}
+
+% lecture 2
+\newcommand{\shortcode}[1]{\texttt{#1}}
+\newcommand*\short[1]{\expandafter\@gobbletwo\number\numexpr#1\relax}
+\newcommand{\myheaderbox}[2]{%
+	\begin{minipage}[t]{#1}
+		\begin{beamerboxesrounded}[upper=block title,lower=block title,shadow=true]%
+			{\centering\usebeamerfont*{block title}\rule{0pt}{2.6ex}#2}%
+		\end{beamerboxesrounded}\usebeamercolor*{normal text}
+	\end{minipage}
+}
+
+\newcommand{\mycontentbox}[2]{%
+	\begin{minipage}[t]{#1}
+		\begin{beamerboxesrounded}[upper=block body,lower=block body,shadow=true]%
+			{\centering\usebeamerfont*{block title}\rule{0pt}{2.6ex}#2}%
+		\end{beamerboxesrounded}
+	\end{minipage}\usebeamercolor*{normal text}
+}
+
+\newcommand{\mylcontentbox}[2]{%
+	\begin{minipage}[t]{#1}
+		\begin{beamerboxesrounded}[upper=block body,lower=block body,shadow=true]%
+			{\flushleft\usebeamerfont*{block title}\rule{0pt}{2.6ex}#2}%
+		\end{beamerboxesrounded}
+	\end{minipage}\usebeamercolor*{normal text}
+}
+
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{ucs}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize,tabsize=2,frame=lines,aboveskip=10pt,belowskip=10pt,captionpos=b,breaklines=true}
+
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+\setlist[itemize,1]{label={\fontfamily{cmr}\fontencoding{T1}\selectfont$\vartriangleright$}}
+\setlist[itemize,2]{label={\fontfamily{cmr}\fontencoding{T1}\color{NavyBlue}\selectfont$\bullet$}}
+\setlist[itemize,3]{label={\fontfamily{cmr}\fontencoding{T1}\selectfont\small$\vartriangleright  $}}
+
+\lstset{ %numbers=left, numberstyle=\tiny,
+	basicstyle=\ttfamily\small,
+	tabsize=2, %keywordstyle=\underbar, stringstyle=\small,
+	backgroundcolor=\color[gray]{0.94} } %, framexleftmargin=2pt}
+\lstdefinelanguage{SPARQL}
+{%showstringspaces=false,
+	morestring=[b]",
+	% morestring=[s]{>}{<},
+	morecomment=[s]{<?}{?>},
+	stringstyle=\ttfamily\color{black},
+	identifierstyle=\ttfamily\color{black},
+	keywordstyle=\ttfamily\color{blue},
+	morekeywords={OPTIONAL, SELECT, CONSTRUCT, ASK, DESCRIBE, DISTINCT, WHERE, MINUS, FILTER, BOUND, UNION, LIMIT, OFFSET, COUNT, AS, DATATYPE, ORDER, GROUP, BY, NOT, EXISTS, PREFIX, langMATCHES, LANG, SPARQL}
+}
+\lstdefinelanguage{SQL}
+{%showstringspaces=false,
+	morestring=[b]",
+	% morestring=[s]{>}{<},
+	morecomment=[s]{<?}{?>},
+	stringstyle=\ttfamily\color{black},
+	identifierstyle=\ttfamily\color{black},
+	keywordstyle=\ttfamily\color{blue},
+	morekeywords={OPTIONAL, FROM, ON, JOIN, SELECT, CONSTRUCT, ASK, DESCRIBE, DISTINCT, WHERE, MINUS, FILTER, BOUND, UNION, LIMIT, OFFSET, COUNT, AS, DATATYPE, ORDER, GROUP, BY, NOT, EXISTS, PREFIX, langMATCHES, LANG, SPARQL}
+}
+\lstdefinelanguage{Cypher}
+{%showstringspaces=false,
+	morestring=[b]",
+	% morestring=[s]{>}{<},
+	morecomment=[s]{<?}{?>},
+	stringstyle=\ttfamily\color{black},
+	identifierstyle=\ttfamily\color{black},
+	keywordstyle=\ttfamily\color{blue},
+	morekeywords={CREATE, OPTIONAL, FROM, ON, JOIN, SELECT, CONSTRUCT, ASK, DESCRIBE, DISTINCT, WHERE, MINUS, FILTER, BOUND, UNION, LIMIT, OFFSET, COUNT, AS, DATATYPE, ORDER, GROUP, BY, NOT, EXISTS, PREFIX, langMATCHES, LANG, SPARQL}
+}
+\lstset{
+	showstringspaces = false,
+	emph={SemanticWeb, verlegtBei, titel, Hitzler, Krötzsch, Rudolph, Sure, autor, Buch, Professor, Person, zugehoerigkeit, vorname, Zahl,Projekt,englischerName,franzoesischerName}, emphstyle=\color{black},
+	emph={[2]some,only,min,max,and,or,that,not}, emphstyle={[2]\color{blue}},
+	aboveskip={0 em},
+	belowskip={0 em},
+	literate={ö}{{\"o}}1
+	{ä}{{\"a}}1
+	{ü}{{\"u}}1
+}
+% Turtle box
+\definecolor{olivegreen}{rgb}{0.2,0.8,0.5}
+\definecolor{grey}{rgb}{0.5,0.5,0.5}
+\lstdefinelanguage{ttl}{
+	sensitive=true,
+	morecomment=[l][\color{grey}]{@},
+	morecomment=[l][\color{olivegreen}]{\#},
+	morestring=[b][\color{blue}]\",
+	keywordstyle=\color{cyan},
+	morekeywords={xmlns,version,owl,rdf,rdfs,xml,xsd}
+}
+
+% from 04-SRL.tex
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\sign}{\operatorname{sign}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\Order}{\mathcal{O}}
+\newcommand{\Normal}{\mathcal{N}}
+\newcommand{\trace}{\operatorname{tr}}
+\newcommand{\const}{\mathop{const}}
+\newcommand{\Prob}{\mathop{Pr}}
+\newcommand{\Expectation}{\mathbb{E}}
+\newcommand{\Covariance}{\operatorname{Cov}}
+\newcommand{\Risk}{\mathcal{R}}
+\newcommand{\continuous}{\mathcal{C}}
+\newcommand{\indicator}{\mathbf{1}}
+\newcommand{\Span}{\operatorname{span}}
+\newcommand{\SV}{\operatorname{SV}}
+\newcommand{\Hilbertspace}{\mathcal{H}}
+\newcommand{\one}{\boldsymbol{1}}
+\newcommand{\scp}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\fp}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\id}{\mathrm{I}}
+\newcommand{\ellset}{\{1, \dots, n\}}
+\newcommand{\sklearn}{\textit{scikit-learn}}
+\newcommand{\code}[1]{\mbox{\texttt{#1}}}
+
+% from 07 Neural Nets
+\newcommand{\diagonal}{\operatorname{diag}}
+
+% Markov Networks
+\newcommand{\indep}{\operatorname{\,\bot\,}} % statistical independence (multiple symbols used in literature)
+\newcommand{\nindep}{\operatorname{\;\not\bot\;}} % statistical independence (multiple symbols used in literature)

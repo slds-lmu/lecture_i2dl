@@ -1,0 +1,238 @@
+
+\input{../../2021/style/preamble_mina.tex} 
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\begin{document}
+
+\lecturechapter{9}{Unsupervised Learning}
+\lecture{Deeplearning}
+
+
+\begin{vbframe}{Unsupervised Learning}
+  \begin{itemize}
+    \item So far, we have described the application of neural networks to supervised learning, in which we have labeled training examples.
+    \item In these \textbf{supervised learning} scenarios, we exploit information of class memberships (or numeric values) to train our algorithm. That means in particular, that we have access to labeled data (y).
+    \item In supervised learning model learn a function to map x to y.
+    \item Examples are: classification, regression, object detection, semantic segmentation, image captioning,etc.
+  \end{itemize}
+    
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\linewidth]{plots/supervised.png}
+            \caption{examples of supervised learning model where we have corresponding labels for training dataset}
+        \end{figure}
+    
+    \framebreak
+    
+    \begin{itemize}
+      \item There exists another learning paradigm, \textbf{unsupervised learning}, where:
+      \item Training data consists of unlabeled input points $\pmb{x}^{(1)}, \dots, \pmb{x}^{(n)}$
+      \item our goal is to learn some underlying  hidden structure of the data.
+      \item Examples are: clustering, dimensionality reduction, feature learning, density estimation, etc
+    \end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}{Unsupervised Learning - Examples}
+  \begin{itemize}
+    \item[] \textbf{1. Clustering.}
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \scalebox{1}{\includegraphics{plots/clustering_2.png}}
+    \caption{\footnotesize{Different cluster analysis results on a dataset. True labels (the colors in the original data) are shown here but the algorithms only operate on unlabelled data. (Source : Wikipedia)}}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item[] \textbf{2. Dimensionality reduction/manifold learning.}
+    \ \begin{itemize}
+    \item E.g.~for  visualisation in a low dimensional space.
+    \end{itemize}
+  \end{itemize}
+
+    \begin{figure}
+        \only<1-2>{\includegraphics[width=6.cm]{plots/unsupervised_3.png}}
+        \caption{\footnotesize{Principal Component Analysis (PCA)}}
+    \end{figure}
+
+\framebreak
+  \begin{itemize}
+    \item[] \textbf{2. Dimensionality reduction/manifold learning.}
+    \ \begin{itemize}
+    \item E.g.~for  image compression.
+    \end{itemize}
+  \end{itemize}
+
+    \begin{figure}
+        \only<1-2>{\includegraphics[width=5.cm]{plots/imagecompression.jpg}}
+        \caption{from \url{https://de.slideshare.net/hcycon/bildkompression}}
+    \end{figure}
+
+\end{vbframe}
+
+
+
+\begin{vbframe} {Unsupervised Learning - Examples}
+  \begin{itemize}
+    \item[] \textbf{3. Feature extraction/representation learning.}
+    \item[]
+  \end{itemize}
+   \begin{figure}
+        \only<1-2>{\includegraphics[width=4.cm]{plots/feature_extraction.png}}
+        \caption{Source: Wikipedia}
+    \end{figure}
+    \begin{itemize}
+    \item  E.g.~for \textbf{semi-supervised learning}: features learned from an unlabeled dataset are employed to improve performance in a supervised setting. 
+    \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item[] \textbf{4. Density fitting/learning a generative model.}
+    \item[]
+  \end{itemize}
+   \begin{figure}
+        \only<1-2>{\scalebox{1}{\includegraphics{plots/BHM.png}}}
+        \caption{A generative model can reconstruct the missing portions of the images. (Bornschein, Shabanian, Fischer \& Bengio, ICML, 2016)}
+    \end{figure}
+    
+
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{Manifold learning}
+
+  \begin{itemize}
+        \item \textbf{Manifold hypothesis}: 
+        Data of interest lies on an embedded non-linear manifold within the higher-dimensional space.
+    %    Data is concentrated around a low-dimensional \textit{manifold} or a small set of such manifolds
+        %    \pause
+        % \item In mathematics, a manifold is a topological space that locally resembles Euclidean space near each point 
+        \item A \textbf{manifold}: 
+        \begin{itemize}
+        \item  is a topological space that locally resembles the Euclidean space.
+        \item  in ML, more loosely refers to a connected set of points that can be approximated well by considering only a small number of dimensions. 
+        \end{itemize}
+          \begin{figure}[h]
+                \centering
+                \includegraphics[width=5  cm]{plots/manifold.png}
+                \caption{
+                from Goodfellow et. al%Data sampled from a distribution in a 2D space that is actually concentrated near a 1D manifold.
+                }
+            \end{figure}
+           \end{itemize}    
+       \framebreak
+ 
+\begin{itemize}
+    \item An important characterization of a manifold is the set of its tangent planes.
+    \item \textbf{Definition}: At a point $\pmb{x}$ on a $d$-dimensional manifold, the \textbf{tangent plane} is given by $d$ basis vectors that span the local directions of variation allowed on the manifold.
+    
+\end{itemize} 
+        \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.8\linewidth]{plots/tangent_plane.png}
+            \caption{A pictorial representation of the tangent space of a single point, \textbf{\textit{x}}, on a manifold (Goodfellow et al. (2016)).}
+        \end{figure}
+     
+       \framebreak
+       
+      
+        \begin{itemize}
+        \item Manifold hypothesis does not need to  hold true.
+        %assumption that the data lies along a low-dimensional manifold may notalways be correct
+        \item In the context of AI tasks (e.g.~processing images, sound, or text) it seems to be at least approximately correct, since :
+        \begin{itemize}
+        \item probability distributions over images, text strings, and sounds that occur in real life are highly concentrated (randomly sampled pixel values do not look like images, randomly sampling letters is unlikely to result in a meaningful sentence).
+        \item samples are connected to each other by other samples, with each sample surrounded by other highly similar samples that can be reached by applying transformations (E.g. for images: Dim or brighten the lights, move or rotate objects, change the colors of objects,  etc).
+     \end{itemize}
+      % TODO: add more on the manifold view ?
+    \end{itemize} 
+
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Revision of PCA}
+\begin{itemize}
+  \item The purpose of PCA is to project the data $\mathbf{x}^{(1)}, \dots, \mathbf{x}^{(n)}$ onto a lower-dimensional subspace (e.g. to save memory). \\
+  \item For each point $\mathbf{x}^{(i)} \in \mathbb{R}^p$ we need to find a corresponding code vector $\mathbf{c}^{(i)} \in \mathbb{R}^l$ with $l < p$. That step is accomplished by the encoding function which produces the code for an input: $$f(\mathbf{x}) = \mathbf{c}$$
+  \item  Additionally, we need a decoding function to produce the reconstruction of the input given its code: $$\mathbf{x} \approx g(f(\mathbf{x}))$$
+  \item PCA is then defined by the choice of the encoding and decoding function.
+  \item We can choose matrix multiplication to map the data back into $\mathbb{R}^{p}$: $g(\mathbf{c}) = \mathbf{Dc}$, with $\mathbf{D} \in \mathbb{R}^{p \times l}$, defining the decoding.
+\framebreak
+  \item To keep the encoding problem easy, PCA constrains the columns of $\mathbf{D}$ to be orthogonal.
+  \item We begin with the optimal code $\mathbf{c}^{*}$ for each input. We could achieve this by minimizing the distance between the input $\mathbf{x}$ and its reconstruction $g(\mathbf{c})$ (PCA is a linear transformation with minimum reconstruction error)
+  \item One way to obtain the optimal code $\mathbf{c}^{*}$ is to minimize the distance between the input $\mathbf{x}$ and its reconstruction $g(\mathbf{c})$ (that means, linear transformation with minimum reconstruction error):
+   $$\mathbf{c}^{*} = \displaystyle\argmin_{\mathbf{c}} ||\mathbf{x} - g(\mathbf{c})||^2_2$$
+  \item Solving this optimization problem leads to
+  $$\mathbf{c} = \mathbf{D}^T\mathbf{x}$$
+  \item Thus, to encode a vector, we apply the encoder function
+  $$f(\mathbf{x}) = \mathbf{D}^T \mathbf{x}$$
+% \framebreak
+% \begin{itemize}
+  \item
+  We can also define the PCA as the reconstruction operation:
+  $$r(\mathbf{x}) = g(f(\mathbf{x})) = \mathbf{DD}^T \mathbf{x}$$
+\end{itemize}
+%   \item To find the encoding matrix $\mathbf{D^*}$, we minimize the Frobenius norm of the matrix of errors computed over all dimensions and points:
+%   $$\mathbf{D^*} = \displaystyle\argmin_{\mathbf{D}} \sqrt{\displaystyle\sum_{i,j} \Big(x^{(i)}_j - r(x^{(i)})_j\Big)^2}, \text{ subject to } \mathbf{D^T}\mathbf{D} = \mathbf{I}_l$$
+%   \item for $l = 1$, $\mathbf{D^*}$ collapses to a single vector and we can rewrite the equation as
+%   $$\mathbf{d^*} = \displaystyle\argmin_{\mathbf{d}} ||\mathbf{X} - \mathbf{X}\mathbf{d}\mathbf{d}^T||^2_F, \text{ subjected to } \mathbf{d}^T\mathbf{d} = 1$$
+%   \item The optimal $\mathbf{d^*}$ is given by the eigenvector of $\mathbf{X}^T\mathbf{X}$ corresponding to the largest eigenvalue.
+% \end{itemize}
+% \framebreak  
+% \begin{itemize}
+%   \item In general, for $l = k$ (with $k < p$) , the optimal reconstruction $\mathbf{X}^*$, by the Eckart-Young-Mirsky Theorem, is the truncated \textbf{Singular Value Decomposition (SVD)} of $\mathbf{X}$ :
+%   $$
+% \mathbf{X}^* = \mathbf{U}_k \boldsymbol{\Sigma}_k \mathbf{V}_k^\top
+% $$
+% where, the diagonal matrix $\boldsymbol{\Sigma}_k$ contains the $k$ largest \textbf{singular values} and the columns of the matrices $\mathbf{U}_k$ and $\mathbf{V}_k$ are the corresponding \textbf{right singular vectors} and \textbf{left singular vectors}, respectively.
+% \item Here, the optimal encoding matrix $\mathbf{D}^*$ consists of the $k$ left singular vectors as columns.
+% \end{itemize}
+% \framebreak
+% \begin{itemize}
+%   \item \small{The first principal component has the largest possible variance (that is, accounts for as much of the variability in the data as possible).
+%   
+%   \item Each succeeding component in turn has the highest variance possible under the constraint that it is orthogonal to the preceding components.}
+% 
+%  \begin{figure}
+%     \centering
+%     \scalebox{0.6}{\includegraphics{plots/PCA_1.png}}
+%     \tiny{\\credit:Syed Nazrul}
+%       \caption{\footnotesize{The vectors shown are the (scaled) eigenvectors. Keeping only the first principal component results in dimensionality reduction.}}
+%   \end{figure}
+%   \end{itemize}
+  
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[fragile]
+\frametitle{Unsupervised Deep Learning}
+Given i.i.d. (unlabeled) data $\mathbf{x}_1, \mathbf{x}_2,\dots, \mathbf{x}_n \sim  p_{\text{data}}$, 
+ in unsupervised deep learning, one usually trains :
+
+ \begin{itemize}
+ 
+ \item  an autoencoder (a special kind of neural network) for \textbf{representation learning} (feature extraction, dimensionality reduction, manifold learning, ...), or, \\
+ %$\righarrow$ This neural networks are 
+
+ \pause
+ 
+  \item a \textbf{generative model}, i.e.~a probabilistic model of the  data generating distribution  $p_{\text{data}}$ 
+  % (predictions, missing feature estimation, reconstruction, denoising, sampling, outlier detection, ...).
+  (data generation, outlier detection, missing feature extraction, reconstruction, denoising or planning in reinforcement learning, ...). 
+  
+  %full probabilistic model of all variables
+  
+ \end{itemize}
+
+\end{frame} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\endlecture
+\end{document}

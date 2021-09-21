@@ -1,0 +1,123 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{verbatimbox}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+\usepackage{hyperref}
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+\input{commands.tex}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\title{	
+\normalfont \normalsize 
+\textsc{Faculty of Mathematics, Ruhr University Bochum} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Deep Learning\\{\Large Exercise Sheet 5}\\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Asja Fischer} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+
+\maketitle % Print the title
+\section{In Class}
+\begin{enumerate} 
+%\item \textbf{Transfer function}\\
+%Consider the sigmoid transfer function
+%\begin{align*}
+%   \sigma(u) = \frac{1}{1 + e^{-u}} \enspace,
+% \end{align*}
+% Show that its derivative fulfills
+% \begin{align*}
+%    \sigma'(u) = \big( 1 - \sigma(u) \big) \cdot \sigma(u) \enspace.
+%   \end{align*}
+
+
+\item \textbf{Sattle point}\\
+Given the function $f(x_1,x_2)= x_1^2 - x_2^2$ calculate the Hessian matrix $H$, the eigenvectors and eigenvalues of $H$, and interpret the results in terms of the curviture of the graph shown in the folling figure. 
+
+\begin{center}
+\includegraphics[width=5cm]{images/saddlepoint.png}
+\end{center}
+
+\item \textbf{Momentum}
+\begin{itemize}
+\item[a)] Execute two iterations of gradient descent with momentum to find the minimum of the function $f(u)=\frac{u^3}{3}+20 u^2-50 u-5$.
+Use a learning rate of $\alpha=0.01$, momentum $\varphi=0.5$ and an initial volocity of $\nu=0$.
+\item[b)] Evaluate the benefit of using a momentum for the task in a) by comparing your findings to the vanilla gradient descent method
+\end{itemize}
+
+\item\textbf{Adam}\\
+Assume the gradient estimate of the fist and second iteration of ADAM are given by $(4,2,3,1)^T$ and $(1,2,1,2)$, respectively. Let $\rho_1=0,9$  $\rho_2=0,99$, and $\alpha=0.01$. Calculate the first two update steps $\Delta \theta_0$ and $\Delta \theta_1$.
+
+\item\textbf{Newton's Method}\\
+The Newton's method is an optimization scheme based on using a second-order Taylor series expansion to approximate the opjective function (that is the empricial risk $R_{emp}(\theta)$ in our case) near some current point ($\theta_0$ in our case), ignoring derivatives of higher order:
+$$
+R_{emp}(\theta)=R_{emp}(\theta_0)+ (\theta - \theta_0)^T \nabla_{\theta} R_{emp}(\theta_0) + \frac{1}{2} (\theta - \theta_0)^T H (\theta - \theta_0)\enspace,
+$$
+where $H$ sis the Hessian of $R_{emp}$ wrt $\theta$ evaluated at $\theta_0$.
+\begin{itemize}
+\item[a)]Solve for the critical point (corresponding to the minimum) of this function to optain the Newton parameter update rule.
+\item[b)] For a (locally) quadratic funtion (with posotive definite $H$) Newton's method jumps directly to the minimum. To demonstrate this appply Newton's method to the simple function $f(x)=(x-1)(x-3)$ and the current point $x_0=4$.   
+\item[c)] What makes it difficult to apply Newton's method and other second order methods to the optimization of neural networks?
+\end{itemize}
+
+\end{enumerate}
+
+
+%\section{At Home}
+%\begin{enumerate}
+%\item ... some example of actually computing knowledge graph embeddings ...
+%\end{enumerate}
+\end{document}

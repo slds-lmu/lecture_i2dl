@@ -1,0 +1,1141 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+@
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{8}{Recurrent Neural Networks (RNNs)}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% 
+% \frametitle{RNNs - What for?}
+%   Suppose we would like to process sequential inputs, such as
+%   \begin{itemize}
+%     \item Text data %(e.g. for text recognition)
+%     \item Audio data %(e.g. for natural language processing)
+%   \end{itemize}
+%   Can we do that with a classic dense net?
+%   %Is it possible for a dense net?
+%   %How would a dense neural network deal with them?
+%   \begin{itemize}
+%     \item[]
+%   \end{itemize}
+%   \begin{centering}
+%   \begin{minipage}{0.42\textwidth}
+%     \begin{figure}
+%         \only<1-2>{\includegraphics[width=5.5cm]{plots/neuralnet2.png}}
+%         \caption{A dense architecture. \textcolor{white}{bla bla bla blabla blabla blabla blabla blabla bla}}
+%     \end{figure}
+%   \end{minipage}\hfill
+%   \begin{minipage}{0.57\textwidth}
+%   \vspace{-0.3cm}
+%     \begin{itemize}
+%       \only<1>{\item[] \textcolor{white}{bla}} % stupid trick to get rid of compiling error
+%       \only<2>{\item[] Hardly, the major drawbacks of these models are:} %The major drawbacks of these models for sequential data are:}
+%       \only<2>{\begin{itemize}
+%         \only<2>{\item \textbf{a fixed input length}. \\ The length of sequential inputs can vary!}
+%         \only<2>{\item \textbf{the assumption of independent training samples}. \\ For sequential inputs, there are short and long term temporal dependencies!}
+%       \end{itemize}}
+% 
+%     \end{itemize}
+%     
+%   \end{minipage}
+%   \end{centering}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame} {Motivation for RNNs}
+  \begin{itemize}
+    \item The two major types of neural network architectures that we have seen so far are fully-connected networks and Convolutional Neural Networks (CNNs).
+    \item In both cases, the input layers have a fixed size and, therefore, these networks can (typically) only handle fixed-length inputs.
+    \item The primary reason for this is that it is not possible to vary the size of the input layer without also varying the number of learnable parameters/weights in the network.
+    \item However, in many cases, we would like to feed \textbf{variable length inputs} to the network.
+    \item Common examples of this are \textbf{sequence data} such as time-series, audio and text.
+    \item Therefore, we need a new class of neural network architectures that are able to handle such variable length inputs: \textbf{Recurrent Neural Networks (RNNs)}.
+  \end{itemize}
+\end{frame}
+
+\section{RNNs -- The basic idea}
+
+\begin{frame} {RNNs - Introduction}
+  \begin{itemize}
+    \item \small{Suppose we have some text data and our task is to analyse the \textit{sentiment} in the text.
+    \item For example, given an input sentence, such as "This is good news.", the network has to classify it as either 'positive' or 'negative'.
+    \item We would like to train a simple neural network (such as the one below) to perform the task.}
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.6}{\includegraphics{plots/ffwd.png}}
+      \caption{\footnotesize{Two equivalent visualizations of a dense net with a single hidden layer.}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {RNNs - Introduction}
+  \begin{itemize}
+    \item Because sentences can be of varying lengths, we need to modify the dense net architecture to handle such a scenario.
+    \item One approach is to draw inspiration from the way a human reads a sentence; that is, one word at a time.
+    \item An important cognitive mechanism that makes this possible is "\textbf{short-term memory}".
+    \item As we read a sentence from beginning to end, we retain some information about the words that we've already read and use this information to understand the meaning of the entire sentence.
+    \item Therefore, in order to feed the words in a sentence sequentially to a neural network, we need to give it the ability to retain some information about past inputs.
+  \end{itemize}
+\end{frame}
+ 
+\begin{frame} {RNNs - Introduction}
+  \begin{itemize}
+   \item %It's important to note that 
+    When words in a sentence are fed to the network one at a time, the inputs are no longer independent. For example, it is much more likely that the word "good" is followed by "morning" rather than "plastic". We need to model this dependence. 
+    \item %Even though we've decided to feed a single word at a time, 
+    Each word must still be encoded as a fixed-length vector because the size of the input layer will remain fixed.
+    \item Here, for the sake of the visualization, each word is represented as a 'one-hot coded' vector of length 5. (<eos> = 'end of sequence')
+    \begin{figure}
+      \centering
+      \scalebox{0.55}{\includegraphics{plots/onehot_1.png}}
+  \end{figure}
+    (The standard approach is to use word embeddings (more on this later)).
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {RNNs - Introduction}
+  \begin{itemize}
+    \item Our goal is to feed the words to the network sequentially in discrete time-steps.
+    \item A regular dense neural network with a single hidden layer only has two sets of weights: 'input-to-hidden' weights W and 'hidden-to- output' weights U.
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.7}{\includegraphics{plots/ffwd1.png}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {RNNs - Introduction}
+  \begin{itemize}
+    \item \small{In order to enable the network to retain information about past inputs, we introduce an \textbf{additional set of weights} $V$, from the hidden neurons at time-step $t$ to the hidden neurons at time-step $t+1$.
+    \item Having this additional set of weights makes the activations of the hidden layer depend on \textbf{both} the current input and the activations for the \textit{previous} input.}
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.80}{\includegraphics{plots/hidtohid.png}}
+      \caption{\footnotesize Input-to-hidden weights $W$ and \textbf{hidden-to-hidden} weights $V$. The hidden-to-output weights U are not shown in the figure.}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {RNNs - Introduction}
+  \begin{itemize}
+    \item With this additional set of hidden-to-hidden weights $V$, the network is now a Recurrent Neural Network (RNN).
+    \item In a regular feed-forward network, the activations of the hidden layer are only computed using the input-hidden weights $W$ (and bias b).
+    $$z = \sigma(W^Tx + b)$$
+    \item In an RNN, the activations of the hidden layer (at time-step $t$) are computed using \textit{both} the input-to-hidden weights $W$ and the hidden-to-hidden weights V.
+    $$z^{[t]} = \sigma(\mathbf{\textcolor{red}{V^Tz^{[t-1]}}} + W^Tx^{[t]} + b)$$
+    \item The vector $z^{[t]}$ represents the short-term memory of the RNN because it is a function of the current input $x^{[t]}$ and the activations $z^{[t-1]}$ of the previous time-step.
+    \item Therefore, by recurrence, it contains a "summary" of \textit{all} previous inputs. 
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame} {Application example - Sentiment Analysis}
+  \begin{itemize}
+    \item At $t = 0$, we feed the word "This" to the network and obtain $z^{[0]}$.
+    \item $z^{[0]} = \sigma(W^Tx^{[0]} + b)$
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.55}{\includegraphics{plots/mto_1.png}}
+  \end{figure}
+  Because this is the very first input, there is no past state. (Or, equivalently, the state is initialized to 0).
+\end{frame}
+
+\begin{frame} {Application example - Sentiment Analysis}
+  \begin{itemize}
+    \item At $t = 1$, we feed the second word to the network to obtain $z^{[1]}$.
+    \item $z^{[1]} = \sigma(V^T\textcolor{red}{z^{[0]}} + W^Tx^{[1]} + b)$
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.55}{\includegraphics{plots/mto_2.png}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Application example - Sentiment Analysis}
+  \begin{itemize}
+    \item At $t = 2$, we feed the next word in the sentence.
+    \item $z^{[2]} = \sigma(V^T\textcolor{red}{z^{[1]}} + W^Tx^{[2]} + b)$
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.55}{\includegraphics{plots/mto_3.png}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Application example - Sentiment Analysis}
+  \begin{itemize}
+    \item Once the entire input sequence has been processed, the prediction of the network can be generated by feeding the activations of the final time-step to the output neuron(s).
+    \item $f = \sigma (U^Tz^{[4]} + c)$, where $c$ is the bias of the output neuron.
+  \end{itemize}
+  \begin{figure}
+      \centering
+      \scalebox{0.65}{\includegraphics{plots/mto_4.png}}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Parameter Sharing}
+  \begin{itemize}
+    \item This way, the network can process the sentence one word at a time and the length of the network can vary based on the length of the sequence.
+    \item It's important to note that no matter how long the input sequence is, the matrices W and V are the same in every time-step. This is another example of \textbf{parameter sharing}.
+    \item Therefore, the number of weights in the network is independent of the length of the input sequence.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame} {RNNs - Use Case specific architectures}
+
+  \small{RNNs are very versatile. They can be applied to a wide range of tasks.
+  
+  \begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/usecase_1.png}}
+      \tiny{\\credit: Andrej Karpathy}
+      \caption{\footnotesize {RNNs can be used in tasks that involve multiple inputs and/or multiple outputs. }}
+  \end{figure}
+  Examples:}
+  \begin{itemize}
+    \item \small{Sequence-to-One: Sentiment analysis, document classification.
+    \item One-to-Sequence: Image captioning.
+    \item Sequence-to-Sequence: Language modelling, machine translation, time-series prediction.}
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{RNNs - Computational Graph}
+
+\frame{
+\frametitle{RNNs - Computational Graph}
+  \center
+  \begin{figure}%
+    \only<1>{\includegraphics[width=7cm]{plots/rnn_comp1.png}}%
+%   \only<2-3>{\includegraphics[width=7cm]{plots/rnn_comp2.png}}%
+    \only<2>{\includegraphics[width=7cm]{plots/rnn_comp3.png}}%
+    \only<3-4>{\includegraphics[width=7cm]{plots/rnn_comp8.png}}%
+    \only<5>{\includegraphics[width=7cm]{plots/rnn_comp5.png}}%
+  \end{figure}%
+  \vspace{-0.2cm}
+  \begin{itemize}
+    \only<1>{\item On the left is the computational graph for the dense net on the right. A loss function $L$ measures how far each output
+    $f$ is from the corresponding training target $y$. }
+    % \only<2-3>{\item In order to derive RNNs we have to extend our notation.}
+    % \only<3>{\begin{itemize}
+    %   \only<3>{\item So far, we mapped some inputs $x$ to outputs $f$:}
+    %   \only<3>{\item[] $f = \tau(c + U^T z) = \tau(c + U^T \sigma(b + W^T x))$}
+    %   \only<3>{\item[] ..with $W$ and $U$ being weight matrices.}
+    % \end{itemize}}
+    \only<2>{\item A helpful way to think of an RNN is as multiple copies of the same network, each passing a message to a successor.}
+    \only<2>{\item RNNs are networks with loops, allowing information to persist.}
+    \only<3>{\item Things might become more clear if we unfold the architecture.}
+    \only<3>{\item We call $z^{[t]}$ the \textit{state} of the system at time $t$.}
+    \only<3>{\item Recall, the state contains information about the whole past sequence.}
+    \only<4>{\item We went from 
+      \begin{eqnarray*} 
+        f &=& \tau(c + U^T \sigma(b + W^T x)) \text{ for the dense net, to } \\
+        f^{[t]} &=& \tau(c + U^T \sigma(b + V^T z^{[t-1]} + W^T x^{[t]})) \text{ for the RNN. }
+      \end{eqnarray*}}
+    \only<5>{\item Potential computational graph for time-step $t$:}
+    \only<5>{\item[] $$f^{[t]} = \tau(c + U^T \sigma(b + V^T z^{[t-1]} + W^T x^{[t]}))$$ }
+  \end{itemize}
+}
+
+
+\frame{
+\frametitle{RNNs - Computational Graph with recurrent output-hidden connections}
+
+Recurrent connections do not need to map from hidden to hidden neurons!
+
+\center
+\begin{figure}
+\includegraphics[width=7cm]{plots/rnn_cg_104.png} 
+\end{figure}
+
+
+}
+
+\frame{
+\frametitle{RNNs - Computational Graph for seq to one mapping}
+
+RNNs do not need to produce an output at each time step. Often only one output is produced after processing the whole sequence. 
+
+\center
+\begin{figure}
+\includegraphics[width=7cm]{plots/rnn_cg_105.png} 
+\end{figure}
+
+}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Computing the Loss Gradient in RNNs}
+
+\frame{
+
+\frametitle{Backpropagation through time}
+
+  \center
+  %\only<1>{\includegraphics[width=4cm]{plots/rnn_bppt1.png}}%
+  \includegraphics[width=4cm]{plots/rnn_bppt3.png}%
+
+  \begin{itemize}
+
+    \item For training the RNN we need to compute $\frac{d L}{d u_{i,j}}$, $\frac{d L}{d v_{i,j}}$, and $\frac{d L}{d w_{i,j}}$.
+    \item To do so, during backpropagation at time step $t$ %for an arbitrary RNN, 
+    we may need to compute
+    % \item $$\textcolor{white}{\frac{d L}{d z^{[1]}}} = \frac{d L}{d z^{[t]}} \frac{z^{[t]}}{d z^{[t-1]}} \dots \frac{d z^{[2]}}{d z^[1]}$$
+    %\only<2>{\item[] $$\frac{d L}{d z^i} = \frac{d L}{d z^{t}} \frac{z^{t}}{d z^{t-1}} \dots \frac{d z^2}{d z^1}$$}
+    $$\frac{d L}{d z^{[1]}} = \frac{d L}{d z^{[t]}} \frac{d z^{[t]}}{d z^{[t-1]}} \dots \frac{d z^{[2]}}{d z^{[1]}}$$
+
+  \end{itemize}
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Nlp - Example}
+%       Example: 
+%   \begin{itemize}
+%     \item Suppose we only had a vocabulary of four possible letters: \enquote{h}, \enquote{e}, \enquote{l} and \enquote{o}
+%     \item We want to train an RNN on the training sequence \enquote{hello}.
+%     \item This training sequence is in fact a source of 4 separate training examples:
+%       \begin{itemize}
+%         \item The probability of \enquote{e} should be likely given the context of \enquote{h}
+%         \item \enquote{l} should be likely in the context of \enquote{he}
+%         \item \enquote{l} should also be likely given the context of \enquote{hel}
+%         \item and \enquote{o} should be likely given the context of \enquote{hell}
+%       \end{itemize}
+%   \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% 
+% \frametitle{Nlp - Example}
+% 
+% The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.
+%   \begin{itemize}
+%     \item[]
+%   \end{itemize}
+%   \begin{minipage}{0.55\textwidth}
+%     \begin{figure}
+%         \only<1>{\includegraphics[width=5.5cm]{plots/nlp1.png}}%
+%         \only<2>{\includegraphics[width=5.5cm]{plots/nlp2.png}}%
+%     \end{figure}
+%   \end{minipage}%\hfill
+%   \begin{minipage}{0.45\textwidth}
+%   %\vspace{-0.3cm}
+%   
+%     \begin{itemize}
+%       \only<1>{\item[] \textcolor{white}{Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).}} 
+%       \only<2>{\item[] Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).} 
+%     \end{itemize}
+%   \end{minipage}
+%   
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Word Embeddings (Word2vec)}
+%   \begin{minipage}{0.4\textwidth}
+%     \begin{itemize}
+%       \item Data Sparsity: 
+%       \item[]
+%       $$\text{man} \to \begin{bmatrix}
+%                                   0\\
+%                                   \vdots\\
+%                                   0\\
+%                                   1\\
+%                                   0\\
+%                                   \vdots\\
+%                                   0
+%                         \end{bmatrix} \to
+%                         \begin{bmatrix}
+%                                   0.35\\
+%                                   -0.83\\
+%                                   \vdots\\
+%                                   0.11\\
+%                                   3.2
+%                         \end{bmatrix}
+%       $$
+%   
+%     \end{itemize}
+%   \end{minipage}
+%   \begin{minipage}{0.55\textwidth}
+%     \begin{itemize}
+%       \item[]
+%     \end{itemize}
+%     \begin{figure}
+%       \includegraphics[width=4.5cm]{plots/word2vec.png}%
+%       \caption*{https://www.tensorflow.org/tutorials/word2vec/}
+%     \end{figure}    
+%   \end{minipage}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Long-Term Dependencies}
+  
+  \begin{itemize}
+    \item Here, $z^{[t]} = \sigma(V^T z^{[t-1]} + W^Tx^{[t]} + b)$
+    \item It follows that:
+    $$ \frac{dz^{[t]}}{dz^{[t-1]}} = diag(\sigma' (V^T z^{[t-1]} + W^Tx^{[t]} + b)) V^T$$
+    \item Therefore, for an arbitrary time-step $i$ in the past, $\frac{dz^{[t]}}{dz^{[i]}}$ will contain the term $(V^T)^{t-i}$ within it. (this follows from the chain rule)
+    \item Based on the largest eigenvalue of $V^T$, the presence of the term $(V^T)^{t-i}$ can either result in vanishing or exploding gradients.
+    \item This problem is quite severe for RNNs (as compared to feedforward networks) because the \textbf{same} matrix $V^T$ is multiplied several times. (\href{https://tinyurl.com/vangrad}{\beamergotobutton{Click here}})
+    \item As the gap between $t$ and $i$ increases, the instability worsens.
+  \end{itemize}
+  
+  \framebreak
+  \begin{itemize}
+    \item It is quite challenging for RNNs to learn long-term dependencies. The gradients either \textbf{vanish} (most of the time) or \textbf{explode} (rarely, but with much damage to the optimization).
+    \item That happens simply because we propagate errors over very many stages backwards.
+    \item Recall, that we can counteract exploding gradients by implementing gradient clipping.
+    \item Even if we assume that the parameters are such that the recurrent network is stable (can store memories, with gradients not exploding), the difficulty with long-term dependencies arises from the exponentially smaller weights given to long-term interactions (involving the multiplication of many Jacobians) compared to short-term ones.
+    \item A more sophisticated solution is needed for the vanishing gradient problem in RNNs.
+  \end{itemize}
+%\framebreak
+%  \begin{itemize}
+%    \item The \textbf{vanishing gradient problem} is heavily dependent on the parameter initialization method, but in particular on the choice of the activation functions.
+%    \begin{itemize}
+%      \item For example, the sigmoid maps a real number into a \enquote{small} range (i.e. $[0, 1]$).
+%      \item As a result, large regions of the input space are mapped into a very small range.
+%      \item Even a huge change in the input will only produce a small change in the output. Hence, the gradient will be small.
+%      \item This becomes even worse when we stack multiple layers of such non-linearities on top of each other (For instance, the first layer maps a large input to a smaller output region, which will be mapped to an even smaller region by the second layer, which will be mapped to an even smaller region by the third layer and so on..).
+%      \item We can avoid this problem by using activation functions which do not have the property of \enquote{squashing} the input.
+%      \item The most popular choice is obviously the Rectified Linear Unit (ReLU) which maps $x$ to $max(0,x)$.
+%      \item The really nice thing about ReLU is that the gradient is either $0$ or $1$, which means it never saturates. Thus, gradients can't vanish.
+%      \item The downside of this is that we can obtain a \enquote{dead} ReLU. It will always return $0$  and consequently never learn because the gradient is not passed through.
+%    \end{itemize}
+%    \item To avoid exploding gradients, we simply clip the norm of the gradient at some threshold $h$ (see chapter 4): $$\text{if  } ||\nabla W|| > \text h: \nabla W \leftarrow \frac{h}{||\nabla W||} \nabla W $$
+%  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Gated units: LSTMs and GRUs}
+%\begin{vbframe}{long short-term memory  (LSTM)}
+%  \begin{itemize}
+%    \item The LSTM provides a different way of dealing with vanishing gradients and modelling long-term dependencies.
+%    \item A cell state $s^{[t]}$ is introduced, which can be manipulated by different \textbf{gates} to forget old information, add new information and read information out of it.
+%    \item Each gate is a vector of the same size as the cell state and each element of the vector is a
+%number between $0$ and $1$, with $0$ meaning \enquote{let nothing pass} and 1 \enquote{let everything pass}.
+%    \item The gates are computed as a parametrized function of the previous hidden state $z^{[t-1]}$ and the input at the current time step $x^{[t]}$ multiplied by \textbf{gate-specific weights} and typically squashed through a sigmoid function into the range of $[0, 1]$.
+%    \item The cell state allows the recurrent neural network to keep information over long time ranges. %and therefore overcome the vanishing gradient problem.
+%  \end{itemize}
+%\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{long short-term memory (LSTM)}
+The LSTM provides a way of dealing with vanishing gradients and modelling long-term dependencies.
+  \begin{figure}
+    \only<1>{\includegraphics[width=8.5cm]{plots/rnnvslstm3.png}}%
+    \only<2>{\includegraphics[width=8.5cm]{plots/rnnvslstm4.png}}%
+  \end{figure}
+  \begin{itemize}
+    \only<1-2>{\item Until now, we simply computed $$z^{[t]} = \sigma(b + V^Tz^{[t-1]} + W^Tx^{[t]})$$}
+    \only<2>{\item Now we introduce the LSTM cell (which is a small network on its own)}
+  \end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% \frametitle{long short-term memory - LSTM}
+%   \begin{itemize}
+%     \item[]
+%   \end{itemize}
+%   \begin{minipage}{0.51\textwidth}
+%     \only<1-2>{\includegraphics[width=2.5cm]{plots/vanilla_rnn.png}}%
+%     \begin{itemize}
+%       \only<1-2>{\item Untill now, we simply computed $$z^{[t]} = \sigma(b + Wz^{[t-1]} + Ux^{[t]})$$}
+%       \only<2>{\item Now we introduce the lstm cell (this is where the fun begins).}
+%     \end{itemize}
+%   \end{minipage}\hfill
+%   \vspace{-0.7cm}
+%   \begin{minipage}{0.41\textwidth}
+%     \only<1>{\includegraphics[width=2.5cm]{plots/vanilla_lstm1.png}}%
+%     \only<2>{\includegraphics[width=2.5cm]{plots/vanilla_lstm2.png}}%
+%     \begin{itemize}
+%       \only<1-2>{\item[] \textcolor{white}{with} $$\textcolor{white}{z^{(t)} = \sigma(b + Wz^{[t-1]} + Ux^{[t]})}$$}
+%       \only<2>{\item[] \textcolor{white}{Now we introduce the lstm cell (this is where the fun begins).}}
+%     \end{itemize}
+%   \end{minipage}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{long short-term memory (LSTM)}
+
+  \center
+  \only<1>{\includegraphics[width=4.75cm]{plots/lstm1a.png}}%
+  \only<2>{\includegraphics[width=4.75cm]{plots/lstm1b.png}}%
+  \only<3-4>{\includegraphics[width=4.75cm]{plots/lstm1c.png}}%
+  \only<5-7>{\includegraphics[width=4.75cm]{plots/lstm3b.png}}%
+  \only<8-9>{\includegraphics[width=4.75cm]{plots/lstm4.png}}%
+  
+  \begin{itemize}
+
+    \only<1>{\item The key to LSTMs is the \textbf{cell state} $s^{[t]}$.}
+    \only<1>{%\item The LSTM does have the ability to remove or add information to the cell state, carefully regulated by structures called gates.
+    \item $s^{[t]}$ can be manipulated by different \textbf{gates} to forget old information, add new information, and read information out of it.}
+\only<1>{\item Each gate is a vector of the same size as the $s^{[t]}$ with elements between 0 ("let nothing pass") and 1 ("let everything pass").
+}
+    
+    \only<2>{\item \textbf{Forget gate}  $f^{[t]}$: indicates which information of the old cell state we should forget. 
+    \item Intuition: Think of a model trying to predict the next word based on all the previous ones. The cell state might include the gender of the present subject, so that the correct pronouns can be used. When we now see a new subject, we want to forget the gender of the old one.}
+    \only<3>{\item We obtain the forget gate by computing 
+%    $$f^{[t]} = \sigma(b^{(f)} + V^{(f)T} z^{[t-1]} + W^{(f)T} x^{[t]})$$
+    $$f^{[t]} = \sigma(b_{f} + V_f^{T} z^{[t-1]} + W_f^{T} x^{[t]})$$}
+    \only<3>{\item $\sigma()$ is  a sigmoid, squashing the values to $[0,1]$, and $ V_f, W-f$ are foget gate specific weights.}
+    \only<4>{\item To compute the cell state $s^{[t]}$, the first step is to multiply (element-wise) the previous cell state $s^{[t-1]}$ by the forget gate $f^{[t]}$. $$f^{[t]} \odot s^{[t-1]}, \text{ with } f^{[t]} \in [0,1]$$}
+    \only<5>{\item \textbf{Input gate} $i^{[t]}$: indicates which new information should be added to  $s^{[t]}$.}
+    %\only<5>{\item We again incorporate the information in the previous hidden state $z^{[t-1]}$.}
+    \only<5>{\item Intuition: In our example, this is where we add the new information about the gender of the new subject.}
+   % \only<6>{\item The cell recurrent connection needs a function whose derivatives sustain for a long span to address the vanishing gradient problem.}
+    \only<6>{\item The new information is given by $\tilde{s}^{[t]} = tanh(b + V^T z^{[t-1]} + W^T x^{[t]}) \in [-1, 1]$.}
+    \only<6>{\item The input gate is given by $i^{[t]} = \sigma(b_i + V_i^{T} z^{[t-1]} + W_i^{T} x^{[t]}) \in [0,1]$.}
+   \only<6>{\item $W$ and $V$ are weights of the new information, $W_i$ and $V_i$ the weights of the input gate.}
+    \only<7>{\item Now we can finally compute the cell state $s^{[t]}$: 
+    $$s^{[t]} = f^{[t]} \odot s^{[t-1]} + i^{[t]} \odot \tilde{s}^{[t]}$$}
+    %\only<7>{\item[] By the way: this does not mean that our lstm is complete! }
+   % \only<8>{\item In order to complete the lstm cell, one final ingredient is missing.}
+   % \only<8>{\item The output of the LSTM cell will be a filtered version of our cell state.}
+    \only<8>{\item %First, we run a sigmoid layer which decides what parts of the cell
+   \textbf{Output gate} $q^{[t]}$:  Indicates which information form the cell state is filtered.
+   \item It is given by $q^{[t]} = \sigma(b_q + V_q^{T} z^{[t-1]} + W_q^{T} x^{[t]})$, with specific weights $W_q, V_q$.}
+    %\only<8>{\item }
+    \only<9>{\item Finally, the new state $z^{[t]}$ of the LSTM is a function of the cell state, multiplied by the output gate: $$z^{[t]} = q^{[t]} \odot tanh(s^{[t]})$$}
+
+  \end{itemize}
+
+}
+
+\begin{frame} {Gated Recurrent Unit (GRU)}
+A popular alternative to LSTM is the Gated Recurrent Unit (GRU). Its performance can match and sometimes exceed that of an LSTM.
+  \begin{figure}
+    \scalebox{1}{\includegraphics{plots/gru.png}}
+    \tiny{\\credit: Michael Nguyen}
+    \caption{\footnotesize A GRU has fewer gates and is faster is to train.}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{RNN with output recurrence}
+%   \begin{figure}
+%     \includegraphics[width=5.5cm]{plots/output_recurrence.png}
+%   \end{figure}
+%   \begin{itemize}
+%     \item Such an RNN is less powerful (can express a smaller set of functions).
+%     \item However, it may be easier to train because each time step it can be trained in isolation from the others, allowing greater parallelization during training.
+%   \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Teacher Forcing}
+%   \begin{itemize}
+%     \item Teacher forcing is a procedure that emerges from the maximum likelihood criterion, in which during training the model receives the ground truth output $y^{[t]}$ as input at time $[t + 1]$.
+%   \end{itemize}
+%   \begin{minipage}{0.51\textwidth}
+%     \begin{figure}
+%       \includegraphics[width=3.8cm]{plots/teacher_forcing_train.png}
+%     \end{figure}  
+%     \begin{itemize}
+%       \item At training time
+%     \end{itemize}
+%   \end{minipage}
+%   \begin{minipage}{0.45\textwidth}
+%     \begin{figure}
+%       \includegraphics[width=3.8cm]{plots/teacher_forcing_test.png}
+%     \end{figure} 
+%     \begin{itemize}
+%       \item At testing time
+%     \end{itemize}
+%   \end{minipage}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{One-output RNN}
+%   \begin{itemize}
+%     \item Recurrent Neural Networks do not need to have an output at each time step, instead they can
+% only have outputs at a few time steps.
+%     \item A common variant is an RNN with only one output at the end of the sequence.
+%     \item Information from the whole input sequence is incorporated into the final hidden state, which is then used to create an output, e.g. a sentiment (\enquote{positive}, \enquote{neutral} or \enquote{negative}) for a movie review.
+%     \item  Other applications of such an architecture are sequence labeling, e.g. classify an article into different categories (\enquote{sports}, \enquote{politics} etc.)
+%   \end{itemize}
+% \framebreak
+%   \begin{figure}
+%     \includegraphics[width=6.5cm]{plots/one_output_rnn.png}
+%     \caption{A Recurrent Neural Network with one output at the end of the sequence. Such a
+% model can be used for sentiment analysis ($<$eos$>$ = \enquote{end of sequence}).}
+%   \end{figure}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame} {Stacked RNNs}
+% \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Recursive neural networks}
+%   \begin{itemize}
+%     \item Recursive Neural Networks are a generalization of Recurrent Neural Networks. 
+%     \item A tree structure instead of a chain structure is used for the computations of the RNN.
+%     \item A fixed set of weights is repeatedly applied to the nodes of the tree.
+%     \item Recursive neural networks have been successfully applied to sentiment analysis!
+%   \end{itemize}
+% \framebreak  
+%   \begin{figure}
+%     \includegraphics[width=5.8cm]{plots/recursive_neural_network.png}
+%     \caption{A recursive neural network}
+%   \end{figure} 
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Application: Language modelling}
+
+%\begin{frame} {RNNs - Use Case specific architectures}
+%
+%  \small{RNNs are very versatile. They can be applied to a wide range of tasks.
+%  
+%  \begin{figure}
+%      \centering
+%      \scalebox{0.9}{\includegraphics{plots/usecase_1.png}}
+%      \tiny{\\credit: Andrej Karpathy}
+%      \caption{\footnotesize {RNNs can be used in tasks that involve multiple inputs and/or multiple outputs. }}
+%  \end{figure}
+%  Examples:}
+%  \begin{itemize}
+%    \item \small{Many-to-One : Sentiment analysis, document classification.
+%    \item One-to-Many : Image captioning.
+%    \item Many-to-Many : Language modelling, machine translation, time-series prediction.}
+%  \end{itemize}
+%\end{frame}
+
+
+\begin{frame}
+
+\vspace{15mm}
+\hspace{25mm} \textbf{\LARGE{Seq-to-Seq (Type I)}}
+\begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/usecase_2.png}}
+  \end{figure}
+  
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{RNNs - Sentiment Analysis}
+%   \begin{itemize}
+%     \item Suppose we would like to train a model to read a sentence and extract the year the narrator went to munich:
+%     \begin{itemize}
+%       %\item \enquote{$\underbrace{\text{I went to Munich in 2009}}_{\text{24 characters}}$}
+%       %\item[]
+%       %\item \enquote{$\underbrace{\text{In 2009, I went to Munich}}_{\text{25 characters}}$}
+%       \item \enquote{I went to Munich in 2009}
+%       \item \enquote{In 2009, I went to Munich}
+%     \end{itemize}
+%     \item A standard dense network would have separate parameters for each input feature. Thus it would need to learn all of the rules of the language separately at each position in the sentence!
+%       \item To overcome this issue, we introduce \textbf{recurrent neural networks}!
+%       \item In order to go from a standard dense to such a recurrent net, we need to take advantage of an idea we have already learned in the CNN chapter: \textbf{parameter sharing}.
+%   \end{itemize}
+% \framebreak
+%   \begin{itemize}
+%     \item Parameter sharing enables us to apply the model to examples of different forms (here: different lengths)!
+%     \item If we had separate parameters for each value of the input data, we could not generalize to sequence lengths not seen during training.
+%     \item Parameter sharing is specifically important, when a particular piece of information might occur at multiple positions within the input sequence.
+%     % \item Recurrent networks share parameters in a different way than CNNs: 
+%     % \begin{itemize}
+%     %   \item[] each member of the output is a function of the previous members of the output.
+%     %   \item[] each member of the output is produced using the same update rule applied to the previous outputs
+%     % \end{itemize}
+%   \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{RNNS - Language Modelling}
+  \begin{itemize}
+    \item In an earlier example, we built a 'sequence-to-one' RNN model to perform 'sentiment analysis'.
+    \item Another common task in Natural Language Processing (NLP) is \textbf{'language modelling'}.
+    \item Input: word/character, encoded as a one-hot vector.
+    \item Output: probability distribution over words/characters given previous words $$P(y^{[1]}, \dots, y^{[\tau]}) = \displaystyle \prod_{i=1}^{\tau} P(y^{[i]}|y^{[1]}, \dots, y^{[i-1]})$$
+    \item[] $\Rightarrow$ given a sequence of previous characters, ask the RNN to model the probability distribution of the next character in the sequence!
+    % \item[]
+    % \item[]
+    % \item[]
+    % \item Time to formalize RNNs...
+  \end{itemize}
+\end{vbframe}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{RNNS - Language Modelling}
+  \begin{itemize}
+  \item In this example, we will feed the characters in the word "hello" one at a time to a 'seq-to-seq' RNN.
+  \item For the sake of the visualization, the characters "h", "e", "l" and "o" are one-hot coded as a vectors of length 4 and the output layer only has 4 neurons, one for each character (we ignore the <eos> token).
+  \item At each time step, the RNN has to output a probability distribution (softmax) over the 4 possible characters that might follow the current input.
+  \item Naturally, if the RNN has been trained on words in the English language: 
+    \begin{itemize}
+      \item The probability of \enquote{e} should be likely, given the context of \enquote{h}.
+      \item \enquote{l} should be likely in the context of \enquote{he}.
+      \item \enquote{l} should \textbf{also} be likely, given the context of \enquote{hel}.
+      \item and, finally, \enquote{o} should be likely, given the context of \enquote{hell}.
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{RNNS - Language Modelling}
+  \begin{figure}
+      \only<1>{\includegraphics[width=6.5cm]{plots/m2many1.png}}%
+      \only<2>{\includegraphics[width=6.5cm]{plots/m2many2.png}}%
+      \only<3>{\includegraphics[width=6.5cm]{plots/m2many3.png}}%
+      \only<4>{\includegraphics[width=6.5cm]{plots/m2many4.png}}%
+      \only<5>{\includegraphics[width=6.5cm]{plots/m2many5.png}}%
+  \end{figure}
+  \begin{itemize}
+    \only<1>{\item[] The probability of \enquote{e} should be high, given the context of \enquote{h}.} 
+    \only<2>{\item[] The probability of \enquote{l} should be high, given in the context of \enquote{he}.} 
+    \only<3>{\item[] The probability of \enquote{l} should \textbf{also} be high, given in the context of \enquote{hel}.}
+    \only<4>{\item[] The probability of \enquote{o} should be high, given the context of \enquote{hell}.}
+    \only<5>{\item[] During training, our goal would be to increase the confidence for the correct letters (indicated by the green arrows) and decrease the confidence of all others.}
+  \end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% \frametitle{RNNs - Generate sequences}
+% 
+% The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.
+%   \begin{itemize}
+%     \item[]
+%   \end{itemize}
+%   \begin{minipage}{0.55\textwidth}
+%     \begin{figure}
+%         \only<1>{\includegraphics[width=5.5cm]{plots/m2many4.png}}%
+%         \only<2>{\includegraphics[width=5.5cm]{plots/m2many5.png}}%
+%     \end{figure}
+%   \end{minipage}%\hfill
+%   \begin{minipage}{0.45\textwidth}
+%   %\vspace{-0.3cm}
+%   
+%     \begin{itemize}
+%       \only<1>{\item[] \textcolor{white}{Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others.}} 
+%       \only<2>{\item[] During training, our goal would be to increase the confidence for the correct letters (green digits) and decrease the confidence of all others.} 
+%     \end{itemize}
+%   \end{minipage}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame} {Sentiment Neuron}
+%  \begin{itemize}
+%    \item \small {In 2017, a team at OpenAI trained a (more sophisticated) RNN to predict the next character in Amazon reviews.
+%    \item The model had 4096 units in its hidden state and was trained on 82 million Amazon reviews.
+%    \begin{figure}
+%      \centering
+%      \scalebox{0.5}{\includegraphics{plots/sent1b.png}}
+%      \tiny{\\credit: OpenAI}
+%  \end{figure}
+%    \item To their surprise, one of the units had learned to detect the sentiment in the reviews extremely well even though the model was trained to only predict the next character in the text. In other words, the training data did not contain any explicit information regarding the sentiment.}
+%  \end{itemize}
+%\end{frame}
+%
+%\begin{frame} {Sentiment Neuron}
+%  \begin{figure}
+%      \centering
+%      \scalebox{1}{\includegraphics{plots/sent2.png}}
+%      \tiny{\\credit: OpenAI}
+%      \caption{\footnotesize {The background color of each character represents the activation of the sentiment neuron for that character. Positive values are green and negative values are red. }}
+%  \end{figure}
+%  
+%  As the passage is fed to the RNN one character at a time, the activation of the sentiment neuron changes from a high value to a low value. Note the sharp jump in the activation after the word 'best' is fed to the network!
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame} {Word embeddings}
+  \begin{itemize}
+    \item In the  example in the beginning, words were encoded as sparse one-hot vectors.
+    \item However, this is simply not practical as it would require that the size of the input layer = \# of words in the dictionary.
+    \item More importantly, the one-hot representations do not capture the meanings/semantics of the words because all words would be equidistant from one another.
+    \item For example, the word "pineapple" would be equidistant from the words "apple" and "weather".
+    \item Therefore, it is standard practice to encode each word as a dense (as opposed to sparse) vector of fixed size that captures its underlying semantic content.
+    \item The dimensionality of these embeddings is typically \text{much} smaller than the number of words in the dictionary.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Word embeddings}
+  \begin{figure}
+      \centering
+      \scalebox{0.75}{\includegraphics{plots/embed1.png}}
+      \tiny{\\source: Kaggle}
+      \caption{\footnotesize{A two-dimensional embedding space is shown here for the sake of visualization. Typically, the embedding space is much higher dimensional.}}
+  \end{figure}
+    \small{A major advantage of using word embeddings is that similar words are embedded close to each other in the lower-dimensional embedding space and, therefore, using them gives you a "warm start" for any NLP task.}
+\end{frame}
+
+\begin{frame} {Word embeddings}
+  \begin{figure}
+      \centering
+      \scalebox{0.75}{\includegraphics{plots/embed1.png}}
+      \tiny{\\source: Kaggle}
+      \caption{\footnotesize{A two-dimensional embedding space is shown here for the sake of visualization. Typically, the embedding space is much higher dimensional.}}
+  \end{figure}
+    It is an easy way to incorporate prior knowledge into your model and a rudimentary form of \textbf{transfer learning}.
+\end{frame}
+
+\begin{frame} {Word embeddings}
+  \begin{itemize}
+    \item Two very popular approaches to learn  word embeddings are \textbf{word2vec} by Google and \textbf{GloVe} by Facebook. These embeddings are typically 100 to 1000 dimensional.
+    \item Even though these embeddings capture the meaning of each word to an extent, they do not capture the \textit{semantics} of the word in a given context because each word has a static precomputed representation. For example, depending on the context, the word "bank" might refer to a financial institution or to a river bank.
+    \item Recently, there have been significant breakthroughs in context-based embeddings. One such example are the embeddings provided by BERT [Devlin et al., 2018], a \textbf{transformer model} which was trained on a corpus of 3.3 billion words.
+    \item BERT (a non-recurrent model!) obtained new state-of-the-art performance on 11 NLP tasks.
+  \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bidirectional RNNs}
+
+
+\begin{vbframe}{Bidirectional RNNs}
+  \begin{itemize}
+    \item Another generalization of the simple RNN are bidirectional RNNs.
+    \item These allow us to process sequential data depending on both past and future inputs, e.g. an application predicting missing words, which probably depend on both preceding and following words.
+    \item One RNN processes inputs in the forward direction from $x^{[1]}$ to $x^{[T]}$ computing a sequence of hidden states $(z^{[1]}, \dots, z^{(T)})$, another RNN in the backward direction from $x^{[T]}$ to $x^{[1]}$ computing hidden states $(g^{[T]}, \dots, g^{[1]})$
+    \item Predictions are then based on both hidden states, which could be \textbf{concatenated}.
+    \item With connections going back in time, the whole input sequence must be known in advance
+to train and infer from the model.
+    \item Bidirectional RNNs are often used for the encoding of a sequence in machine translation.
+  \end{itemize}
+\framebreak  
+\textbf{Computational graph of an bidirectional RNN:}
+  \begin{figure}
+    \includegraphics[width=4.5cm]{plots/bi_rnn.png}
+    \caption{A bidirectional RNN consists of a forward RNN processing inputs from left to right
+and a backward RNN processing inputs backwards in time.}
+  \end{figure} 
+\end{vbframe}
+
+
+
+\section{Encoder-Decoder Architectures}
+
+
+\begin{frame}
+
+
+\vspace{15mm}
+\hspace{25mm} \textbf{\LARGE{Seq-to-Seq (Type II)}}
+\begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/usecase_3.png}}
+  \end{figure}
+  
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Encoder-Decoder Network}
+  \begin{itemize}
+   % \item Standard RNNs operate on input and output sequences of the same length.
+    \item For many interesting applications such as question answering, dialogue systems, or machine translation, the network needs to map an input sequence to an output sequence of different length.
+    \item This is what an encoder-decoder (also called sequence-to-sequence architecture) enables us to do!
+    
+    \end{itemize}
+ 
+ \framebreak
+ 
+  \begin{figure}
+    \includegraphics[width=7cm]{plots/seq2seq_2.png}
+    \caption{%Encoder-decoder allows an RNN to process different length input and output sequences. 
+    In the first part of the network, information from the input is encoded in the context vector, here the final hidden state, which is then passed on to every hidden state of the decoder, which produces the target sequence.}
+  \end{figure} 
+    
+    
+    \begin{itemize}
+   
+    \item An input/encoder-RNN processes the input sequence of length $n_x$ and computes a fixed-length context vector $C$, usually the final hidden state or  simple function of the hidden states.
+    \item One time step after the other information from the input sequence is processed, added to the hidden state and passed forward in time through the recurrent connections between hidden states in the encoder.
+    \item  The context vector summarizes important information from the input sequence, e.g. the intent of a question in a question answering task or the meaning of a text in the case of machine translation.
+    \item The decoder RNN uses this information to predict the output, a sequence of length $n_y$, which could vary from $n_x$. 
+    \item In machine translation, the decoder is a language model with recurrent connections between the output at one time step and the hidden state at the next time step as well as recurrent connections between the hidden states:
+    $$p(y^{[1]}, \dots, y^{[y_n]}|x^{[1]}, \dots, x^{[x_n]}) = \displaystyle \prod_{t=1}^{n_y} p(y^{[t]}|C; y^{[1]}, \dots, y^{[t-1]})$$ with $C$ being the context-vector.
+    \item This architecture is now jointly trained to minimize the translation
+error given a source sentence.
+    \item Each conditional probability is then $$p(y^{[t]}|y^{[1]}, \dots, y^{[t-1]};C) = f(y^{[t-1]}, g^{[t]}, C)$$ where $f$ is a non-linear function, e.g. the tanh and $g^{[t]}$ is the hidden state of the decoder network.
+ %   \item Encoder-decoder architectures are often used for machine translation, where they excel phrase-based translation models.
+  \end{itemize}
+%\framebreak
+%  \begin{figure}
+%    \includegraphics[width=7cm]{plots/seq2seq_2.png}
+%    \caption{Encoder-decoder allows an RNN to process different length input and output sequences. In the first part of the network, information from the input is encoded in the context, here the final hidden state, which is then passed on to every hidden state of the decoder, which produces the target sequence.}
+%  \end{figure} 
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Attention}
+  \begin{itemize}
+    \item In a classical decoder-encoder RNN all information about the input sequence must be incorporated into the final hidden state, which is then passed as an input to the decoder network.
+    \item With a long input sequence this fixed-sized context vector is unlikely to capture all relevant information about the past.
+      \item Each hidden state contains mostly information from recent inputs. 
+      %In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
+      \item Key idea: Allow the decoder to access all the hidden states of the encoder (instead of just the final one) so that it can dynamically decide which ones are relevant at each time-step of the decoding process.
+      \item This means the decoder can choose to "focus" on different hidden states (of the encoder) at different time-steps of the decoding process similar to how the human eye can focus on different regions of the visual field.
+      \item This is known as an \textbf{attention mechanism}.
+   \end{itemize}
+   
+   \framebreak
+   
+   \begin{itemize}
+      \item The attention mechanism is implemented by an additional component in the decoder.
+      \item For example, this can be a simple single-hidden layer feed-forward neural network which is trained along with the RNN.
+      \item At any given time-step $i$ of the decoding process, the network computes the relevance of encoder state $z^{[j]}$ as:
+            $$ rel(z^{[j]})^{[i]} = v_a^T tanh (W_a[g^{[i-1]};z^{[j]}]) $$
+            where $v_a$ and $W_a$ are the parameters of the feed-forward network, $g^{[i-1]}$ is the decoder state from the previous time-step and ';' indicates concatenation.
+      %\item $v_a$ and $W_a$ are also learned through backpropagation.
+      \item The relevance scores (for all the encoder hidden states) are then normalized which gives the \textit{attention weights} $(\alpha^{[j]})^{[i]}$:      
+        $$ (\alpha^{[j]})^{[i]} = \frac{\exp (rel(z^{[j]})^{[i]})}{\sum_{j'} \exp(rel(z^{[j']})^{[i]})} $$
+   \end{itemize}
+   
+   \framebreak
+   
+   \begin{itemize}  
+    \item The attention mechanism allows the decoder network to focus on different parts of the input sequence by adding connections from all hidden states of the encoder to each hidden state of the decoder.
+  %  \item At each point in time, a set of weights is computed which determine how to combine the hidden states of the encoder into a context vector $c_i$, which holds the necessary information to predict the correct output.
+ %   \item Each hidden state contains mostly information from recent inputs. In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
+  \end{itemize}
+ \begin{figure}
+    \includegraphics[width=4.cm]{plots/seq2seq_3.png}
+    \caption{Attention at $i=t+1$}
+  \end{figure}
+ 
+\framebreak
+\begin{itemize}  
+   % \item An \textbf{attention mechanism} allows the decoder network to focus on different parts of the input sequence by adding connections from all hidden states of the encoder to each hidden state of the decoder
+    \item At each time step $i$, a set of weights $(\alpha^{[j]})^{[i]}$ is computed which determine how to combine the hidden states of the encoder into a context vector $c^{[i]}= \sum_{j=1}^{n_x} (\alpha^{[j]})^{[i]} z^{[j]}$, which holds the necessary information to predict the correct output.
+ %   \item Each hidden state contains mostly information from recent inputs. In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[width=4.cm]{plots/seq2seq_4.png}
+    \caption{Attention at $i=t+2$}
+  \end{figure}
+  
+\framebreak
+  
+  \lz
+  \lz
+  \begin{figure}
+    \centering
+    \scalebox{0.9}{\includegraphics{plots/attention_example.png}}
+    \tiny{\\Credit: FloydHub}
+    \caption{\footnotesize An illustration of a machine translation task using an encoder-decoder model with an attention mechanism. The attention weights at each time-step of the decoding/translation process indicate which parts of the input sequence are most relevant. (There are 4 attention weights because there are 4 encoder states.)}
+  \end{figure}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Neural Turing Machines}
+%
+%\begin{frame} {Neural Turing Machines}
+%  \begin{itemize}
+%    \item We've seen that an RNN has a form of \textbf{internal} "short-term memory" that enables it to process inputs sequentially.
+%    \item In 2014, a team at DeepMind [Graves et al. , 2014] introduced the 'Neural Turing Machine (NTM) ' which combines an RNN with an \textbf{external} memory bank.
+%    \item This external memory bank is just a real valued matrix.
+%    \item The NTM has an \textbf{attention mechanism} which enables the RNN to read from and write to the external memory.
+%    \item It's helpful to think of the RNN as the 'processor' and the memory bank as the 'RAM' in a computer.
+%    \item Importantly, the \textit{whole} system is end-to-end trainable by gradient descent. That is, the network eventually learns where to read and write to perform the task.
+%  \end{itemize}
+%\end{frame}
+%
+%% Here's a great blog article from which the images below were taken : https://distill.pub/2016/augmented-rnns/
+%
+%\begin{frame} {Neural Turing Machines}
+%  \begin{figure}
+%      \centering
+%      \scalebox{1.1}{\includegraphics{plots/ntm2.png}}
+%      \tiny{\\credit: Chris Olah}
+%      \caption{\footnotesize{The Neural Turing Machine architecture.}}
+%  \end{figure}
+%    Like any RNN, the controller (network 'A') is fed input vectors and produces output vectors. However, unlike a typical RNN, the controller also reads from and writes to the external memory.
+%\end{frame}
+%
+%\begin{frame} {Neural Turing Machines}
+%  \begin{figure}
+%      \centering
+%      \scalebox{1}{\includegraphics{plots/ntm1.png}}
+%      \tiny{\\credit: Chris Olah}
+%      \caption{\footnotesize{An illustration of the 'read' operation in an NTM.}}
+%  \end{figure}
+%  
+%  $M_i$ is the memory vector in the $i$-th location and $a_i$ is the associated attention weight. The value that is read from the memory matrix is a convex combination of all the vectors in the matrix.
+%\end{frame}
+
+
+\section{More application examples}
+
+\frame{
+\frametitle{Some more sophisticated applications}
+  \begin{figure}
+      \only<1>{\includegraphics[width=9.5cm]{plots/image_caption2.png}}%
+      \only<2>{\includegraphics[width=9.5cm]{plots/image_caption.png}}%
+  \end{figure}
+\textbf{Figure:} Show and Tell: A Neural Image Caption Generator (Oriol Vinyals et al. 2014). A language generating RNN tries to describe in brief the content of different images.
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{Some more sophisticated applications}
+  \begin{figure}
+    \includegraphics[width=5cm]{plots/attention3.png}
+    \caption{Attention for image captioning: the attention mechanism tells the network roughly which pixels to pay attention to when writing the text (Kelvin Xu al. 2015)}
+  \end{figure}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{Some more sophisticated applications}
+  \begin{figure}
+      \only<1>{\includegraphics[width=8.5cm]{plots/seq2seq.png}}%
+      \only<2>{\includegraphics[width=8.5cm]{plots/seq2seq2.png}}%
+  \end{figure}
+\textbf{Figure:} Neural Machine Translation (seq2seq): Sequence to Sequence Learning with Neural Networks (Ilya Sutskever et al. 2014). As we saw earlier, an encoder converts a source sentence into a \enquote{meaning} vector which is passed through a decoder to produce a translation.
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Some more sophisticated applications}
+  \begin{figure}
+    \centering
+    \includegraphics[width=10cm]{plots/hand_writing_generation.png}
+    \caption{Generating Sequences With Recurrent Neural Networks (Alex Graves, 2013). Top row are real data, the rest are generated by various RNNs.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=11.5cm]{plots/emotion_from_audio_data.png}
+    \caption{Convolutional and recurrent nets for detecting emotion from audio data (Namrata Anand \& Prateek Verma, 2016). We already had this example in the CNN chapter!}
+  \end{figure}  
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=11.5cm]{plots/visually_indicated_sounds.png}
+    \caption{Visually Indicated Sounds (Andrew Owens et al. 2016). A model to synthesize plausible impact sounds from silent videos.(\href{https://www.youtube.com/watch?v=0FW99AQmMc8&feature=youtu.be&t=61}{Click here.})}
+  \end{figure}   
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{CNNs or RNNs?}
+
+\begin{frame} {CNNs or RNNs?}
+  \begin{itemize}
+    \item Historically, RNNs were the default models used in sequence processing tasks.
+    \item However, some families of CNNs (especially those based on Fully Convolutional Networks (FCNs)) \textit{can} be used to process variable-length sequences such as text or time-series data.
+    \item If a CNN doesn't contain any fully-connected layers, the total number of weights in the network is independent of the spatial dimensions of the input because of weight-sharing in the convolutional layers.
+    \item Recent research [Bai et al. , 2018] indicates that such convolutional architectures (which the authors term Temporal Convolutional Networks (TCNs)) can outperform RNNs on a wide range of tasks.
+    \item A major advantage of TCNs is that the entire input sequence can be fed to the network at once (as opposed to sequentially.)
+    % \item Surprisingly, the TCNs can model long-range dependencies in the inputs even better than recurrent architectures!
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {CNNs or RNNs?}
+  \begin{figure}
+      \centering
+      \scalebox{1}{\includegraphics{plots/tcn2.png}}
+      \caption{\footnotesize{A TCN (we have already seen this in the CNN lecture!) is simply a variant of the one-dimensional FCN which uses a special type of dilated convolutions called \textbf{causal dilated} convolutions.}}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame} {CNNs or RNNs?}
+  \begin{figure}
+      \centering
+      \scalebox{1}{\includegraphics{plots/tcn1.png}}
+      \caption{\footnotesize{Evaluation of TCNs and recurrent architectures on a wide range of sequence modelling tasks. $^h$ means higher is better and ${}^\ell$~ means lower is better. Note: To make the comparisons fair, all models have roughly the same size (for a given task) and the authors used grid search to find good hyperparameters for the recurrent architectures.}}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item RNNs are specifically designed to process sequences of varying lengths. 
+\item  For that recurrent connections are introduced into the network structure.
+\item The gradient is calculated by backpropagation through time.
+\item  An LSTM replaces the  simple hidden neuron by a complex system consisting of cell state, and forget, input, and output gates.
+\item An RNN can be used as a language model, which can be improved by word-embeddings.
+\item Different advanced types of RNNs exist, like Encoder-Decoder architectures and bidirectional RNNs.$^1$
+\end{itemize}
+
+\vspace{8mm}
+\tiny{1. A bidirectional RNN processes the input sequence in both directions (front-to-back and back-to-front).}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Oriol Vinyals et al., 2014]{2} Oriol Vinyals, Alexander Toshev, Samy Bengio and Dumitru Erhan (2014)
+\newblock Show and Tell: A Neural Image Caption Generator
+\newblock \emph{\url{https://arxiv.org/abs/1411.4555}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Alex Graves, 2013]{3} Alex Graves (2013)
+\newblock Generating Sequences With Recurrent Neural Networks
+\newblock \emph{\url{https://arxiv.org/abs/1308.0850}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Namrata Anand and Prateek Verma, 2016]{4} Namrata Anand and Prateek Verma (2016)
+\newblock Convolutional and recurrent nets for detecting emotion from audio data
+\newblock \emph{\url{http://cs231n.stanford.edu/reports/2015/pdfs/Cs_231n_paper.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Andrew Owens et al., 2016]{5} Andrew Owens, Phillip Isola, Josh H. McDermott, Antonio Torralba, Edward H. Adelson and  William T. Freeman (2015)
+\newblock Visually Indicated Sounds
+\newblock \emph{\url{https://arxiv.org/abs/1512.08512}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Kelvin Xu al., 2016]{6} Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron C. Courville, Ruslan Salakhutdinov, Richard S. Zemel and  Yoshua Bengio (2015)
+\newblock Show, Attend and Tell: Neural Image Caption Generation with Visual Attention
+\newblock \emph{\url{https://arxiv.org/abs/1502.03044}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Graves et al., 2014]{7} Alex Graves, Greg Wayne, Ivo Danihelka (2014)
+% \newblock Neural Turing Machines
+% \newblock \emph{\url{https://arxiv.org/abs/1410.5401}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Devlin et al., 2018]{8} Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova (2018)
+\newblock BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+\newblock \emph{\url{https://arxiv.org/abs/1810.04805}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Bai et al., 2018]{9} Shaojie Bai, J. Zico Kolter, Vladlen Koltun (2018)
+\newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
+\newblock \emph{\url{https://arxiv.org/abs/1803.01271}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Weng 2018]{9} Lilian Weng (2018)
+\newblock Attention? Attention!
+\newblock \emph{\url{https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture

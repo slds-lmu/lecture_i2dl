@@ -1,0 +1,176 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+
+<<setup-child, include = FALSE>>=
+  library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+\input{../latex-math/basic-math}
+\input{../latex-math/basic-ml}
+\input{../latex-math/ml-nn}
+  
+\lecturechapter{0}{Notation}
+\lecture{Deeplearning}
+  
+\begin{vbframe}{Fundamental definitions and notation}
+
+\begin{itemize}
+\item $\Xspace$ $p$-dim. input space, usually we assume $\Xspace = \R^p$, but
+categorical features can occur, too
+\item $\Yspace$ target space,  \\
+e. g. $\Yspace = \R$, $\Yspace = \lbrace 0, 1 \rbrace$, $\Yspace = \lbrace -1, 1 \rbrace$, $\Yspace = \gset$, $\Yspace = \lbrace \textrm{label}_1 \ldots \textrm{label}_g \rbrace$
+  \item $x = \xvec \in \Xspace$ observation
+\item $y \in \Yspace$ dependent variable (target, label, output)
+\item $\P_{xy}$ joint probability distribution on $\Xspace \times \Yspace$
+  \item $\pdfxy$ or $\pdfxyt$ joint pdf for $x$ and $y$
+  \end{itemize}
+
+% \remark{
+%   This lecture is mainly developed from a frequentist perspective. If parameters appear behind the |, this is
+%   for better reading, and does not imply that we condition on them in a Bayesian sense (but this notation
+%                                                                                         would actually make a Bayesian treatment simple).
+%   So formally, $p(x | \theta)$ should be read as $p_\theta(x)$ or $p(x, \theta)$ or $p(x; \theta)$.
+% }
+
+\remark{
+  Formally, $p(x | \theta)$ should be read as $p_\theta(x)$ or $p(x; \theta)$ (In other words, we adopt the frequentist perspective instead of a Bayesian one).
+}
+
+
+\framebreak
+
+\begin{itemize}
+\item $\D = \Dset$ data set with $n$ observations
+\item $\xyi$ $i$-th observation
+\item $\Dtrain$, $\Dtest$ data for training and testing, often $\D = \Dtrain \dot{\cup} ~ \Dtest$
+  \item $\fx$ or $\fxt \in \R$ prediction function learnt on data, we might suppress $\theta$ in notation
+\item $\hx$ or $\hxt \in \Yspace$ discrete prediction for classification
+\item $\theta \in \Theta$ model parameters\\
+(some models may traditionally use different symbols)
+\item $\Hspace$ hypothesis space, $f$ lives here, restricts the functional form of $f$
+  \item $\eps = y - \fx$ or $\epsi = \yi - \fxi$, residual in regression
+\item $\yf$ or $\yfi$, margin for binary classification with  $\Yspace = \{-1, 1\}$
+  \end{itemize}
+
+\framebreak
+
+\begin{itemize}
+\item $\pikx = \postk$, posterior probability for class $k$, given $x$, in case of binary labels we might abbreviate
+$\pix = \post$
+  \item $\pi_k = \P(y = k)$, prior probability for class $k$, in case of binary labels we might abbreviate
+$\pi = \P(y = 1)$
+  \item $\LLt$ and $\llt$, Likelihood and log-Likelihood for a parameter $\theta$, based on a statistical model
+\item $\fh$, $\hh$, $\pikxh$, $\pixh$ and $\thetah$, learned functions and parameters
+  \item $diag(a)$, diagonal matrix($a$ on the diagonal)
+  \item $\Pen$, parameter norm penalty
+  \item $\lambda$, regularization coefficient
+  \item $\nabla \fx$, gradient of $f(x)$
+  \item $\alpha$, learning rate/ step-size
+
+% \item $\phi(x | \mu, \sigma^2)$, $\Phi(x | \mu, \sigma^2)$, pdf and cdf of the univariate normal distribution,
+% with $\phi(x)$ and $\Phi(x)$ for the N(0,1) standard normal case,
+% and $\phi(x | \mu, \Sigma)$ (or $\phi_p(x)$) for the (standard) multivariate case in $p$ dimensions
+
+\end{itemize}
+
+\lz
+
+\remark{
+  With a slight abuse of notation we write random variables, e.g., $x$ and $y$, in lowercase, as normal
+  variables or function arguments. The context will make clear what is meant.
+}
+
+\framebreak
+
+% 
+% 
+% In the simplest case we have i.i.d. data $\D$, where the input and output space are both real-valued and one-dimensional.
+% 
+% \vspace{0.5cm}
+% 
+% <<fig.height=4>>=
+%   qplot(wt, mpg, data = mtcars) + xlab("x") + ylab("y")
+% @
+%   
+%   \framebreak
+
+Design matrix and intercept term:
+  
+  \begin{minipage}{0.45\textwidth}
+$$
+  X  = \mat{x_1^{(1)} & \cdots & x_p^{(1)} \\
+    \vdots    & \vdots & \vdots \\
+    x_1^{(n)} & \cdots & x_p^{(n)}}
+$$
+  \end{minipage}
+\begin{minipage}{0.45\textwidth}
+$$
+  X  = \mat{1      & x_1^{(1)} & \cdots & x_p^{(1)} \\
+    \vdots & \vdots    & \vdots & \vdots \\
+    1      & x_1^{(n)} & \cdots & x_p^{(n)}}
+$$
+  \end{minipage}
+
+\begin{itemize}
+\item $\xjb = \xjvec$ j-th observed feature vector.
+\item $\ydat = \yvec$ vector of target values.
+\item The right design matrix demonstrates the trick to encode the intercept via an additional
+constant-1 feature, so the feature space will be $(p+1)$-dimensional.
+This allows to simplify notation, e.g., to write $\fx = \theta^T x$, instead
+of $\fx = \theta^T x + \theta_0$.
+\end{itemize}
+
+\end{vbframe}
+
+\begin{frame}   {Fundamental definitions and notation}
+    \textbf{Neural networks - General}:\\
+    \vspace{3mm}
+    \makebox[4cm]{$\wtw$}  \hspace{1cm}weights of a (hidden) neuron\par
+    \makebox[4cm]{$W$}   \hspace{1cm}weight matrix with dimensions $p \times m$\par
+    \makebox[4cm]{$\wtu$}  \hspace{1cm}weights of an output neuron\par
+    \makebox[4cm]{$U$}   \hspace{1cm}weight matrix with dimensions $m \times g$\par
+    \makebox[4cm]{$b$, and $\biasb$}  \hspace{1cm}bias (hidden layer) \par
+    \makebox[4cm]{$c$, and $\mathbf{c}$}  \hspace{1cm}bias (output layer) \par
+    \vspace{3mm}
+    \makebox[4cm]{$\hidz_{in}$}  \hspace{1cm}vector of "weighted sums" (hidden)\par
+    \makebox[4cm]{$\hidz = \hidz_{out} = (z_1, \dots, z_m)^T$}  \hspace{1cm}vector of hidden units\par
+    \vspace{3mm}
+    \makebox[4cm]{$\sigma$}  \hspace{1cm}activation function(hidden layer)\par
+    \makebox[4cm]{$\tau$}  \hspace{1cm}activation function(output layer)\par
+    \vspace{3mm}
+    \makebox[4cm]{$\mathbf{f}_{in}$}  \hspace{1cm}vector of "weighted sums"(output)\par
+    \makebox[4cm]{$\mathbf{f} = \mathbf{f}_{out} = (f_1, \dots, f_g)^T$}  \hspace{1cm}vector of output units\par
+    \vspace{3mm}
+    
+% z_{in,j}
+% z_{out,j}
+% \hidz_{in} = (z_{in,1}, \dots, z_{in,m})^T
+
+
+\end{frame}
+
+\begin{frame}   {Fundamental definitions and notation}
+    
+    \textbf{RNNs}:\\
+    \makebox[4cm]{$U$}  \hspace{1cm}matrix of input-to-hidden weights\par
+    \makebox[4cm]{$W$}  \hspace{1cm}matrix of hidden-to-hidden weights\par
+    \makebox[4cm]{$V$}  \hspace{1cm}matrix of hidden-to-output weights\par
+    \makebox[4cm]{$t$}  \hspace{1cm}time-step\par
+    \makebox[4cm]{$s^{[t]}$}  \hspace{1cm}LSTM cell state(at time t)\par
+    
+    \vspace{3mm}
+    
+    \textbf{Autoencoders}:\\
+    \makebox[4cm]{$r, \hat x$}  \hspace{1cm}reconstruction of the input $x$\par
+    \makebox[4cm]{$\tilde{x}$}  \hspace{1cm}noise-corrupted copy for $x$\par
+    \makebox[4cm]{$C(\tilde{x}|x)$}  \hspace{1cm}conditional distribution of $\tilde{x}$ given $x$\par
+    
+    
+\end{frame}
+
+
+\endlecture

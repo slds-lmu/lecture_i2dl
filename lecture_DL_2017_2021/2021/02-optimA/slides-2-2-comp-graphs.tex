@@ -1,0 +1,177 @@
+
+\input{../../2021/style/preamble-david.tex}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\begin{document}
+
+\lecturechapter{2}{Chain Rule and Computational Graphs}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\begin{frame}
+%\frametitle{Lecture outline}
+%\tableofcontents
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}{Local Minima/Convexity}
+% \end{frame}
+
+% \section{Chain Rule and Computational Graphs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Chain rule of calculus}
+  % \begin{itemize}
+  %   \item The chain rule can be used to compute derivatives of the composition of two or more functions.
+  %   \item Let $x \in \R^m$, $y \in \R^n$, \\
+  %         $g: \R^m \to \R^n$ and $f: \R^n \to \R$. \\
+  %   \item If $y = g(x)$ and $z = f(y)$, the chain rule yields $$\frac{\partial z}{\partial x_i} = \sum_j \frac{\partial z}{\partial y_j} \frac{\partial y_j}{\partial x_i}$$
+  %         or in vector notation $$\nabla_x z = \Big(\frac{\partial y}{\partial x}\Big)^\top \nabla_y z,$$
+  %         where $\frac{\partial y}{\partial x}$ is the $n \times m$ jacobian matrix of $g$.
+  % \end{itemize}
+  \begin{itemize}
+    \item The chain rule can be used to compute derivatives of the composition of two or more functions.
+    \item Let $\xb \in \R^m$, $\mathbf{y} \in \R^n$, \\
+          $g: \R^m \to \R^n$ and $f: \R^n \to \R$. \\
+    \item If $\mathbf{y} = g(\xb)$ and $z = f(\mathbf{y})$, the chain rule yields: $$\frac{\partial z}{\partial x_i} = \sum_j \frac{\partial z}{\partial y_j} \cdot \frac{\partial y_j}{\partial x_i}$$
+          or, in vector notation: $$\nabla_{\xb} z = \Big(\frac{\partial \mathbf{y}}{\partial \xb}\Big)^\top \nabla_{\mathbf{y}} z,$$
+          where $\frac{\partial \mathbf{y}}{\partial \xb}$ is the ($n \times m$) Jacobian matrix of $g$.
+  \end{itemize}
+\end{vbframe}  
+
+\begin{vbframe}{Computational graphs}
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Computational graphs are a very helpful language to understand and visualize the chain rule.
+      \item Each node describes a variable.
+      \item Operations are functions applied to one or more variables.
+    \end{itemize}
+  \end{minipage}\hfill
+  \begin{minipage}{0.5\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=6cm]{plots/compgraph1.png}
+        \tiny{\\source : Goodfellow et al. (2016)}
+        \caption{The computational graph for the expression $H = \sigma(XW + B)$ with activation function $\sigma(\cdot)$.}
+    \end{figure}
+  \end{minipage}  
+\end{vbframe}
+
+\begin{vbframe}{Chain rule of calculus: Example 1}
+  \begin{minipage}{0.5\textwidth}
+    \begin{itemize}
+      \item Suppose we have the following computational graph.
+      \item To compute the derivative of $\frac{\partial z}{\partial w}$ %$\frac{\partial z}{\partial w}$ 
+      we need to recursively apply the chain rule. That is:
+      \begin{eqnarray*}
+        \frac{\partial z}{\partial w} &=& \frac{\partial z}{\partial y} \cdot \frac{\partial y}{\partial x} \cdot \frac{\partial x}{\partial w} \\
+                                  &=& f'_3(y) \cdot f'_2(x) \cdot f'_1(w) \\
+                                  &=& f'_3(f_2(f_1(w))) \cdot f'_2(f_1(w)) \cdot f'_1(w)
+      \end{eqnarray*}
+    \end{itemize}
+  \end{minipage}\hfill
+  \begin{minipage}{0.32\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=1cm]{plots/compgraph2.png}
+        \begin{footnotesize}
+        \tiny{\\source : Goodfellow et al. (2016)}
+        \caption{A computational graph, such that $x = f_1(w),$ $y = f_2(x)$ and $z = f_3(y)$.}
+        \end{footnotesize}
+    \end{figure}
+  \end{minipage}
+% \framebreak
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=4.5cm]{plots/compgraph3.png}
+%       \caption{Applying the chain rule to the example yields us a computational graph with a symbolic description of the
+% derivatives.}
+%   \end{figure}  
+\end{vbframe}
+
+\begin{frame}{Chain rule of calculus: Example 2}
+
+   \begin{figure}
+    \centering
+      \scalebox{0.27}{\includegraphics{plots/chain_tree.png}}
+  \end{figure}
+  
+To compute $\nabla_\xb z$, we apply the chain rule % to the computational graph above,
+  \begin{itemize}
+    \item $\frac {\partial z}{\partial x_1} = \sum_j \frac{\partial z}{\partial y_j} \frac{\partial y_j}{\partial x_1} = \frac {\partial z}{\partial y_1} \frac {\partial y_1}{\partial x_1} + \frac {\partial z}{\partial y_2} \frac {\partial y_2}{\partial x_1}$
+    \item $\frac {\partial z}{\partial x_2} = \sum_j \frac{\partial z}{\partial y_j} \frac{\partial y_j}{\partial x_2} = \frac {\partial z}{\partial y_1} \frac {\partial y_1}{\partial x_2} + \frac {\partial z}{\partial y_2} \frac {\partial y_2}{\partial x_2}$
+  \end{itemize}
+  \vspace{2mm}
+    Therefore, the gradient of $z$ w.r.t $\xb$ is
+    \begin{itemize}
+      \item  $\nabla_\xb z = \begin{bmatrix}
+               \frac {\partial z}{\partial x_1} \\
+               \frac {\partial z}{\partial x_2} \\
+             \end{bmatrix} = \underbrace{\begin{bmatrix} \frac{\partial y_1}{\partial x_1}&\frac {\partial y_2}{\partial x_1}\\
+                                             \frac {\partial y_1}{\partial x_2}&\frac {\partial y_2}{\partial x_2}\\
+             \end{bmatrix}}_{\textcolor{red}{(\frac{\partial \mathbf{y}}{\partial \xb})^\top}} \underbrace{\begin{bmatrix} \frac {\partial z}{\partial y_1} \\
+            \frac {\partial z}{\partial y_2} \\ \end{bmatrix}}_{\textcolor{red}{\nabla_{\mathbf{y}} z}} = \Big(\frac{\partial \mathbf{y}}{\partial \xb}\Big)^\top \nabla_{\mathbf{y}} z $
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Computational Graph: Neural Net}
+  \begin{figure}
+      \centering
+        \scalebox{0.75}{\includegraphics{plots/neo_comp.png}}
+        \caption{A neural network can be seen as a computational graph. $\phi$ is the weighted sum and $\sigma$ and $\tau$ are the activations. \\
+        Note: In contrast to the top figure, the arrows in the computational graph below merely indicate \textbf{dependence}, not weights.}
+    \end{figure}
+\end{frame}
+% \begin{frame}{Chain rule of calculus}
+% \begin{figure}
+%     \centering
+%       \scalebox{0.4}{\includegraphics{plots/chain_tree.png}}
+%   \end{figure}
+%   
+%     $\nabla_x z = \begin{bmatrix}
+%            \frac {\partial z}{\partial x_1} \\
+%            \frac {\partial z}{\partial x_2} \\
+%          \end{bmatrix} = \begin{bmatrix}
+%            \frac {\partial z}{\partial x_1} \\
+%            \frac {\partial z}{\partial x_2} \\
+%          \end{bmatrix}$
+% \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame} {Simple Example?}
+%   \begin{figure}
+%     \centering
+%       \scalebox{1}{\includegraphics{plots/simex.png}}
+%   \end{figure}
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\section{References}
+
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture
+\end{document}

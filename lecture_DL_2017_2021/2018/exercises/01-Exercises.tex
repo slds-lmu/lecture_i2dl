@@ -1,0 +1,169 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{verbatimbox}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+\usepackage{hyperref}
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+\input{commands.tex}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\title{	
+\normalfont \normalsize 
+\textsc{Faculty of Mathematics, Ruhr University Bochum} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Deep Learning\\{\Large Exercise Sheet 1}\\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Asja Fischer} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+
+\maketitle % Print the title
+\section{In Class}
+\begin{enumerate} 
+%\item \textbf{Transfer function}\\
+%Consider the sigmoid transfer function
+%\begin{align*}
+%   \sigma(u) = \frac{1}{1 + e^{-u}} \enspace,
+% \end{align*}
+% Show that its derivative fulfills
+% \begin{align*}
+%    \sigma'(u) = \big( 1 - \sigma(u) \big) \cdot \sigma(u) \enspace.
+%   \end{align*}
+
+\item \textbf{Weight parameters} \\
+Consider a neuron in a hidden layer with input (membrane potential) $z_{in}$, and output (firing rate) $z_{out}$. 
+Let $x = (x_1, \dots, x_m) \in \mathbb{R}^p$ denote the input, let $w = (w_1, \dots, w_p)$ denote the connection weights
+from the inputs to a hidden node, and let $b$ denote the bias weight:
+\begin{align*}
+z_{in} &= \sum_{i=1}^p w_i \cdot x_i + b = w^T x + b \\
+  z_{out} &= \sigma(z_{in}) 
+\end{align*}
+Say we want to make the sigmoid $\sigma$ twice as steep, ideally we'd like to apply
+ \begin{align*}
+ \tau(z_{in}) =  \frac{1}{1 + e^{-2 z_{in}}} \enspace, 
+  \end{align*}
+  instead of $\sigma$. But we cannot do this, since the sigmoid itself is fixed; it does not have any parameters.
+  How can the parameters (weights and bias) be changed to achieve the same effect? Let $w, b$ denote the parameters used with $\tau$, how to set $w', b'$ used with $\sigma$ to model the same function?
+  
+\item\textbf{Universal approximation theorem}\\
+What is the universal approximation property of neural networks?
+  
+\item\textbf{Size of the hidden layer}\\
+Consider two neural networks, one with a small and one with a huge hidden layer, trained to minimize the empirical risk.
+ For which one would you expect higher/lower
+  \begin{itemize}
+  \item training error
+  \item over-fitting
+   \item generalization error?
+   \end{itemize}
+For which reasons?
+
+\item\textbf{XOR-Problem}\\
+Consider a simple neural network with two hidden neurons with ReLU activation functions and one output neuron with the following activation function
+\[
+\tau(f_{in})=\begin{cases} 1 & \text{if $ f_{in}>0$}\\\ 0 & \text{otherwise}  
+\end{cases}\enspace,
+\]
+and let the parameters of the first and the second layer be given by
+$\ W = \begin{pmatrix}
+      1 & 1 \\
+      1 & 1
+    \end{pmatrix}, \\
+      b = \begin{pmatrix}
+      0 \\
+      -1
+    \end{pmatrix}$
+    and $
+      u = \begin{pmatrix}
+      1 \\
+      -2
+    \end{pmatrix}, \
+      c =-0.5,
+ $
+respectively.
+\begin{figure}[H]\label{fig:nn}
+\center
+    \includegraphics[width=12cm]{images/xor_rep.png}% 
+  \end{figure}
+  \begin{itemize}
+  \item[a)]  Write the parameters into the corresponding positions in figure.
+  \item[b)] Calculate the output of the neural network for the four data points \\ $X = \{[0,0]^T, [0,1]^T, [1,0]^T, [1,1]^T \}$.
+  \end{itemize}
+  
+  \item \textbf{Gradient}\\
+  Consider the function
+  $f:\,\mathbb{R}^2\to\mathbb{R}$,
+  $(x,y)\mapsto x^2+y^2$.
+  Sketch the graph of $f$ in $\mathbb{R}^3$
+  by interpreting $f(x,y)$ as the height $z$ at location $(x,y)$.
+  Calculate the gradient of $f$
+  and draw some of those gradient vectors
+  in the $xy$-plane.
+  How does the height change if you
+  move in the direction of the gradient?  
+  
+  
+  
+ 
+  
+\end{enumerate}
+
+
+%\section{At Home}
+%\begin{enumerate}
+%\item ... some example of actually computing knowledge graph embeddings ...
+%\end{enumerate}
+\end{document}

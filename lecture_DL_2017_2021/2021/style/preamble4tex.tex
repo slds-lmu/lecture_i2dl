@@ -1,0 +1,122 @@
+\documentclass[11pt,compress,t,notes=noshow]{beamer}
+
+\usepackage[english]{babel}
+\usepackage{dsfont}
+\newcommand\bmmax{2}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{csquotes}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{enumerate}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{psfrag}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{eqnarray}
+\usepackage{multimedia}
+\usepackage{media9}
+\usepackage{arydshln}
+\usepackage{tabularx}
+\usepackage{placeins}
+\usepackage{tikz}
+\usepackage{setspace}
+\usepackage{wrapfig}
+\usepackage{tcolorbox}
+\usepackage[export]{adjustbox}
+\usepackage{siunitx}
+\usetikzlibrary{shapes,arrows,automata,positioning,calc}
+\tikzset{
+  %Define standard arrow tip
+  >=stealth',
+  %Define style for boxes
+  punkt/.style={
+    rectangle,
+    rounded corners,
+    draw=black, very thick,
+    text width=6.5em,
+    minimum height=2em,
+    text centered},
+  % Define arrow style
+  pil/.style={
+    ->,
+    thick,
+    shorten <=2pt,
+    shorten >=2pt,}
+}
+\usepackage{subfig}
+
+%new environments
+
+\newenvironment{vbframe}  %frame with breaks and verbatim
+{
+ \begin{frame}[containsverbatim,allowframebreaks]
+}
+{
+\end{frame}
+}
+
+\newenvironment{vframe}  %frame with verbatim without breaks (to avoid numbering one slided frames)
+{
+ \begin{frame}[containsverbatim]
+}
+{
+\end{frame}
+}
+
+\newenvironment{blocki}[1]   % itemize block
+{
+ \begin{block}{#1}\begin{itemize}
+}
+{
+\end{itemize}\end{block}
+}
+
+\newenvironment{fragileframe}[2]{  %fragile frame with framebreaks
+\begin{frame}[allowframebreaks, fragile, environment = fragileframe]
+\frametitle{#1}
+#2}
+{\end{frame}}
+
+
+\newcommand{\myframe}[2]{  %short for frame with framebreaks
+\begin{frame}[allowframebreaks]
+\frametitle{#1}
+#2
+\end{frame}}
+
+\newcommand{\remark}[1]{
+  \textbf{Remark:} #1
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% basic latex stuff
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}} %fontstyle for R packages
+\newcommand{\lz}{\vspace{0.5cm}} %vertical space
+\newcommand{\dlz}{\vspace{1cm}} %double vertical space
+\newcommand{\oneliner}[1] % Oneliner for important statements
+{\begin{block}{}\begin{center}\begin{Large}#1\end{Large}\end{center}\end{block}}
+
+
+%\usetheme{lmu-lecture}
+\usepackage{../style/lmu-lecture}
+
+\let\code=\texttt
+\let\proglang=\textsf
+
+\setkeys{Gin}{width=0.9\textwidth}
+
+
+
+\title{Deep Learning}
+\author{Bernd Bischl}
+\institute{Department of Statistics -- LMU Munich}
+\date{Winter term 2021}
+
+\setbeamertemplate{frametitle}{\expandafter\uppercase\expandafter\insertframetitle}
+

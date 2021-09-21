@@ -1,0 +1,29 @@
+
+please use proper macros for (regularized) risk ect. 
+we have riskt and risket. and introduce some macros for J as well
+
+weight decay should have an animation, where we show how gradient steps get "contracted" in each iteration.
+
+
+weight decay example plot, use 10^-k notation for plot too
+
+tau cannot be used as iteration number for early stopping, maybe use T_stop
+
+early stopping: "eps" is not explained
+
+adversarial examples: image witg plot (46/59). multiple stuff here is not readable. change layout. also never have these small axis labellings!!
+it also simply says "credit goodfellow"? below the exmample?
+
+FGSM: we should put a "hat" on theta there, or on "f". this is already fitted.
+we also need to be careful with notation here!
+the symbolic params we use as argument of the the function should be distinguished from what we input to the function! 
+notation: grad_x L(\fhat(x), y). then should also change the notation below the next images.
+
+adversiarial examples:
+remove the itemize below the images with a single bullet point
+
+general: 
+- im many places you are missing a space before "("
+- in many places it just says "credit" below some images. dont know if that is wanted / Ok.
+- really check all axis labellings / legends. in MANY places they are absolutely not readable as they are so small
+

@@ -1,0 +1,32 @@
+
+\sloppy
+\parindent0em
+\parskip0.5em
+\topmargin-2.3 cm
+\textheight25cm
+\textwidth17.5cm
+\oddsidemargin-0.8cm
+\pagestyle{empty}
+
+\newcommand{\kopf}[1] {
+\hrule
+\vspace{.15cm}
+\begin{minipage}{\textwidth}
+	{\sf\bf Computerintensive Methoden\hfill #1. Übung\\
+	 Bernd Bischl, Giuseppe Casalicchio, Florian Fendt\hfill WiSe 2015/2016}
+\end{minipage}
+\vspace{.05cm}
+\hrule
+\vspace{1cm}}
+
+\newenvironment{allgemein}
+	{\noindent}{\vspace{1cm}}
+
+\newcounter{aufg}
+\newenvironment{aufgabe}
+	{\refstepcounter{aufg}\textbf{Aufgabe \arabic{aufg}:}\\*[1ex]\noindent}
+	{\vspace{.5cm}}
+
+\newenvironment{loesung}
+	{\bigskip\textbf{Lösung:}\\*[1ex]\noindent}
+	{\bigskip}

@@ -1,0 +1,1486 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+source('./code/text_encoding.R')
+# amsmath in preamble, whut?
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=FALSE)
+@
+
+\input{../../latex-math/basic-math}
+
+
+\lecturechapter{6}{Convolutional neural networks II}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{CNNs - application}
+    \begin{itemize}
+        \item As CNNs are one of the workhorses of deep learning, lots of research focuses on this model class.
+        \item In this chapter, we will: 
+        \begin{itemize}
+            \item introduce different CNN topologies.
+            \item discuss different use cases and suitable prominent architectures.
+            \item give practical tips and tricks on the application of CNNs on real world data.
+        \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Important Types of Convolutions}
+
+\begin{vbframe}{Important Types of Convolutions}
+    \begin{enumerate}
+    \item 1D convolutions
+    \item 2D convolutions
+    \item 3D convolutions
+    % \item Locally connected convolutions
+    \item Dilated convolutions
+    \item Transposed convolutions
+    \item Inception modules
+    \item Separable convolutions
+    %\item Skip connections
+    %\item Global average pooling
+    %\item Squeeze-and-Excite layers
+    \end{enumerate}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{1D Convolution}
+    \begin{itemize} 
+    \item Problem setting: data that contains sequential, 1-dimensional information.
+    \item Data is convolved with a 1D-kernel.
+    \item Data consists of tensors with shape [channels, xdim].
+    \item Single channel:
+        \begin{itemize}
+            \item Analogon to univariate time series. 
+            \item Development of a single stock price over time.
+        \end{itemize}
+    \item Multi-channel:
+        \begin{itemize}
+            \item Analogon to multivariate time series. 
+            \item Movement data measured with multiple sensors for human activity recognition \cite{21}.
+            \item Temperature and humidity in weather forecasting.
+            \item Text encoded in character-level one-hot-vectors \cite{20}.
+        \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+
+\begin{vbframe}{1D Convolution -- Sensor data}
+    \begin{figure}
+        \centering
+        \includegraphics[width=9cm]{plots/05_conv_variations/1d/HAR.png}
+        \caption{Illustration of 1D movement data with three channels measured with an accelerometer sensor in the course of a human activity recognition task.}
+    \end{figure}
+\framebreak
+    \begin{figure}
+        \centering
+        \includegraphics[width=10cm]{plots/05_conv_variations/1d/deep_tsc.png}
+        \caption{Time series classification with 1D CNNs and global average pooling (explained later). An input time series is convolved with 3 CNN layers, pooled and fed into an MLP layer for classification. This is one of the classic time series classification architectures \cite{31}.}
+    \end{figure}
+\end{vbframe}
+
+
+\begin{vbframe}{1D Convolution -- Text mining}
+    \begin{itemize}
+        \item 1D convolutions also have an interesting application in text mining \cite{20}.
+        \item For example, they can be used to classify the sentiment of text snippets such as yelp reviews.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=12cm]{plots/05_conv_variations/1d/yelp_lmu.png}
+        \caption{Sentiment classification: can we teach the net that this a positive review?}
+    \end{figure}
+\end{vbframe}
+
+\frame{
+\frametitle{1D Convolution -- Text mining}    
+    \center
+    \only<1>{\includegraphics[width=5cm]{plots/text_encoding/1_encoded_text.png}}%
+    \only<2>{\includegraphics[width=9cm]{plots/text_encoding/4_encoded_text.png}}%
+    \only<3>{\includegraphics[width=9cm]{plots/text_encoding/8_encoded_text.png}}%
+    \only<4>{\includegraphics[width=9cm]{plots/text_encoding/11_encoded_text.png}}%
+    \\
+    % \only<1>{1D convolution of text that was encoded on a character-level. The data is represented as 1D signal with channel size = size of the alphabet as shown in \cite{20}. The temporal dimension is shown as the y dimension for illustrative purposes. The 1D-Kernel (blue) convolves the input in the temporal y-dimension yielding a 1D feature vector}  
+    \begin{itemize}
+        \only<1>{\item We encode the text reviews (here: \textit{dummy review}) using a given alphabet.}
+        \only<1>{\item Each character is transformed into a one-hot vector. Character \textit{d} contains only zero values for all positions in the vector except position four.}
+        \only<1>{\item The max length of each review is set to 1014: shorter texts are padded with spaces (zero-vectors) and longer texts are simply cut.}
+        \only<2>{\item The data is represented as 1D signal with channel size = size of the alphabet.}
+        \only<3>{\item The temporal dimension is shown as the y dimension for illustrative purposes. }
+        \only<4>{\item The 1D-Kernel (blue) convolves the input in the temporal y-dimension yielding a 1D feature vector. }
+    \end{itemize}
+}
+
+\begin{vbframe}{1D Convolution -- Text mining}
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/1d/ccnnArch.png}
+        \caption{Example: an alphabet containing 72 (special-) characters is used for encoding and the text length is fixed to 1014. This yields an accuracy of 96\% with a net trained on 500K reviews. \cite{20}}
+    \end{figure}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{2D Convolution}
+    \begin{itemize}
+        \item Problem setting: work with 2 dimensional data such as images.
+        \item Refer to the previous lecture for a comprehensive introduction to 2 dimensional convolutions.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/2d/2d_catdog.png}
+        \caption{Simple binary classification problem on 2D image data: cat vs. dog detection as illustrated \href{https://becominghuman.ai/building-an-image-classifier-using-deep-learning-in-python-totally-from-a-beginners-perspective-be8dbaf22dd8}{here}.}
+    \end{figure}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{3D Convolution}
+    \begin{itemize}
+        \item Problem setting: settings with data containing 3 dimensions.
+        \item Solution: move the three-dimensional kernel in x, y and z direction to capture all important information.
+        \item Data consists of tensors with shape [channels, xdim, ydim, zdim].
+        \item Dimensions can be both, temporal (video frames) or spatial (MRI).
+        \item Examples:
+        \begin{itemize}
+            \item Human activity recognition in video data in one of the first papers in this domain \cite{18}.
+            \item Disease classification or tumor segmentation on MRI scans \cite{19}.
+        \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolution -- Data}
+    \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{plots/05_conv_variations/3d/MRI.png}
+        \caption{Illustration of single-channel volumetric data: MRI scan \cite{17}. Each slice of the stack has one channel, as the frames are black-white.}
+    \end{figure}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolution -- Data}
+    \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{plots/05_conv_variations/3d/swim.png}
+        \caption{Illustration of multi-channel volumetric data: video snippet of an action detection task. The video consists of several slices, stacked in temporal order. Frames have three channels, as they are RGB.}
+    \end{figure}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolution}
+    % https://dspace.cc.tut.fi/dpub/bitstream/handle/123456789/24703/teivas.pdf?sequence=1&isAllowed=y
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/3d/3dconv_arch.png}
+        \caption{Basic 3D-CNN architecture.}
+    \end{figure}
+    \begin{itemize}
+        \item Basic architecture of the CNN stays the same.
+        \item 3D convolutions output 3D feature maps which are element-wise activated and then (eventually) pooled in 3 dimensions.
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolution}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/3d/3dconv.png}
+    \end{figure}
+    \begin{itemize}
+        \item 3D convolution can be expressed as: 
+        $$ H(i, j, k) = (\mathcal{I}\star\mathcal{G})(i, j, k)=\sum_{x}\sum_{y}\sum_{z}\mathcal{I}(x, y, z)\mathcal{G}(i-x, j-y, k-z) $$
+        \item Note: 3D convolutions yield a 3D output.
+    \end{itemize}
+\end{vbframe}
+
+% \frame{
+% \frametitle{Types: 3D - Data}    
+%     \center
+%     \only<1>{\includegraphics[width=4cm]{plots/05_conv_variations/3d/breaststroke/frame_1.png}}%
+%     \only<2>{\includegraphics[width=4cm]{plots/05_conv_variations/3d/breaststroke/frame_2.png}}%
+%     \only<3>{\includegraphics[width=4cm]{plots/05_conv_variations/3d/breaststroke/frame_3.png}}%
+%     \only<4>{\includegraphics[width=4cm]{plots/05_conv_variations/3d/breaststroke/frame_4.png}}%
+%     \only<5>{\includegraphics[width=4cm]{plots/05_conv_variations/3d/breaststroke/frame_5.png}}%
+%     \only<6>{\includegraphics[width=4cm]{plots/05_conv_variations/3d/breaststroke/frame_6.png}}%
+%     \\
+%     Illustration of multi-channel volumetric data: video snippet of an action detection task. The video consists of several slices, stacked in temporal order. Frames have three channels, as they are RGB.
+% }
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% \begin{vbframe}{Types: locally connected convolutions}
+%     \begin{itemize}
+%         \item Problem setting: focus on spatial information during the convolution 
+%         \item nice overview post here: https://towardsdatascience.com/types-of-convolutions-in-deep-learning-717013397f4d
+%     \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Dilated convolutions}
+    \begin{itemize}
+        \item Idea: artificially increase the receptive field of the net without using more filter weights.
+        \item Benefit:
+        \begin{itemize}
+            \item Detection of fine-details by processing inputs in higher resolutions.
+            \item Broader view of the input to capture more contextual information with less depth.
+            \item Improved run-time-performance due to less parameters.
+        \end{itemize}
+        \item Idea: Add new dilation parameter to the kernel $\mathcal{K}$ that skips pixels during convolution.
+        \item Dilated kernel is basically a regular convolutional kernel interleaved with zeros.
+    \end{itemize}
+\framebreak 
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/dilated/dilation_nice.png}
+        \caption{Dilated convolution on 2-dimensional data \cite{14}. It is observable, that the dilation can be interpreted as an increased kernel filled with zero values.} 
+    \end{figure}
+\framebreak
+    \begin{itemize}
+        \item Useful in applications where the global context is of great importance for the model decision.
+        \item This component finds application in:
+        \begin{itemize}
+            \item Generation of audio-signals and songs within the famous Wavenet developed by DeepMind \cite{15}.
+            \item Time series classification and forecasting \cite{23}.
+            \item Image segmentation \cite{22}.
+        \end{itemize}
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item Dilation increases the receptive field of the model - what is a receptive field?
+        \item Receptive field: the visual field of a single neuron in a specific layer.
+        \item Huge receptive field of neurons in the last hidden layer: they can capture a lot more global information from the input.
+        % \item Formula for neuron in layer $l$ with kernel size $k$, dilation factor $d$ and stride $s$:
+        % $$
+        %     RF_l = RF_{l-1} + (k-1) \cdot d \cdot \prod_{i = 1}^{k-1}s_i
+        % $$
+        % \item See \href{https://www.uio.no/studier/emner/matnat/ifi/INF5860/v18/undervisningsmateriale/lectures/inf5860_lecture6_convolutional_nerual_networks.pdf}{Oslo slides for original formula}, adapted to dilation by Jann, to be xchecked
+    \end{itemize}
+\framebreak 
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/dilated/classic_conv.png}
+        \caption{Regular convolution: we use a convolutional kernel of size 2 with the fixed weights $\{0.5, 1.0\}$ and convolve the input vector with a stride of 2. We do not dilate the kernel in this example (the dilation factor is one) and one neuron in layer 2 has a receptive field of size 4 after two stacked layers. }
+    \end{figure}
+\framebreak 
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/dilated/dilated.png}
+        \caption{Dilated convolution: we use a convolutional kernel of size 2 with the fixed weights $\{0.5, 1.0\}$ and convolve the input vector with a stride of 2. We dilate the kernel with a factor of 2 in this example and one neuron in layer 2 has a receptive field of size 8 after two stacked layers.}
+    \end{figure}
+% \framebreak
+%     \begin{itemize}
+%         % http://ttic.uchicago.edu/~shubhendu/Pages/Files/Lecture8_flat.pdf
+%         \item Remember the formulation of a regular convolution from the previous lecture:
+%             \begin{equation*}
+%                  H(i, j) = (\mathcal{I} \ast \mathcal{G})(i, j) = \sum_{x} \sum_{y} \mathcal{I}(x, y) \mathcal{G}(i-x, j-y)
+%             \end{equation*}
+%         \item Using the dilation factor $d$ leads to this formulation of a dilated convolution:
+%             \begin{equation*}
+%                  H(i, j) = (\mathcal{I} \ast \mathcal{G})(i, j) = \sum_{x} \sum_{y} \mathcal{I}(x, y) \mathcal{G}(i-(d \cdot x), j-(d \cdot y))
+%             \end{equation*}
+%     \end{itemize}
+\framebreak 
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/dilated/tcn.png}
+        \caption{Application of dilated convolutions on time series for classification or seq2seq prediction \cite{23}. The dilations are used to drastically increase the context information for each output neuron $y_i$ with relatively few layers.}
+    \end{figure}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% \begin{vbframe}{Types: separable convolutions}
+%     \begin{itemize}
+%         \item Problem setting: make convolution computationally more efficient
+%         \item Remember the sobel kernel from the previous lecture:
+%             \begin{equation*}
+%                     K_x = 
+%                     \begin{bmatrix}
+%                         +1 & 0 & -1 \\
+%                         +2 & 0 & -2 \\
+%                         +1 & 0 & -1 
+%                     \end{bmatrix}
+%             \end{equation*}
+%         \item this 3x3 dimensional kernel can be replaced by the outer product of two 3x1 and 1x3 dimensional kernels:
+%             \begin{equation*}
+%                     \begin{bmatrix}
+%                         +1 \\ 
+%                         +2 \\
+%                         +1   
+%                     \end{bmatrix}* 
+%                     \begin{bmatrix}
+%                         +1 & 0 & -1   
+%                     \end{bmatrix}
+%             \end{equation*}
+%         \item Convolving with both filters subsequently has a similar effect, reduces the amount of parameters to be stored and thus improves speed
+%     \end{itemize}
+% \framebreak
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=4cm]{plots/05_conv_variations/separable/separable.png}
+%         \caption{Seperable convolutions (also: factorized) find application in the inception net V4 \cite{28}. The authors find it to increase computational speed but suggest to use this trick in medium to late stage layers only.}
+%     \end{figure}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Transposed convolutions}
+    \begin{itemize}
+        \item Idea: re-increase dimensionality of a feature map instead of decreasing it as with regular convolutions.
+        \item Problem setting: required module in Encoder-Decoder architectures such as (variational) Autoencoders, Segmentation Nets, GANs (covered in later lectures).
+        \item In such architectures, dimensions of the feature maps are getting reduced throughout the architecture. Transposed convolutions are used to get back to the initial dimensionality. 
+        \item Note: Do not confuse this with deconvolutions (which are mathematically defined as the inverse of a convolution).
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item Example 1:
+        \begin{itemize}
+            \item Input: blue feature map with dim $4\times 4$.
+            \item Output: turquoise feature map with dim $2\times 2$.
+        \end{itemize}
+    \end{itemize}
+    \begin{figure}
+      \centering
+      \includegraphics[width=10cm]{plots/05_conv_variations/transpose/transpose_conv_0.png}
+      \caption{ A \textbf{regular} convolution with kernel-size $k$ = 3, padding $p$ = 0 and stride $s$ = 1.}
+    \end{figure}
+    Here, the feature map shrinks from $4\times 4$ to $2\times 2$.
+\framebreak
+    \begin{itemize}
+      \item \small{Example 1:
+        \begin{itemize}
+            \item Now, let's upsample the $2\times 2$ feature map back to a $4\times 4$ feature map.
+            \item Input: $2\times 2$ (blue). Output: $4\times 4$ (turquoise).
+            % \item Output: turquoise feature map with dim $4\times 4$
+        \end{itemize}
+      \item One way to upsample is to use a regular convolution with various padding strategies.}
+    \end{itemize}
+    \begin{figure}
+      \centering
+      \includegraphics[width=10cm]{plots/05_conv_variations/transpose/transpose_conv.png}
+      \caption{\textbf{Transposed} convolution can be a seen as a regular convolution.}
+    \end{figure}
+        \small{Convolution (above) with $k' = 3, s' = 1, p' = 2$ re-increases dimensionality from $2\times 2$ to $4\times 4$ as shown in \cite{14}}.\\
+% \framebreak
+%     \begin{itemize}
+%         \item Convolution with parameters kernel size $k$, stride $s$ and padding factor $p$
+%         \item Associated transposed convolution has parameters $k' = k$, $s' = s$ and $p' = k-1$
+%     \end{itemize}
+% \framebreak
+%   Example 2 : (Transposed) Convolution as a matrix multiplication : 
+% % \framebreak
+% %   Example 2 : Let's now view transposed convolutions from a different perspective.
+%    \begin{figure}
+%       \centering
+%       \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/transpose_mat_1.png}}
+%       \tiny{\\credit:Stanford}
+%       \caption{A "regular" 1D convolution. kernel size = 3, stride = 1 , padding = 1. The vector $a$ is the 1D input feature map. }
+%   \end{figure}
+%   
+%   
+% \framebreak
+%   Example 2 : (Transposed) Convolution as a matrix multiplication :
+% \begin{figure}
+%       \centering
+%       \scalebox{0.6}{\includegraphics{plots/05_conv_variations/transpose/transpose_mat_2.png}}
+%       \tiny{\\credit:Stanford}
+%       \caption{"Transposed" convolution upsamples a vector of length 4 to a vector of length 6. Stride is 1. Note the change in padding.}
+%   \end{figure}
+  % \small{Important : Even though the "structure" of the matrix here is the transpose of the original matrix, the non-zero elements are, in general, different from the correponding elements in the original matrix. These (non-zero) elements/weights are tuned by backpropagation.} 
+
+\framebreak
+  Example 2: Transposed Convolution as matrix multiplication:
+  \begin{figure}
+      \centering
+      \scalebox{1}{\includegraphics{plots/05_conv_variations/transpose/tr_ex21.png}}
+      \caption{A regular 1D convolution.  kernel size = 3, stride = 1 , padding = 0. The vector $z$ is in the input feature map. The matrix $K$ represents the convolution operation.}
+  \end{figure}
+  A regular convolution decreases the dimensionality of the feature map from 6 to 4.\\
+\framebreak
+    \small{Example 2: Transposed Convolution as matrix multiplication:}
+  \begin{figure}
+      \centering
+      \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/tr_ex22.png}}
+      \caption{\footnotesize{A transposed convolution can be used to upsample the feature vector of length 4 back to a feature vector of length 6.}}
+  \end{figure}
+  \small{Few important things to note: \\
+% Had to add manual styling to make things fit.
+    \vspace{1mm}
+     1): Even though the transpose of the original matrix is shown in this example, the actual values of the weights are different from the original matrix (and tuned by backpropagation). \\
+    \vspace{1mm}
+     2): The goal of the transposed convolution here is simply to get back the original dimensionality. It is \textit{not} necessarily to get back the original feature map itself.} \\
+\framebreak
+    \small{Example 2: Transposed Convolution as matrix multiplication:}
+  \begin{figure}
+      \centering
+      \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/tr_ex22.png}}
+      \caption{\footnotesize{A transposed convolution can be used to upsample the feature vector of length 4 back to a feature vector of length 6.}}
+  \end{figure}
+  \small{3): The elements in the downsampled vector only affect those elements in the upsampled vector that they were originally "derived" from. For example, $z_7$ was computed using $z_1$ , $z_2$ and $z_3$ and it is only used to compute $\tilde{z}_1$, $\tilde{z}_2$ and $\tilde{z}_3$. \\
+  \vspace{1mm}
+  4): In general, transposing the original matrix doesn't result in a convolution. But a transposed convolution can always be implemented as a regular convolution by using various padding strategies (this would not be very efficient, however).}\\
+\framebreak
+  Example 3: Let's now view transposed convolutions from a different perspective.
+  \begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_1.png}}
+      \tiny{\\credit:Stanford}
+      \caption{Regular $3\times 3$ convolution, stride 2 , pad 1.}
+  \end{figure}
+\framebreak
+  Example 3: Let's now view transposed convolutions from a different perspective.
+  \begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_2.png}}
+      \tiny{\\credit:Stanford}
+      \caption{Regular $3\times 3$ convolution, stride 2 , pad 1.}
+  \end{figure}
+  \framebreak
+  Example 3: Let's now view transposed convolutions from a different perspective.
+  \begin{figure}
+      \centering
+      \scalebox{0.8}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_3.png}}
+      \tiny{\\credit:Stanford}
+      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2 , pad 1. Note: stride now refers to the "stride" in the \textit{output}.}
+  \end{figure}
+  Here, the filter is \textit{scaled} by the input.\\
+\framebreak
+  Example 3: Let's now view transposed convolutions from a different perspective.
+  \begin{figure}
+      \centering
+      \scalebox{0.8}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_4.png}}
+      \tiny{\\credit:Stanford}
+      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2 , pad 1. Note: stride now refers to the "stride" in the \textit{output}.}
+  \end{figure}
+  Here, the filter is \textit{scaled} by the input.
+\end{vbframe}
+
+
+\begin{vbframe}{Transposed Convolutions -- drawback}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/transpose/transpose_artifact.png}
+        \caption{Artifacts produced by transposed convolutions \cite{24}.}
+    \end{figure}
+    \begin{itemize}
+        \item Transposed convolutions lead to checkerboard-style artifacts in resulting images.
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \small{\item Explanation: transposed convolution yields an overlap in some feature map values.
+        \item This leads to higher magnitude for some feature map elements than for others, resulting in the checkerboard pattern.
+        \item One solution is to ensure that the kernel size is divisible by the stride.
+        }
+    \end{itemize}
+        \begin{figure}
+            \centering
+              \scalebox{0.65}{\includegraphics{plots/05_conv_variations/transpose/deconv_blog.png}}
+            \caption{\footnotesize{1D example. In both images, top row = input and bottom row = output. \textit{Top}: Here, kernel weights overlap unevenly which results in a checkerboard pattern. \textit{Bottom}: There is no checkerboard pattern as the kernel size is divisible by the stride.}}
+        \end{figure}
+        % \begin{figure}
+        %     \centering
+        %       \scalebox{0.60}{\includegraphics{plots/05_conv_variations/transpose/stride_dec.png}}
+        %     \caption{\small{1D example with stride = 2 and kernel size = 4.}}
+        % \end{figure}
+% \framebreak
+%     \begin{itemize}
+%         \item Solutions: 
+%         \begin{itemize}
+%             \item Increase dimensionality via upsampling (bilinear, nearest neighbor) and then convolve this output with regular convolution.
+%             \item Make sure that the kernel size $k$ is divisible by the stride $s$.
+%         \end{itemize}
+%     \end{itemize}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=5cm]{plots/05_conv_variations/transpose/upsample.png}
+%         \caption{Nearest neighbor upsampling and subsequent same convolution to avoid checkerboard patterns.}
+%     \end{figure}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Inception modules}
+    \begin{itemize}
+        \item Problem setting: how do we choose the kernel size in each layer? 
+        \item This is often an arbitrary decision.
+        \item Solution: offer the model kernels of different sizes in each layer through which it can propagate information and let it decide, which one to use to which extent.
+        \item Side-effect: massive parameter reduction allowing for deeper architectures.
+        \item First proposed in \cite{26}.
+    \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \scalebox{0.75}{\includegraphics{plots/05_conv_variations/inception/incept_naive.png}}
+    \caption{Naive inception module. The model can \enquote{choose} from kernels of different sizes.}
+  \end{figure}
+        \small{Idea: do several convolutions in parallel and concatenate the resulting feature maps in the depth dimension. This requires equal dimensions of the feature maps created by the parallel convolutions.Thus, same padding is used throughout the parallel convolutions.}
+\framebreak 
+    \begin{figure}
+      \centering
+      \scalebox{0.75}{\includegraphics{plots/05_conv_variations/inception/incep_ex.png}}
+      \caption{\footnotesize{Naive Inception module - Example}}
+    \end{figure}
+    \begin{itemize}
+        \item \small{To allow for the bypass of information throughout one inception module, an 1x1 convolutional layer is also included.
+        \item Max-pooling is used as it is ought to increase the robustness of the feature maps. The kernels are padded accordingly to yield feature maps of equal dimensions.}
+    \end{itemize}
+\framebreak
+    \begin{figure}
+      \centering
+      \scalebox{0.80}{\includegraphics{plots/05_conv_variations/inception/incep_ex.png}}
+      \caption{\footnotesize{Naive Inception module - Example}}
+    \end{figure}
+    \begin{itemize}
+        \item \small{Resulting feature map blocks are restricted to have the same dimensionality but can be of varying depth.
+        \item The different feature maps are finally concatenated in the depth-dimension and fed to the next layer.}
+    \end{itemize}
+\framebreak
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/inception/googlenet.png}
+        \caption{Inception modules are the integral part of the famous GoogLeNet (2014), one of the first very deep net architectures.}
+    \end{figure}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% good blog post: https://hacktilldawn.com/2016/09/25/inception-modules-explained-and-implemented/
+\begin{vbframe}{Inception modules}
+  \begin{figure}
+    \centering
+    \includegraphics[width=8cm]{plots/05_conv_variations/inception/incept_naive.png}
+    \caption{Naive inception module.}
+  \end{figure}
+    \begin{itemize}
+        \item Problem: 3x3 and 5x5 convolutions are expensive operations, especially when executed on very deep input blocks such as many feature maps from the previous layer.
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Inception modules}
+  \begin{figure}
+    \centering
+    \includegraphics[width=8cm]{plots/05_conv_variations/inception/incept_dim_reduction.png}
+    \caption{Dimensionality reduced inception module.}
+  \end{figure}
+    \begin{itemize}
+        \item Solution: apply 1x1 convolutions beforehand to reduce the depth of the previous feature map.
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Inception modules}
+    \begin{itemize}
+        \item Let's understand this with a little numerical example.
+        \item Output dimensions of the previous layer: [28, 28, 192].
+        \item Output dimensions of the 5x5 convolution from the inception module: [28, 28, 32].
+        \item The 5x5 convolution has stride 1 and same padding.
+        \item To improve speed, we first convolve the [28, 28, 192] input with 16 1x1 kernels which results in a [28, 28, 16] block. We then apply the 32 5x5 kernel convolution on this \enquote{thinner} block.
+        \item Required operations:
+        \begin{itemize}
+            \item Naive: $5^2 \cdot 28^2 \cdot 192 \cdot 32 = 120.422.400$
+            \item Improved version with 1x1 convolution and depth 16: $1^2 \cdot 28^2 \cdot 192 \cdot 16 + 5^2 \cdot 28^2 \cdot 16 \cdot 32 = 12.443.648$
+        \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Separable convolutions}
+    \begin{itemize}
+        \item Problem setting: make convolution computationally more efficient.
+        \item Remember the sobel kernel from the previous lecture:
+            \begin{equation*}
+                    K_x = 
+                    \begin{bmatrix}
+                        +1 & 0 & -1 \\
+                        +2 & 0 & -2 \\
+                        +1 & 0 & -1 
+                    \end{bmatrix}
+            \end{equation*}
+        \item This 3x3 dimensional kernel can be replaced by the outer product of two 3x1 and 1x3 dimensional kernels:
+            \begin{equation*}
+                    \begin{bmatrix}
+                        +1 \\ 
+                        +2 \\
+                        +1   
+                    \end{bmatrix}* 
+                    \begin{bmatrix}
+                        +1 & 0 & -1   
+                    \end{bmatrix}
+            \end{equation*}
+        \item Convolving with both filters subsequently has a similar effect, reduces the amount of parameters to be stored and thus improves speed.
+    \end{itemize}
+\framebreak
+\begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/05_conv_variations/inception/insep_1.png}}
+      \caption{\textit{Left}: Regular Inception module . \textit{Right}: Inception module where each 5x5 convolution is replaced by two 3x3 convolutions.}
+    Separable convolutions (also: factorized) find application in the inception net V4 \cite{28}. The authors find that it increases computational speed but suggest to use this trick in medium to late stage layers only.
+    \end{figure}
+\framebreak
+\begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/05_conv_variations/inception/insep_2.png}}
+      \caption{\textit{Left}: Inception module from the previous slide. \textit{Right}: Inception module after the factorization of the $nxn$ convolutions (n = 3, here).}
+    \end{figure}
+% \framebreak
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=4cm]{plots/05_conv_variations/separable/separable.png}
+%         \footnotesize{\\credit: Szegedy et al. 2014}
+%         \caption{Seperable convolutions (also: factorized) find application in the inception net V4 \cite{28}. The authors find it to increase computational speed but suggest to use this trick in medium to late stage layers only.}
+%     \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Skip connections}
+
+\begin{vbframe}{Skip connections}
+    \begin{itemize}
+        \item Problem setting: theoretically, we could build infinitely deep architectures as the net should learn to pick the beneficial layers and skip those that do not improve the performance automatically.
+        \item But: this skipping would imply learning an identity mapping $x = \mathcal{F}(x)$. It is very hard for a neural net to learn such a 1:1 mapping through the many non-linear activations in the architecture.
+        \item Solution: offer the model explicitly the opportunity to skip certain layers if they are not useful.
+        \item Introduced in \cite{29} and motivated by the observation that stacking evermore layers increases the test- as well as the train-error ($\neq$ overfitting).
+    \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=7cm]{plots/05_conv_variations/skip/residual_module.png}
+    \caption{Skip connection/ residual learning module. The information flows through two layers and the identity function. Both streams of information are then element-wise summed and jointly activated.}
+  \end{figure}
+\framebreak
+    \begin{itemize}
+        \item Let $\mathcal{H}(x)$ be the optimal underlying mapping that should be learned by (parts of) the net.
+        \item $x$ is the input in layer $l$ (can be raw data input or the output of a previous layer).
+        \item $\mathcal{H}(x)$ is the output from layer $l$.
+        \item Instead of fitting $\mathcal{H}(x)$, the net is ought to learn the residual mapping $\mathcal{F}(x):=\mathcal{H}(x)-x$ whilst $x$ is added via the identity mapping.
+        \item Thus, $\mathcal{H}(x) = \mathcal{F}(x) + x$, as formulated on the previous slide.
+        \item The model should only learn the \textit{residual mapping} $\mathcal{F}(x)$ 
+        \item Thus, the procedure is also referred to as \textit{Residual Learning}.
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item The element-wise addition of the learned residuals $\mathcal{F}(x)$ and the identity-mapped data $x$ requires both to have the same dimensions.
+        \item To allow for downsampling within $\mathcal{F}(x)$ (via pooling or valid-padded convolutions), the authors introduce a linear projection layer $W_s$ .
+        \item $W_s$ ensures that $x$ is brought to the same dimensionality as $\mathcal{F}(x)$ such that:
+        $$
+            y = \mathcal{F}(x) + W_sx
+        $$
+        \item where $y$ is the output of the skip module and $W_s$ represents the weight matrix of the linear projection (\# rows of $W_s$ = dimensionality of $\mathcal{F}(x)$).
+        \item This idea applies to fully connected layers as well as to convolutional layers.
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Global average pooling}
+
+\begin{vbframe}{Global average pooling}
+    \begin{itemize}
+        \item Problem setting: tackle overfitting in the final fully connected layer.
+        \begin{itemize}
+        \item Classic pooling removes spatial information and is mainly used for dimension and parameter reduction.
+        \item The elements of the final feature maps are connected to the output layer via a dense layer. This could require a huge number of weights increasing the danger of overfitting.
+        \item Example: 256 feature maps of dim 100x100 connected to 10 output neurons lead to $25.6\times 10^6$ weights for the final dense layer.
+        \end{itemize}
+        \item Solution: 
+        \begin{itemize}
+            \item Average each final feature map to the element of one global average pooling (GAP) vector.
+            \item Do not use pooling throughout the net.
+            \item Example: 256 feature maps are now reduced to GAP-vector of length 256 yielding a final dense layer with 2560 weights.
+        \end{itemize}
+\framebreak
+        \item GAP preserves whole information from the single feature maps whilst decreasing the dimension.
+        \item Mitigates the possibly \textit{destructive} effect of pooling.
+        \item Each element of the GAP output represents the activation of a certain feature on the input data.
+        \item Acts as an additional regularizer on the final fully connected layer.
+        \item Allows for interpretation of the model via Class Activation Maps (more on this later).
+    \end{itemize}
+\framebreak
+    \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/05_conv_variations/gap/GAP.png}
+    \caption{Illustration of GAP \cite{25}. Each feature map representing one feature category averaged into one final vector. No pooling operations are applied throughout the net. The dimensionality of the input reduces solely due to the convolution operations. }
+    \end{figure}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% \begin{vbframe}{Types: squeeze-and-excite}
+%     \begin{itemize}
+%         \item Problem setting: some feature maps from one convolutional block can be more important than others. Still, we force the net to weight them equally. 
+%         \item Solution: offer the model a way to weight the channels of each feature map block individually.
+%         \item Intuition: some features (car wheel vs. straight line) might be more important than others for the final prediction. Allow the model, to weight them according to their importance.
+%         \item Most basic variant: add scalar parameter to each feature map and let the model adapt its relevance throughout training.
+%         \item Easily applicable to any convolutional layer.
+%         \item Proposed by \cite{27}.
+%     \end{itemize}
+% \framebreak
+%     \begin{figure}
+%     \centering
+%     \includegraphics[width=11cm]{plots/05_conv_variations/se/se.png}
+%     \caption{Illustration of SE as in \cite{27}: in the \textbf{squeeze}-step the feature map U with depth C is transformed to a vector of length C via GAP. Then, a simple 2-layer dense net is used to add non-linearity and output the \textbf{excited} vector of length C. The initial feature map is now multiplied with this vector and the output is fed into the next layer.}
+%     \end{figure}
+% \framebreak
+%     \begin{itemize}
+%         \item The authors include a little bit more complexity in the following steps:
+%         \begin{enumerate}
+%             \item \textbf{Squeeze} feature map $U$ of depth $C$ to vector of the same length via GAP.
+%             \item Run a 2-layer dense net on this vector to yield another, \textbf{excited} vector of length $C$ to introduce non-linearity in the process.
+%             \item Multiply the initial feature map block by this scalar vector.
+%             \item Feed the scaled block $\tilde X$ to the subsequent convolutional layer.
+%         \end{enumerate}
+%     \end{itemize}
+% \end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Class activation mapping}
+    \begin{itemize}
+        \item We want to understand the decision-making of a net, e.g. \textbf{why does it classify image X as a cat?}
+        \item Simplest method based on GAP was introduced in \cite{32}.
+        \item Idea: 
+        \begin{itemize}
+            \item the final GAP vector stores the activation of each feature map category that was learnt throughout the net.
+            \item the dense layer that connects the output classes with the GAP vector stores information about how much each feature contributes to each class.
+            \item exploit this information to show which parts of the input image would be activated for each class.
+        \end{itemize}
+    \end{itemize}
+\framebreak
+    \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/05_conv_variations/cam/cam_scheme.png}
+    \caption{Illustration of the class activation mapping. The activated regions from the feature maps are summed up weighted by their connection strength with the final output classes and upsampled back to the dimension of the input image. No max-pooling is applied throughout the architecture, the downsampling is due to the CNN layers. }
+    \end{figure}
+\framebreak
+    \begin{enumerate}
+        \item Train a net with GAP pooling end-to-end.
+        \item Run a forward-pass with the image $i$ you would like to understand.
+        \item Take the final $l$ feature maps $f_1, ..., f_l$ for this input.
+        \item Get the \textit{feature weights} $w_{j1}, ...,w_{jl}$ that connect the GAP layer with the final class output $j$ that you would like to interpret (e.g. terrier).
+        \item Create the CAM for class $j$ on input image $i$:
+        $$
+            \text{CAM}_{j, i} = \sum_{k = 1}^{l}w_{jk} * f_k
+        $$
+        \item Normalize the values such that $\text{CAM}_{j, i} \in [0, 1]$.
+        \item In case of valid convolutions, the resulting CAM will be smaller than the input image. Linear upsampling is then used to map it back to the input dimension.
+        \item Overlay the input image with the CAM and interpret the activation.
+    \end{enumerate}
+% \framebreak
+%     \begin{itemize}
+%         \item There exists a variety of extensions such as:
+%         \begin{itemize}
+%             \item 
+%         \end{itemize}
+%     \end{itemize}
+% \framebreak
+%     \begin{itemize}
+%         \item Zeiler et al (2013) with occluders: https://arxiv.org/abs/1311.2901
+%         \item Grad-CAM blog: https://github.com/jacobgil/pytorch-grad-cam/blob/master/README.md
+%         \item Gradient-based Localization (Grad-CAM) Paper: https://arxiv.org/abs/1610.02391
+%     \end{itemize}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Application Example}
+
+\begin{vbframe}{Application - Road Segmentation}
+    \begin{itemize}
+        \item Problem setting: train a neural net to pixelwise segment roads in satellite imagery. 
+        \item Answer the questions \textbf{where is the road map?}
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=3.8cm]{plots/outlook/31.png}
+        \caption{Model prediction on a test satellite image. Yellow are correctly identified pixels, blue false negatives and red false positives.}
+    \end{figure}
+\framebreak 
+    \begin{itemize}
+        \item The net takes an RGB image [512, 512, 3] and outputs a binary (road / no road) probability mask [512, 512, 1] for each pixel.
+        \item The model is trained via a binary cross entropy loss which was combined over each pixel. 
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/outlook/architecture_4.png}
+        \caption{Scheme for the input/ output of the net architecture.}
+    \end{figure}
+\framebreak 
+    \begin{itemize}
+        \item The architecture is inspired by the U-Net \cite{12}, a fully convolutional net that makes use of upsampling via transposed convolutions as well as skip connections.
+        \item Input images are getting convolved and down-sampled in the first half of the architecture.
+        \item Then, they are getting upsampled and convolved again in the second half to get back to the input dimension.
+        \item Skip connections throughout the net ensure that high-level features from the start can be combined with low-level features throughout the architecture.
+        \item Only convolutional and no dense layers are used.
+    \end{itemize}
+\framebreak
+    \begin{figure}
+        \centering
+        \includegraphics[width=7cm]{plots/outlook/unet.png}
+        \caption{Illustration of the architecture. Blue arrows are convolutions, red arrows max-pooling operations, green arrows upsampling steps and the brown arrows merge layers with skip connections. The height and width of the feature blocks are shown on the vertical and the depth on the horizontal. D are dropout layers.}
+    \end{figure}
+\end{vbframe}
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Filter Visualization}
+%     \begin{itemize}
+%         \item keras post https://blog.keras.io/how-convolutional-neural-networks-see-the-world.html
+%         \item explain mathematically
+%     \end{itemize}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=10cm]{plots/other/visualization.png}
+%         \caption{Visualizing and Understanding Convolutional Networks (Zeiler \& Fergus (2013))}
+%     \end{figure}
+% \end{vbframe}
+% 
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Transfer Learning example}
+%     \begin{itemize}
+%         \item use trained model, freeze and fine-tune the last layers
+%         \item practical example
+%     \end{itemize}
+% \end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Famous architectures}
+
+\begin{vbframe}{Famous architectures - LeNet}
+  \begin{itemize}
+    \item Pioneering work on CNNs by \cite{33}. 
+    \item Applied on the famous MNIST data set for automated handwritten digit recognition.
+    \item Consists of convolutional, max-pooling and dense layers.
+    \item Complexity and depth of the net was mainly restricted by limited computational power back in the days.
+  \end{itemize}
+  \begin{figure}
+  \centering
+    \includegraphics[width=9cm]{plots/architectures/lenet.png}
+    \caption{LeNet architecture: two CNN layers followed by max-pooling, a hidden dense and a softmax layer.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Famous architectures - AlexNet}
+  \begin{itemize}
+    \item Introduced by \cite{11}, won the ImageNet challenge in 2012 and is basically a deeper version of the LeNet.
+    \item Trained in parallel on two GPUs, using two streams of convolutions which are partly interconnected.
+    \item Contains ReLU activations and makes use of data set augmentation strategies.
+  \end{itemize}
+  \begin{figure}
+  \centering
+    \includegraphics[width=9cm]{plots/architectures/alexnet.png}
+    \caption{AlexNet architecture by \cite{34}.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Famous architectures - VGG}
+  \begin{itemize}
+    \item Architecture introduced by \cite{35} as \enquote{Very Deep Convolutional Network}.
+    \item A deeper variant of the AlexNet.
+    \item Mainly uses many convolutional layers with a small kernel size 3x3.
+    \item Performed very well in the ImageNet Challenge 2014.
+    \item Exists in a small version (VGG16) with a total of 16 layers and a larger version (VGG19) with 19 layers.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=10cm]{plots/other/vgg16.png}
+    \caption{VGG Net 16 with 10 CNN layers.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=13cm]{plots/architectures/vgg.png}
+    \caption{VGG Net 16 with 10 CNN layers in comparison with AlexNet.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Famous architectures - GoogLeNet}
+  \begin{itemize}
+    \item The net architecture that first made use of inception modules \cite{26}.
+    \item Also referred to as Inception Net.
+    \item Also includes Batch Normalization to improve training.
+    \item Uses auxiliary losses: branches throughout the net that consist of softmax layers that make predictions using early stage layers.
+    \item Those losses are jointly optimized and the output from the final head is used for deployment and testing of the architecture.
+    \item Inception modules allow the net to \enquote{choose} between different kernels.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=11.5cm]{plots/architectures/googlenet.png}
+    \caption{GoogleNet architecture. Yellow rectangles mark the auxiliary losses which are combined during training.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=11cm]{plots/05_conv_variations/inception/googlenet.png}
+    \caption{Zoom view in one of the inception modules upon which the GoogLeNet architecture is build.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Famous architectures - ResNet}
+  \begin{itemize}
+    \item Net architecture that makes use of skip connections / residual learning.
+    \item This allowed \cite{16} to create a very deep net architectures of up to 152 layers.
+    \item Batch normalization and global average pooling is used.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=11.5cm]{plots/architectures/resnet.png}
+    \caption{A deep ResNet architecture with a total of 34 layers. }
+  \end{figure}
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=5cm]{plots/architectures/resnet_zoom.png}
+    \caption{Zoom view in the ResNet architecture. The arrows mark residual connections which allow the net to \enquote{skip} layers which do not contribute to an improvement in the prediction performance.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Famous architectures - Summary}
+  \begin{itemize}
+    \item Main points from the previous architectures:
+    \begin{itemize}
+        \item LeNet was one of the first successful applications of CNNs.
+        \item AlexNet is a deeper version of LeNet.
+        \item VGG is a deeper version of AlexNet.
+        \item ResNet makes heavy use of skip connections.
+        \item GoogLeNet uses inception modules.
+        \item Batch normalization is often used in modern architectures.
+        \item Global average pooling is also a prominent module in modern architectures.
+    \end{itemize}
+    \item There exists a great variety of different architectures which perform very well on different tasks.
+    \item Almost all of the above described architectures exist in extended versions such as the Inception V1 - V4, deeper and shallower ResNets, ResNets for time series ... it is up to you to discover them all.
+  \end{itemize}
+\end{vbframe}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Case Study - Mask R-CNN}
+
+\begin{frame} {Common Machine Vision Tasks}
+  \begin{itemize}
+    \item Image Classification: Assign a \textit{single} label to the whole image.
+    \item Object localization / detection: Draw \textbf{bounding boxes} around (and classify) one or more objects in the image.
+    \item Semantic Segmentation: The goal here is to draw \textbf{outlines} between classes \textit{without} differentiating between different instances of a given class.
+    \item Instance segmentation: This is a hybrid of the previous two tasks. The goal is to classify \textit{each} object in the image and draw a \textit{separate} outline around it.
+    \item Note: This is not an exhaustive list. There are \textit{many} others.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame} {Common Machine Vision Tasks}
+  \begin{figure}
+    \centering
+      \scalebox{0.90}{\includegraphics{plots/maskrcnn/mask_types.png}}
+      \tiny{\\credit: Waleed Abulla}
+  \end{figure}
+    Instance segmentation is the most challenging task!
+\end{frame}
+
+\begin{frame} {Mask R-CNN - Overview}
+  \begin{itemize}
+    \item Mask R-CNN (He et al. 2017) belongs to an important class of CNNs known as Region-based CNNs (or R-CNNs).
+    \item It extends the Faster R-CNN (Ren et al. 2015) architecture (which performs classification and detection) by adding a branch for segmentation (more on this later).
+    \item Therefore, Mask R-CNN performs classification, detection \textit{and} instance segmentation in parallel!
+    \item It was developed at Facebook in 2017 and trained using the COCO (Common Objects in Context) dataset.
+    \item Note: Each training example has ground truth class labels, bounding boxes and segmentation masks.
+    \item This case-study is only meant to be a 'quick tour' of Mask R-CNN. If any of the details are unclear, please read the paper.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Mask R-CNN architecture}
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/maskrcnn/mask_arch_2.png}}
+      \tiny{\\credit: UCSD}
+      \caption{Mask R-CNN architecture.}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Mask R-CNN architecture}
+  \begin{figure}
+    \centering
+      \scalebox{0.95}{\includegraphics{plots/maskrcnn/mask_arch_1.png}}
+      \tiny{\\credit: Georgia Gkioxari}
+      \caption{Mask R-CNN architecture.}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Mask R-CNN architecture - Stage One}
+  \begin{figure}
+    \centering
+      \scalebox{0.95}{\includegraphics{plots/maskrcnn/mask_stage1.png}}
+  \end{figure}
+  \begin{itemize}
+    \item \textit{Stage One}: Consists of a "backbone" network and a Region Proposal Network (RPN).
+    \item The backbone network extracts the feature maps from an image and the RPN identifies promising regions, or Regions of Interest (ROIs) that might contain interesting objects.
+    \item The ROIAlign layer then resizes the ROIs so that they all have the same spatial dimensions.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Mask R-CNN architecture - Stage Two}
+  \begin{figure}
+    \centering
+      \scalebox{0.95}{\includegraphics{plots/maskrcnn/mask_stage2.png}}
+  \end{figure}
+  \begin{itemize}
+    \item The resized ROIs are then fed to the \textit{Stage Two} network (pictured above).
+    \item This has three branches: one each for classification, detection/localization and segmentation.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage One - Backbone}
+  \begin{itemize}
+    \item The backbone architecture can be based on any generic CNN.
+    \item In the paper, the authors implement Mask R-CNN using ResNet.
+    \item ResNets are divided into 5 "stages" where each stage consists of several convolutional layers.
+    \item The authors use the first 4 stages of ResNet-50 or ResNet-101 as the backbone network.
+    %\item The output of the 4th stage , which is $14 \times 14 \times 1024$ , will now serve as the input to the Region Proposal Network.
+    \item The output of the backbone network will now serve as the input to the Region Proposal Network.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage One - Region Proposal Network}
+  \begin{itemize}
+    \item Lightweight network that works directly on the final feature map generated by the backbone network.
+    \item Consists of a $3 \times 3$ convolutional layer and $1 \times 1$ convolutional layers.
+    \item The RPN looks at small $n \times n$ regions of the input feature map (n = 3, in our case).
+    \item At \textbf{each} such location, the RPN simultaneously proposes multiple regions of interest (ROIs) that might contain objects.
+    \item In order to accomplish this, each such $n \times n$ region is associated with $k$ \textbf{anchor boxes}.
+    \item The number of anchor boxes and their locations, sizes and aspect ratios are all hyperparameters.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Anchor boxes}
+  \begin{figure}
+    \centering
+      \scalebox{0.75}{\includegraphics{plots/maskrcnn/mask_anchors.png}}
+      \tiny{\\credit:Hao Gao}
+      \caption{An example set of anchor boxes in a 600x800 pixel image. Three colors represent three scales or sizes: 128x128, 256x256, 512x512. For a given color, the three boxes correspond to height:width ratios of 1:1, 1:2 and 2:1. }
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Stage One - Region Proposal Network}
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/maskrcnn/mask_rpn.png}}
+  \end{figure}
+  \begin{itemize}
+      \item Every location/'sliding window' in the final feature map is associated with $k = 15$ anchor boxes of varying sizes and aspect ratios.
+      \item For a convolutional feature map of size $W \times H$, there will be $W \times H \times k$ anchor boxes.
+      \item Cross-boundary anchors are ignored during training.
+    \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage One - Region Proposal Network}
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/maskrcnn/mask_rpn.png}}
+  \end{figure}
+  \begin{itemize}
+    \item The classifier ('cls' layer) is a dense layer which outputs $2k$ scores (to which a softmax is applied) indicating the probability of an object being present or \textit{not} present in each of the $k$ anchor boxes. 
+    \item Of course, it's also possible to simply output $k$ scores (to which a logistic sigmoid is applied) instead indicating simply whether an object is present.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage One - Region Proposal Network}
+  \begin{figure}
+    \centering
+      \scalebox{0.7}{\includegraphics{plots/maskrcnn/mask_rpn.png}}
+  \end{figure}
+  \begin{itemize}
+    \item The regression ('reg') layer is a dense layer which outputs $4k$ outputs encoding the 4 coordinates of the $k$ region proposals.
+    \item These four values represent the \textit{offsets} to the location of the upper-left corner and the height and width of a (preconfigured, rectangular) anchor box.
+  \end{itemize}
+\end{frame}
+
+% \begin{frame} {IOU}
+%   \begin{itemize}
+%     \item Intersection over Union
+%   \end{itemize}
+%   \begin{figure}
+%     \centering
+%       \scalebox{0.75}{\includegraphics{plots/maskrcnn/mask_iou.png}}
+%       \caption{Two-stage architecture (Xiang Zhang)}
+%   \end{figure}
+% \end{frame}
+
+\begin{frame} {ROI Pooling}
+  \begin{itemize}
+    \item The RPN has its own loss function and can be trained either separately or jointly with the rest of the network. 
+    \item Stage One was computing the region proposals. Once we have have them, we enter Stage Two.
+    \item Only the most promising region proposals are chosen for Stage Two using a technique called 'non-max suppression'.
+    \item Please read the paper for details.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {ROI Pooling}
+  \begin{itemize}
+    \item The region proposals are in pixel space, not feature space. Therefore, a region of the output feature map (of the backbone network) which roughly corresponds to the region proposal must first be computed.
+    \item These computed regions in the feature map will be of different sizes and aspect ratios. However, the Stage Two network expects a fixed size input.
+    \item Therefore, these regions (in the feature map) must then be \textit{reshaped} so that they all have the same size.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {ROI Pooling}
+  \begin{figure}
+    \centering
+      \scalebox{0.65}{\includegraphics{plots/maskrcnn/mask_roipool.png}}
+      \tiny{\\credit:deepsense.ai}
+      \caption{A rectangular piece of the feature map which roughly corresponds to a region proposal is further subdivided into four unequal sections.}
+  \end{figure}
+  \begin{itemize}
+    \item \small{To reshape, one option is to divide each rectangular region into unequal sections and perform max-pooling in each section. This is called ROIPool.
+    \item However, the authors implement a more sophisticated method called ROIAlign to perform the reshaping.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage Two}
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/maskrcnn/mask_head.png}}
+      \caption{\footnotesize{The three "heads" for classification ('class'), bounding box regression ('box) and instance segmentation ('mask'). The first two heads are also present in the Faster-RCNN architecture from which Mask R-CNN is derived.}
+}
+  \end{figure}
+  \begin{itemize}
+    \item After reshaping, a $7 \times 7 \times 1024$ ROI is fed to the fifth stage of ResNet ('res5') which outputs a $7 \times 7 \times 2048$ feature map.
+    \item The resulting feature map is then fed to the classification, regression and mask branches.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame} {Stage Two}
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/maskrcnn/mask_head.png}}
+  \end{figure}
+    \begin{itemize}
+      \item \small{The $7 \times 7 \times 2048$ output of 'res5' is fed to a dense layer of size 2048.
+      \item The output of the dense layer is then fed to two 'sibling' branches which contain additional dense layers.
+      \item The classification head outputs a vector of length $K+1$, where $K$ is the number of classes.
+      \item This vector contains the probabilities for each class and, additionally, \textit{no} class / "background" class.}
+    \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage Two}
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/maskrcnn/mask_head.png}}
+  \end{figure}
+  \begin{itemize}
+    \item The regression head outputs 4 real valued numbers for each of the $K$ classes.
+    \item Each set of 4 values encodes refined bounding box predictions for one of the classes.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Stage Two}
+  \begin{figure}
+    \centering
+      \scalebox{0.5}{\includegraphics{plots/maskrcnn/mask_head.png}}
+  \end{figure}
+  \begin{itemize}
+    \item \small{The segmentation head contains a transposed convolution layer which upsamples the $7 \times 7$ feature maps to $14 \times 14$.
+    \item Finally, the output layer, which is a regular $1 \times 1$ convolution layer with a sigmoid activation, outputs a a $Km^2$ dimensional output ($K$ = 80 and $m$ = 14 here).
+    \item This encodes $K$ masks of resolution $m \times m$, one for each class.
+    \item The $m \times m$ mask is then resized to the ROI size and binarized (with a threshold of 0.5).}
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Mask R-CNN - Loss Function}
+  \begin{itemize}
+    \item The multi-task loss function of Mask R-CNN combines the losses of the classification, localization and segmentation masks.
+    \item For each ROI, the loss is $L = L_{cls} + L_{box} + L_{mask}$.
+    \item $L_{cls}$ is the negative log likelihood for the true class.
+    \item $L_{box}$ is a modified $L1$ loss between the predicted and true bounding box coordinates (for the true class) which is summed over the 4 values.
+    \item Finally, $L_{mask}$ is the average binary cross-entropy loss.
+    \item For an RoI associated with ground-truth class $k$, $L_{mask}$ is only defined on the $k$-th mask (other mask outputs do not contribute to the loss).
+    \item Note: The component losses may be weighted differently.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Mask R-CNN - Training and Inference}
+  \begin{itemize}
+    \item Dataset: COCO ($\sim$ 100k training images).
+    \item Trained on 8 GPUs with a minibatch size of 16 for 160k iterations.
+    \item Learning rate: 0.02 for the first 120k, 0.002 thereafter.
+    \item Weight Decay: 0.0001, Momentum: 0.9.
+    \item Training time: 32 - 44 hours .
+    \item Inference time: 200 ms - 400 ms on a Tesla M40.
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {Mask R-CNN - Examples}
+   \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/maskrcnn/maskrcnn.png}}
+      \tiny{\\credit: He et al. 2017}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Mask R-CNN - Examples}
+   \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/maskrcnn/mask_examples.png}}
+      \tiny{\\credit: He et al. 2017}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Mask R-CNN - Examples}
+   \begin{figure}
+    \centering
+      \scalebox{0.90}{\includegraphics{plots/maskrcnn/mask_nuc.png}}
+      \tiny{\\credit: Matterport}
+      \caption{\footnotesize{Segmenting nuclei in microscopy images.}}
+  \end{figure}
+\end{frame}
+
+
+% \begin{frame} {Feature Pyramid Network}
+%   \begin{figure}
+%     \centering
+%       \scalebox{0.65}{\includegraphics{plots/maskrcnn/mask_fpn0.png}}
+%       \caption{Two-stage architecture (Xiang Zhang)}
+%   \end{figure}
+%   \begin{itemize}
+%     \item Feature Pyramid Network : Resnet-101 based.
+%     \item Intutions : early layers are higher resultion and layer layers capture higher level semantics. Can we get the best of both worlds?
+%   \end{itemize}
+% \end{frame}
+% 
+% \begin{frame} {Feature Pyramid Network}
+%   \begin{figure}
+%     \centering
+%       \scalebox{0.75}{\includegraphics{plots/maskrcnn/mask_fpn.png}}
+%       \caption{Two-stage architecture (Xiang Zhang)}
+%   \end{figure}
+% \end{frame}
+% 
+% \begin{frame} {Feature Pyramid Network}
+%   \begin{figure}
+%     \centering
+%       \scalebox{0.75}{\includegraphics{plots/maskrcnn/mask_fpn2.png}}
+%       \caption{Two-stage architecture (Xiang Zhang)}
+%   \end{figure}
+% \end{frame}
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Otavio Good, 2015]{2} Otavio Good (2015)
+\newblock How Google Translate squeezes deep learning onto a phone
+\newblock \emph{\url{https://research.googleblog.com/2015/07/how-google-translate-squeezes-deep.html}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zhang et al., 2016]{3} Zhang, Richard and Isola, Phillip and Efros, Alexei A (2016)
+\newblock Colorful Image Colorization
+\newblock \emph{\url{https://arxiv.org/pdf/1603.08511.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Mariusz Bojarski et al., 2016]{4} Mariusz Bojarski, Davide Del Testa,Daniel Dworakowski,Bernhard Firner,Beat Flepp, Prasoon Goyal, Lawrence D. Jackel, Mathew Monfort, Urs Muller, Jiakai Zhang, Xin Zhang, Jake Zhao, Karol Zieba (2016)
+\newblock End to End Learning for Self-Driving Cars
+\newblock \emph{\url{https://arxiv.org/abs/1604.07316}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Namrata Anand and Prateek Verma, 2016]{5} Namrata Anand and Prateek Verma (2016)
+\newblock Convolutional and recurrent nets for detecting emotion from audio data
+\newblock \emph{\url{http://cs231n.stanford.edu/reports/2015/pdfs/Cs_231n_paper.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Alex Krizhevsky, 2009]{6} Alex Krizhevsky (2009)
+\newblock Learning Multiple Layers of Features from Tiny Images
+\newblock \emph{\url{https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Matthew D. Zeiler and Rob Fergus, 2013]{7} Matthew D. Zeiler and Rob Fergus (2013)
+\newblock Visualizing and Understanding Convolutional Networks
+\newblock \emph{\url{http://arxiv.org/abs/1311.2901}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Mnih Volodymyr, 2013]{8} Mnih Volodymyr (2013)
+\newblock Machine Learning for Aerial Image Labeling
+\newblock \emph{\url{https://www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Hyeonwoo Noh et al., 2013]{9} Hyeonwoo Noh, Seunghoon Hong and Bohyung Han (2015)
+\newblock Learning Deconvolution Network for Semantic Segmentation
+\newblock \emph{\url{http://arxiv.org/abs/1505.04366}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Karen Simonyan and Andrew Zisserman 2014]{10} Karen Simonyan and Andrew Zisserman (2014)
+\newblock Very Deep Convolutional Networks for Large-Scale Image Recognition
+\newblock \emph{\url{https://arxiv.org/abs/1409.1556}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Alex Krizhevsky et al., 2012]{11} Alex Krizhevsky, Ilya Sutskever and Geoffrey E. Hinton (2012)
+\newblock ImageNet Classification with Deep Convolutional Neural Networks
+\newblock \emph{\url{https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Olaf Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
+\newblock U-Net: Convolutional Networks for Biomedical Image Segmentation
+\newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Michal Drozdzal et al., 2016]{13} Michal Drozdzal, Eugene Vorontsov, Gabriel Chartrand, Samuel Kadoury and Chris Pal (2016)
+\newblock The Importance of Skip Connections in Biomedical Image Segmentation
+\newblock \emph{\url{http://arxiv.org/abs/1608.04117}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Vincent Dumoulin et al., 2016]{14} Dumoulin, Vincent and Visin, Francesco (2016)
+\newblock A guide to convolution arithmetic for deep learning
+\newblock \emph{\url{https://arxiv.org/abs/1603.07285v1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Aaron van den Oord et al., 2016]{15} Van den Oord, Aaron, Sander Dielman, Karen Simonyan, Oriol Vinyals, Alex Graves, Nal Kalchbrenner, and Koray Kavukocuoglu (2016)
+\newblock WaveNet: A Generative Model for Raw Audio
+\newblock \emph{\url{https://arxiv.org/abs/1609.03499}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Christian Szegedy et al., 2014]{16} Szegedy, Christian, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott E. Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhouck and Andrew Rabinovich (2014)
+\newblock Going Deeper with Convolutions
+\newblock \emph{\url{http://arxiv.org/abs/1409.4842}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Benoit A. Gennart et al., 1996]{17} Benoit A., Gennart, Bernard Krummenacher, Roger D. Hersch, Bernard Saugy, J.C. Hadorn and D. Mueller (1996)
+\newblock The Giga View Multiprocessor Multidisk Image Server
+\newblock \emph{\url{https://www.researchgate.net/publication/220060811_The_Giga_View_Multiprocessor_Multidisk_Image_Server}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Du Tran et al., 2015]{18} Tran, Du, Lubomir Bourdev, Rob Fergus,  Lorenzo Torresani and Paluri Manohar (2015)
+\newblock Learning Spatiotemporal Features with 3D Convolutional Networks
+\newblock \emph{\url{https://arxiv.org/pdf/1412.0767.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Milletari Fausto et al., 2016]{19} Milletari, Fausto, Nassir Navab and  Seyed-Ahmad Ahmadi (2016)
+\newblock V-Net: Fully Convolutional Neural Networks for
+Volumetric Medical Image Segmentation
+\newblock \emph{\url{https://arxiv.org/pdf/1606.04797.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zhang Xiang et al., 2015]{20} Zhang, Xiang, Junbo Zhao and Yann LeCun (2015)
+\newblock Character-level Convolutional Networks for Text Classification
+\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Wang Zhiguang et al., 2017]{21} Wang, Zhiguang, Weizhong Yan and Tim Oates (2017)
+\newblock Time Series Classification from Scratch with Deep Neural Networks: A Strong Baseline
+\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Fisher Yu et. al, 2015]{22} Fisher, Yu and Vladlen Koltun (2015)
+\newblock Multi-Scale Context Aggregation by Dilated Convolutions
+\newblock \emph{\url{https://arxiv.org/abs/1511.07122}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Bai Shaojie et. al, 2018]{23} Bai, Shaojie,  Zico J. Kolter eand Vladlen Koltun (2018)
+\newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
+\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Distill.pub et. al , 2017]{24} Distill, pub (2018)
+\newblock Deconvolution and Checkerboard Artifacts
+\newblock \emph{\url{https://distill.pub/2016/deconv-checkerboard/}{https://distill.pub/2016/deconv-checkerboard/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[B. Zhou et. al , 2016]{25} B. Zhou, Khosla, A., Labedriza, A., Oliva, A. and A. Torralba (2016)
+\newblock Deconvolution and Checkerboard Artifacts
+\newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Christian Szegedy et. al , 2014]{26} Christian Szegedy (2014)
+\newblock Going deeper with convolutions
+\newblock \emph{\url{https://arxiv.org/abs/1409.4842}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Jie Hu et. al , 2014]{27} Jie Hu, Shen, Li and Gang Sun (2017)
+\newblock Squeeze-and-Excitation Networks
+\newblock \emph{\url{https://arxiv.org/abs/1709.01507}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Szegedy Christian et. al , 2015]{28} Christian Szegedy, Vanhoucke, Vincent, Sergey, Ioffe, Shlens, Jonathan and Wojna Zbigniew (2015)
+\newblock Rethinking the Inception Architecture for Computer Vision
+\newblock \emph{\url{https://arxiv.org/abs/1512.00567}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[He Kaiming et. al , 2015]{29} Kaiming He, Zhang, Xiangyu, Ren, Shaoqing, and Jian Sun (2015)
+\newblock Deep Residual Learning for Image Recognition
+\newblock \emph{\url{https://arxiv.org/abs/1512.03385}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Wang Zhiguang et. al , 2017]{31} Zhiguang Wang, Yan, Weizhong and Tim Oates (2017)
+\newblock Time series classification from scratch with deep neural networks: A
+strong baseline
+\newblock \emph{\url{https://arxiv.org/1611.06455}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zhou Bolei et. al, 2016]{32} Bolei Zhou, Aditya Khosla, Agata Lapedriza, Aude Oliva and Antonio Torralba (2016)
+\newblock Learning Deep Features for Discriminative Localization
+\newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[LeCunn Yann et. al, 1998]{33} LeCunn Yann, Bottou, Leon, Bengio, Yoshua and Patrick Haffner (1998)
+\newblock Global training of document processing systems using graph transformer networks
+\newblock \emph{\url{http://vision.stanford.edu/cs598_spring07/papers/Lecun98.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Krizhevsky Alex et. al, 2012]{34} Krizhevsky Alex, Sutskever, Ijla, and Geoffray Hinton (2012)
+\newblock ImageNet Classification with Deep Convolutional Neural Networks
+\newblock \emph{\url{https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Simoyan Karen et. al, 2014]{35} Simoyan Karen and Andrew Zisserman (2014)
+\newblock Very Deep Convolutional Networks for Large-Scale Image Recognition
+\newblock \emph{\url{https://arxiv.org/abs/1409.1556}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ren et al., 2015]{36} Shaoqing Ren, Kaiming He, Ross Girshick, Jian Sun (2015)
+\newblock Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks
+\newblock \emph{\url{https://arxiv.org/abs/1506.01497}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[He et al., 2014]{37} Kaiming He, Georgia Gkioxari, Piotr Dollar, Ross Girshick (2017)
+\newblock Mask R-CNN
+\newblock \emph{\url{https://arxiv.org/abs/1703.06870}}
+
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endlecture
+

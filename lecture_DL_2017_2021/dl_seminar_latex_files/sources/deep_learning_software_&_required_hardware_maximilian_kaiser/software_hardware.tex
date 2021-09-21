@@ -1,0 +1,963 @@
+\documentclass[9pt]{beamer}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{yfonts,amsmath,amsfonts,amssymb,stmaryrd}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{color}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{listings}   % Code einbinden
+\usepackage{multicol}
+
+%\geometry{paperwidth=140mm,paperheight=105mm}
+\usepackage{beamerthemeshadow}
+\usetheme[width=0pt]{}	
+
+% Plots
+\usepackage{pgfplots}
+
+\AtBeginSection[]{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+
+\title[Hardware and Software for Deep Learning]{Hardware and Software for Deep Learning}
+\subtitle{Master Seminar Deep Learning}
+\author[Maximilian Kaiser]{Maximilian Kaiser}
+\institute[Institut für Statistik \\ Ludwig-Maximilians-Universität]{Institut für Statistik \\ Ludwig-Maximilians-Universität}
+\date{27.1.2017}
+\subject{Deep Learning}
+\keywords{Deep Learning}
+
+\definecolor{hublau}{cmyk}{1,0.6,0,0.2}
+
+\begin{document}
+\frame{\titlepage} 
+\frame{\frametitle{Table of Contents}\tableofcontents} 
+
+\section{Hardware}
+\subsection{CPUs}
+\begin{frame}
+\frametitle{CPUs In General}
+\framesubtitle{Central Processing Units}
+\begin{itemize}
+\item Main component of any PC (and various other things).\\ Main competitors: Intel, AMD, TSMC and Qualcomm.
+\item Processing Speed depends on many things:
+\begin{enumerate}
+\item Clock speed. \\ Speed: Low Gigahertz.
+\item May cache interim results in the processors cache (L1<L2<L3). \\ Size: Low Megabytes. Extreme speed.
+\item Writes and reads on the Random Access Memory (RAM). \\ Size: Low Gigabytes. Very high speed.
+\end{enumerate}
+\item Modern CPUs consist of multiple cores. Clusters consist of multiple multi-core CPUs.
+\item Standard option for most software is to use the CPU.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{CPU in Deep Learning}
+\begin{itemize}
+\item Pro
+\begin{itemize}
+\item Widely spread in terms of hardware and software support.
+\item Versatile to complex functions (gradients?)
+\item Parallelization (even Hyperthreading) is almost standard...
+\end{itemize}
+\item Con
+\begin{itemize}
+\item ... but very limited with a small amount of threads.
+\item Scalability for clusters depends on various factors.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+  \centering \Large
+  \emph{Short Video Demonstration}
+\end{frame}
+
+\subsection{GPUs}
+\begin{frame}
+\frametitle{GPUs in General}
+\framesubtitle{Whats a GPU}
+\begin{itemize}
+\item Driven by the video game industry (among others), graphics processing units have been increasing steadily in their performance and versatility. Main competitors: Intel, nVidia and ATI.
+\item They are in part designed to calculate high dimensional matrix operations, i.e.: 
+\begin{figure}
+\small
+$$
+\left(
+\begin{matrix}
+a_1 & a_2 & a_3 & a_4 \\
+b_1 & b_2 & b_3 & b_4 \\
+c_1 & c_2 & c_3 & c_4 \\
+d_1 & d_2 & d_3 & d_4
+\end{matrix}
+\right)
+\left(
+\begin{matrix}
+T \\
+U \\
+V \\
+W
+\end{matrix}
+\right)
+=
+\left(
+\begin{matrix}
+a_1T + a_2U + a_3V + a_4W \\
+b_1T + b_2U + b_3V + b_4W \\
+c_1T + c_2U + c_3V + c_4W \\
+d_1T + d_2U + d_3V + d_4W
+\end{matrix}
+\right)
+$$
+\end{figure}
+\item GPGPU - General Purpose Graphical Processing Unit. (e.g. CUDA).
+\item A dedicated GPU does not rely on the RAM of the CPU but has it's own memory (low GB). They're clocked at around 1.5 to 2 GHz.
+\item A GPU consists of many shader cores (in the low thousands). Multi GPU settings are possible in private and commercial sector.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{GPUs in Deep Learning}
+\begin{itemize}
+\item Pro 
+\begin{itemize}
+\item PARALLELIZATION. Each hidden layer may be computed in parallel. 
+\item High speed increases.
+\end{itemize}
+\item Con
+\begin{itemize}
+\item Scalability of multi-GPU systems still in development.
+\item Specialized software is needed.
+\item Cost intensive.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{CPU and GPU scheme}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{pics/CPU.jpg}
+\end{figure}
+\end{frame}
+
+\subsection{Specialized Hardware}
+\begin{frame}
+\frametitle{Specialized Hardware}
+\framesubtitle{Double digits are overrated}
+\begin{itemize}
+\item Changes in Deep Learning Development:
+\begin{itemize}
+\item In the "first neural network era", CPUs were rapidly evolving and simultaneously getting cheaper, while the implementation of neural network chips may took up to two years.
+\item In this "nn-era", three main factors of the industry turned this trend around:
+\begin{enumerate}
+\item GPUs are far more powerful and popular.
+\item Parallelization across cores > Single core improvement (Both CPU and GPU).
+\item Low-power devices with new requirements are everywhere (phones).
+\end{enumerate}
+\end{itemize}
+\item It was shown in 1991 that double precision is not necessary for deep learning, see \cite{Low_Prec}.
+\begin{itemize}
+\item Google developed TPUs specially for TensorFlow machine learning. It uses only 8-Bit Precision and achieved 10x efficiency compared to GPUs.
+\end{itemize}
+\item VPUs - Visual Processing Units (Movidius) \\ FPGAs - Field Programmable Gate Arrays
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Model Compression and Dynamic Structures}
+\begin{itemize}
+\item Problem: Training and deployment of models are inherently different.
+\item Solution: Compression
+\begin{itemize}
+\item Applicable if size is driven by the need to prevent overfitting.
+\item Rather use one large model than an ensemble of many, many small ones.
+\end{itemize}
+\item Problem: Calculation speed is much slower on less powerful devices.
+\item Solution: Dynamic structure
+\begin{itemize}
+
+\item Use cascade classifiers. Start with low capacity and high recall. Finish with high precision classifiers.
+\item Train a specialized gater neural network that chooses which expert neural network is to be used in each case.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Software}
+
+\subsection{Overview}
+\subsubsection{Open Source}
+\begin{frame}
+\frametitle{Popular Open Source Software - Python Affiliated}
+\begin{itemize}
+\item Theano by the Université de Montréal
+\begin{itemize}
+\item Python library.
+\item Optimized Speed and Stability.
+\item Dynamic C code generation.
+\item Uses the concepts of computational graphs similarly to TensorFlow.
+\end{itemize}
+\item TensorFlow by Google Brain
+\begin{itemize}
+\item Python and C\texttt{++} Intefaces. Written in Python and C\texttt{++}.
+\item We will focus on this later.
+\end{itemize}
+\item Keras by François Chollet
+\begin{itemize}
+\item Python library.
+\item May be used as Frontend for TensorFlow or Thenao - therefore inherits their properties. Extends both by hyperparameter optimization and more.
+\item Focused on meaningful, modular and easily extensible coding.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Keras Example}
+\small
+\begin{verbatim}
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+
+
+model = Sequential()
+
+model.add(Dense(output_dim=64, input_dim=100))
+model.add(Activation("relu"))
+model.add(Dense(output_dim=10))
+model.add(Activation("softmax"))
+
+model.compile(loss='categorical_crossentropy', optimizer='sgd',
+  			metrics=['accuracy'])
+
+model.fit(X_train, Y_train, nb_epoch=5, batch_size=32)
+
+loss_and_metrics = model.evaluate(X_test, Y_test, batch_size=32)
+\end{verbatim}
+\end{frame}
+
+\begin{frame}
+\frametitle{Popular Open Source Software - in General}
+\begin{itemize}
+\item Microsoft Cognitive Toolkit (previously CNTK)
+\begin{itemize}
+\item Became open source in 2016.
+\item Claims to have best scalability on the market.
+\item Command line, python and C\texttt{++} interfaces.
+\end{itemize}
+\item Caffe by the Berkeley Vision and Learning Center. 
+\begin{itemize}
+\item Main goals: expressive architecture, extensible code, speed and community.
+\item Pure C\texttt{++}/Cuda library.
+\item Command line, python and matlab interfaces.
+\item Used in industry as well as science.
+\end{itemize}
+\item Torch
+\begin{itemize}
+\item Developed by a team of Facebook, Twitter and Google Research scientists. 	
+\item Written and interfaced in C and Lua.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Caffe Example}
+\small
+\begin{columns}
+\column[t]{3.5cm}
+Data Layer
+\begin{verbatim}
+layer {
+  name: "mnist"
+  type: "Data"
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "mnist_train_lmdb"
+    backend: LMDB
+    batch_size: 64
+  }
+  top: "data"
+  top: "label"
+}
+\end{verbatim}
+\column[t]{3.5cm}
+Convolutional Layer
+\begin{verbatim}
+layer {
+  name: "conv1"
+  type: "Convolution"
+  param { lr_mult: 1 }
+  param { lr_mult: 2 }
+  convolution_param {
+    num_output: 20
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+  bottom: "data"
+  top: "conv1"
+}
+\end{verbatim}
+\column[t]{3.5cm}
+Pooling and Loss
+\begin{verbatim}
+layer {
+  name: "pool1"
+  type: "Pooling"
+  pooling_param {
+    kernel_size: 2
+    stride: 2
+    pool: MAX
+  }
+  bottom: "conv1"
+  top: "pool1"
+}
+layer {
+  name: "loss"
+  type: "SoftmaxWithLoss"
+  bottom: "ip2"
+  bottom: "label"
+}
+\end{verbatim}
+\end{columns}
+\end{frame}
+
+
+\subsubsection{Proprietary}
+\begin{frame}
+\frametitle{Proprietary Software}
+\begin{itemize}
+\item Neural Designer
+\begin{itemize}
+\item Developed from the open source library OpenNN by Artelnics - Written in C\texttt{++}.
+\item Covers data mining and machine learning tools. Called a "general predictive analytics software".
+\end{itemize}
+\item Wolfram Mathematica
+\begin{itemize}
+\item Developed by Wolfram Research - written in Wolfram language, C/C\texttt{++}, Java and Mathematica.
+\item Covers many and many more fields of computational mathematics, machine learning, data mining etc.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Examples - Neural Designer}
+\begin{figure}
+\centering
+\includegraphics[scale=0.2]{pics/neural_designer_neural_network}
+\end{figure}
+\end{frame}
+
+
+\subsection{Tensor Flow}
+\subsubsection{Overview and Concept}
+\begin{frame}
+\frametitle{Tensor Flow}
+\framesubtitle{Overview}
+\begin{itemize}
+\item Grew out of the DistBelief project inside the Google Brain Project.	
+\item Controlled via Python API
+\item There is also a C\texttt{++} API for execution while R, Java, Ruby and Go APIs are in the making.
+\item TF both has CPU and GPU implementations (through CUDA). You can use multiple GPUs through multi towering.
+\item Not only used for neural networks but especially suited for them, cuDNN (Nvidia Cuda Deep Neural Network library).
+\item Tensors in  this case refer to multidimensional arrays (not the mathematical concept of tensors)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+  \centering \Large
+  Computation Graph Concept\\
+  \emph{On the board}
+\end{frame}
+\subsubsection{Examples}
+\begin{frame}[fragile]
+\frametitle{Example MNIST in Tensor Flow - R API (1/2)}
+\lstset{
+  language=R,                     % the language of the code
+  basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=5,                   % the step between two line-numbers. If it's 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  % frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+  keywordstyle=\color{black},     % keyword style
+  commentstyle=\itshape\color{black},     % comment style
+  stringstyle=\color{black},      % string literal style
+         }    
+\begin{lstlisting}[frame=single] 
+# Load Data
+library(tensorflow) 
+datasets = tf$contrib$learn$datasets
+mnist = datasets$mnist$read_data_sets("MNIST-data", one_hot = T)
+
+# Start an interactive Session
+sess = tf$InteractiveSession()
+
+# Define (empty) placeholders for inputs
+x = tf$placeholder(tf$float32, shape(NULL, 784L))
+y_ = tf$placeholder(tf$float32, shape(NULL, 10L))
+
+# Define model parameters as variables
+W = tf$Variable(tf$zeros(shape(784L, 10L)))
+b = tf$Variable(tf$zeros(shape(10L)))
+
+# Initiate all variables 
+sess$run(tf$initialize_all_variables()
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Example MNIST in Tensor Flow - R API (2/2)}
+\lstset{
+  language=R,                     % the language of the code
+  basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=5,                   % the step between two line-numbers. If it's 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  % frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+  keywordstyle=\color{black},     % keyword style
+  commentstyle=\itshape\color{black},     % comment style
+  stringstyle=\color{black},      % string literal style
+         }    
+\begin{lstlisting}[frame=single] 
+# Define the model and Loss
+y = tf$nn$softmax(tf$matmul(x,W) + b)
+cross_entropy = tf$reduce_mean(-tf$reduce_sum(y_ * tf$log(y), reduction_indices=1L))
+
+# Train the model
+optimizer = tf$train$GradientDescentOptimizer(0.5)
+train_step = optimizer$minimize(cross_entropy)
+for (i in 1:1000) {
+  batches = mnist$train$next_batch(100L) 
+  batch_xs = batches[[1]]
+  batch_ys = batches[[2]]
+  sess$run(train_step,
+           feed_dict = dict(x = batch_xs, y_ = batch_ys))
+}
+
+# Evaluate Model
+correct_prediction = tf$equal(tf$argmax(y, 1L), tf$argmax(y_, 1L)
+accuracy = tf$reduce_mean(tf$cast(correct_prediction, tf$float32))
+accuracy$eval(feed_dict=dict(x = mnist$test$images, y_ = mnist$test$labels))
+\end{lstlisting}
+\end{frame}
+
+\section{Benchmarks}
+\subsection{Own Trials}
+\begin{frame}
+\frametitle{Results}
+\begin{itemize}
+\item Trial network as seen in your Handout.
+\item Classic MNIST example: 28x28 pictures of number 0-9.
+\item 2 Convolutional Layers and 1 Fully connected.
+\item Batchsize: 50, Epochs: 1, Train sets: 60000, Test sets: 10000. 
+\end{itemize}
+\begin{figure}
+\centering
+\small
+\begin{tabular}{| l | l | l || l | l | l | l |}
+ & & & \multicolumn{2}{c |}{TensorFlow} & \multicolumn{2}{c |}{Keras} \\ \hline
+System & Processor & RAM & Runtime & Accuracy & Runtime & Accuracy \\ \hline
+Virtual Box & 1 CPU & 12 Gb & 383 & 0.9668 & 326 & 0.602 \\ \hline
+AWS t2.xlarge & 4 CPU & 16 Gb & 334 & 0.9654 & 130 & 0.9756  \\
+\end{tabular}
+\end{figure}
+\end{frame}
+
+\subsection{Benchmarking Paper 2016}
+\begin{frame}
+\frametitle{Benchmarking Set Up}
+\framesubtitle{\emph{Benchmarking State-of-the-Art Deep Learning Software Tools}}
+\begin{figure}
+\center
+\begin{tabular}{l l l l l}
+\hline
+Computational Unit & Cores & Memory & OS & CUDA \\ \hline
+Intel CPU i7-3280 & 4 & 64 GB & Ubuntu 14.04 & - \\
+Intel CPU E5-2630x2 & 16 & 128 GB & CentOS 7.2 & - \\
+NVIDIA GTX 980 & 2048 & 4 GB & Ubuntu 14.04 & 7.5 \\
+NVIDIA GTX 1080 & 2560 & 8 GB & Ubuntu 14.04 & 8.0 \\
+NVIDIA Tesla K80 & 2496 & 12 GB & CentOS 7.2 & 7.5 \\
+\hline
+\end{tabular}
+\end{figure}
+\begin{figure}
+\center
+\begin{tabular}{l | l | c | c | c | c }
+\hline
+Type & Network & Input & Output & Layers & Parameters \\
+\hline
+FCN & FCN-5 & 26,752 & 26,752 & 5 & 55 millions \\
+ & FCN-8 & 26,752 & 26,752 & 8 & 58 millions \\ 
+\hline
+CNN & AlexNet & 150,528 &  1,000 & 4 & 61 millions \\
+ & ResNet-50 & 150,528 &  1,000 & 50 & 3.8 billions \\ 
+\hline
+RNN & LSTM-32 & 10,000 & 10,000 & 2 & 13 millions\\
+ & LSTM-64 & 10,000 & 10,000 & 2 & 13 millions\\
+\hline
+\end{tabular}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmarking Results}
+\framesubtitle{FCN-5 - CPUs}
+\begin{table}
+\begin{figure}
+\centering
+\includegraphics[scale=0.2]{plots/final_fcn5}
+\end{figure}
+\tiny
+\begin{tabular}{ |l|l|l|l|l|l|l|l|l| }
+  \hline
+Network & Software &  \multicolumn{3}{|c|}{CPU Threads} &  \multicolumn{4}{|c|}{CPU Server Threads}\\ \hline
+ & & 1 & 2 & 8 & 1 & 8 & 16 & 32\\ \hline \hline
+FCN-5 & CNTK & 2.351 & .962 & .810 &.828 & .547 & .530& .549 \\
+FCN-5 & TF & 7.206 & 2.626 & 1.934 & 2.804 & 1.574 & .857 & 0.595\\
+FCN-5 & Torch & 1.227 & .661 & - & .536 & .440 & .425 & 0.892\\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Benchmarking Results}
+\framesubtitle{FCN-5 - GPUs}
+\begin{table}
+\begin{figure}
+\centering
+\includegraphics[scale=0.2]{plots/gpu_plot}
+\end{figure}
+\tiny
+\begin{tabular}{ |l|l|l|l|l|l|l|l|l|l| }
+  \hline
+Network & Software & \multicolumn{2}{|c|}{CPU Threads} & \multicolumn{3}{|c|}{GPUs}  \\ \hline
+ & & 16 & 32 & G.980 & G.1080 & T.K80 \\ \hline \hline
+FCN-5 & CNTK  & .530 & .549 & .044 &.033 & .053\\
+FCN-5 & TF  & .857 & .595 & .070 & .063 & .089\\
+FCN-5 & Torch & .425 & .892 & .044 & .046 & .055 \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmarking Results}
+\framesubtitle{AlexNet}
+\begin{figure}
+\centering
+\includegraphics[scale=0.3]{plots/alex_net}
+\end{figure}
+\begin{table}
+\tiny
+\begin{tabular}{ |l|l|l|l|l|l|l|l|l|l| }
+  \hline
+Network & Software & \multicolumn{2}{|c|}{CPU Threads} & \multicolumn{3}{|c|}{GPUs}  \\ \hline
+ & & 16 & 32 & G.980 & G.1080 & T.K80 \\ \hline \hline
+AlexNet & CNTK  & 1.223 & 1.292 &.054 & .040 & .091 \\
+AlexNet & TF  & .666 & .914 & .058 & -  & .086\\
+AlexNet & Torch  & 1.122 & 1.229 & .038 & .033 & .081 \\ \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmarking Results}
+\framesubtitle{LSTM-64}
+\begin{figure}
+\centering
+\includegraphics[scale=0.3]{plots/lstm_64}
+\end{figure}
+\begin{table}
+\tiny
+\begin{tabular}{ |l|l|l|l|l|l|l|l|l|l| }
+  \hline
+Network & Software & \multicolumn{2}{|c|}{CPU Threads} & \multicolumn{3}{|c|}{GPUs}  \\ \hline
+ & & 16 & 32 & G.980 & G.1080 & T.K80 \\ \hline \hline
+LSTM-64 & CNTK  & 1.527 & 1.798 & .171 & .122 & .249 \\
+LSTM-64 & TF  & 1.590 & 1.469 & .178 & .144 & .232 \\
+LSTM-64 & Torch & 3.358 & 5.815 & .269 & .194 & .407 \\ \hline 
+\end{tabular}
+\end{table}
+\end{frame}
+\section{Sources and Discussion}
+
+\begin{frame}
+\frametitle{Sources}
+\begin{thebibliography}{9}
+
+\bibitem{dl}
+  Ian Goodfellow,
+  Yoshua Bengio,
+  Aaron Courville,
+  \emph{Deep Learning},
+  www.deeplearningbook.org,
+  2016.
+  
+\bibitem{BS}
+  Shaohuai Shi,
+  Qiang Wang,
+  Pengfei Xu, 
+  Xiaowen Chu,
+  \emph{Benchmarking State-of-the-Art Deep Learning Software Tools},
+  arxiv.org,
+  v5,
+  19.9.2016.
+  	
+\bibitem{Comp}
+	S. Bahrampour, 
+	N. Ramakrishnan, 
+	L. Schott, 
+	M. Shah 
+	\emph{Comparative Study of Deep Learning Software Frameworks},
+	Mar. 2016.
+	
+\bibitem{Low_Prec}
+	J. Holt,
+	Thomas Baker,
+	\emph{Back Propagation Simulations using Limited Precision Calculations},
+	IJCNN-91 on Neural Networks, 
+	1991.
+  
+\bibitem{TF_PY}
+	TensorFlow with Python:\\ https://www.tensorflow.org, 3.1.17.\\
+  	TensorFlow with R:\\ https://github.com/rstudio/tensorflow, 3.1.17.\\
+	Pro and Cons of Frameworks:\\ https://deeplearning4j.org/compare-dl4j-torch7-pylearn, 7.7.17.\\
+	Keras:\\ https://github.com/fchollet/keras/tree/master/examples, 5.1.17\\
+	
+\end{thebibliography}
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Most Important Sources}
+%\begin{itemize}
+%\item Tutorials:
+%\begin{itemize}
+%\item TensorFlow with Python: https://github.com/rstudio/tensorflow, 3.1.17.
+%\item TensorFlow with R: https://github.com/rstudio/tensorflow, 3.1.17.
+%\item Keras: https://github.com/fchollet/keras/tree/master/examples, 5.1.17.
+%\end{itemize}
+%\item Pro and Cons of Frameworks: https://deeplearning4j.org/compare-dl4j-torch7-pylearn, 7.7.17.
+%\item S. Shi, Q. Wang, P. Xu, X. Chu, "Benchmarking State-of-the-Art Deep Learning Software Tools", Sept. 2016.
+%\item S. Bahrampour, N. Ramakrishnan, L. Schott, M. Shah "Comparative Study of Deep Learning Software Frameworks", Mar. 2016.
+%\end{itemize}
+%\end{frame}
+
+\begin{frame}{}
+  \centering \Large
+  \emph{Questions and Discussion}
+\end{frame}
+
+\subsection*{Backup}
+
+\begin{frame}
+\frametitle{Benchmarking Results as of Sept. 2016}
+\framesubtitle{Hong Kong Baptist University}
+\begin{table}
+\small
+\begin{tabular}{ |l|l|l|l|l|l|l|l| }
+  \hline
+Network & Software &  \multicolumn{3}{|c|}{CPU Threads} &  \multicolumn{3}{|c|}{CPU Server Threads}\\ \hline
+ & & 1 & 2 & 8 & 1 & 8 & 16\\ \hline \hline
+FCN-5 & CNTK & \textcolor{blue}{2.351} & \textcolor{blue}{.962} & \textcolor{blue}{.810} & \textcolor{blue}{.828} & \textcolor{blue}{.547} & \textcolor{blue}{.530}\\
+FCN-5 & TF & 7.206 & 2.626 & 1.934 & 2.804 & 1.574 & .857\\
+FCN-5 & Torch & 1.227 & .661 & - & .536 & .440 & .425\\ \hline
+FCN-8 & CNTK & 2.641 & 1.393 & .919 & .885 & .633 & .580\\
+FCN-8 & TF & 7.167 & 2.630 & 1.955 & 2.896 & 1.577 & .892\\
+FCN-8 & Torch & .1317 & .448 & .881 & .560 & .475 & .444\\ \hline \hline
+AlexNet & CNTK & \textcolor{red}{6.541} & 2.140 & 2.063 & 2.319 & 1.684 & 1.223\\
+AlexNet & TF & \textcolor{red}{3.935} & 1.694 & 1.453 & 1.865 & 1.067 & .666\\
+AlexNet & Torch & \textcolor{red}{4.621} & 1.400 & 3.034 & 1.312 & 1.114 & 1.122\\ \hline
+ResNet-50 & CNTK & - & - & - & - & - & - \\
+ResNet-50 & TF & 26.707 & 10.093 & 8.187 & 9.989 & 6.048 & 3.773\\
+ResNet-50 & Torch & 12.101 & - & - & 5.145 & 4.043 & 3.770\\ \hline \hline
+LSTM-32 & CNTK & 4.393 & 1.220 & 1.369 & 1.331 & .964 & .773\\
+LSTM-32 & TF & 9.306 & 2.021 & 1.723 & 2.168 & 1.229 & .770\\
+LSTM-32 & Torch & 4.872 & 2.366 & 3.645 & 2.067 & 1.706 & 1.763\\ \hline
+LSTM-64 & CNTK & \textcolor{red}{8.218} & 2.483 & 2.762 & 2.662 & 1.949 & 1.527\\
+LSTM-64 & TF & \textcolor{red}{11.699} & 3.516 & 3.477 & 4.402 & 2.525 & 1.590\\
+LSTM-64 & Torch & \textcolor{red}{9.623} & 4.980 & 6.976 & 4.054 & 3.252 & 3.358\\ \hline 
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}
+\frametitle{Benchmarking Results as of Sept. 2016}
+\framesubtitle{Hong Kong Baptist University}
+\begin{table}
+\small
+\begin{tabular}{ |l|l|l|l|l|l|l|l|l|l| }
+  \hline
+Network & Software & \multicolumn{2}{|c|}{CPU Threads} & \multicolumn{3}{|c|}{GPUs}  \\ \hline
+ & & 16 & 32 & G.980 & G.1080 & T.K80 \\ \hline \hline
+FCN-5 & CNTK  & \textcolor{red}{.530} & \textcolor{red}{.549} & \textcolor{red}{.044} & \textcolor{red}{.033} & \textcolor{red}{.053}\\
+FCN-5 & TF  & .857 & .595 & .070 & .063 & .089\\
+FCN-5 & Torch & .425 & .892 & .044 & .046 & .055 \\ \hline
+FCN-8 & CNTK  & .580 & .653 & .049 & .037 & .059 \\
+FCN-8 & TF  & .892 & .620 & .071 & .063  & .107\\
+FCN-8 & Torch  & .444 & .976 & .047 & .048 & .057 \\ \hline \hline
+AlexNet & CNTK  & \textcolor{blue}{1.223} & 1.292 & \textcolor{blue}{.054} & .040 & .091 \\
+AlexNet & TF  & \textcolor{blue}{.666} & .914 & \textcolor{blue}{.058} & -  & .086\\
+AlexNet & Torch  & \textcolor{blue}{1.122} & 1.229 & \textcolor{blue}{.038} & .033 & .081 \\ \hline
+ResNet-50 & CNTK & - & - & .245 & .207 & .475\\
+ResNet-50 & TF & 3.773 & 4.060 & .346 & - & .486 \\
+ResNet-50 & Torch  & 3.770 & 4.428 & .215 & .188 & .435\\ \hline \hline
+LSTM-32 & CNTK  & .773 & .897 & .088 & .062 & .133 \\
+LSTM-32 & TF  & .770 & .706 & .087 & .070 & .123 \\
+LSTM-32 & Torch  & 1.763 & 2.901 & .135 & .098 & .205 \\ \hline
+LSTM-64 & CNTK  & 1.527 & 1.798 & .171 & .122 & .249 \\
+LSTM-64 & TF  & 1.590 & 1.469 & .178 & .144 & .232 \\
+LSTM-64 & Torch & 3.358 & 5.815 & .269 & .194 & .407 \\ \hline 
+\end{tabular}
+\end{table}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{How to set it up}
+\begin{enumerate}
+\item Install Python 2.7 or 3.3+
+\item Install Cuda Toolkit 8.0
+\item Register and install cuDNN 5.1
+\item Install cuDNN dependencies
+\item Install TensorFlow (various methods)
+\item Install TensorFlow-GPU (various methods)
+\end{enumerate}
+\end{frame}
+
+%\begin{frame}
+%\tiny
+%\centering
+%\begin{tabular}{ l || c | c | c | c | c | c | }
+%Property & Caffe & CNTK & Ker	as & Theano & \textbf{TensorFlow} & Torch \\ \hline \hline
+%Core & C\texttt{++} & C\texttt{++} & Python & Python & C\texttt{++} & Lua \\ \hline
+%CPU/GPU & \parbox[t]{1.2cm}{Multi-GPU: Data parallel} &\parbox[t]{1.2cm}{Claims to be best parallel} & \parbox[t]{1.2cm}{See Theano, TF} & \parbox[t]{1.2cm}{Multi-GPU: experimental} & \parbox[t]{1.2cm}{Multi-GPU: Best one} & \parbox[t]{1.2cm}{Multi-CPU: Most used} \\ \hline
+%Open Source & Yes & Yes & Yes & Yes & Yes & Yes \\ \hline
+%\end{tabular}
+%\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Keras}
+\framesubtitle{Example MNIST in Keras}
+\lstset{language=Python, breaklines=true, basicstyle=\footnotesize}   
+\begin{lstlisting}[frame=single] 
+batch_size = 128; nb_classes = 10; nb_epoch = 12;
+
+img_rows, img_cols = 28, 28 # input image dimensions
+nb_filters = 32             # number of convolutional filters
+pool_size = (2, 2)          # size of pooling area for max pooling
+kernel_size = (3, 3)        # convolution kernel size
+
+# the data, shuffled and split between train and test sets
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+if K.image_dim_ordering() == 'th':
+    X_train = X_train.reshape(X_train.shape[0], 1, img_rows, img_cols)
+    X_test = X_test.reshape(X_test.shape[0], 1, img_rows, img_cols)
+    input_shape = (1, img_rows, img_cols)
+else:
+    X_train = X_train.reshape(X_train.shape[0], img_rows, img_cols, 1)
+    X_test = X_test.reshape(X_test.shape[0], img_rows, img_cols, 1)
+    input_shape = (img_rows, img_cols, 1)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Keras}
+\framesubtitle{Example MNIST in Keras}
+\lstset{language=Python, breaklines=true, basicstyle=\footnotesize}   
+\begin{lstlisting}[frame=single] 
+X_train = X_train.astype('float32')
+X_test = X_test.astype('float32')
+X_train /= 255
+X_test /= 255
+print('X_train shape:', X_train.shape)
+print(X_train.shape[0], 'train samples')
+print(X_test.shape[0], 'test samples')
+
+# convert class vectors to binary class matrices
+Y_train = np_utils.to_categorical(y_train, nb_classes)
+Y_test = np_utils.to_categorical(y_test, nb_classes)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Keras}
+\framesubtitle{Example MNIST in Keras}
+\lstset{language=Python, breaklines=true, basicstyle=\footnotesize}   
+\begin{lstlisting}[frame=single] 
+model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1],
+                        border_mode='valid',
+                        input_shape=input_shape))
+model.add(Activation('relu'))
+model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1]))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=pool_size))
+model.add(Dropout(0.25))
+
+model.add(Flatten())
+model.add(Dense(128))
+model.add(Activation('relu'))
+model.add(Dropout(0.5))
+model.add(Dense(nb_classes))
+model.add(Activation('softmax'))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Keras}
+\framesubtitle{Example MNIST in Keras}
+\lstset{language=Python, breaklines=true, basicstyle=\footnotesize}   
+\begin{lstlisting}[frame=single] 
+model.compile(loss='categorical_crossentropy',
+              optimizer='adadelta',
+              metrics=['accuracy'])
+
+model.fit(X_train, Y_train, batch_size=batch_size, nb_epoch=nb_epoch,
+          verbose=1, validation_data=(X_test, Y_test))
+score = model.evaluate(X_test, Y_test, verbose=0)
+print('Test score:', score[0])
+print('Test accuracy:', score[1])
+\end{lstlisting}
+\end{frame}
+
+%\begin{frame}[fragile]
+%\frametitle{Torch}
+%\framesubtitle{Example MNIST in Torch}
+%\lstset{language=Pascal, breaklines=true, basicstyle=\footnotesize}   
+%\begin{lstlisting}[frame=single] 
+%function mnist.download()
+%   if not paths.filep(mnist.path_trainset) or not paths.filep(mnist.path_testset) then
+%      local remote = mnist.path_remote
+%      local tar = paths.basename(remote)
+%      os.execute('wget ' .. remote .. '; ' .. 'tar xvf ' .. tar .. '; rm ' .. tar)
+%   end
+%end
+%
+%function mnist.loadTrainSet(maxLoad, geometry)
+%   return mnist.loadDataset(mnist.path_trainset, maxLoad, geometry)
+%end
+%
+%function mnist.loadTestSet(maxLoad, geometry)
+%   return mnist.loadDataset(mnist.path_testset, maxLoad, geometry)
+%end
+%
+%function mnist.loadDataset(fileName, maxLoad)
+%   mnist.download()
+%\end{lstlisting}
+%\end{frame}
+%
+%\begin{frame}[fragile]
+%\frametitle{Torch}
+%\framesubtitle{Example MNIST in Torch}
+%\lstset{language=Pascal, breaklines=true, basicstyle=\footnotesize}   
+%\begin{lstlisting}[frame=single] 
+%   local f = torch.load(fileName, 'ascii')
+%   local data = f.data:type(torch.getdefaulttensortype())
+%   local labels = f.labels
+%
+%   local nExample = f.data:size(1)
+%   if maxLoad and maxLoad > 0 and maxLoad < nExample then
+%      nExample = maxLoad
+%      print('<mnist> loading only ' .. nExample .. ' examples')
+%   end
+%   data = data[{{1,nExample},{},{},{}}]
+%   labels = labels[{{1,nExample}}]
+%   
+% local dataset = {}
+%   dataset.data = data
+%   dataset.labels = labels
+%   print('<mnist> done')
+%   
+%   function dataset:normalize(mean_, std_)
+%      local mean = mean_ or data:view(data:size(1), -1):mean(1)
+%      local std = std_ or data:view(data:size(1), -1):std(1, true)
+%      for i=1,data:size(1) do
+%         data[i]:add(-mean[1][i])
+%         if std[1][i] > 0 then
+%            tensor:select(2, i):mul(1/std[1][i])
+%         end
+%      end
+%      return mean, std
+%   end
+%
+%\end{lstlisting}
+%\end{frame}
+%
+%\begin{frame}[fragile]
+%\frametitle{Torch}
+%\framesubtitle{Example MNIST in Torch}
+%\lstset{language=Pascal, breaklines=true, basicstyle=\footnotesize}   
+%\begin{lstlisting}[frame=single] 
+%   function dataset:normalizeGlobal(mean_, std_)
+%      local std = std_ or data:std()
+%      local mean = mean_ or data:mean()
+%      data:add(-mean)
+%      data:mul(1/std)
+%      return mean, std
+%   end
+%
+%   function dataset:size()
+%      return nExample
+%   end
+%
+%   local labelvector = torch.zeros(10)
+%
+%   setmetatable(dataset, {__index = function(self, index)
+%			     local input = self.data[index]
+%			     local class = self.labels[index]
+%			     local label = labelvector:zero()
+%			     label[class] = 1
+%			     local example = {input, label}
+%                                       return example
+%   end})
+%
+%   return dataset
+%end
+%\end{lstlisting}
+%\end{frame}
+
+\end{document}

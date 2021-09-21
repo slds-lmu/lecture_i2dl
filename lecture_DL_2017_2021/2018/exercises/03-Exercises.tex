@@ -1,0 +1,154 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{verbatimbox}
+\usepackage{graphicx}
+\usepackage{float}
+
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+\usepackage{hyperref}
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+\input{commands.tex}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+\title{	
+\normalfont \normalsize 
+\textsc{Faculty of Mathematics, Ruhr University Bochum} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge Deep Learning\\{\Large Exercise Sheet 4}\\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Asja Fischer} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+
+\maketitle % Print the title
+\section{In Class}
+\begin{enumerate} 
+%\item \textbf{Transfer function}\\
+%Consider the sigmoid transfer function
+%\begin{align*}
+%   \sigma(u) = \frac{1}{1 + e^{-u}} \enspace,
+% \end{align*}
+% Show that its derivative fulfills
+% \begin{align*}
+%    \sigma'(u) = \big( 1 - \sigma(u) \big) \cdot \sigma(u) \enspace.
+%   \end{align*}
+
+\item \textbf{Weight Decay}\\
+What is weight decay and why can it be interpreted as decreasing the hypothesis space?  
+
+\item \textbf{Early Stopping}
+\begin{itemize}
+\item[a)] Explain the early stopping strategy based on the following figure.
+\item[b)] Why does it make sense to look several steps ahead before deciding when to stop?
+\end{itemize} 
+
+\begin{center}
+\includegraphics[width=.33\textwidth]{images/model1.png}
+\end{center}
+
+\item \textbf{Ensemble methods}
+\begin{itemize}
+\item[a)] You have three classification models $p_1(y|x)$, $p_2(y|x)$, and $p_3(y|x)$ trained on the same dataset. How can you combine them to form an ensemble?  
+\item[b)] What is bagging? 
+\end{itemize}
+
+\item \textbf{Dropout}
+
+Given is the following network with two input and two hidden neurons and Relu activation functions in both hidden and output layer. The network parameters are given by the weight matrix
+$W=
+\begin{pmatrix}
+-1 & 2 \\
+3 & -4
+\end{pmatrix}$,
+the weight vector
+$u=
+\begin{pmatrix}
+1 \\
+2
+\end{pmatrix}$,
+the bias of the hidden neuron 
+$b=
+\begin{pmatrix}
+3\\
+3
+\end{pmatrix}$,
+and the bias of the output neuron $c=1$.
+\begin{center}
+\includegraphics[width=.5\textwidth]{images/xor_rep.png}
+\end{center}
+\begin{itemize}
+\item[a)]  Training: You want to train this neural network with dropout with a dropout probability of $p=0.5$ and a mean-squared-error loss function. In the current mini-batch there are two training samples $x^{(1)}=(1,1)$ and $x^{(2)}=(2,2)$ with targets $y^{(1)}=2$ and $y^{(2)}=3$, respectively.
+In the first randomly generated dropout mask the first input neuron and the second hidden neuron are dropped out (i.e.~the masked is given by $\mu^{(1)}=(0,1,1,0)$ for our neurons $(x_1,x_2,z_1,z_2)$ ), and in the second mask only the first hidden neuron is dropped (i.e.~$\mu^{(2)}=(1,1,0,1)$). Perform one step of mini-batch stochastic gradient descent. 
+\item[b)] Making a prediction: After training, given a new sample  $x^{(3)}=(1,2)$, calculate the networks prediction for that sample.
+\end{itemize}
+
+\item \textbf{Dataset augmentation and Noise robustness}
+
+Explain how this concepts are used for regularization. 
+
+\item \textbf{Adversarial Training}
+\begin{itemize}
+\item[a)] What is an adversarial example?
+\item[b)] Explain how the Fast Gradient Sign Method works! 
+\item[c)] How are adversarial examples used for regularization?
+\end{itemize}
+
+
+\end{enumerate}
+
+
+%\section{At Home}
+%\begin{enumerate}
+%\item ... some example of actually computing knowledge graph embeddings ...
+%\end{enumerate}
+\end{document}

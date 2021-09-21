@@ -1,0 +1,1649 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+@
+
+\lecturechapter{1}{Introduction}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Team}
+  \begin{itemize}
+    \item Bernd Bischl \\
+          Department of Statistics - Working Group Computational Statistics \\
+          LMU Munich \\
+          E-mail: \textbf{bernd.bischl@stat.uni-muenchen.de} \\
+    \item Janek Thomas \\
+          E-mail: \textbf{Janek.Thomas@stat.uni-muenchen.de} \\
+    \item Xudong Sun \\
+          E-mail: \textbf{Xudong.Sun@stat.uni-muenchen.de} \\
+    \item Niklas Klein \\
+          E-mail: \textbf{Niklas.Klein@campus.lmu.de} \\
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Course Outline}
+  \begin{itemize}
+    \item Brief history of deeplearning
+    \item Introduction to neural networks
+    \item Deep feedforward networks
+    \item Regularization and optimization of neural networks
+    \item Advanced nets for supervised problems:
+    \begin{itemize}
+      \item Convolutional neural networks: search for patterns regardless of their position in the input (e.g an image)
+      \item Recurrent Nets: for sequential data, units use its internal memory to apply information about previous inputs
+    \end{itemize}
+    \item Advanced nets for unsupervised problems:
+    \begin{itemize}
+      \item Autoencoders: for pretraining and dimensionality reduction (the net tries to reconstruct its input)
+    \end{itemize}
+    \item Maybe: automatic hyperparameter tuning
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Supervised and unsupervised learning}
+  \begin{itemize}
+    \item Dealing with supervised problems means we know the ground truth of the data (i.e. we have labeled training data).
+    \begin{itemize}
+      \item Our goal is to learn an output $y$ (real valued or categorical) based on its features: $\hat{y} = f(x)$.
+      \item Those features are the elements of the input vectors $x_1, x_2, ..., x_p$. 
+      %(the columns of the data frame).
+      \item Upon the prediction we can compute the loss to evaluate our model.
+    \end{itemize}
+    \item Unsupervised on the other hand means that we do not know the ground truth of the data.
+    \begin{itemize}
+      \item Thus, there is no possibility to evaluate the the model against the ground truth.
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{A brief history of neural networks}
+  \begin{itemize}
+    \item \pkg{1943:} The first artificial neuron, the "Threshold Logic Unit (TLU)", was proposed by Warren McCulloch \& Walter Pitts.
+    \begin{itemize}
+      \item In this model the neuron fires a 1 if the input exceeds a certain treshhold $\phi$.
+      \item However, this model didn't have adjustable weights, so learning could only be achieved by changing the treshhold $\phi$.
+    \end{itemize}
+    % Source: https://en.wikipedia.org/wiki/Artificial_neuron#History
+  \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item \pkg{1957:} The perceptron was invented by Frank Rosenblatt. 
+  \end{itemize}
+    \begin{figure}
+      \centering
+        \includegraphics[width=4cm]{plots/mark_i_perceptron.png}
+        \caption{The Mark I Perceptron (https://en.wikipedia.org/wiki/Perceptron)}
+    \end{figure}
+\framebreak
+    \begin{figure}
+      \centering
+        \includegraphics[width=10cm]{plots/perceptron_neu.png}
+        \caption{The perceptron with a single neuron z, input units $x_1, x_2,... ,x_p$, weights $w_1, w_2,... ,w_p$ and a constant bias term b.}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item The features $x = (x_1,\ldots, x_p)^T$ are connected with the neuron $z$ via links.
+    \item The bias term must not be confused with the statistical bias. It actually is an intercept parameter.
+    \item We may add a column containing only ones to the feature matrix, so we can drop the bias term in notation ($x = (x_0,\ldots, x_p)^T$).
+    \item The weights $w = (w_0,\ldots,w_p)$ control the impact of each input unit (i.e. feature) on the prediction.
+    \item $\sigma$ is called activation function. It can be used for a non-linear transformation of the input.
+    \item So the neuron can be expressed as: $z = \sigma(w^Tx) = \hat{y}$ and:
+    $$
+    \sigma(w^Tx) = 
+    \begin{cases}
+     1 & w^Tx \geq \phi \\
+     0 & otherwise \\
+    \end{cases}
+    $$
+  \end{itemize}
+\framebreak
+  \begin{minipage}{0.5\textwidth}
+    \begin{itemize}
+      \item Linear classifier: \\
+      \lz
+      2 weights: linear boundary:
+      $$w_{1} x_1 + w_{2} x_2 = \phi$$
+      \item Weights are learned by a delta-update rule.
+      \item Only linearly separable problems can be learned with a perceptron.
+    \end{itemize}
+  \end{minipage}\hfill
+  \begin{minipage}{0.45\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=5cm]{plots/linearclassifier.png}
+        %\caption{The Mark I Perceptron (https://en.wikipedia.org/wiki/Perceptron)}
+    \end{figure}
+  \end{minipage}
+\framebreak
+  \begin{itemize}
+    \item The delta-update rule is an iterative learning rule for updating the weights of the inputs in a single-layer neural network, such that:
+  \end{itemize}
+  \begin{algorithm}[H]
+    \caption{delta-update rule}
+    \begin{algorithmic}[1]
+    \State \textbf{initialize} weights $w_p$ (to $0$ or to a small random value)
+      \While{stopping criterion not met}
+        \State compute the output of the net: $f(x) = \sigma(w^Tx + b) = \hat{y}$
+        \State update weights: $w_{p,(t+1)} = w_{p,t} + (y - \hat{y}_t) x_p$
+      \EndWhile
+    \end{algorithmic}
+  \end{algorithm}
+  \begin{itemize}
+    \item The stopping criterion can be either epochs or an error threshold.
+  \end{itemize}
+\framebreak
+  \begin{blocki}{Choices for $\sigma$:}
+    \item If we choose the identity our model collapses to a simple linear regression:
+    $$
+    y = \sigma(w^Tx) = w^Tx
+    $$
+    \item Using the logistic function gives us:
+    $$
+    y = \sigma(w^Tx) = \frac{1}{1 + \exp(-w^Tx)}
+    $$
+    This is just logistic regression!
+  \end{blocki}
+\framebreak
+  \begin{itemize}
+    \item As already stated, the bias term must not be confused with the statistical bias.
+    \item It is actually an intercept parameter, which puts the decision boundary at the correct position in the learned space.
+    % Deeplearningbook page 110: This terminology derives from the point of view that the output of the transformation is biased toward being b in the absence of any input.
+  \end{itemize}
+    \begin{figure}
+      \centering
+        \includegraphics[width=8.5cm]{plots/bias.png}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item \pkg{1960:} ADALINE by Bernard Widrow \& Tef Hodd.
+    \begin{itemize}
+      \item Weights are now adjusted according to the weighted sum of the inputs.
+    \end{itemize}
+    % Source: https://en.wikipedia.org/wiki/ADALINE
+    \item \pkg{1965:} Group method of data handling (also known as polynomial neural networks) by Alexey Ivakhnenko. The first general working learning algorithm for supervised deep feedforward multilayer perceptrons.
+    % Source: http://people.idsia.ch/~juergen/firstdeeplearner.html (J?rgen Schmidhubers website)
+    %         https://en.wikipedia.org/wiki/Group_method_of_data_handling
+    \item \pkg{1969:} The first "AI Winter" kicked in.
+    \begin{itemize}
+      \item Marvin Minsky \& Seymour Papert proved that a perceptron cannot solve the XOR-Problem (linear separability).
+      \item Less funding $\Rightarrow$ Standstill in AI/DL research
+      % Source: https://en.wikipedia.org/wiki/Perceptrons_(book)#The_XOR_affair
+      %         https://en.wikipedia.org/wiki/AI_winter
+    \end{itemize}
+  \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item \pkg{1985:} Multi-layered perceptron with backpropagation by David Rumelhart, Geoffrey Hinton and Ronald Williams.
+    % Source: https://en.wikipedia.org/wiki/Backpropagation#History
+    % Results: This was when Rumelhart, Williams, and Hinton demonstrated back propagation in a neural network could provide "interesting" distribution representations. Philosophically, this discovery brought to light the question within cognitive psychology of whether human understanding relies on symbolic logic (computationalism) or distributed representations (connectionism). http://www.dataversity.net/brief-history-deep-learning/
+    \begin{itemize}
+      \item Method to efficiently compute derivatives of differentiable composite functions.
+      \item Backpropagation was developed already in 1970 by Seppo Linnainmaa.
+      % Source: https://en.wikipedia.org/wiki/Seppo_Linnainmaa
+    \end{itemize}
+    \item \pkg{1985:} The second "AI Winter" kicked in.
+    \begin{itemize}
+      \item Overly optimistic/exaggerated expectations concerning potential of AI/DL.
+      \item Angering investors, the phrase "AI" even reached a pseudoscience status.
+      \item Kernel machines and graphical models both achieved good results on many important tasks.
+      \item Some of the fundamental mathematical difficulties in modeling long sequences were identified.
+      % Source http://www.dataversity.net/brief-history-deep-learning/
+    \end{itemize}
+    \item \pkg{2006:} Age of deep neural networks began.
+    \begin{itemize}
+      \item Geoffrey Hinton showed that a kind of neural network called deep belief network could be efficiently trained using a strategy called greedy layer-wise pretraining.
+      \item This wave of neural networks research popularized the use of the term deep learning to emphasize that researchers were now able to train deeper neural networks than had been possible before.
+      \item At this time, deep neural networks outperformed competing AI systems based on other machine learning technologies as well as hand-designed functionality.
+    \end{itemize}
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/dataset_size_over_time.png}
+      \caption{Dataset sizes over time (Goodfellow et al. (2016))}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/network_size_over_time.png}
+      \caption{Network sizes over time. 1: Perceptron, 5: Recurrent neural network for speech recognition, 8: LeNet-5, 10: Deep belief network, 20: GoogLeNet. For more details, see: Goodfellow et al. (2016)}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Neural Networks}
+  We will now extend the perceptron:\\
+  \begin{itemize}
+    \item Our perceptron from before only had one neuron $z$.
+    \item Extension: $m$ neurons $z_1, \dots, z_m$
+    \item The neurons are arranged in layers:\\
+    \begin{itemize}
+      \item The first layer is the input layer.
+      \item The intermediate layer is called \enquote{hidden layer},
+      because its output is not observed directly.
+      \item The last layer is the output layer.
+    \end{itemize}
+    \item Each neuron is connected to all neurons in the previous and next layer over directed links (fully connected layers!). Directed means that information can only be passed in one direction. We'll call such graphs
+    \enquote{feed-forward neural networks}.
+  \end{itemize}
+\framebreak
+    \begin{figure}
+      \centering
+        \includegraphics[width=10.2cm]{plots/neuralnet2.png}
+        \caption{Structure of a single hidden layer, feed-forward neural network for regression or binary classification problems (bias term omitted).}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item The input $x$ is a column vector with dimensions $p \times 1$
+    \item $W$ is a weight matrice with dimensions $p \times m$:
+    $$
+    W =
+     \begin{pmatrix}
+      w_{1,1} & w_{1,2} & \cdots & w_{1,m} \\
+      w_{2,1} & w_{2,2} & \cdots & w_{2,m} \\
+      \vdots  & \vdots  & \ddots & \vdots  \\
+      w_{p,1} & w_{p,2} & \cdots & w_{p,m}
+     \end{pmatrix}
+    $$
+    \item For example, to obtain $z_1$, we pick the first column of $W$:
+    $$
+    W_1 =
+     \begin{pmatrix}
+      w_{1,1} \\
+      w_{2,1} \\
+      \vdots  \\
+      w_{p,1}
+     \end{pmatrix}
+    $$
+    and compute $z_1 = \sigma(W_1^T x)$
+  \end{itemize}
+\framebreak
+  \begin{blocki}{General notation:}
+    \item For regression or binary classification: one output unit $y$.
+    \item $m$ hidden neurons $z_1, \dots, z_m$, with:
+    $$ z_i = \sigma(W_i^T x), \quad i = 1,\ldots,m$$
+    \item Linear combinations of derived features $z$:
+    $$ y = u^T z, \quad z=(z_1, \dots, z_m)^T$$
+  \end{blocki}
+\framebreak
+  \begin{blocki}{Output function $\tau(u^T z)$:}
+    \item For regression one may use any function mapping from $\R \to \R$, for example the identity function:
+    $$ \tau(u^T z) = u^T z $$
+    \item For binary classification one could apply the sigmoidal logistic function.
+  \end{blocki}
+\framebreak
+    \begin{figure}
+      \centering
+        \includegraphics[width=10.2cm]{plots/neuralnet.png}%
+        \caption{Structure of a single hidden layer, feed-forward neural network for g-class classification problems (bias term omitted).}
+    \end{figure}
+\framebreak
+  \begin{blocki}{Notation:}
+    \item For g-class classification: g output units $y = (y_1, \dots, y_g)$ 
+    \item $m$ hidden neurons $z_1, \dots, z_m$, with:
+    $$ z_i = \sigma(W_i^T x), \quad i = 1,\ldots,m $$
+    \item Compute linear combinations of derived features $z$:
+    $$ y_k = U_k^T z, \quad z=(z_1,\dots, z_m)^T, \quad k = 1,\ldots,g$$
+  \end{blocki}
+\framebreak
+  \begin{blocki}{Output softmax function $\tau(y)$:}
+    \item For g-classification a usual choice is the softmax-function, which gives us a probability distribution over g different possible outcomes:
+    $$ \tau_j(y) = \frac{\exp(y)}{\sum_{k=1}^g\exp(y_k)}$$
+    \item This is the same transformation used in the multilogit-model!
+      \item Derivative $ \frac{\delta\tau(y)}{\delta y} = diag(\tau(y)) - \tau(y) \tau(y)^T $
+      \item It is a \enquote{smooth} approximation of the argmax operation,
+        so $\tau((1, 1000, 2)^T) \approx (0, 1, 0)^T$ (picks out 2nd element!).
+    \end{blocki}
+\framebreak
+  \begin{blocki}{Loss of a neural network:}
+    \item To optimize a neural network, we have to minimize a loss function $\Lxy$, where $y$ corresponds to the ground truth and $f(x)$ to the networks prediction.
+    \item For regression, we typicall use the L2 loss (rarely L1): $$\Lxy = \frac{1}{2}(y - f(x))^2$$
+    \item For classification we typically apply the cross entropy (binomial loss): 
+     $$\Lxy = -\frac{1}{n} \sum_{i=1}^{n} \Big[y_i log \ f(x) + (1 - y_i) log(1 - f(x)) \Big]$$
+  \end{blocki}
+\framebreak
+  \begin{itemize}
+    \item The term cross-entropy is widely used for the negative log-likelihood of a bernoulli or softmax distribution, but that is a misnomer.
+    \begin{itemize}
+      \item Any loss consisting of a negative log-likelihood is a cross-entropy between the empirical distribution of the training data and the probability distribution defined by model! 
+      \item For example, the mean squared error is the cross-entropy between the empirical distribution and a Gaussian model.
+    \end{itemize}
+    \item Thus, maximum likelihood estimation is as an attempt to make the model distribution match the empirical distribution.
+  \end{itemize}
+\framebreak
+  \begin{blocki}{Activation function $\sigma$:}
+    \item $\sigma$ is in general non-linear, monotonically increasing and bounded.
+    \item One may use the sigmoidal logistic function:
+    $$ \sigma(v) = \frac{1}{(1+\exp (-s \cdot v))} $$
+  \end{blocki}
+<<echo=FALSE, fig.height=2.7>>=
+library(ggplot2)
+logfun = function(v, s) {
+  1 / (1 + exp(- s * v))
+}
+x = seq(-10, 10, 0.1)
+stretch = c(0.25, 1, 10)
+y = sapply(stretch, function(s) {
+  sapply(x, logfun, s = s)
+})
+df = data.frame(y = as.vector(y), x = rep(x, length(stretch)),
+  s = as.factor(rep(stretch, each = length(x))))
+
+logfun.q = ggplot(df, aes(x = x, y = y, color = s)) + geom_line(size=1)
+logfun.q = logfun.q + scale_y_continuous(name = NULL)
+logfun.q = logfun.q + scale_x_continuous(name = NULL)
+logfun.q = logfun.q + theme(axis.title = element_text(size = 14L, face = "bold"),
+  plot.margin = unit(c(0, 0, 0, 0), "cm"))
+logfun.q
+@
+\framebreak
+
+\begin{itemize}
+  \item Some important properties of the sigmoidal logistic function include:
+  \item[]
+  \item[]
+  \begin{itemize}
+    \item limits: $$\lim_{v \to -\infty} \sigma(v) = 0 \text{ and } \lim_{v \to \infty} \sigma(v) = 1$$
+    \item the derivative for $s = 1$: $$\frac{\delta\sigma(v)}{\delta v}=\frac{\exp(v)}{(1+\exp(v))^2} = \sigma(v)(1-\sigma(v))$$
+    \item for any s: $$\sigma(v) \text{ is symmetrical in } (0, 0.5)$$
+  \end{itemize}
+\end{itemize}
+
+\framebreak
+  \begin{blocki}{Activation function $\sigma$:}
+    \item Another choice might be the hyperbolic tangent:
+    $$ \sigma (v) = tanh(v) = \frac{sinh(v)}{cosh(v)} = 1 - \frac{2}{exp(2v) + 1}$$
+  \end{blocki}
+<<echo=FALSE, fig.height=3>>=
+library(ggplot2)
+library(reshape2)
+relu <- function(x) sapply(x, function(z) tanh(z))
+x <- seq(from=-3, to=3, by=0.1)
+fits <- data.frame(x=x, relu = relu(x))
+long <- melt(fits, id.vars="x")
+ggplot(data=long, aes(x=x, y=value, group=variable, colour=variable))+
+  geom_line(size=1.2) + scale_y_continuous(name = NULL) + 
+  scale_x_continuous(name = NULL) + theme(legend.position="none")
+@
+\framebreak
+
+\begin{itemize}
+  \item Some important properties of the hyperbolic tangent function include:
+  \item[]
+  \item[]
+  \begin{itemize}
+    \item limits: $$\lim_{v \to -\infty} \sigma(v) = -1 \text{ and } \lim_{v \to \infty} \sigma(v) = 1$$
+    \item derivative: $$\frac{\delta\sigma(v)}{\delta v} = 1 - tanh^2(v)$$
+    \item symmetry: $$\sigma(v) \text{ is symmetrical in } (0, 0)$$
+  \end{itemize}
+\end{itemize}
+
+\framebreak
+  \begin{blocki}{Activation function $\sigma$:}
+    \item Currently the most popular choice is the ReLU (rectified linear unit):
+    $$ \sigma (v) = max(0,v) $$
+  \end{blocki}
+<<echo=FALSE, fig.height=3>>=
+library(ggplot2)
+library(reshape2)
+relu <- function(x) sapply(x, function(z) max(0,z))
+x <- seq(from=-5, to=5, by=0.1)
+fits <- data.frame(x=x, relu = relu(x))
+long <- melt(fits, id.vars="x")
+ggplot(data=long, aes(x=x, y=value, group=variable, colour=variable))+
+  geom_line(size=1.5) + scale_y_continuous(name = NULL) + 
+  scale_x_continuous(name = NULL) + theme(legend.position="none")
+@
+\framebreak
+
+  \begin{itemize}
+    \item Some important properties of the relu function include:
+    \item[]
+    \item[]
+    \begin{itemize}
+      \item limits: $$\lim_{v \to -\infty} \sigma(v) = 0 \text{ and } \lim_{v \to \infty} \sigma(v) = \infty$$
+      \item derivative: 
+      $$\frac{\delta\sigma(v)}{\delta v} =
+        \begin{cases}
+                                       1 & \text{if $v > 1$} \\
+                                       0 & \text{else}
+        \end{cases}
+      $$
+    \end{itemize}
+  \end{itemize}
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Example: XOR Problem}
+  \begin{itemize}
+    \item Suppose we have four data points $$X = \{[0,0]^T, [0,1]^T, [1,0]^T, [1,1]^T \}$$
+    \item The XOR gate (exclusive or) returns true, when an odd number of inputs are true:
+  \end{itemize}
+  \begin{table}
+    \centering
+      \begin{tabular}{ccc}
+        \textbf{$x_1$}  & \textbf{$x_2$}  & \textbf{XOR} $= y$ \\
+        \hline
+        \hline
+        $0$             &   $0$           &  $0$ \\
+        $0$             &   $1$           &  $1$ \\
+        $1$             &   $0$           &  $1$ \\
+        $1$             &   $1$           &  $0$
+      \end{tabular}
+  \end{table}
+  \begin{itemize}
+    \item Can you learn the target function with a logistic regression model? \\
+    % (Aside from statistical generalization, we just want to learn the training data!)
+  \end{itemize}
+\framebreak
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Logistic regression cannot solve this problem and will always output $0.5$. \\
+      In fact, any model using simple hyperplanes for separation can't (including a perceptron).
+      \lz
+      \item A small neural net can easily solve the problem by transforming the space!
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}{0.5\textwidth}
+    \includegraphics{plots/xor1.png}%
+  \end{minipage}\hfill
+\framebreak
+  \begin{itemize}
+    \item Consider the following model:
+  \end{itemize}
+    \begin{figure}
+      \centering
+        \includegraphics[width=8cm]{plots/neuralnet_2_bias.png}%
+        \caption{A neural network with two neurons in the hidden layer. The matrix W describes the mapping from x to z. The vector u from z to y. The c and b are biases.}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Let us treat the XOR task as a regression problem and apply ReLU as activation function. We can represent the models architecture by the following equation: 
+  \end{itemize}
+  \begin{eqnarray*}
+    f(x|\theta) &=& f(x| W, c, u, b) \\ 
+                &=& u^T\sigma(W^T x+c)+b \\
+                &=& u^T max\{0, W^T x+c\} + b
+  \end{eqnarray*}
+  \begin{itemize}
+    \item So how many parameters does our model have?
+    \begin{itemize}
+      \item In a fully connected neural net, the number of connections between the nodes equals our parameters: $$\underbrace{(2 \times 2)}_{W} + \underbrace{(2 \times 1)}_{c} + \underbrace{(2 \times 1)}_{u} + \underbrace{(1)}_{b} = 9$$
+    \end{itemize}
+  \end{itemize}
+\framebreak
+  \begin{eqnarray*}
+   \text{Let} \ W = \begin{pmatrix}
+      1 & 1 \\
+      1 & 1
+    \end{pmatrix}, \
+      c = \begin{pmatrix}
+      0 \\
+      -1
+    \end{pmatrix}, \
+      u = \begin{pmatrix}
+      1 \\
+      -2
+    \end{pmatrix}, \
+      b = 0
+  \end{eqnarray*}
+  \begin{eqnarray*}
+    X = \begin{pmatrix}
+      0 & 0 \\
+      0 & 1 \\
+      1 & 0 \\
+      1 & 1
+    \end{pmatrix}, \
+    XW = \begin{pmatrix}
+      0 & 0 \\
+      1 & 1 \\
+      1 & 1 \\
+      2 & 2
+    \end{pmatrix}, \
+      XW + c = \begin{pmatrix}
+        0 & -1 \\
+        1 & 0 \\
+        1 & 0 \\
+        2 & 1
+    \end{pmatrix}
+  \end{eqnarray*}
+  \begin{eqnarray*}
+    z = max\{0, XW+c\}
+    &=&
+    \begin{pmatrix}
+      0 & 0 \\
+      1 & 0 \\
+      1 & 0 \\
+      2 & 1
+    \end{pmatrix}
+  \end{eqnarray*}
+  \begin{itemize}
+    \item Note that we computed all examples at once.
+  \end{itemize}
+
+\framebreak
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Our transformed space has form
+        \begin{eqnarray*}
+          z = \begin{pmatrix}
+              0 & 0 \\
+              1 & 0 \\
+              1 & 0 \\
+              2 & 1
+          \end{pmatrix}
+        \end{eqnarray*}
+      \item[] which is easily separable.
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}{0.5\textwidth}
+    \includegraphics<1>{plots/xor2_2.png}%
+  \end{minipage}\hfill
+  
+\framebreak
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Our transformed space has form
+        \begin{eqnarray*}
+          z = \begin{pmatrix}
+              0 & 0 \\
+              1 & 0 \\
+              1 & 0 \\
+              2 & 1
+          \end{pmatrix}
+        \end{eqnarray*}
+      \item[] which is easily separable.
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}{0.5\textwidth}
+    \includegraphics{plots/xor2.png}%
+  \end{minipage}\hfill
+  
+\framebreak
+  \begin{itemize}
+    \item In a final step we have to multiply the activated values of matrix z with the vector u:
+  \end{itemize}
+  \begin{eqnarray*}
+    f(x; W, c, u, b) =
+    \begin{pmatrix}
+      0 & 0 \\
+      1 & 0 \\
+      1 & 0 \\
+      2 & 1
+    \end{pmatrix}
+    \begin{pmatrix}
+      1 \\
+      -2
+    \end{pmatrix}
+    &=&
+    \begin{pmatrix}
+      0 \\
+      1 \\
+      1 \\
+      0
+    \end{pmatrix}
+  \end{eqnarray*}
+  \begin{itemize}
+    \item This solves the XOR problem perfectly!
+  \end{itemize}
+  \begin{table}
+    \centering
+      \begin{tabular}{ccc}
+        \textbf{$x_1$}  & \textbf{$x_2$}  & \textbf{XOR} = y\\
+        \hline
+        \hline
+        $0$             &   $0$           &  $0$ \\
+        $0$             &   $1$           &  $1$ \\
+        $1$             &   $0$           &  $1$ \\
+        $1$             &   $1$           &  $0$
+      \end{tabular}
+  \end{table}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% XOR problem with sigmoid activation function %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{XOR Problem 2}
+%   \begin{eqnarray*}
+%     z = \frac{1}{1+exp(-W^Tx+c)}
+%     &=&
+%     \begin{pmatrix}
+%       -0.5 & 0.269 \\
+%       0.731 & -0.5 \\
+%       0.731 & -0.5 \\
+%       0.881 & 0.731
+%     \end{pmatrix} \\
+%     &=&
+%     \begin{pmatrix}
+%       -1.038 \\
+%       1.731 \\
+%       1.731 \\
+%       -0.581
+%     \end{pmatrix}
+%   \end{eqnarray*}
+%   \begin{eqnarray*}
+%     \hat{y} = \frac{1}{1+exp(-w^Tx+b)}
+%     &=&
+%     \begin{pmatrix}
+%       0.26 \\
+%       0.85 \\
+%       0.85 \\
+%       0.36
+%     \end{pmatrix}
+%   \end{eqnarray*}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Training neural networks}
+  \begin{itemize}
+    \item In this simple example we actually \enquote{guessed} the values of the parameters for $W$, $c$, $u$ and $b$.
+    \item That wont work for more sophisticated problems!
+    \item Training of neural nets is composed of two iterative steps:
+      \begin{enumerate}
+        \item Forward pass: the information of the inputs flow through the model to produce a prediction. \\
+        Based on that, we compute a loss which is sometimes called the cost.
+        \item Backward pass: the information of the error flows backwards through the model.\\
+        Thereby we use the error values to calculate the gradient of the loss with respect to each weight. \\
+        In a final step we update the weights (i.e. \enquote{move} them in the direction of the steepest descent of the loss).
+      \end{enumerate}
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Gradient based learning}
+%   \begin{itemize}
+%     \item Nonlinearity of neural nets causes loss functions to become non-convex. Thus, convex optimization algorithms do not work anymore.
+%     \item We use iterative, gradient-based optimization instead!
+%     \begin{itemize}
+%       \item But: does not guarantee convergence and results may depend heavily on initial parameters.
+%     \end{itemize}
+%   \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Revision of gradient descent}
+  \begin{itemize}
+    \item First we need to recall the method of gradient descent in numerical optimization.
+    \item Let $\fx$ be an arbitrary, differentiable, unrestricted target function, which we want to minimize.
+      \begin{itemize}
+        \item We can calculate the gradient $\nabla \fx$, which always points in the direction of the steepest ascent.
+        \item Thus $-\nabla \fx$ points in the direction of the steepest descent!
+      \end{itemize}
+  \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item Standing at a point $x_k$ during minimization, we can improve this point by doing the following step:
+$$f(x_{k+1}) = f(x_k) - \nu \nabla f(x_k)$$
+ \enquote{Walking down the hill, towards the valley.}
+    \item $\nu$ determined the length of the step and is called step size.
+To find the optimal $\nu$ we need to look at:
+$$g(\nu) = f(x_k) - \nu \nabla f(x_k) = min!$$
+    \item This minimization problem only has one real parameter, and is therefore \enquote{easy} to solve.
+These kind of methods are known as line search methods.
+  \end{itemize}
+\framebreak
+    \begin{figure}
+      \centering
+        \includegraphics[width=10.2cm]{plots/ascent.png}
+    \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Computational graphs}
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Computational graphs are a very helpful language to describe algorithms like the backpropagation.
+      \item Each node describes a variable.
+      \item Operations are functions applied to one or more variables.
+    \end{itemize}
+  \end{minipage}\hfill
+  \begin{minipage}{0.5\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=6cm]{plots/compgraph1.png}
+        \caption{The computational graph for the expression $H = \sigma(XW + b)$.}
+    \end{figure}
+  \end{minipage}  
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Chain rule of calculus}
+  \begin{itemize}
+    \item The chain rule can be used to compute derivatives of the composition of two or more functions.
+    \item Let $x \in \R^m$, $y \in \R^n$, \\
+          $g: \R^m \to \R^n$ and $f: \R^n \to \R$. \\
+    \item If $y = g(x)$ and $z = f(y)$, the chain rule yields $$\frac{\delta z}{\delta x_i} = \sum_j \frac{\delta z}{\delta y_j} \frac{\delta y_j}{\delta x_i}$$
+          or in vector notation $$\nabla_x z = \Big(\frac{\delta y}{\delta x}\Big)^T \nabla_y z,$$
+          where $\frac{\delta y}{\delta x}$ is the $n \times m$ jacobian matrix of $g$.
+  \end{itemize}
+\framebreak
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Suppose the following computational graph.
+      \item To compute the derivative of $\frac{\delta z}{\delta w}$ we need to recursively apply the chain rule. That is:
+    \end{itemize}
+      \begin{eqnarray*}
+        \frac{\delta z}{\delta w} &=& \frac{\delta z}{\delta y} \frac{\delta y}{\delta x} \frac{\delta x}{\delta w} \\
+                                  &=& f'_3(y) f'_2(x) f'_1(w) \\
+                                  &=& f'_3(f_2(f_1(w)))f'_2(f_1(w))f'_1(w)
+      \end{eqnarray*}
+  \end{minipage}\hfill
+  \begin{minipage}{0.40\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=1cm]{plots/compgraph2.png}
+        \caption{A computational graph, such that $x = f_1(w),$ $y = f_2(x)$ and $z = f_3(y)$.}
+    \end{figure}
+  \end{minipage}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=4.5cm]{plots/compgraph3.png}
+      \caption{Applying the chain rule to the example yields us a computational graph with a symbolic description of the
+derivatives.}
+  \end{figure}  
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Backpropagation}
+%   \begin{itemize}
+%     \item Backpropagation is the method used to compute the gradient of a neural network. That is, recursively applying the chain rule to obtain the error of each node. 
+%       \begin{itemize}
+%         \item Keep in mind that another algorithm uses this gradient to perform the actual learning (for example stochastic gradient descent).
+%       \end{itemize}
+%   \end{itemize}
+% \framebreak
+  \begin{itemize}
+    \item Backpropagation is a method used to calculate the error contribution of each weight after a batch of data is processed. 
+    \item This is used by an enveloping optimization algorithm to adjust the weight of each neuron (e.g. SGD, Adam, ..).
+    \item To apply backpropagation, we have to choose a loss function $\Lxy$, which we would like to minimize.    
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Weight update rule}
+  \begin{itemize}
+    \item After obtaining the gradients we can finally update the weights according to $$w_{i+1} = w_{i} - \alpha \cdot \frac{\delta\Lxy}{\delta w},$$ where $\alpha$ correspons to a learning rate with $\alpha \in (0,1).$
+    \lz
+    \begin{itemize}
+      \item We can think of how fast the network will abandon its old beliefs. Thus, we would like to apply a learning rate which is low enough to converge to something useful, but also high enough that we do not have to spend years of training.
+    \end{itemize}
+    \lz
+    \item We will inspect the details of the weight upate in the optimization chapter.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Backpropagation example}
+  \begin{itemize}
+    \item Let us recall the XOR example, but this time with randomly initialized weights.
+    \item For activations we apply the sigmoidal logistic function.
+    \item To perform one forward and one backward pass we feed our neural network exemplarily with $X = [1,0]^T$ (positive sample).
+    \item We will divide the forward pass into four steps:
+      \begin{itemize}
+        \item the inputs of $z_m$: $z_{i,in}$
+        \item the activations of $z_m$: $z_{i,out}$
+        \item the input of $\hat{y}$: $\hat{y}_{in}$
+        \item and finally the activation of $\hat{y}$: $\hat{y}_{out}$
+      \end{itemize}
+\framebreak
+    \item Then we compute the backward pass and apply backpropgation exemplarily to update two weights.
+    \item Finally we evaluate the model with our updated weights.
+    \item Note that all computations were carried out in R with with up to 8 decimal places.
+    \item[] $\Rightarrow$ To avoid unnecessary complexity, we only show up to 4 decimals. Hence, don't wonder if the second or third decimal place is different if you calculate it by hand.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/forwardprop1.png}
+      \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will perform one forward and one backward pass.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=6cm]{plots/forwardprop2b.png}
+  \end{figure}
+  \begin{itemize}
+    \item $z_{1,in} = 1 \cdot (-0.07) + 0 \cdot 0.22 + 1 \cdot (-0.46) = -0.53$
+    \item $z_{1,out} = \frac{1}{(1+exp(-(-0.53)))} = \num[round-mode=places,round-precision=4]{0.3705169}$
+  \end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OLD STYLE: first slide plot of whole network, second slide computations %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/forwardprop2.png}
+%       \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will compute the value of $z_1$.}
+%   \end{figure}
+% \framebreak
+%   \begin{itemize}
+%     \item The input of $z_{1,in}$ is given by: $$1 \cdot (-0.07) + 0 \cdot 0.22 + 1 \cdot (-0.46) = -0.53$$
+%     \item Following up we apply the activation function to obtain $z_{1,out}$: $$\frac{1}{(1+exp(-(-0.53)))} = \num[round-mode=places,round-precision=4]{0.3705169}$$
+%   \end{itemize}
+% \framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=6cm]{plots/forwardprop3b.png}
+  \end{figure}
+  \begin{itemize}
+    \item $z_{2,in} = 1 \cdot 0.94 + 0 \cdot 0.46 + 1 \cdot 0.1 = 1.04$
+    \item $z_{2,out} = \frac{1}{(1+exp(-1.04))} = \num[round-mode=places,round-precision=4]{0.73885}$
+  \end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OLD STYLE: first slide plot of whole network, second slide computations %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/forwardprop3.png}
+%       \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will compute the value of $z_2$.}
+%   \end{figure}
+% \framebreak
+%   \begin{itemize}
+%     \item The input of $z_{2,in}$ is given by: $$1 \cdot 0.94 + 0 \cdot 0.46 + 1 \cdot 0.1 = 1.04$$
+%     \item Following up we apply the activation function to obtain $z_{2,out}$: $$\frac{1}{(1+exp(-1.04))} = \num[round-mode=places,round-precision=4]{0.73885}$$
+%   \end{itemize}
+% \framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=5cm]{plots/forwardprop4b.png}
+  \end{figure}
+  \begin{itemize}
+    \item $\hat{y}_{in} = \num[round-mode=places,round-precision=4]{0.3705169} \cdot (-0.22) + \num[round-mode=places,round-precision=4]{0.73885} \cdot 0.58 + 1 \cdot 0.78 = \num[round-mode=places,round-precision=4]{1.112242}$
+    \item $\hat{y}_{out} = \frac{1}{(1+exp(\num[round-mode=places,round-precision=4]{-1.112242}))} = \num[round-mode=places,round-precision=4]{0.7525469}$
+  \end{itemize}
+\framebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% OLD STYLE: first slide plot of whole network %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   \begin{figure}
+%     \centering
+%       \includegraphics[width=10cm]{plots/forwardprop4.png}
+%       \caption{A neural network with two neurons in the hidden layer and two bias terms c and b. Based on the values for the weights, we will compute the value of $\hat{y}$.}
+%   \end{figure}
+% \framebreak
+  \begin{itemize}
+    \item The forward pass of our neural network predicted a value of $$\hat{y}_{out} = 0.7525$$
+    \lz
+    \item Now we would like to evaluate the result by computing a suitable error rate.
+    \lz
+    \item For convenience, we use the squared error to evaluate our result:
+  \end{itemize}
+      \begin{eqnarray*}
+        \Lxy &=& \frac{1}{2}(f(x) - f(x| \theta))^2 = \frac{1}{2}(y - \hat{y}_{out})^{2} \\
+                  &=& \frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7525469})^2 = \num[round-mode=places,round-precision=4]{0.03061652}
+      \end{eqnarray*}
+\framebreak
+  \begin{itemize}
+    \item Assume we would like to know how much and in which direction a change in $u_1$ affects the total error. To this we have to recursively apply the chain rule and compute: $$\frac{\delta \Lxy}{\delta u_1} = \frac{\delta \Lxy}{\delta \hat{y}_{out}} \cdot \frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}} \cdot \frac{\delta \hat{y}_{in}}{\delta u_1}$$
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=6cm]{plots/backprop1.png}
+      \caption{Snippet from our neural network showing the backward path to compute the gradient with respect to weight $u_1$.}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item 1st step (backwards)
+  \end{itemize}
+    \begin{eqnarray*}
+      \frac{\delta \Lxy}{\delta \hat{y}_{out}} &=& \frac{\delta}{\delta \hat{y}_{out}} \frac{1}{2}(y - \hat{y}_{out})^2 = -(y - \hat{y}_{out}) \\
+                                                    &=& -(1 - \num[round-mode=places,round-precision=4]{0.7525469}) = \num[round-mode=places,round-precision=4]{-0.2474531}
+    \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \includegraphics[width=6cm]{plots/backprop1_b.png}
+        \caption{The first term of our chain rule $\frac{\delta \Lxy}{\delta \hat{y}_{out}}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item 2nd step (backwards). $\hat{y_{out}} = \sigma(\hat{y}_{in})$ and we apply the rule for $\sigma'$
+  \end{itemize}
+    \begin{eqnarray*}
+      \frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}}  &=& \sigma(\hat{y}_{in})(1-\sigma(\hat{y}_{in})) \\
+                                                        &=& \num[round-mode=places,round-precision=4]{0.7525469} (1 - \num[round-mode=places,round-precision=4]{0.7525469}) = \num[round-mode=places,round-precision=4]{0.1862201}
+    \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \includegraphics[width=6cm]{plots/backprop1_c.png}
+        \caption{The second term of our chain rule $\frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item 3rd step (backwards). $\hat{y}_{in} = u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + b \cdot 1$
+  \end{itemize}
+    \begin{eqnarray*}
+      \frac{\delta \hat{y}_{in}}{\delta u_1} = z_{1,out} = \num[round-mode=places,round-precision=4]{0.3705169}
+    \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \includegraphics[width=6cm]{plots/backprop1_d.png}
+        \caption{The third term of our chain rule $\frac{\delta \hat{y}_{in}}{\delta u_1}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Finally we are able to plug all three parts together and obtain:
+  \end{itemize}
+  \begin{eqnarray*}
+    \frac{\delta \Lxy}{\delta u_1} &=& \frac{\delta \Lxy}{\delta \hat{y}_{out}} \cdot \frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}} \cdot \frac{\delta \hat{y}_{in}}{\delta u_1} \\
+                                        &=& \num[round-mode=places,round-precision=4]{-0.2474531} \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot \num[round-mode=places,round-precision=4]{0.3705169} \\
+                                        &=& \num[round-mode=places,round-precision=4]{-0.01707369}
+  \end{eqnarray*}
+    \begin{figure}
+      \centering
+        \includegraphics[width=6cm]{plots/backprop1_e.png}
+        \caption{All three terms of our chain rule $\frac{\delta \Lxy}{\delta u_1} = \frac{\delta \Lxy}{\delta \hat{y}_{out}} \cdot \frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}} \cdot \frac{\delta \hat{y}_{in}}{\delta u_1}$}
+    \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Consider a learning rate of $\alpha = 0.5$. Then we obtain:
+  \end{itemize}
+    \begin{eqnarray*}
+      u_{1,new} &=& u_{1,old} - \alpha \cdot \frac{\delta \Lxy}{\delta u_1} \\
+                &=& -0.22 - 0.5 \cdot (\num[round-mode=places,round-precision=4]{-0.01707369}) \\
+                &=& \num[round-mode=places,round-precision=4]{-0.2114632}
+    \end{eqnarray*}
+\framebreak
+  \begin{itemize}
+    \item Now assume we would also like to do the same for weight $W_{11}$. This time we have to compute: $$\frac{\delta \Lxy}{\delta W_{11}} = \frac{\delta \Lxy}{\delta \hat{y}_{out}} \cdot \frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}} \cdot \frac{\delta \hat{y}_{in}}{\delta z_{1,out}} \cdot \frac{\delta z_{1,out}}{\delta z_{1,in}} \cdot \frac{\delta z_{1,in}}{\delta W_{11}}$$
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=9cm]{plots/backprop2.png}
+      \caption{Snippet from our neural network showing the backward path to compute the gradient with respect to weight $W_{11}$.}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item We already know $\frac{\delta \Lxy}{\delta \hat{y}_{out}}$ and $\frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}}$ from the computations before.
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/backprop2_bc.png}
+      \caption{The first and second term of our chain rule $\frac{\delta \Lxy}{\delta \hat{y}_{out}}$ and $\frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}}$}
+  \end{figure}
+\framebreak
+    \item With $\hat{y}_{in} = u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + b \cdot 1$ we can compute:
+  \end{itemize}
+  \begin{eqnarray*}
+    \frac{\delta \hat{y}_{in}}{\delta z_{1,out}} = u_1 = -0.22
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/backprop2_d.png}
+      \caption{The third term of our chain rule $\frac{\delta \hat{y}_{in}}{\delta z_{1,out}}$}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Next, we need
+  \end{itemize}
+  \begin{eqnarray*}
+    \frac{\delta z_{1,out}}{\delta z_{1,in}}  &=& \sigma(z_{1,in})(1-\sigma(z_{1,in})) \\
+                                              &=&  \num[round-mode=places,round-precision=4]{0.3705169} (1 - \num[round-mode=places,round-precision=4]{0.3705169}) = \num[round-mode=places,round-precision=4]{0.2332341}
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \includegraphics[width=9cm]{plots/backprop2_e.png}
+      \caption{The fourth term of our chain rule $\frac{\delta z_{1,out}}{\delta z_{1,in}}$}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item With $z_{1,in} = x_1 \cdot W_{11} + x_2 \cdot W_{21} + c \cdot 1$ we can compute the last component:
+  \end{itemize}
+  \begin{eqnarray*}
+    \frac{\delta z_{1,in}}{\delta W_{11}} = x_1 = 1
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \includegraphics[width=9cm]{plots/backprop2_f.png}
+      \caption{The fifth term of our chain rule $\frac{\delta z_{1,in}}{\delta W_{11}}$}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Plugging all five components together yields us: 
+      \begin{eqnarray*}
+        \frac{\delta \Lxy}{\delta W_{11}} &=& 
+        \frac{\delta \Lxy}{\delta \hat{y}_{out}} \cdot \frac{\delta \hat{y}_{out}}{\delta \hat{y}_{in}} \cdot \frac{\delta \hat{y}_{in}}{\delta z_{1,out}} \cdot \frac{\delta z_{1,out}}{\delta z_{1,in}} \cdot \frac{\delta z_{1,in}}{\delta W_{11}} 
+        \\ &=& (\num[round-mode=places,round-precision=4]{-0.2474531}) \cdot \num[round-mode=places,round-precision=4]{0.1862201} \cdot (-0.22) \cdot \num[round-mode=places,round-precision=4]{0.2332341} \cdot 1 
+        \\ &=& \num[round-mode=places,round-precision=4]{0.0023645}
+      \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \includegraphics[width=9cm]{plots/backprop2_g.png}
+      \caption{All five terms of our chain rule}
+  \end{figure}
+\framebreak
+    \item Consider the same learning rate of $\alpha = 0.5$. Then we obtain:
+  \end{itemize}
+    \begin{eqnarray*}
+      W_{11,new}  &=& W_{11,old} - \alpha \cdot \frac{\delta \Lxy}{\delta W_{11}} \\
+                  &=& -0.07 - 0.5 \cdot \num[round-mode=places,round-precision=4]{0.0023645} = \num[round-mode=places,round-precision=4]{-0.0711823}
+    \end{eqnarray*}
+  \begin{itemize}
+    \item We would now like to check how the performance has improved. Our updated weights are:
+  \end{itemize}
+  \begin{eqnarray*}
+    W = \begin{pmatrix}
+    \num[round-mode=places,round-precision=4]{-0.0711823} & \num[round-mode=places,round-precision=4]{0.9425785} \\
+    0.22 & 0.46
+    \end{pmatrix},
+    c = \begin{pmatrix}
+    \num[round-mode=places,round-precision=4]{-0.454562} \\
+    \num[round-mode=places,round-precision=4]{0.100258}
+    \end{pmatrix},
+  \end{eqnarray*}
+  \begin{eqnarray*}
+    u = \begin{pmatrix}
+    \num[round-mode=places,round-precision=4]{-0.2114632} \\
+    \num[round-mode=places,round-precision=4]{0.5970234}
+    \end{pmatrix}
+    \text{and} \ b = \num[round-mode=places,round-precision=4]{0.79797}
+  \end{eqnarray*}
+\framebreak  
+  \begin{itemize}
+    \item Plugging all values into our model yields $$f(x| W, c, u, b) = \num[round-mode=places,round-precision=4]{0.7614865}$$ and a squared error of $$\Lxy = \frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7614865})^2 = \num[round-mode=places,round-precision=4]{0.02844434}.$$
+    \item The initial weights predicted $\hat{y} = \num[round-mode=places,round-precision=4]{0.7525469}$ and a slightly higher error value of $\Lxy = \num[round-mode=places,round-precision=4]{0.03061652}$.
+    \lz
+    \item Keep in mind that this is the result of only one training iteration. When applying a neural network, one usually conducts thousands of those.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Universal approximation property}
+
+  \textbf{Theorem.}
+  Let $h : \R \to \R$ be a continuous, non-constant, bounded, and
+  monotonically increasing function. Let $C \subset \R^p$ be compact,
+  and let $\continuous(C)$ denote the space of continuous functions $C \to \R$.
+  Then, given a function $g \in \continuous(C)$ and an accuracy $\varepsilon > 0$,
+  there exists a hidden layer size $N \in \N$ and a set of coefficients
+  $w^{(1)}_i \in \R^p$, $w^{(2)}_i, b_i \in \R$
+  (for $i \in \{1, \dots, N\}$), such that
+  $$
+    f : K \to \R \,;\quad f(x) = \sum_{i=1}^N w^{(2)}_i \cdot h \Big( (w^{(1)}_i)^T x + b_i \Big)
+  $$
+  is an $\varepsilon$-approximation of $g$, that is,
+  $$
+    \|f - g\|_{\infty} := \max_{x \in K} |f(x) - g(x)| < \varepsilon
+    \enspace.
+  $$
+
+  The theorem extends trivially to multiple outputs.
+
+  \framebreak
+
+  \textbf{Corollary.}
+  Neural networks with a single sigmoidal hidden layer and linear
+  output layer are universal approximators.
+
+
+
+  \begin{itemize}
+    \item This means that for a given target function $g$ there exists a
+    sequence of networks $\big( f_k \big)_{k \in \N}$ that converges
+    (pointwise) to the target function.
+    \item Usually, as the networks come closer and closer to $g$, they
+    will need more and more hidden neurons.
+    \item A network with fixed layer sizes can only model a subspace of all
+    continuous functions. Its dimensionality is limited by the number
+    of weights.
+    \item The continuous functions form an infinite dimensional vector space.
+    Therefore arbitrarily large hidden layer sizes are needed.
+  \end{itemize}
+
+  \framebreak
+
+  \begin{itemize}
+  \item Why is universal approximation a desirable property?
+  \item Recall the definition of a Bayes optimal hypothesis $h^* : X \to Y$.
+    It is the best possible hypothesis (model) for the given problem:
+    it has minimal loss averaged over the data generating distribution.
+  \item So ideally we would like the neural network (or any other
+    learner) to approximate the Bayes optimal hypothesis.
+  \item Usually we do not manage to learn $h^*$.
+  \item This is because we do not have enough (infinite) data. We have
+    no control over this, so we have to live with this limitation.
+  \item But we do have control over which model class we use.
+  \end{itemize}
+
+  \framebreak
+
+  \begin{itemize}
+    \item Universal approximation $\Rightarrow$ approximation error tends
+    to zero as hidden layer size tends to infinity.
+    \item Positive approximation error implies that no matter how good
+    the data, we cannot find the optimal model.
+    \item This bears the risk of systematic under-fitting, which can be avoided with a universal model class.
+  \end{itemize}
+
+  \framebreak
+
+  \begin{itemize}
+    \item As we know, there are also good reasons for restricting the model class.
+    \item This is because a flexible model class with universal approximation
+    ability often results in over-fitting, which is no better than
+    under-fitting.
+    \item Thus, \enquote{universal approximation $\Rightarrow$ low approximation error}, but at the risk of a substantial learning error.
+    \item In general, models of intermediate flexibilty give the best predictions.
+    For neural networks this amounts to a reasonably sized hidden layer.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Regression: 100 training iterations}
+<<echo=FALSE, warning=FALSE, message=FALSE, results="hide">>=
+
+library("mlr")
+set.seed(1234L)
+n = 50L
+x = sort(10 * runif(n))
+y = sin(x) + 0.2 * rnorm(x)
+df = data.frame(x = x, y = y)
+tsk = makeRegrTask("sine function example", data = df, target = "y")
+plotLearnerPrediction("regr.nnet", tsk, size = 1L, maxit = 100)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 2L, maxit = 100)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 3L, maxit = 100)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 4L, maxit = 100)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 5L, maxit = 100)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 6L, maxit = 100)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 100L, maxit = 100)
+
+@
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Regression: 1000 training iterations}
+<<echo=FALSE, warning=FALSE, message=FALSE, results="hide">>=
+
+library("mlr")
+set.seed(1234L)
+n = 50L
+x = sort(10 * runif(n))
+y = sin(x) + 0.2 * rnorm(x)
+df = data.frame(x = x, y = y)
+tsk = makeRegrTask("sine function example", data = df, target = "y")
+plotLearnerPrediction("regr.nnet", tsk, size = 1L, maxit = 1000)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 2L, maxit = 1000)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 3L, maxit = 1000)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 4L, maxit = 1000)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 5L, maxit = 1000)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 6L, maxit = 1000)
+
+plotLearnerPrediction("regr.nnet", tsk, size = 10L, maxit = 1000)
+
+@
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Classification: 500 training iterations}
+<<echo=FALSE, warning=FALSE, message=FALSE, results="hide">>=
+
+library("mlr")
+library("mlbench")
+set.seed(1234L)
+spirals = mlbench.spirals(500,1.5,0.05)
+spirals = data.frame(cbind(spirals$x, spirals$classes))
+colnames(spirals) = c("x1","x2","class")
+spirals$class = as.factor(spirals$class)
+task = makeClassifTask(data = spirals, target = "class")
+lrn = makeLearner("classif.nnet")
+plotLearnerPrediction("classif.nnet", task, size = 1L, maxit = 500)
+
+plotLearnerPrediction("classif.nnet", task, size = 2L, maxit = 500)
+
+plotLearnerPrediction("classif.nnet", task, size = 3L, maxit = 500)
+
+plotLearnerPrediction("classif.nnet", task, size = 5L, maxit = 500)
+
+plotLearnerPrediction("classif.nnet", task, size = 10L, maxit = 500)
+
+plotLearnerPrediction("classif.nnet", task, size = 30L, maxit = 500)
+
+plotLearnerPrediction("classif.nnet", task, size = 50L, maxit = 500)
+
+@
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Summary}
+  \begin{itemize}
+    \item We have seen that neural networks are far more flexible than linear models. Furthermore, neural networks are able to approximate any continuous function.
+      \begin{itemize}
+        \item Yet, in reality, there is no way to make full use of the universal approximation property. The learning algorithm will usually not find the best possible model. At best it finds a locally optimal model. 
+      \end{itemize}
+    \item The XOR example showed us how neural networks extract features to transform the space and actually learn a kernel (learn a representation).
+    \item Neural networks can perfectly fit noisy data. Thus, neural networks are endangered to over-fit. This is particularly true for a model with a huge hidden layer.
+    \item Fitting neural networks with sigmoidal activation function is nothing else but fitting many weighted logistic regressions!
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Deep feedforward networks}
+  \begin{itemize}
+    \item We will now extend the model class once again, such that we allow an arbitrary amount of $k$ layers.
+      \begin{itemize}
+        \item For more than one hidden layer, we call such graphs deep feedforward networks.
+      \end{itemize}
+    \item We can characterize those models by the following chain structure: $$f(x) = g(f_{(k)}(f_{(k-1)}(f_{(k-2)}(\ldots(f_{(1)}(x))\ldots)$$ where $f_{(1)}$ corresponds to the first and $f_{(k)}$ to the last layer of the network.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=10.5cm]{plots/deepneuralnet.png}
+      \caption{Structure of a deep neural network with k layers (bias term omitted).}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Mathematically, we observe the following mapings: 
+  \end{itemize}
+  \begin{eqnarray*}
+    &f_1(x):& \R^P \to \R^{M_1} \\
+    &f_2(f_1):& \R^{M_1} \to \R^{M_2} \\
+    &...& \\
+    &f_H(..):& \R^{M_{H-1}} \to \R^{M_H}, \ \forall h = 2,\dots,H \\
+    &g(..):& \R^{M_H} \to \R^{K}
+  \end{eqnarray*}
+  \begin{figure}
+    \centering
+      \includegraphics[width=5cm]{plots/deepneuralnet.png}
+  \end{figure}
+\end{vbframe}  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Why add more layers?}
+\begin{itemize}
+  \item Each layer in a feed-forward neural network adds its own degree of non-linearity to the model.
+\end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10.5cm]{plots/folding}
+      \caption{An intuitive, geometric explanation of the exponential advantage of deeper networks formally (Mont\'{u}far et al. (2014))}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Why now and not earlier?}
+  \begin{itemize}
+    \item Better algorithms (optimization chapter)
+      \begin{itemize}
+        \item Vanishing gradient problem (relu)
+      \end{itemize}
+    \item Better regularization (regularization chapter)
+    \item Unsupervised pretraining (autoencoder chapter)
+    \item More layers inevitably lead to a significant increase of parameters.
+      \begin{itemize}
+        \item Back then, processing power was simply not capable to handle such huge amounts of parameters. \\
+        $\Rightarrow$ Nowadays, deep neural networks are trained on GPUs (graphic processing units), not on CPUs (central processing units).
+      \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Number of parameters in a neural network}
+%   \begin{itemize}
+%     \item For a fix input and output, a neural network has 
+%     $$M_1 \cdot M_2 \cdot ... \cdot M_H$$ 
+%     parameters in its hidden layers.
+%     \lz
+%     \item or just
+%     $$M^H$$ 
+%     for the same amount of neurons in each layer (note that we omitted bias terms).
+%   \end{itemize}
+% \framebreak
+% <<echo=FALSE, fig.height=5.5>>=
+% library(ggplot2)
+% logfun = function(v, s) {
+%   v^s
+% }
+% x = seq(0, 10, 0.1)
+% stretch = c(2, 3, 4)
+% y = sapply(stretch, function(s) {
+%   sapply(x, logfun, s = s)
+% })
+% 
+% df = data.frame(y = as.vector(y), 
+%   x = rep(x, length(stretch)),
+%   s = as.factor(rep(stretch, each = length(x))))
+% 
+% hl = ggplot(df, 
+%   aes(x = x, y = y, color = s)) + 
+%   geom_line(size = 1) +
+%   scale_y_continuous(name = "# parameters") +
+%   scale_x_continuous(labels = function (x) floor(x), 
+%     name = "# neurons in each hidden layer") +
+%   theme(axis.title = element_text(size = 14L, 
+%     face = "bold"),
+%     plot.margin = unit(c(0, 0, 0, 0), "cm"), 
+%     legend.position = c(0.25, 0.78), 
+%     legend.background = element_rect(fill="transparent")) +
+%   labs(colour = "number of\nhidden layers") 
+% 
+% hl
+% @
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Initializing of the parameters}
+%   \begin{itemize}
+%     \item This topic is basically part of neural network optimization and not yet fully understood.
+%     \item The choice of initial weights strongly influences the speed of convergence as well as optimality (ending up in a local or global minima).
+%     \lz
+%     \item Common strategies for weight initialization are:
+%       \begin{itemize}
+%         \item Drawing from a standard normal distribution.
+%         \item Drawing from an uniform distribution with zero mean and sqrt(number of parameters) (LeCun et al. (1998)).
+%         \item Unsupervised layerwise pre-training (Hinton and Salakhutdinov (2006)).
+%       \end{itemize}
+%   \end{itemize}
+% \end{vbframe}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Weight decay}
+  \begin{itemize}
+    \item In terms of neural networks, weight decay is the common terminology for L2 penalization.
+    \item Applying weight decay means nothing but regularizing the network to reduce overfitting.
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=7cm]{plots/weight_decay.png}
+      \caption{The effect of weight decay when applied to a simple regression model (Goodfellow et al. (2016)). We will examine weight decay in greater detail in the regularization chapter.}
+  \end{figure}  
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Introduction to MXNet}
+  \begin{itemize}
+    \item Open-source deep learning framework written in C++ and cuda (used by Amazon for their Amazon Web Services) 
+    \item Scalable, allowing fast model training
+    \item Supports flexible model programming and multiple languages (C++, Python, Julia, Matlab, JavaScript, Go, \textbf{R}, Scala, Perl)
+    \item Installation instructions for different operating systems: \url{http://mxnet.io/get_started/install.html}
+  \end{itemize}
+\end{vbframe}  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Kaggle challenge digit recognizer}
+    \begin{itemize}
+      \item The MNIST database is a large database of handwritten digits (black and white) that is commonly used for benchmarking various image processing algorithms. 
+      \item It is a good database for people who want to try learning techniques and pattern recognition methods on real-world data while spending minimal efforts on preprocessing and formatting.
+      \item  There have been a number of scientific papers on attempts to achieve the lowest error rate. One paper, using a hierarchical system of convolutional neural networks (chapter 4), manages to get an error rate of only 0.23 percent.
+    \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=10cm]{plots/mnist.png}
+      \caption{Snipped from the mnist data set (LeCun and Cortes (2010)).}
+  \end{figure}
+  \begin{itemize}
+    \item 70k image data of handwritten digits with $28 \times 28$ pixels.
+    \item Classification task with 10 classes (e.g. 0, 1, 2, ..., 9).
+    \item In R: the darch package gives an easy option to access the data.
+    \item[] ...but for our example, we use another source with a more difficult train/test split.
+  \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item Since competing with others is more fun, we dare ourselves to face the mnist kaggle challenge.
+    \item Therefor, we download the data sets (train.csv and test.csv) from \url{https://www.kaggle.com/c/digit-recognizer/data}.
+    \item We obtain $42.000$ images for training and $28.000$ for testing.
+  \end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ ME!!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The following slides include lots of code chunks which have been     %
+% temporarily disabled (eval = FALSE, echo = FALSE) and replaced by    %
+% screenshots of the corresponding outputs (to maintain colorization). %  
+% Else, one would need a working version of mxnet (and a fast CPU/GPU) %
+% to compile the code in a finite amount of time.                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  % \begin{figure}
+  %   \centering
+  %     \includegraphics[width=12cm]{plots/mxnet_codechunk_1.png}
+  % \end{figure}
+<<mxnet1, size = "small", cache = TRUE, eval = FALSE, echo = TRUE>>=
+# assign the location of the data as your wd()
+
+train = read.csv("train.csv", header = TRUE)
+test = read.csv("test.csv", header = TRUE)
+
+train = data.matrix(train)
+test = data.matrix(test)
+@
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=11cm]{plots/mxnet_codechunk_2.png}
+  \end{figure}
+<<mxnet2, size = "normalsize", cache = TRUE, eval = FALSE, echo = FALSE>>=
+# Split data into matrix containing features and 
+# vector with labels
+train.x = train[, -1]
+train.y = train[, 1]
+
+# normalize to (0,1) and transpose data
+train.x = t(train.x/255)
+dim(train.x)
+
+test = t(test/255)
+
+table(train.y)
+@
+\framebreak
+  \begin{itemize}
+    \item Now we define the architecture of our model.
+  \end{itemize}
+  % \begin{figure}
+  %   \centering
+  %     \includegraphics[width=11cm]{plots/mxnet_codechunk_3.png}
+  % \end{figure}  
+<<mxnet3, size = "scriptsize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+require("mxnet")
+
+data = mx.symbol.Variable(name = "data")
+
+layer1 = mx.symbol.FullyConnected(data = data, name = "layer1", 
+  num_hidden = 10L)
+activation1 = mx.symbol.Activation(data = layer1, name = "activation1", 
+  act_type = "relu")
+layer2 = mx.symbol.FullyConnected(data = activation1, name = "layer2", 
+  num_hidden = 10L)
+activation2 = mx.symbol.Activation(data = layer2, name = "activation2", 
+  act_type = "relu")
+layer3 = mx.symbol.FullyConnected(data = activation2, name = "layer3", 
+  num_hidden = 10L)
+softmax = mx.symbol.SoftmaxOutput(data = layer3, name = "softmax")
+@
+\framebreak
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Mxnet enables us to easily visualize the models architecture
+    \end{itemize}
+  % \begin{figure}
+  %   \centering
+  %     \includegraphics[width=6cm]{plots/mxnet_codechunk_4a.png}
+  % \end{figure}    
+<<mxnet4, size = "footnotesize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+graph.viz(model$symbol)
+@
+  \end{minipage}
+  \begin{minipage}{0.45\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=1.5cm]{plots/mxnet_codechunk_4b.png}
+    \end{figure}
+  \end{minipage}
+\framebreak
+  \begin{itemize}
+    \item In a final step, we have to assign some parameters.
+  \end{itemize}
+  
+  % \begin{figure}
+  %   \centering
+  %     \includegraphics[width=11cm]{plots/mxnet_codechunk_5.png}
+  % \end{figure}  
+<<mxnet5, size = "footnotesize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+devices = mx.cpu()
+
+mx.set.seed(1337)
+
+model = mx.model.FeedForward.create(
+  symbol = softmax, 
+  X = train.x, y = train.y,
+  ctx = devices, 
+  num.round = 10L, array.batch.size = 100L, 
+  learning.rate = 0.05, 
+  eval.metric = mx.metric.accuracy, 
+  initializer = mx.init.uniform(0.07), 
+  epoch.end.callback = mx.callback.log.train.metric(100L))
+@
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=10.5cm]{plots/mxnet_codechunk_6.png}
+  \end{figure}
+<<mxnet6, size = "scriptsize", warning = FALSE, cache = TRUE, eval = FALSE, echo = FALSE>>=
+require("mxnet")
+
+train = read.csv("train.csv", header = TRUE)
+test = read.csv("test.csv", header = TRUE)
+train = data.matrix(train)
+test = data.matrix(test)
+train.x = train[,-1]
+train.y = train[,1]
+train.x = t(train.x/255)
+test = t(test/255)
+data = mx.symbol.Variable("data")
+layer1 = mx.symbol.FullyConnected(data, name = "layer1",num_hidden = 10)
+activation1 = mx.symbol.Activation(layer1, name = "activation1", act_type = "relu")
+layer2 = mx.symbol.FullyConnected(activation1, name = "layer2", num_hidden = 10)
+activation2 = mx.symbol.Activation(layer2, name = "activation2", act_type = "relu")
+layer3 = mx.symbol.FullyConnected(activation2, name = "layer3", num_hidden = 10)
+softmax = mx.symbol.SoftmaxOutput(layer3, name = "softmax")
+devices = mx.cpu()
+mx.set.seed(1337)
+model = mx.model.FeedForward.create(softmax, X = train.x, y = train.y,
+  ctx = devices, num.round = 10, array.batch.size = 100, 
+  learning.rate = 0.05, momentum = 0.9,  
+  eval.metric = mx.metric.accuracy,
+  initializer = mx.init.uniform(0.07),
+  epoch.end.callback = mx.callback.log.train.metric(100))
+@
+  \begin{itemize}
+    \item After 10 epochs, our neural network begins to stagnate at a training accuracy of roughly $93.5\%$
+    \item Following up, we use the model to predict the test data.
+  \end{itemize}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=11cm]{plots/mxnet_codechunk_7.png}
+  \end{figure}
+<<mxnet7, size = "scriptsize", warning = FALSE, cache = TRUE, eval = FALSE, echo = FALSE>>=
+preds = predict(model, test)
+# this yields us predicted probabilities for all 10 classes
+dim(preds)
+
+# we choose the maximum to obtain quantities for each class
+pred.label = max.col(t(preds)) - 1
+table(pred.label)
+@
+\framebreak
+  \begin{itemize}
+    \item Finally we want to submit our predictions on kaggle to see how good we performed.
+    \item Thus, we save our results in a csv file and upload it on \url{https://www.kaggle.com/c/digit-recognizer/submit}
+  \end{itemize}
+  % \begin{figure}
+  %   \centering
+  %     \includegraphics[width=11cm]{plots/mxnet_codechunk_8.png}
+  % \end{figure}  
+<<mxnet8, size = "footnotesize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+submission = data.frame(ImageId = 1:ncol(test), Label = pred.label)
+
+write.csv(submission, file = 'submission.csv', row.names = FALSE, 
+  quote = FALSE)
+@
+\framebreak
+  \begin{itemize}
+    \item After making your submission, you should see something like this:
+  \end{itemize}
+  \begin{figure}
+    \centering
+      \includegraphics[width=10.5cm]{plots/mxnet_codechunk_9.png}
+  \end{figure}
+  \begin{itemize}
+    \item For this competition Kaggle uses accuracy (score) to messure each participants performance. 
+    \item While the ratio of the train to test data makes the problem really difficult, $89.843\%$ is still a very bad result and we would like to improve our performance.
+  \end{itemize}
+\framebreak
+  \begin{minipage}{0.45\textwidth}
+    \begin{itemize}
+      \item Let us try the following, much larger, network (all other parameters remain the same):
+    \end{itemize}
+  \end{minipage}
+  \begin{minipage}{0.45\textwidth}
+    \begin{figure}
+      \centering
+        \includegraphics[width=1.5cm]{plots/mxnet_codechunk_10.png}
+    \end{figure}
+  \end{minipage}
+\framebreak
+  \begin{figure}
+    \centering
+      \includegraphics[width=11cm]{plots/mxnet_codechunk_11.png}
+  \end{figure} 
+  \begin{itemize}
+    \item Rerunning the training with the new architecture, this model yields us a training accuracy of $99.39\%$ and a test accuracy of $96.514\%$.
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Mont\'{u}far et al., 2014]{1} Guido Mont\'{u}far, Razvan Pascanu, Kyunghyun Cho and Yoshua Bengio (2014)
+\newblock On the Number of Linear Regions of Deep Neural Networks
+\newblock \emph{\url{https://arxiv.org/pdf/1402.1869.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Yann LeCun and Corinna Cortes, 2010]{2} Yann LeCun and Corinna Cortes (2010)
+\newblock MNIST handwritten digit database 
+\newblock \emph{\url{http://yann.lecun.com/exdb/mnist/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Yann LeCun et al., 1998]{3} Yann Lecun, Leon Bottou, Genevieve B. Orr and Klaus-Robert Müller (1998)
+\newblock Efficient BackProp
+\newblock \emph{\url{http://yann.lecun.com/exdb/publis/pdf/lecun-98b.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Geoffrey Hinton and Ruslan Salakhutdinov, 2006]{4} Geoffrey Hinton and Ruslan Salakhutdinov (2006)
+\newblock Reducing the Dimensionality of Data with Neural Networks
+\newblock \emph{\url{https://www.cs.toronto.edu/\%7Ehinton/science.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{5} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture

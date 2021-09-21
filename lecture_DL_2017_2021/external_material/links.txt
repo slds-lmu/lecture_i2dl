@@ -1,0 +1,11 @@
+Tensorflow Playground: 
+https://playground.tensorflow.org/
+
+Distill: 
+https://distill.pub/
+
+Neural networks and Deep Learning: 
+http://neuralnetworksanddeeplearning.com/
+
+Repo for nice visualizations of CNNs: 
+https://github.com/HarisIqbal88/PlotNeuralNet

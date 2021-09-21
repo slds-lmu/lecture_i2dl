@@ -1,0 +1,713 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+source('./code/text_encoding.R')
+# amsmath in preamble, whut?
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=FALSE)
+@
+
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+
+%\usepackage[style=authoryear-comp,maxnames=1,uniquelist=false]{biblatex}
+
+
+\lecturechapter{6}{Important Types of Convolutions}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Lecture outline}
+\tableofcontents
+\end{frame}
+
+
+\begin{vbframe}{Important Types of Convolutions}
+
+% As CNNs are one of the workhorses of deep learning, lots of research focuses on this model class. 
+
+\vspace*{0.2cm}
+
+In this chapter, we will introduce important types of convolutions: 
+
+    \begin{enumerate}
+    \item 1D convolutions
+    \item 2D convolutions
+    \item 3D convolutions
+    % \item Locally connected convolutions
+    \item Dilated convolutions
+    \item Transposed convolutions
+    % \item Inception modules
+    % \item Separable convolutions
+    %\item Skip connections
+    %\item Global average pooling
+    %\item Squeeze-and-Excite layers
+    \end{enumerate}
+\end{vbframe}
+
+
+\section{1D Convolutions}
+
+\begin{vbframe}{1D Convolutions}
+
+\textbf{Data situation}: Sequential, 1-dimensional tensor data. 
+
+\begin{itemize}
+% \item Data is convolved with a 1D-kernel.
+\item Data consists of tensors with shape [depth, xdim]
+\item Depth $1$ (single-channel):
+    \begin{itemize}
+        \item Univariate time series, e.g. development of a single stock price over time
+        \item Functional / curve data
+    \end{itemize}
+\item Depth $> 1$ (mutli-channel):
+    \begin{itemize}
+        \item Multivariate time series, e.g.
+        \begin{itemize}
+            \item Movement data measured with multiple sensors for human activity recognition \cite{21}
+            \item Temperature and humidity in weather forecasting
+        \end{itemize}
+        \item Text encoded as character-level one-hot-vectors \cite{20}
+    \end{itemize}
+\end{itemize}
+
+$\to$ Convolve the data with a 1D-kernel
+
+\end{vbframe}
+
+
+\begin{vbframe}{1D Convolutions -- Sensor data}
+    \begin{figure}
+        \centering
+        \includegraphics[width=9cm]{plots/05_conv_variations/1d/HAR.png}
+        \caption{Illustration of 1D movement data with depth $3$ measured with an accelerometer sensor belonging to a human activity recognition task. }
+    \end{figure}
+\framebreak
+    \begin{figure}
+        \centering
+        \includegraphics[width=10cm]{plots/05_conv_variations/1d/deep_tsc.png}
+        \caption{Time series classification with 1D CNNs and global average pooling (explained later). An input time series is convolved with 3 CNN layers, pooled and fed into a fully connected layer before the final softmax layer. This is one of the classic time series classification architectures \cite{31}.}
+    \end{figure}
+\end{vbframe}
+
+
+\begin{vbframe}{1D Convolutions -- Text mining}
+    \begin{itemize}
+        \item 1D convolutions also have an interesting application in text mining \cite{20}.
+        \item For example, they can be used to classify the sentiment of text snippets such as yelp reviews.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=12cm]{plots/05_conv_variations/1d/yelp_lmu.png}
+        \caption{Sentiment classification: can we teach the net that this a positive review?}
+    \end{figure}
+\end{vbframe}
+
+\frame{
+\frametitle{1D Convolutions -- Text mining}    
+    \center
+    \only<1>{\includegraphics[width=5cm]{plots/text_encoding/1_encoded_text.png}}%
+    \only<2>{\includegraphics[width=9cm]{plots/text_encoding/4_encoded_text.png}}%
+    \only<3>{\includegraphics[width=9cm]{plots/text_encoding/8_encoded_text.png}}%
+    \only<4>{\includegraphics[width=9cm]{plots/text_encoding/11_encoded_text.png}}%
+    \\
+    % \only<1>{1D convolution of text that was encoded on a character-level. The data is represented as 1D signal with channel size = size of the alphabet as shown in \cite{20}. The temporal dimension is shown as the y dimension for illustrative purposes. The 1D-kernel (blue) convolves the input in the temporal y-dimension yielding a 1D feature vector}  
+    \begin{itemize}
+        \only<1>{\item We use a given alphabet to encode the text reviews (here: \textit{\enquote{dummy review}}).}
+        \only<1>{\item Each character is transformed into a one-hot vector. The vector for character \textit{d} contains only 0's at all positions except for the 4th position.}
+        \only<1>{\item The maximum length of each review is set to 1014: shorter texts are padded with spaces (zero-vectors), longer texts are simply cut.}
+        \only<2>{\item The data is represented as 1D signal with \emph{depth = size of the alphabet} .}
+        \only<3>{\item The temporal dimension is shown as the y dimension for illustrative purposes. }
+        \only<4>{\item The 1D-kernel (blue) convolves the input in the temporal y-dimension yielding a 1D feature vector. }
+    \end{itemize}
+}
+
+\begin{vbframe}{1D Convolutions -- Text mining}
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/1d/ccnnArch.png}
+        \caption{An alphabet containing 72 (special-) characters is used for encoding and the text length is fixed to 1014. This yields an accuracy of 96\% with a net trained on 500K reviews \cite{20}. }
+    \end{figure}
+\end{vbframe}
+
+
+\section{2D Convolutions}
+
+\begin{vbframe}{2D Convolutions}
+
+\textbf{Data situation}: 2-dimensional tensor data such as image data.
+    \begin{itemize}
+        \item[$\to$] Refer to the previous lecture for a comprehensive introduction to 2-dimensional convolutions.
+    \end{itemize}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/2d/2d_catdog.png}
+        \caption{Simple binary classification problem on 2D image data: cat vs. dog detection as illustrated \href{https://becominghuman.ai/building-an-image-classifier-using-deep-learning-in-python-totally-from-a-beginners-perspective-be8dbaf22dd8}{here}.}
+    \end{figure}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{3D Convolutions}
+
+\begin{vbframe}{3D Convolutions}
+
+\textbf{Data situation}: 3-dimensional tensor data.
+
+    \begin{itemize}
+        \item Data consists of tensors with shape [depth, xdim, ydim, zdim].
+        \item Dimensions can be both temporal (e.g. video frames) or spatial (e.g. MRI)
+        \item Examples:
+        \begin{itemize}
+            \item Human activity recognition in video data \cite{18}
+            \item Disease classification or tumor segmentation on MRI scans \cite{19}
+        \end{itemize}
+    \end{itemize}
+
+\textbf{Solution}: Move a 3D-kernel in $x$, $y$ and $z$ direction to capture all important information.
+
+\end{vbframe}
+
+\begin{vbframe}{3D Convolutions -- Data}
+    \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{plots/05_conv_variations/3d/MRI.png}
+        \caption{Illustration of depth $1$ volumetric data: MRI scan \cite{17}. Each slice of the stack has depth $1$, as the frames are black-white.}
+    \end{figure}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolutions -- Data}
+    \begin{figure}
+        \centering
+        \includegraphics[width=5cm]{plots/05_conv_variations/3d/swim.png}
+        \caption{Illustration of volumetric data with depth $> 1$: video snippet of an action detection task. The video consists of several slices, stacked in temporal order. Frames have depth $3$, as they are RGB.}
+    \end{figure}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolutions}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/3d/3dconv.png}
+    \end{figure}
+    \begin{itemize}
+        \item Note: 3D convolutions yield a 3D output.
+        % \item 3D convolution can be expressed as: 
+        % $$ H(i, j, k) = (\mathcal{I}\star\mathcal{G})(i, j, k)=\sum_{x}\sum_{y}\sum_{z}\mathcal{I}(x, y, z)\mathcal{G}(i-x, j-y, k-z) $$
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{3D Convolutions}
+    % https://dspace.cc.tut.fi/dpub/bitstream/handle/123456789/24703/teivas.pdf?sequence=1&isAllowed=y
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/3d/3dconv_arch.png}
+        \caption{Basic 3D-CNN architecture.}
+    \end{figure}
+    \begin{itemize}
+        \item Basic architecture of the CNN stays the same.
+        \item 3D convolutions output 3D feature maps which are element-wise activated and then (eventually) pooled in 3 dimensions.
+    \end{itemize}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Dilated Convolutions}
+
+\begin{vbframe}{Dilated convolutions}
+
+    \vspace*{-0.3cm}
+
+    \begin{itemize}
+        \item The \textbf{receptive field} of an output neuron $f_k$ with respect to a layer $l$ comprises all features in layer $l$ used for the calculation of $f_k$.
+        \item In general, we can consider the receptive field of any neuron $z_{i,j}$ (neuron $i$ in layer $j$) w.r.t. any other (previous) layer ($j < k$). 
+        \item The \textbf{size} of the receptive field is the number of inputs that are in the \textbf{span} of neurons in the receptive field. 
+    \end{itemize}
+
+    \vspace*{-0.5cm}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=3.5cm]{plots/05_conv_variations/dilated/receptive_field2.png}
+        \caption{A convolutional neural network, convolved with $3$ layers with $3 \times 3$ kernels. The green area marks the receptive field of one neuron in Layer 2 w.r.t. the input layer (size $9$), the yellow area marks the receptive field of one pixel in layer 3 \cite{38}. } 
+    \end{figure}
+
+    \framebreak 
+
+    \begin{itemize}
+        \item Intuitively, neurons in the first layers capture less information of the input (layer), while neurons in the last layers have huge receptive fields and can capture a lot more global information from the input (layer). 
+        \item The size of the receptive fields depends on the filter size. 
+    \end{itemize}
+
+    \vspace*{-0.5cm}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=3.5cm]{plots/05_conv_variations/dilated/receptive_field2.png}
+        \caption{A convolutional neural network, convolved with $3$ layers with $3 \times 3$ kernels. The green area marks the receptive field of one neuron in Layer 2 w.r.t. the input layer (size $9$), the yellow area marks the receptive field of one pixel in layer 3 \cite{38}. } 
+    \end{figure}
+
+    \framebreak 
+
+    \begin{itemize}
+        \item By increasing the filter size, the size of the receptive fields increases as well and more contextual information can be captured.
+        \item However, increasing the filter size increases the number of parameters, which leads to increased runtime. 
+        \item Idea: artificially increase the receptive field of the net without using more filter weights by adding a new dilation parameter to the kernel that skips pixels during convolution.
+        % \item Benefits:
+        % \begin{itemize}
+        %     \item Capture more contextual information. 
+        %     \item Enable the processing of inputs in higher dimensions to detect fine details. 
+        %     \item Improved run-time-performance due to less parameters.
+        % \end{itemize}
+    \end{itemize}
+
+    \vspace*{-0.6cm}
+ 
+    \begin{figure}
+        \centering
+        \includegraphics[width=10cm]{plots/05_conv_variations/dilated/dilation_nice.png}
+        \caption{Dilated convolution on 2D data \cite{14}. A dilated kernel is a regular convolutional kernel interleaved with zeros. } 
+    \end{figure}
+
+\framebreak
+
+    \begin{itemize}
+        \item Useful in applications where the global context is of great importance for the model decision.
+        \item This component finds application in:
+        \begin{itemize}
+            \item Generation of audio-signals and songs within the famous Wavenet developed by DeepMind \cite{15}.
+            \item Time series classification and forecasting \cite{23}.
+            \item Image segmentation \cite{22}.
+        \end{itemize}
+    \end{itemize}
+
+
+% \framebreak
+
+%     \begin{itemize}
+%         \item Dilation increases the receptive field of the model - what is a receptive field?
+%         \item Receptive field: the visual field of a single neuron in a specific layer.
+%         \item Huge receptive field of neurons in the last hidden layer: they can capture a lot more global information from the input.
+%         % \item Formula for neuron in layer $l$ with kernel size $k$, dilation factor $d$ and stride $s$:
+%         % $$
+%         %     RF_l = RF_{l-1} + (k-1) \cdot d \cdot \prod_{i = 1}^{k-1}s_i
+%         % $$
+%         % \item See \href{https://www.uio.no/studier/emner/matnat/ifi/INF5860/v18/undervisningsmateriale/lectures/inf5860_lecture6_convolutional_nerual_networks.pdf}{Oslo slides for original formula}, adapted to dilation by Jann, to be xchecked
+%     \end{itemize}
+\framebreak 
+\vspace*{0.5cm}
+\begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/05_conv_variations/dilated/dilation_example_stride1.png}
+    \caption{Simple $1$D convolutional network with convolutional kernel of size $2$, stride $1$ and fixed weights $\{0.5, 1.0\}$. \\ The kernel is dilated with \textbf{dilation factor} $\mathbf{2}$. One neuron in layer $2$ has a receptive field of size $5$ w.r.t. the input layer. }
+\end{figure}  
+\framebreak 
+    \vspace*{0.5cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/dilated/classic_conv.png}
+        \caption{Simple $1$D convolutional network with convolutional kernel of size $2$, stride $2$ and fixed weights $\{0.5, 1.0\}$. \\ The kernel is not dilated (\textbf{dilation factor} $\mathbf{1}$). One neuron in layer $2$ has a receptive field of size $4$ w.r.t. the input layer. }
+    \end{figure}
+\framebreak 
+    \vspace*{0.5cm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=11cm]{plots/05_conv_variations/dilated/dilated.png}
+        \caption{Simple $1$D convolutional network with convolutional kernel of size $2$, stride $2$ and fixed weights $\{0.5, 1.0\}$. \\ The kernel is dilated with \textbf{dilation factor} $\mathbf{2}$. One neuron in layer $2$ has a receptive field of size $7$ w.r.t. the input layer. }
+    \end{figure}
+% \framebreak
+%     \begin{itemize}
+%         % http://ttic.uchicago.edu/~shubhendu/Pages/Files/Lecture8_flat.pdf
+%         \item Remember the formulation of a regular convolution from the previous lecture:
+%             \begin{equation*}
+%                  H(i, j) = (\mathcal{I} \ast \mathcal{G})(i, j) = \sum_{x} \sum_{y} \mathcal{I}(x, y) \mathcal{G}(i-x, j-y)
+%             \end{equation*}
+%         \item Using the dilation factor $d$ leads to this formulation of a dilated convolution:
+%             \begin{equation*}
+%                  H(i, j) = (\mathcal{I} \ast \mathcal{G})(i, j) = \sum_{x} \sum_{y} \mathcal{I}(x, y) \mathcal{G}(i-(d \cdot x), j-(d \cdot y))
+%             \end{equation*}
+%     \end{itemize}
+\framebreak 
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/dilated/tcn.png}
+        \caption{Application of (a variant of) dilated convolutions on time series for classification or seq2seq prediction (e.g. machine translation) \cite{23}. Given an input sequence $x_0,x_1, \ldots, x_T$, the model generates an output sequence $\yh_0,\yh_1, \ldots, \yh_T$ . Dilation factors $d = 1, 2, 4$ shown above, each with a kernel size $k = 3$. The dilations are used to drastically increase the context information for each output neuron with relatively few layers.   }
+    \end{figure}
+
+
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe} {Computing the receptive field size}
+
+\begin{footnotesize}Source: Blogpost from A. Araujo, W. Norris, J. Sim \href{https://distill.pub/2019/computing-receptive-fields}{\beamergotobutton{click here}}\end{footnotesize}
+
+  \begin{itemize}
+    \item Consider a fully-convolutional network (FCN) (that is, a CNN without any dense layers) with $L$ 1D convolutional layers.
+    \item For the sake of simplicity, let us only consider feature maps of depth (\# of channels) 1.
+    \item Goal: derive an expression to compute the region in the input which is the receptive field of a neuron $f_L$ in the final layer $L$.
+    \item To do so, let us first define a few terms.
+    \item $f_l$ denotes the feature map corresponding to the $l$-th layer, for $l \in {1,2 \ldots L}$.
+    \item The input is denoted as $f_0$ and $f_L$ is the final feature map.
+  \end{itemize}
+  
+  \framebreak
+  
+  \begin{figure}
+      \centering
+      \scalebox{0.95}{\includegraphics{plots/05_conv_variations/1d/recep_field_1.png}}
+      \tiny{\\source: Araujo et al. (2019)}
+      \caption{Parameters of the 1D convolutional layer $l$.}
+  \end{figure}
+
+  \begin{itemize}
+    \item $p_l$ is the amount of padding on the left of $f_{l-1}$ and $q_l$ is the corresponding quantity on the right.
+    \item $k_l$  and $s_l$ are the kernel size and stride, respectively, of layer $l$.
+  \end{itemize}
+
+  \framebreak
+
+  \begin{figure}
+      \centering
+      \scalebox{0.95}{\includegraphics{plots/05_conv_variations/1d/recep_field_1.png}}
+      \tiny{\\ source: Araujo et al. (2019)}
+      \caption{Parameters of the 1D convolutional layer $l$.}
+  \end{figure}
+
+  \begin{itemize}
+    \item Additionally, the positions in the feature maps (and input) are zero-indexed (that is, they begin at 0).
+    \item If padding is present, the padded zeros on the left have negative indices.
+  \end{itemize}
+
+  \framebreak
+
+  % (\href{https://distill.pub/2019/computing-receptive-fields}{\beamergotobutton{click here})
+  
+  \begin{itemize}
+    \item For a neuron in layer $L$, it can be shown by recursion (\href{https://distill.pub/2019/computing-receptive-fields}{\beamergotobutton{click here}}) that the left boundary of its receptive field, denoted as $u_0$ is:
+      $$u_{0}=u_{L} \prod_{i=1}^{L} s_{i}-\sum_{l=1}^{L} p_{l} \prod_{i=1}^{l-1} s_{i}$$
+   and, the right boundary $v_0$ is:
+      $$v_{0}=v_{L} \prod_{i=1}^{L} s_{i}-\sum_{l=1}^{L}\left(1+p_{l}-k_{l}\right) \prod_{i=1}^{l-1} s_{i}$$
+    where $u_L$ = $v_L$ is the location of the neuron in $f_L$.
+    \item Note that $v_0$ depends on the kernel sizes $k$ of all the layers.
+    \item For dilated convolutions, the receptive field can be computed by replacing $k$ with $d (k-1) + 1$ where $d$ is the dilation factor.
+  \end{itemize}
+
+  \framebreak
+
+  \begin{figure}
+      \centering
+      \scalebox{0.77}{\includegraphics{plots/05_conv_variations/1d/recep_field_2.png}}
+      \tiny{\\ source : Araujo et al. (2019)}
+      \caption{The receptive field of a neuron in layer 2.}
+  \end{figure}
+
+      The size $r$ of the receptive field is simply $r = v_0 - u_0 + 1$.
+
+
+  \end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Transposed Convolutions}
+
+
+\begin{vbframe}{Transposed convolutions}
+    \begin{itemize}
+        \item Problem setting: 
+        \begin{itemize}
+            \item In some encoder-decoder architectures (such as (variational) autoencoders, segmentation nets, or GANs), dimensions of the feature maps are getting reduced in a first step, 
+            \item before being re-increased to the original dimensionality in a second step.
+        \end{itemize}
+        \item Instead of decreasing dimensionality as with regular convolutions, \textbf{transposed convolutions} are used to re-increase dimensionality back to the initial dimensionality.
+        % \item Idea: use transposed convolutions to re-increase dimensionality instead of decreasing it as with regular convolutions.
+        \item Note: Do not confuse this with deconvolutions (which are mathematically defined as the inverse of a convolution).
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item Example 1:
+        \begin{itemize}
+            \item Input: blue feature map with dim $4\times 4$.
+            \item Output: turquoise feature map with dim $2\times 2$.
+        \end{itemize}
+    \end{itemize}
+    \begin{figure}
+      \centering
+      \includegraphics[width=10cm]{plots/05_conv_variations/transpose/transpose_conv_0.png}
+      \caption{ A \textbf{regular} convolution with kernel-size $k$ = 3, padding $p$ = 0 and stride $s$ = 1.}
+    \end{figure}
+    Here, the feature map shrinks from $4\times 4$ to $2\times 2$.
+\framebreak
+    \begin{itemize}
+      \item Example 1:
+        \small{
+        \begin{itemize}
+            \item Now, let us upsample the $2\times 2$ feature map back to a $4\times 4$ feature map.
+            \item Input: $2\times 2$ (blue). Output: $4\times 4$ (turquoise).
+            % \item Output: turquoise feature map with dim $4\times 4$
+        \end{itemize}
+      \item One way to upsample is to use a regular convolution with various padding strategies.}
+    \end{itemize}
+    \begin{figure}
+      \centering
+      \includegraphics[width=10cm]{plots/05_conv_variations/transpose/transpose_conv.png}
+      \caption{\textbf{Transposed} convolution can be a seen as a regular convolution. Convolution (above) with $k' = 3, s' = 1, p' = 2$ re-increases dimensionality from $2\times 2$ to $4\times 4$ as shown in \cite{14}}
+    \end{figure}
+% \framebreak
+%     \begin{itemize}
+%         \item Convolution with parameters kernel size $k$, stride $s$ and padding factor $p$
+%         \item Associated transposed convolution has parameters $k' = k$, $s' = s$ and $p' = k-1$
+%     \end{itemize}
+% \framebreak
+%   Example 2 : (Transposed) Convolution as a matrix multiplication : 
+% % \framebreak
+% %   Example 2 : Let's now view transposed convolutions from a different perspective.
+%    \begin{figure}
+%       \centering
+%       \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/transpose_mat_1.png}}
+%       \tiny{\\credit:Stanford University}
+%       \caption{A "regular" 1D convolution. kernel size = 3, stride = 1 , padding = 1. The vector $a$ is the 1D input feature map. }
+%   \end{figure}
+%   
+%   
+% \framebreak
+%   Example 2 : (Transposed) Convolution as a matrix multiplication :
+% \begin{figure}
+%       \centering
+%       \scalebox{0.6}{\includegraphics{plots/05_conv_variations/transpose/transpose_mat_2.png}}
+%       \tiny{\\credit:Stanford University}
+%       \caption{"Transposed" convolution upsamples a vector of length 4 to a vector of length 6. Stride is 1. Note the change in padding.}
+%   \end{figure}
+  % \small{Important : Even though the "structure" of the matrix here is the transpose of the original matrix, the non-zero elements are, in general, different from the correponding elements in the original matrix. These (non-zero) elements/weights are tuned by backpropagation.} 
+
+\framebreak 
+
+  Example 2: Transposed Convolution as matrix multiplication:
+  \begin{figure}
+      \centering
+      \scalebox{1}{\includegraphics{plots/05_conv_variations/transpose/tr_ex21.png}}
+      \caption{A regular 1D convolution with kernel size = 3, stride = 1 , padding = 0. The vector $z$ is in the input feature map. The matrix $K$ represents the convolution operation.}
+  \end{figure}
+  A regular convolution decreases the dimensionality of the feature map from 6 to 4.\\
+\end{vbframe}
+
+\begin{frame}{Transposed Convolutions}
+
+    Example 2: Transposed Convolution as matrix multiplication:
+    \vspace*{-0.2cm}
+  \begin{figure}
+      \centering
+      \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/tr_ex22.png}}
+      \caption{\footnotesize{A transposed convolution can be used to upsample the feature vector of length 4 back to a feature vector of length 6.}}
+  \end{figure}
+
+  \vspace*{-0.4cm}
+
+  \textbf{Note}:
+  \begin{itemize}
+  	\only<1>{\item Even though the transpose of the original matrix is shown in this example, the actual values of the weights are different from the original matrix (and optimized by backpropagation). }
+  	\only<1>{\item The goal of the transposed convolution here is simply to get back the original dimensionality. It is \textit{not} necessarily to get back the original feature map itself.}
+  	\only<2>{\item The elements in the downsampled vector only affect those elements in the upsampled vector that they were originally "derived" from. For example, $z_7$ was computed using $z_1$ , $z_2$ and $z_3$ and it is only used to compute $\tilde{z}_1$, $\tilde{z}_2$ and $\tilde{z}_3$.}
+  	\only<2>{\item In general, transposing the original matrix does not result in a convolution. But a transposed convolution can always be implemented as a regular convolution by using various padding strategies (this would not be very efficient, however).}
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Transposed Convolutions}
+  
+  Example 3: Let us now view transposed convolutions from a different perspective.
+  
+  \only<1>{
+  \begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_1.png}}
+      \tiny{\\credit: Stanford University}
+      \caption{Regular $3\times 3$ convolution, stride 2, padding 1.}
+  \end{figure}
+ }
+
+  \only<2>{
+  \begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_2.png}}
+      \tiny{\\credit: Stanford University}
+      \caption{Regular $3\times 3$ convolution, stride 2, padding 1.}
+  \end{figure}
+ }
+
+  \only<3>{
+  \begin{figure}
+      \centering
+      \scalebox{0.8}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_3.png}}
+      \tiny{\\credit: Stanford University}
+      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2, padding 1. Note: stride now refers to the "stride" in the \textit{output}.}
+  \end{figure}
+
+   Here, the filter is \textit{scaled} by the input.\\
+
+ }
+
+  \only<4>{
+  \begin{figure}
+      \centering
+      \scalebox{0.8}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_4.png}}
+      \tiny{\\credit: Stanford University}
+      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2, padding 1. Note: stride now refers to the "stride" in the \textit{output}.}
+  \end{figure}
+  Here, the filter is \textit{scaled} by the input.
+
+ }
+
+\end{frame}
+
+
+\begin{vbframe}{Transposed Convolutions -- drawback}
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/05_conv_variations/transpose/transpose_artifact.png}
+        \caption{Artifacts produced by transposed convolutions \cite{24}.}
+    \end{figure}
+    \begin{itemize}
+        \item Transposed convolutions lead to checkerboard-style artifacts in resulting images.
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \small{\item Explanation: transposed convolution yields an overlap in some feature map values.
+        \item This leads to higher magnitude for some feature map elements than for others, resulting in the checkerboard pattern.
+        \item One solution is to ensure that the kernel size is divisible by the stride.
+        }
+    \end{itemize}
+        \begin{figure}
+            \centering
+              \scalebox{0.65}{\includegraphics{plots/05_conv_variations/transpose/deconv_blog.png}}
+            \caption{\footnotesize{1D example. In both images, top row = input and bottom row = output. \textit{Top}: Here, kernel weights overlap unevenly which results in a checkerboard pattern. \textit{Bottom}: There is no checkerboard pattern as the kernel size is divisible by the stride.}}
+        \end{figure}
+        % \begin{figure}
+        %     \centering
+        %       \scalebox{0.60}{\includegraphics{plots/05_conv_variations/transpose/stride_dec.png}}
+        %     \caption{\small{1D example with stride = 2 and kernel size = 4.}}
+        % \end{figure}
+% \framebreak
+%     \begin{itemize}
+%         \item Solutions: 
+%         \begin{itemize}
+%             \item Increase dimensionality via upsampling (bilinear, nearest neighbor) and then convolve this output with regular convolution.
+%             \item Make sure that the kernel size $k$ is divisible by the stride $s$.
+%         \end{itemize}
+%     \end{itemize}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=5cm]{plots/05_conv_variations/transpose/upsample.png}
+%         \caption{Nearest neighbor upsampling and subsequent same convolution to avoid checkerboard patterns.}
+%     \end{figure}
+\end{vbframe}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+
+\bibitem[Dumoulin et al., 2016]{14} Dumoulin, Vincent and Visin, Francesco (2016)
+\newblock A guide to convolution arithmetic for deep learning
+\newblock \emph{\url{https://arxiv.org/abs/1603.07285v1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[van den Oord et al., 2016]{15} Van den Oord, Aaron, Sander Dielman, Karen Simonyan, Oriol Vinyals, Alex Graves, Nal Kalchbrenner, and Koray Kavukocuoglu (2016)
+\newblock WaveNet: A Generative Model for Raw Audio
+\newblock \emph{\url{https://arxiv.org/abs/1609.03499}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Gennart et al., 1996]{17} Benoit A., Gennart, Bernard Krummenacher, Roger D. Hersch, Bernard Saugy, J.C. Hadorn and D. Mueller (1996)
+\newblock The Giga View Multiprocessor Multidisk Image Server
+\newblock \emph{\url{https://www.researchgate.net/publication/220060811_The_Giga_View_Multiprocessor_Multidisk_Image_Server}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Tran et al., 2015]{18} Tran, Du, Lubomir Bourdev, Rob Fergus,  Lorenzo Torresani and Paluri Manohar (2015)
+\newblock Learning Spatiotemporal Features with 3D Convolutional Networks
+\newblock \emph{\url{https://arxiv.org/pdf/1412.0767.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Milletari et al., 2016]{19} Milletari, Fausto, Nassir Navab and  Seyed-Ahmad Ahmadi (2016)
+\newblock V-Net: Fully Convolutional Neural Networks for
+Volumetric Medical Image Segmentation
+\newblock \emph{\url{https://arxiv.org/pdf/1606.04797.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zhang et al., 2015]{20} Zhang, Xiang, Junbo Zhao and Yann LeCun (2015)
+\newblock Character-level Convolutional Networks for Text Classification
+\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Wang et al., 2017]{21} Wang, Zhiguang, Weizhong Yan and Tim Oates (2017)
+\newblock Time Series Classification from Scratch with Deep Neural Networks: A Strong Baseline
+\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Yu et. al, 2015]{22} Fisher Yu and Vladlen Koltun (2015)
+\newblock Multi-Scale Context Aggregation by Dilated Convolutions
+\newblock \emph{\url{https://arxiv.org/abs/1511.07122}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Bai et. al, 2018]{23} Bai, Shaojie,  Zico J. Kolter and Vladlen Koltun (2018)
+\newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
+\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Odena et. al , 2017]{24} Augustus Odena, Vincent Dumoulin and Chris Olah (2016)
+\newblock Deconvolution and Checkerboard Artifacts
+\newblock \emph{\url{https://distill.pub/2016/deconv-checkerboard/}{https://distill.pub/2016/deconv-checkerboard/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Arauho et. al , 2019]{45} Andre Araujo, Wade Norris and Jack Sim (2019)
+\newblock Computing Receptive Fields of Convolutional Neural Networks
+\newblock \emph{\url{https://distill.pub/2019/computing-receptive-fields/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Wang et. al , 2017]{31} Zhiguang Wang, Yan, Weizhong and Tim Oates (2017)
+\newblock Time series classification from scratch with deep neural networks: A
+strong baseline
+\newblock \emph{\url{https://arxiv.org/1611.06455}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Lin et al., 2017]{38} Lin, Haoning and Shi, Zhenwei and Zou, Zhengxia (2017)
+\newblock Maritime Semantic Labeling of Optical Remote Sensing Images with Multi-Scale Fully Convolutional Network
+
+\end{thebibliography}
+}
+\end{vbframe}
+\endlecture

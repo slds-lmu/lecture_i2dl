@@ -1,0 +1,24 @@
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../../style/preamble_ueb.Rnw")
+@
+
+\kopf{1}
+
+\aufgabe{ What are the differences in the training phase between
+the convolutional neural network and a fully connected neural network?}
+
+\dlz
+
+\aufgabe{ Write 1-d convolution in the form of circular matrix multiiplication
+and how the matrix/vector structure connect with the CNN stride and
+pad?
+
+}
+
+\dlz
+
+\aufgabe{ Show the relationship between Discrete Fourier Transform
+and Circular Convolution}
+

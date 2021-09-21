@@ -1,0 +1,116 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+
+@
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{9}{Regularized Autoencoders}
+\lecture{Deeplearning}
+
+
+\begin{vbframe}
+\frametitle{Manifold learning}
+
+  \begin{itemize}
+        \item \textbf{Manifold hypothesis}: 
+        Data of interest lies on an embedded non-linear manifold within the higher-dimensional space.
+    %    Data is concentrated around a low-dimensional \textit{manifold} or a small set of such manifolds
+        %    \pause
+        % \item In mathematics, a manifold is a topological space that locally resembles Euclidean space near each point 
+        \item A \textbf{manifold}: 
+        \begin{itemize}
+        \item  is a topological space that locally resembles the Euclidean space.
+        \item  in ML, more loosely refers to a connected set of points that can be approximated well by considering only a small number of dimensions. % embedded in a higher-dimensional space
+        \end{itemize}
+          \begin{figure}[h]
+                \centering
+                \includegraphics[width=5  cm]{plots/manifold.png}
+                \caption{
+                from Goodfellow et. al%Data sampled from a distribution in a 2D space that is actually concentrated near a 1D manifold.
+                }
+            \end{figure}
+           \end{itemize}    
+       \framebreak
+ 
+\begin{itemize}
+    \item An important characterization of a manifold is the set of its tangent planes.
+    \item \textbf{Definition}: At a point $\xv$ on a $d$-dimensional manifold, the \textbf{tangent plane} is given by $d$ basis vectors that span the local directions of variation allowed on the manifold.
+    
+\end{itemize} 
+        \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.8\linewidth]{plots/tangent_plane.png}
+            \caption{A pictorial representation of the tangent space of a single point, \textbf{\textit{x}}, on a manifold (Goodfellow et al. (2016)).}
+        \end{figure}
+     
+       \framebreak
+       
+      
+        \begin{itemize}
+        \item Manifold hypothesis does not need to  hold true.
+        %assumption that the data lies along a low-dimensional manifold may notalways be correct
+        \item In the context of AI tasks (e.g.~processing images, sound, or text) it seems to be at least approximately correct, since :
+        \begin{itemize}
+        \item probability distributions over images, text strings, and sounds that occur in real life are highly concentrated (randomly sampled pixel values do not look like images, randomly sampling letters is unlikely to result in a meaningful sentence).
+        \item samples are connected to each other by other samples, with each sample surrounded by other highly similar samples that can be reached by applying transformations (E.g. for images: Dim or brighten the lights, move or rotate objects, change the colors of objects,  etc).
+     \end{itemize}
+      % TODO: add more on the manifold view ?
+    \end{itemize} 
+
+\end{vbframe}
+
+
+
+
+\begin{vbframe}{Learning Manifolds with AEs}
+  
+    \begin{itemize}
+        \item AEs training procedures involve a compromise between two forces:
+
+            \begin{enumerate}
+                \item Learning a representation $\pmb{z}$ of a training example $\xv$ such that $\xv$ can be approximately recovered from $\pmb{z}$ through a decoder.
+
+                \item Satisfying an architectural constraint or regularization penalty.
+            \end{enumerate}
+   
+       \item Together, they force the hidden units to capture information about the structure of the data generating distribution 
+       
+       \item important principle: AEs can afford to 
+       represent only the variations that are needed to reconstruct training examples.
+       
+         \item If the data-generating distribution concentrates near a low-dimensional manifold, this yields representations that implicitly capture a local coordinate system for the manifold. 
+         
+         \framebreak
+       
+   \item Only the variations tangent to the manifold around $\xv$ need to correspond to changes in $\pmb{z}=enc(\xv)$. Hence the encoder learns a mapping from the input space to a representation space that is only sensitive to changes along the manifold directions, but that is insensitive to changes orthogonal to the manifold.  
+       
+       \begin{figure}
+    \centering
+    \includegraphics[width=4cm]{plots/AE-manifold.jpg}
+    \caption{from Goodfellow et al. (2016) }
+    \end{figure}
+    
+   \end{itemize}
+
+\framebreak
+
+    \begin{itemize}
+        \item Common setting: a representation (embedding) for the points on the manifold is learned.
+        \item Two different approaches
+            \begin{enumerate}
+                \item Non-parametric methods: learn an embedding for each training example.
+                \item Learning a more general mapping for \textit{any} point in the input space.
+            \end{enumerate}
+        \item %Non-parametric approaches have problems with complicated manifolds\\
+        AI problems can have very complicated structures that can be difficult to capture from only local interpolation.\\
+            $\Rightarrow$ Motivates use of \textbf{distributed representations} and deep learning!
+    \end{itemize}
+\end{vbframe}
+
+
+
+
+\endlecture

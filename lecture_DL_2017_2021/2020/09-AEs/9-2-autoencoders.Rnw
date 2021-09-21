@@ -1,0 +1,389 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("../style/preamble_mina.Rnw")
+knitr::opts_chunk$set(cache=TRUE)
+
+@
+
+\input{../../latex-math/basic-math}
+
+\lecturechapter{9}{Autoencoders}
+\lecture{Deeplearning}
+
+\begin{frame}
+\frametitle{Lecture outline}
+\tableofcontents
+\end{frame}
+
+\section{Autoencoders - Basic Principle}
+
+\begin{vbframe}{Autoencoder (AE)-task and structure}
+
+  \begin{itemize}
+  \item Autoencoders (AEs) are unsupervised approach for learning a lower dimensional feature representation from unlabeled training data.
+  \item Task: Learn a lossy compression of the data 
+  \item Autoencoders consist of two parts:
+  \begin{itemize}
+            \item \textbf{encoder} learns mapping from the data, $x$, to a low-dimensional latent space of $z$,  $\mathbf{z} = enc(\xv)$.
+            \item \textbf{decoder} learns mapping back from latent, $z$, to a reconstructed observation of $\hat {{x}}$,  $\hat {\mathbf{x}} = dec(\mathbf{z})$.
+  \end{itemize}
+    \item Loss function Loss function doesnot use any labels and it measures the quality of the reconstruction compared to the input: 
+    $$
+      L\left(\xv, dec(enc(\xv))\right)
+    $$
+    \item Goal: Learn good \textbf{internal representations} $\mathbf{z}$ (also called \textbf{code}).
+    \item Autoencoding is a form of compression! Smaller latent space will force a larger training bottleneck
+
+  \end{itemize}
+  
+%  \begin{itemize}
+%    \item The basic idea of an autoencoder is to obtain a neural network, that is able to \textbf{reconstruct its input}.
+%    \item[] $\Rightarrow$ Traditionally used for dimensionality reduction!
+%    \item (Very) simple example: given the input vector (1, 0, 1, 0, 0), an autoencoder will try to output (1, 0, 1, 0, 0).
+%    \item Therefore, we do not need class labels and pass over into the world of \textbf{unsupervised learning}.
+%  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Autoencoder (AE)- computational graph}
+%  \begin{itemize}
+%    \item An autoencoder maps an input $x$ to an output $r$ (reconstruction)
+%    \item We can distinguish its general architecture in the following manner:
+%    \begin{itemize}
+%      \item an encoder $z = enc(x)$ and
+%      \item a decoder $r = dec(z)$ 
+%    \end{itemize}
+%    \item[] to generate the reconstruction.
+%    \item We call $z$ the \textbf{internal representation} or \textbf{code}
+%  \end{itemize}
+%\framebreak
+  The general structure of an AE as a computational graph:
+  \begin{figure}
+    \centering
+    \includegraphics[width=5.5cm]{plots/autoencoder_basic_structure.png}
+  \end{figure}
+  \begin{itemize}
+    \item An AE has two computational steps:
+    \begin{itemize}
+      \item the encoder $enc$, mapping $\xv$ to $\mathbf{z}$.
+      \item the decoder $dec$, mapping $\mathbf{z}$ to $\mathbf{\hat x}$.
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{Use case}
+%
+%Todo: Remove this slide?
+%
+%  \begin{itemize}
+%    \item Practitioners utilize autoencoders, although they have access to labeled data.
+%    \item[] $\Rightarrow$ Why?
+%    \item Autoencoders may be used for:
+%    \begin{itemize}
+%      \item Learning a representation of the input data\\ $\Rightarrow$ dimensionality reduction \& pretraining
+%      \item Advanced: some variants of the autoencoder can be regarded as generative models \\ $\Rightarrow$ may be used to draw synthetic data
+%    \end{itemize}
+%  \end{itemize}
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \frame{
+% 
+% \frametitle{Autoencoders - use case}
+% 
+%   \begin{itemize}
+% 
+%     \only<1-2>{\item Practitioners utilize autoencoders, although they have access to labeled data.}
+%     \only<1-2>{\item[] $\Rightarrow$ Why?}
+%     \only<2-2>{\item Autoencoders may be used for:}
+%     \only<2>{\begin{itemize}
+%       \only<2>{\item Learning a representation of the input data\\ $\Rightarrow$ dimensionality reduction \& pretraining}
+%       \only<2>{\item Advanced: some variants of the autoencoder can be regarded as generative models \\ $\Rightarrow$ may be used to draw synthetic data}
+%     \end{itemize}}
+% 
+%   \end{itemize}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Undercomplete Autoencoders}
+
+\begin{frame}{Undercomplete Autoencoders}
+  \only<1-2>{
+    \begin{itemize}
+      \item A naive implementation of an autoencoder would simply learn the identity $dec(enc(\xv)) = \mathbf{\hat x}$. 
+      \item This would not be useful.
+    \end{itemize}
+  }
+  \only<1>{
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{plots/AE_naive1.png}
+    \end{figure}
+  }
+
+  \only<2>{
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{plots/AE_naive2.png}
+    \end{figure}
+  }
+  \only<3>{
+    \begin{itemize}
+      \item Therefore we have a \enquote{bottleneck} layer: We restrict the architecture, such that 
+        $$
+          \text{dim}(\mathbf{z}) < \text{dim}(\xv)
+        $$
+      \item Such an AE is called \textbf{undercomplete}. 
+    \end{itemize}
+  }  
+  \only<4>{
+    \begin{itemize}
+      \item In other words: In an undercomplete AE, the hidden layer has fewer neurons than the input layer. 
+      \item[$\rightarrow$] That will force the AE to 
+      \begin{itemize}
+        \item  capture only the most salient features of the training data!
+        \item  learn a \enquote{compressed} representation of the input.
+      \end{itemize}   
+    \end{itemize}
+  }  
+
+  \only<3-4>{
+  \vspace*{-0.3cm}
+    \begin{figure}
+    \centering
+<<<<<<< HEAD
+    \includegraphics[width=0.4\textwidth]{plots/AE_undercomplete.png}
+=======
+    \includegraphics[width=0.55\textwidth]{plots/AE_undercomplete.png}
+>>>>>>> c67183e44e1e038de6a0abcc61f6f4ff2056b488
+    \end{figure}
+  }
+
+    % $\to$ That will force the autoencoder to capture only the most salient features of the training data! 
+    % \item If an AE simply learns the identity $dec(enc(\xv)) = \xv$, it would be of no use. In fact, we want the AE to learn a representation $\mathbf{z}$ that encodes \enquote{useful} or \enquote{significant} properties of the data.
+    % \item Consequently, the autoencoder tries to learn a \enquote{compressed} representation of the input. 
+    % \item %To extract such \enquote{useful} or \enquote{significant} properties, we introduce the \textbf{undercomplete autoencoder}.
+    % One possibility to do so is to 
+    % %\item Therefore, we 
+    % restrict the architecture, such that \\ %$$dim(z) < dim(x)$$ 
+    %  \textbf{code dimension $<$ input dimension}.
+ %   \item Consequently, the undercomplete autoencoder tries to learn a \enquote{compressed} representation of the input.
+  
+\end{frame}
+
+\begin{vbframe}{Undercomplete Autoencoders}
+
+  \begin{itemize}
+  %  \item In other words: In an undercomplete AE, the hidden layer has fewer neurons than the input layer.
+  %   \item[] $\Rightarrow$ That will force the AE to 
+  % \begin{itemize}
+  % \item  capture only the most salient features of the training data!
+  % \item  learn a \enquote{compressed} representation of the input.
+  % \end{itemize}    
+    \item %Learning such a net is 
+    Training an AE is done by minimizing the risk, where the loss function penalizes the reconstruction  $dec(enc(\xv))$ for differing from $\xv$. 
+    \item The L2-loss 
+    $$
+    \|\xv - dec(enc(\xv))\|^2_2
+    $$
+    is a typical choice, but other loss functions are possible as well. 
+%    \begin{itemize}
+%      \item Typical choice: MSE
+%    \end{itemize}
+%    \item[]
+    \item For optimization, the very same optimization techniques as for standard feed-forward nets are applied (SGD, RMSProp, ADAM,...).
+    \item[]
+ %   \item How could a potential architecture of an undercomplete autoencoder look like for our (very) simple example?
+  %  \item[] Reminder: $x = (1, 0, 1, 0, 0)$
+  \end{itemize}
+
+\end{vbframe}
+
+
+\begin{frame}{Experiment: Learn to encode MNIST}
+  \begin{itemize}
+    \item Let us try to compress the MNIST data as good as possible.
+    \item Therefore, we will fit a simple undercomplete autoencoder to learn the best possible representation 
+    \item We fit the autoencoder for different dimensions of the internal representation $\mathbf{z}$ (different \enquote{bottleneck} sizes).
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/autoencoder_mnist_problem.png}
+    \caption{Flow chart of our our autoencoder: reconstruct the input with fixed dimensions $dim(\mathbf{z}) \ll dim(\xv)$.}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Experiment: Learn to encode MNIST}
+  \begin{figure}
+    \centering
+    \includegraphics[width=6.5cm]{plots/autoencoder_mnist_example.png}
+    \caption{Architecture of the autoencoder.}
+  \end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Experiment: Learn to encode MNIST}
+  
+  <<mxnet1, size = "footnotesize", cache = TRUE, eval = FALSE, echo = FALSE>>=
+    z = c(784, 256, 64, 32, 16, 8, 4, 2, 1)
+
+    input = mx.symbol.Variable("data") # mnist with 28x28 = 784
+    encoder = mx.symbol.FullyConnected(input, num_hidden = z[i])
+    decoder = mx.symbol.FullyConnected(encoder, num_hidden = 784)
+    activation = mx.symbol.Activation(decoder, "sigmoid")
+    output = mx.symbol.LinearRegressionOutput(activation)
+
+    model = mx.model.FeedForward.create(output,
+      X = train.x, y = train.x,
+      num.round = 50, 
+      array.batch.size = 32,
+      optimizer = "adam",
+      initializer = mx.init.uniform(0.01), 
+      eval.metric = mx.metric.mse
+    )
+  @
+
+  \center
+  \begin{figure}
+  
+    \only<1>{\includegraphics[width=11.2cm]{plots/784.png}}%
+    \only<2>{\includegraphics[width=11.2cm]{plots/256.png}}%
+    \only<3>{\includegraphics[width=11.2cm]{plots/64.png}}%
+    \only<4>{\includegraphics[width=11.2cm]{plots/32.png}}%
+    \only<5>{\includegraphics[width=11.2cm]{plots/16.png}}%
+    \only<6>{\includegraphics[width=11.2cm]{plots/8.png}}%
+    \only<7>{\includegraphics[width=11.2cm]{plots/4.png}}%
+    \only<8>{\includegraphics[width=11.2cm]{plots/2.png}}%
+    \only<9>{\includegraphics[width=11.2cm]{plots/1.png}}%
+    \caption{The top row shows the original digits, the bottom row the reconstructed ones.}
+    
+  \end{figure}
+  
+  \vspace{-0.3cm}
+  
+  \begin{itemize}
+  
+    \only<1>{\item $dim(\mathbf{z}) = 784 = dim(\xv)$.}
+    \only<2>{\item $dim(\mathbf{z}) = 256$.}
+    \only<3>{\item $dim(\mathbf{z}) = 64$.}
+    \only<4>{\item $dim(\mathbf{z}) = 32$.}
+    \only<5>{\item $dim(\mathbf{z}) = 16$.}
+    \only<6>{\item $dim(\mathbf{z}) = 8$.}
+    \only<7>{\item $dim(\mathbf{z}) = 4$.}
+    \only<8>{\item $dim(\mathbf{z}) = 2$.}
+    \only<9>{\item $dim(\mathbf{z}) = 1$.}
+    
+  \end{itemize}
+  
+}
+
+\begin{vbframe}{Increasing the Capactiy of AEs}
+
+Increasing the number of layers adds capacity to autoencoders: 
+
+
+  \begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{plots/AE_increased_capacity.png}
+  \end{figure}
+
+
+\end{vbframe}
+
+\section{Principal Component Analysis as Autoencoder}
+
+\begin{vbframe}{Principal Component Analysis}
+
+  \begin{itemize}
+    \item Consider the same simple undercomplete autoencoder architecture as above, but this time with
+    \begin{itemize}
+      \item \textbf{linear} encoder function $enc(\xv)$, and
+      \item \textbf{linear} decoder function $dec(\pmb{z})$.
+    \end{itemize}  
+    Further we use the L2-loss $\|\xv-dec(enc(\xv))\|^2_2$ and assume that inputs are normalized to zero mean.   
+    \item In other words: We want to find the \textbf{linear projection} of the data with the minimal L2-reconstruction error.
+
+    \begin{figure}
+      \centering
+      \includegraphics[width=0.3\textwidth]{plots/autoencoder_mnist_example.png}
+    \end{figure}
+
+    \framebreak 
+
+    \item It can be shown that, given a $\text{dim}(\bm{z}) = k$, the optimal solution is an \textbf{orthogonal} linear transformation (i.e. a rotation of the coordinate system) given by the $k$ singular vectors with largest singular values. 
+
+    \begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{plots/PCA_AE.png}
+    \end{figure}
+
+    \framebreak 
+
+    \item This is an equivalent formulation to \textbf{Principal Component Analysis (PCA)}, which uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of values of linearly uncorrelated variables called \textbf{principal components}. 
+    \item The transformation is defined in such a way that the first principal component has the largest possible variance (that is, accounts for as much of the variability in the data as possible)    
+    \begin{figure}
+    \centering
+    \includegraphics[width=3.5cm]{plots/PCA.png}
+    \end{figure}
+
+    \framebreak 
+
+    \item The formulations are equivalent: \enquote{Find a linear projection into a $k$-dimensional space that ...}
+    \begin{itemize}
+      \item \enquote{... minimizes the L2-reconstruction error} (AE-based formulation) 
+      \item \enquote{... maximizes the variance of the projected datapoints} (statistical formulation). 
+    \end{itemize}
+  
+    \framebreak 
+
+    \item An AE with a non-linear decoder/encoder can be seen as a non-linear generalization of PCA.
+
+    \vspace*{-0.2cm}
+
+    \begin{figure}
+<<<<<<< HEAD
+    \centering
+    \includegraphics[width=0.5\textwidth]{plots/manifold1.png}
+=======
+    \begin{center}
+    \includegraphics[width=0.6\textwidth]{plots/manifold1.png}
+>>>>>>> c67183e44e1e038de6a0abcc61f6f4ff2056b488
+    \caption{Credits: Jeremy Jordan \enquote{Introduction to autoencoders}}
+    \end{center}
+    \end{figure}
+
+  \end{itemize}
+  
+  
+  
+  % \item Problem: If an AE is \textbf{overcomplete} (code dimension $>$ input dimension) or encoder and decoder are too powerful, the AE can learn to simply copy the input.
+  % \end{itemize}
+
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+
+
+\endlecture

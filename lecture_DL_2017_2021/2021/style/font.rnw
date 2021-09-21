@@ -1,0 +1,41 @@
+%Blank Lecture
+%This file is a child of preamble.Rnw in the style folder
+%if you want to add stuff to the preamble go there to make
+%your changes available to all childs
+
+
+<<setup-child, include = FALSE>>=
+library(knitr)
+set_parent("preamble.Rnw")
+@
+
+
+% \input{../latex-math/basic-math}
+% \input{../latex-math/basic-ml}
+% \input{../latex-math/ml-nn}
+
+
+% \usepackage{wrapfig}
+
+\lecturechapter{2}{Optimization I}
+\lecture{Deeplearning}
+
+\begin{frame}
+
+$c = 0.78$\\
+
+$x_1 = 1$
+$x_2 = 0$
+$z_1$
+$u_1=-0.22$
+$u_2=0.58$
+\\
+$z_{1,in}$
+$z_{1,out}$
+
+$f_{in}$ \\
+$f_{out}$
+
+\end{frame}
+
+\endlecture

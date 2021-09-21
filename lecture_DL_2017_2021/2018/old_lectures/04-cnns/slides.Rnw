@@ -1,0 +1,1392 @@
+<<setup-child, include = FALSE>>=
+library(knitr)
+# amsmath in preamble, whut?
+set_parent("../style/preamble.Rnw")
+knitr::opts_chunk$set(cache=FALSE)
+@
+
+\lecturechapter{4}{Convolutional neural networks}
+\lecture{Deeplearning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Convolutional neural networks}
+  \begin{itemize}
+    \item Probably the most important model class in the world of deep learning.
+    \item Since 2012 the undisputed state of the art for image classification of all shades.
+    \item That covers in particular:
+    \begin{itemize}
+      \item object recognition
+      \item image segmentation
+      \item speech recognition
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{CNNs - What for?}
+  \begin{figure}
+    \centering
+    \includegraphics[width=7cm]{plots/01_introduction/recognition.png}
+    \caption{Object classification with Cifar 10: famous benchmark data set with 60000 images and 10 classes (Alex Krizhevsky (2009)). There is also a much more difficult version with 60000 images and 100 classes. Top algorithms manage to get arround 75\% accuracy on the latter one.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/01_introduction/translate.png}
+    \caption{Automatic Machine Translation (Otavio Good (2015)).The Google Translate app does real-time visual translation of more than 20 languages. A CNN is used to recognize the characters on the image and a recurrent neural network (chapter 5) for the translation.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/01_introduction/driving.png}
+    \caption{End to End Learning for Self-Driving Cars (Mariusz Bojarski et al. (2016)). A convolutional neural network is used to map raw pixels from a single front-facing camera directly into steering commands. With minimum training data from humans the system learns to drive in traffic on local roads with or without lane markings and on highways.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=11cm]{plots/01_introduction/colorization.png}
+    \caption{Colorful Image Colorization (Zhang et al. (2016)). Given a grayscale photograph as input (top row), this network attacks the problem of hallucinating a plausible color version of the photograph (bottom row, i.e. the prediction of the network). Realizing this task manually consumes many hours of time.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=9cm]{plots/01_introduction/segmentation.png}
+    \caption{Image segmentation (Hyeonwoo Noh et al. (2013)). The neural network network is composed of deconvolution (the transpose of a convolution) and unpooling layers, which identify pixel-wise class labels and predict segmentation masks.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=6cm]{plots/01_introduction/road_seg.png}
+    \caption{Road segmentation (Mnih Volodymyr (2013)). Aerial images and possibly outdated map pixels are labeled.}
+  \end{figure}
+\framebreak
+  \begin{figure}
+    \centering
+    \includegraphics[width=10cm]{plots/01_introduction/speech.png}
+    \caption{Speech recognition (Anand \& Verma (2015)). Convolutional neural network to extract features from audio data in order to classify emotions.}
+  \end{figure}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{Filters to extract features}
+    \center
+    \only<1>{\includegraphics[width=11cm]{plots/02_filters/sobel1.png}}%
+    \only<2>{\includegraphics[width=11cm]{plots/02_filters/sobel2.png}}%
+    \only<3>{\includegraphics[width=11cm]{plots/02_filters/sobel3.png}}%
+    \only<4>{\includegraphics[width=11cm]{plots/02_filters/sobel4.png}}%
+    \only<5>{\includegraphics[width=11cm]{plots/02_filters/sobel4.png}}%
+    %\only<6>{\includegraphics[width=11cm]{plots/02_filters/sobel5.png}}%
+    \only<6>{\includegraphics[width=11cm]{plots/02_filters/sobel6.png}}%
+    \only<7>{\includegraphics[width=11cm]{plots/02_filters/sobel8.png}}%
+
+    \begin{itemize}
+        \only<1>{\item How to represent a digital image?}
+        \only<2>{\item Basically as an array of integers}
+        \only<3>{\item The Sobel-Operator computes an approximation of the gradient of the image intensity function.}
+        \only<3>{\item $G_x$ enables us to to detect horizontal edges!}
+        \only<4>{\item[]}
+        \only<5>{\item[]
+        \vspace{-0.8cm}
+        \begin{alignat*}{3}
+            S_{(i,j)} = (I \star \mathit{G}_x)_{(i, j)}
+                 & = -1 \cdot 0 \ \ &&+ \ \ 0 \cdot 255 \ \ &&+ \ \ \textbf{1} \cdot \textbf{255} \\
+                 &\quad - 2 \cdot 0 &&+ \ \ 0 \cdot 0 &&+ \ \ \textbf{2} \cdot \textbf{255} \\
+                 &\quad - 1 \cdot 0 &&+ \ \ 0 \cdot 255 &&+ \ \ \textbf{1} \cdot \textbf{255}
+                 \notag
+        \end{alignat*}
+        }
+        % \only<6>{\item[] \textcolor{white}{Applying the Sobel-Operator to every location in the input space yields us the \textbf{feature map}.}}
+        \only<6>{\item Applying the Sobel-Operator to every location in the input space yields us the \textbf{feature map}.}
+        \only<7>{\item Normalized feature map reveals horizontal edges.}
+    \end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Why do we need to know all of that?}
+  \begin{itemize}
+    \item What we just did was extracting \textbf{pre-defined} features from our input (i.e. edges).
+    \item A convolutional neural network does almost exactly the same: \enquote{extracting features from the input}.
+    \item[] $\Rightarrow$ The main difference is that we usually do not tell the CNN what to look for (pre-define them), \textbf{the CNN decides itself}.
+    \item In a nutshell:
+    \begin{itemize}
+      \item We initiliaze alot of random filters (like the Sobel but just random entries) and apply them to our input.
+      \item Then, a classifier which is generally a feed forward neural net, uses them as input data.
+      \item Filter entries will be adjusted by common gradient descent methods.
+    \end{itemize}
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Why do we need to know all of that?}
+    \center
+    \only<1>{\includegraphics[width=11cm]{plots/02_filters/sobel9.png}}%
+    \only<2>{\includegraphics[width=11cm]{plots/02_filters/sobel10.png}}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{CNNs - A First Glimpse}
+  \begin{itemize}
+  \item In order to understand the functionality of CNNs, we have to familiarize ourselves with some properties from images.
+  \item Grey scale images:
+  \begin{itemize}
+    \item Matrix with dimensions \textbf{h}eight $\times$ \textbf{w}idth $\times$ 1
+    \item Pixel entries differ from 0 (black) to 255 (white)
+  \end{itemize}
+  \item Color images:
+  \begin{itemize}
+    \item Tensor with dimensions \textbf{h}eight $\times$ \textbf{w}idth $\times$ 3
+    \item The depth 3 denotes the RGB values (red - green - blue) 
+  \end{itemize}
+  \item Filters:
+  \begin{itemize}
+    \item A filters depth is \textbf{always} equal to the inputs depth!
+    \item In general, filters are quadratic.
+    \item Thus we only need one integer to define its size.
+    \item For example, a filter of size $2$ applied on a color image actually has the dimensions $2 \times 2 \times 3$
+  \end{itemize}
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{CNNs - A First Glimpse}
+
+  \center
+  \only<1>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn1}}%
+  \only<2>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn2}}%
+  \only<3>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn3}}%
+  \only<4>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn4}}%
+  \only<5>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn5}}%
+  \only<6>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn6}}%
+  \only<7>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn7}}%
+  \only<8>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn8}}%
+  \only<9>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn9}}%
+  \only<10>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn10}}%
+  \only<11>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn11}}%
+  \only<12>{\includegraphics[width=11cm]{plots/03_first_glimpse/cnn12}}%
+
+  \begin{itemize}
+
+    \only<1>{\item Suppose the following input tensor with dimensions $10 \times 10 \times 3$.}
+    \only<2>{\item We use a filter of size $2$.}
+    \only<3>{\item Applying it to the first spatial location, yields one scalar value.}
+    \only<4>{\item The second spatial location yields another one..}
+    \only<5>{\item ..and another one..}
+    \only<6>{\item ..and another one..}
+    \only<7>{\item Finally we obtain an output which is called feature map.}
+    \only<8>{\item We initialize another filter to obtain a second feature map.}
+    \only<9>{\item All feature maps yield us a \enquote{new image} with dim $h \times w \times N$.}
+    \only<9>{\item[] We actually append them to a new tensor with depth = \# filters.}
+    \only<10>{\item All feature map entries will then be activated, just like the neurons of a standard feedforward net. }
+    \only<11>{\item One may use pooling operations to downsample the dimensions of the feature maps.}
+    \only<12>{\item Many of these layers can be placed successively, to extract evermore complex features}
+
+  \end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{The 2d convolution}
+
+  \begin{itemize}
+
+    \only<1-7>{\item Suppose an input with entries $a, b, \dots, i$ (think of pixel values).}
+    \only<1-7>{\item The filter we would like to apply has weights $w_{11}, w_{12}, w_{21} \text{ and } w_{22}$.}
+
+  \end{itemize}
+
+  \center
+  \only<1>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv1.png}}%
+  \only<2>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv2.png}}%
+  \only<3>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv2.png}}%
+  \only<4>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv3.png}}%
+  \only<5>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv4.png}}%
+  \only<6>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv5.png}}%
+  \only<7>{\includegraphics[width=8cm]{plots/04_conv2d/2dconv6.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item[] }
+    \only<2>{\item[] }
+    \only<3>{\item[] To obtain $s_{11}$ we simply compute the dot product:}
+    \only<3>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<4>{\item[] Same for $s_{12}$:}
+    \only<4>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<5>{\item[] As well as for $s_{21}$:}
+    \only<5>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<6>{\item[] And finally for $s_{22}$:}
+    \only<6>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+    \only<7>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<7>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<7>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<7>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+
+  \end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{Padding}
+
+  \begin{itemize}
+
+    \only<1-5>{\item \enquote{Valid} convolution without padding}
+    \only<1>{\item[] Exactly what we just did is called valid convolution.}
+    \only<2>{\item[] The filter is only allowed to move inside of the input space.}
+    \only<3-5>{\item[] That will inevitably reduce the output dimensions.}
+
+  \end{itemize}
+
+  \center
+  \only<1>{\includegraphics[width=10cm]{plots/05_conv_variations/valid/valid0.png}}%
+  \only<2>{\includegraphics[width=10cm]{plots/05_conv_variations/valid/valid1.png}}%
+  \only<3>{\includegraphics[width=10cm]{plots/05_conv_variations/valid/valid2.png}}%
+  \only<4>{\includegraphics[width=10cm]{plots/05_conv_variations/valid/valid3.png}}%
+  \only<5>{\includegraphics[width=10cm]{plots/05_conv_variations/valid/valid4.png}}%
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{Padding}
+
+  \begin{itemize}
+
+    \only<1-8>{\item \enquote{Valid} convolution with \enquote{same} padding}
+    \only<1>{\item[] Suppose the following situation: an input with dimensions $5x5$ and a filter with size $3$.}
+    \only<2>{\item[] We would like to obtain an output with the same dimensions as the input.}
+    \only<3>{\item[] Hence, we apply a technique called zero padding. That is to say \enquote{pad} zeros around the input:}
+    \only<4-8>{\item[] That always works! We just have to adjust the zeros according to the input dimensions and filter size (ie. one, two or more rows).}
+
+  \end{itemize}
+
+  \center
+  \only<1>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same0.png}}%
+  \only<2>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same1.png}}%
+  \only<3>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same2.png}}%
+  \only<4>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same3.png}}%
+  \only<5>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same4.png}}%
+  \only<6>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same5.png}}%
+  \only<7>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same6.png}}%
+  \only<8>{\includegraphics[width=11cm]{plots/05_conv_variations/same/same7.png}}%
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{Strides}
+
+  \begin{itemize}
+
+    \only<1-5>{\item Stepsize \enquote{strides} of our filter}
+
+  \end{itemize}
+
+  \center
+  \only<1>{\includegraphics[width=9cm]{plots/05_conv_variations/strides/strides0.png}}%
+  \only<2>{\includegraphics[width=9cm]{plots/05_conv_variations/strides/strides1.png}}%
+  \only<3>{\includegraphics[width=9cm]{plots/05_conv_variations/strides/strides2.png}}%
+  \only<4>{\includegraphics[width=9cm]{plots/05_conv_variations/strides/strides3.png}}%
+  \only<5>{\includegraphics[width=9cm]{plots/05_conv_variations/strides/strides4.png}}%
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Convolution mathematically - content}
+%     \begin{itemize}
+%         \item Sources:
+%         \item nice explanation here: https://wiki.tum.de/display/lfdv/Convolutional+Neural+Networks
+%         \item and here: https://wiki.tum.de/display/lfdv/Layers+of+a+Convolutional+Neural+Network
+%         \item and dl book: http://www.deeplearningbook.org/contents/convnets.html
+%         \item cornell uni: google cornell cs1114 convolution
+%     \end{itemize}
+% \end{vbframe}    
+
+\begin{vbframe}{Convolution mathematically}
+    \begin{itemize}
+        \item Definition: \\
+            \begin{equation*}
+                \begin{split}
+                    h(x) &= (f \star g)(x) = \int_{\mathcal{R}^n} f(t)g(x-t)dt = \int_{\mathcal{R}^n} f(x-t)g(t)dt \\
+                    \text{where } f(x)&: \text{input function} \\
+                    \text{and } g(x)&: \text{weighting function, kernel} \\
+                    \text{and } h(x)&: \text{output function, feature map}
+                \end{split}
+            \end{equation*}
+        \item Intuition 1: weighted smoothing of $f(x)$ with weighting function $g(x)$ (see following animation)
+        \item Intuition 2: filter function $g(x)$ filters features $h(x)$ from input signal $f(x)$
+    \end{itemize}
+    \framebreak
+    \begin{itemize}
+        \item Discretization for the $\mathcal{R}^1$: \\
+            \begin{equation*}
+                \begin{split}
+                    h(x) &= (f \star g)(x) = \sum_{i = 1}^x f(i)g(x-i)
+                \end{split}
+            \end{equation*}
+        \item Discretization for 2D images:
+            \begin{itemize}
+                \item $\mathcal{I} \in \mathcal{R}^2$ contains two dimensions
+                \item Use 2D Kernel $\mathcal{K}$ as well to yield feature map $\mathcal{S}$:
+                \begin{equation*}
+                    \begin{split}
+                        S(i, j) &= (\mathcal{I} \star \mathcal{K})(i, j) = \sum_{m} \sum_{n} \mathcal{I}(m, n) \mathcal{K}(i-m, j-n) \\
+                        \text{where } m, n &:= \text{iterators $\mathcal{I}$} \\
+                        \text{and } i, j &:= \text{iterators positions of } \mathcal{K} \\
+                        \end{split}
+                \end{equation*}
+            \end{itemize}
+    \end{itemize}
+
+\end{vbframe}    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{1D Convolution as smoothing function}
+    \center
+      \only<1>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_1.png}}%
+      \only<2>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_2.png}}%
+      \only<3>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_3.png}}%
+      \only<4>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_4.png}}%
+      \only<5>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_5.png}}%
+      \only<6>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_6.png}}%
+      \only<7>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_7.png}}%
+      \only<8>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_8.png}}%
+      \only<9>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_9.png}}%
+      \only<10>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_10.png}}%
+      \only<11>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_11.png}}%
+      \only<12>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_12.png}}%
+      \only<13>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_13.png}}%
+      \only<14>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_14.png}}%
+      \only<15>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_15.png}}%
+      \only<16>{\includegraphics[width=11cm]{plots/conv_animations/conv_anim_16.png}}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Related oprations}
+    \begin{itemize}
+        \item Convolution is strongly related to two other mathematical operators:
+        \begin{enumerate}
+            \item Fourier transform via the Convolution Theorem
+            \item Cross correlation
+        \end{enumerate}
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Convolution Theorem}
+    \begin{itemize}
+        \item STUPID NOTATION STYLE CURRENTLY
+        \item Convolution of the Fourier transform of two functions can be expressed as product of their Fourier transforms:
+        $$ 
+            \widehat{(f \star g)(t)}= \hat{f(t)} \hat{g(t)} 
+        $$
+        \item Important in signal processing for solving differential equations
+        \item Recap the Fourier transform of $h(t)$:
+        $$
+            \widehat{h(t)} = \int_{-\infty}^\infty exp(-2 \pi i \omega t)h(t) dt
+        $$
+        \item The computationally fastest way to compute a convolution is therefore taking the Fourier inverse of the muliplication of the Fourier-transformed input and filter function
+        $$
+            (f \star g)(t) = (\hat{f(t)} \hat{g(t)})^{-1}
+        $$
+    \end{itemize}
+\end{vbframe}
+
+\begin{vbframe}{Convolution Theorem - Proof}
+    % $$
+    %     \widehat{(f \star g)(t)} = \int_{-\infty}^\infty exp(-2 \pi i \omega t) \big\[ \inf_{-\infty}^\infty f(\tao) g(t-\tao)d\tao  \big\]dt \\
+    %     \int_{-\infty}^\infty \int_{-\infty}^\infty exp(-2 \pi i \omega t) f(\tao)g(t-\tao)d\tao dt \\
+    %     \int_{-\infty}^\infty \big\[ \int_{-\infty}^\infty exp(-2 \pi i \omega t) f(\tao)g(t-\tao) dt \big\]d \tao
+    % $$ 
+    \begin{equation*}
+        \begin{split}
+            \widehat{(f \star g)(t)} &= \int_{-\infty}^\infty exp(-2 \pi i \omega t) \Big[ \int_{-\infty}^\infty f(\tau) g(t-\tau)d\tau \Big] \\
+            & = \int_{-\infty}^\infty \int_{-\infty}^\infty exp(-2 \pi i \omega t) f(\tau)g(t-\tau)d\tau dt \\
+            & \overset{Fubini}{=} \int_{-\infty}^\infty \Big[ \int_{-\infty}^\infty exp(-2 \pi i \omega t) f(\tau) g(t-\tau ) dt  \Big] d\tau \\
+            & \overset{f(\tau) \perp t}{=} \int_{-\infty}^\infty f(\tau) \Big[ \int_{-\infty}^\infty exp(-2 \pi i \omega t) g(t-\tau) dt \Big]d \tau \\
+            & \overset{u = t - \tau}{=} \int_{-\infty}^\infty f(\tau) \Big[ \int_{-\infty}^\infty exp(-2\pi i \omega \tau) exp(-2 \pi i \omega u) g(u) du \Big] d\tau \\
+            & = \int_{-\infty}^\infty exp(-2 \pi i \omega \tau) f(\tau) \Big[ \int_{-\infty}^\infty exp(-2 \pi i \omega u) g(u) du \Big] d \tau \\
+            & \overset{Fubini}{=} ...
+        \end{split}
+    \end{equation*}
+\end{vbframe}
+
+\begin{vbframe}{Convolution Theorem - Proof}
+    \begin{equation*}
+        \begin{split}
+            &... \int_{-\infty}^\infty exp(-2 \pi i \omega \tau) f(\tau) d\tau \int_{-\infty}^\infty exp(-2 \pi i \omega u) g(u) du \\
+            &= \hat{f(t)}\hat{g(t)}
+        \end{split}
+    \end{equation*}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% nice xcor vs conv video by caltech
+% https://www.youtube.com/watch?v=MQm6ZP1F6ms
+
+\begin{vbframe}{Cross Correlation}
+    \begin{itemize}
+        \item Meausurement for similiarity of two functions $f(x), g(x)$
+        \item More specific, \textbf{where} are the two functions \textbf{how} similar to each other?
+        \item Mathematical formulation:
+        \begin{equation*}
+            S(i, j) ‚= (\mathcal{I} \star \mathcal{K})(i, j) = \sum_{m} \sum_{n} \mathcal{I}(m, n) \mathcal{K}(i+m, j+n)
+        \end{equation*}
+        \item Similar formulation as the convolution despite the flipped filter function in the convolutional kernel 
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{vbframe}{Properties of the Convolution}
+    \begin{itemize}
+        \item Commutativity:
+        $$ f \star g = g \star f$$
+        \item Associativity:
+        $$ (f \star g) \star h = f \star (g \star h)$$
+        \item Distributivity:
+        $$ f \star (g + h) = f\star g + f \star h$$ 
+        $$ \alpha (f \star g) = (\alpha f) \star g \text{ for scalar } \alpha$$ 
+        \item Differentiability:
+        $$ \frac{\partial (f\star g)(x)}{\partial x_i} = \frac{\partial f(x)}{\partial x_i}\star g(x) = \frac{\partial g(x)}{\partial x_i} \star f(x)$$ \\
+        $ \rightarrow (f\star g)(x)$ is as many times differentiable as the max of $g(x)$ and $f(x)$
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{vbframe}{Convolution mathematically - 2D}
+%     \begin{itemize}
+%         \item Interpret images as data matrices
+%         \item Amount of channels determines amount of matrices (RGB: 3, BW: 1)
+%         \item One channel of image $\mathcal{I}$ is represented as a matrix:\\
+%             \begin{equation*}
+%                 \begin{split}
+%                 \mathcal{I}:\Omega \in \mathcal{R}^2 &\mapsto \mathcal{R}_+ \\
+%                 (i, j) \mapsto \mathcal{I}_{i, j}
+%                 \end{split}
+%             \end{equation*}
+%         \item $\mathcal{I}$ contains two axis $\rightarrow$ use 2-dimensional kernel:
+%             \begin{equation*}
+%                 \begin{split}
+%                     S(i, j) &= (\mathcal{I} \star \mathcal{K})(i, j) = \sum_{m} \sum_{n} \mathcal{I}(m, n) \mathcal{K}(i-m, j-n) \\
+%                     \text{where } m, n &:= \text{iterators $\mathcal{I}$} \\
+%                     \text{and } i, j &:= \text{iterators positions of } \mathcal{K} \\
+%                 \end{split}
+%             \end{equation*}
+%     \end{itemize}
+% \end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{vbframe}{Convolution mathematically - tum}
+%     \begin{itemize}
+%         \item Convolution: filter one function (image I) with another one (filter K) to yield third function (feature map Y)  
+%         \item This can be formulated as: \\
+%                 \begin{equation*}
+%                     Y = (I \star K)_{r, s} := \sum_{u = -h_1}^{h_1} \sum_{u = -h_2}^{h_2} K_{u, v} * I_{r-u, s-v}
+%                 \end{equation*}
+%         \item with filter matrix K:\\
+%                 \begin{equation*}
+%                     K = 
+%                     \begin{bmatrix}
+%                         K_{-h_1, -h_2} & ... & K_{-h_1, h_2} \\
+%                         ... & K_{0, 0} & ... \\
+%                         K_{h_1, - h_2} & ... & K_{h_1, h_2}
+%                     \end{bmatrix}
+%                 \end{equation*}
+%     \end{itemize}
+% \framebreak
+%     \begin{itemize}
+%         \item Each layer $l$ consists of $m_1$ filters $K^{(l)}_i, ..., K^{(l)}_{m_1}$
+%         \item Thus, output $Y_i^{(l)}$ of layer $l$ contains $m_1^{(l)}$ feature maps of dimension $m_2^{(l)} \times m_3^{(l)}$ 
+%         \item The dimensions $m_2^{(l)} \text{ and } m_3^{(l)}$ can be calculated as $XXX$
+%         \item The $i^\text{th}$ feature map is computed as:
+%             \begin{equation*}
+%                 Y_i^{(l)} = B_i^{(l)} + \sum_{j=1}^{m_1^{l-1}}K_{i, j}^{(l)} \star Y_j^{(l-1)}
+%             \end{equation*}
+%         \item Where $B_i^{(l)}$ corresponds to a bias matrix similar to the bias in FFNs and $K_{i, j}^{(l)}$ is the filter that connects the $j^\text{h}$ with the $i^\text{h}$ feature map in the layer $l$. CHECK!
+%     \end{itemize}
+% \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Typology of Convolutions}
+    \begin{itemize}
+    \item 1D convolutions
+    \item 2D convolutions
+    \item 3D convolutions
+    \item Locally connected convolutions
+    \item Dilated convolutions
+    \item Separable convolutions
+    \item Transposed convolutions
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Types: 1D}
+    \begin{itemize} 
+    \item Use case: process 1-dimensional (mostly sequential) information
+    \item Single channel:
+        \begin{itemize}
+            \item Analogon to univariate time series
+            \item Audio waveform of one signal where discretized time (e.g. ms) is the convolution-axis
+            \item Text encoded in character-level one-hot-vectors
+        \end{itemize}
+    \item Multichannel:
+        \begin{itemize}
+            \item Analogon to multivariate time series
+            \item Movement data measured in three dimensions (e.g. accelerometer) where each channel corresponds to one dimension
+            \item Temperature and humidity
+        \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+\frame{
+\frametitle{Types: 1D}    
+    \center
+    \only<1>{\includegraphics[width=9cm]{plots/1d_conv_animation/1_filter.png}}%
+    \only<2>{\includegraphics[width=9cm]{plots/1d_conv_animation/2_filter.png}}%
+    \only<3>{\includegraphics[width=9cm]{plots/1d_conv_animation/3_filter.png}}%
+    \only<4>{\includegraphics[width=9cm]{plots/1d_conv_animation/4_filter.png}}%
+    \only<5>{\includegraphics[width=9cm]{plots/1d_conv_animation/5_filter.png}}%
+    \only<6>{\includegraphics[width=9cm]{plots/1d_conv_animation/6_filter.png}}%
+    \only<7>{\includegraphics[width=9cm]{plots/1d_conv_animation/7_filter.png}}%
+    \only<8>{\includegraphics[width=9cm]{plots/1d_conv_animation/8_filter.png}}%
+    \only<9>{\includegraphics[width=9cm]{plots/1d_conv_animation/9_filter.png}}%
+    \only<10>{\includegraphics[width=9cm]{plots/1d_conv_animation/10_filter.png}}%
+    \only<11>{\includegraphics[width=9cm]{plots/1d_conv_animation/11_filter.png}}%
+    \\
+    1D convolution of character-level-encoded text. Kernel (blue) moves with stride = 1 in direction of the y-axis yielding a 1D feature vector.
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Types: 3D}
+    \begin{itemize}
+        \item Data contains spatial (2 dimensions) and temporal (1 dimension) information
+        \item Single channel: 
+            \begin{itemize}
+                \item Volumetric data
+                \item MRI scans with height $y$ and width $x$ that consist of $z$ sequential slices of b/w images
+            \end{itemize}
+        \item Multichannel:
+            \begin{itemize}
+                \item Video data e.g. for pose estimation
+                \item Same as MRI but with 3 RGB channels for colourized images
+            \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Types: locally connected convolutions}
+    \begin{itemize}
+        \item Use case: XXX
+        \item nice overview post here: https://towardsdatascience.com/types-of-convolutions-in-deep-learning-717013397f4d
+    \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Types: dilated convolutions}
+    \begin{itemize}
+        \item Idea: artificially increase the receptive field of the net without using more filter weights
+        \item Benefit:
+        \begin{itemize}
+            \item Detection of fine-details by processing inputs in higher resolutions
+            \item Broader view of the input to capture more contextual information with less depth
+            \item Improved run-time-performance due to less parameters
+        \end{itemize}
+        \item Add new dilation parameter to the kernel $\mathcal{K}$ that skips pixels during convolution
+        \item Dilated kernel is basically a regular convolutional kernel padded with zeros
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item Receptive field: the visual field of a single neuron in a specific layer
+        \item Huge receptive field of neurons in the last hidden layer: they can capture a lot global information from the input
+        \item Formula for neuron in layer $l$ with kernel size $k$, dilation factor $d$ and stride $s$:
+        $$
+            RF_l = RF_{l-1} + (k-1) * d * \prod_{i = 1}^{k-1}s_i
+        $$
+        \item See \href{https://www.uio.no/studier/emner/matnat/ifi/INF5860/v18/undervisningsmateriale/lectures/inf5860_lecture6_convolutional_nerual_networks.pdf}{Oslo slides for original formula}, adapted to dilation by Jann, to be xchecked
+        \item Famous application in the WaveNet by \cite{15}
+    \end{itemize}
+    
+\framebreak
+    \center
+    \includegraphics[width=11cm]{plots/05_conv_variations/dilated/classic_conv.pdf}
+    \begin{itemize}
+        \item Regular convolution: neuron in layer 2 has receptive field of size 4 after two stacked layers
+    \end{itemize} 
+    
+\framebreak 
+    \center
+    \includegraphics[width=11cm]{plots/05_conv_variations/dilated/dilated.pdf}
+    \begin{itemize}
+        \item Dilated convolution: neuron in layer 2 has receptive field of size 8 after two stacked layers    
+    \end{itemize}    
+    
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Types: separable convolutions}
+    \begin{itemize}
+        \item Use case: XXX
+    \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Types: transposed convolutions}
+    \begin{itemize}
+        \item Idea: re-increase dimensionality of a feature map instead of decreasing it as with regular convolutions
+        \item Use case: required module in Encoder-Decoder architectures such as (variational) Autoencoders, Segmentation Nets, GANs
+        \item Tranpose convolution $\neq$ deconvolution 
+        \begin{itemize}
+            \item deconvolution simply reverts the convolution: create $f(x)$ out of $h(x)$ using $g(x)$
+            \item deconvolution is mathematically defined as the inverse of a convolution
+        \end{itemize}
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item Example:
+        \begin{itemize}
+            \item Input: feature map with dim $2\times 2$
+            \item Output: feature map with dim $4\times 4$
+            \item Use regular Convolution with advanced padding strategy and reshaping of the kernel matrix
+        \end{itemize}
+    \end{itemize}
+    \center
+    \includegraphics[width=10cm]{plots/05_conv_variations/transpose_conv.png}
+    \begin{itemize}
+        \item Convolution with $k=3, s=1, p=k-1=2$ reincreases dimensionality from 2 to 4 as shown by \cite{14}
+    \end{itemize}
+\framebreak
+    \begin{itemize}
+        \item Convolution with parameters kernel size $k$, stride $s$ and padding factor $p$
+        \item Associated transposed convolution has parameters $k' = k$, $s' = s$ and $p' = k-1$
+    \end{itemize}
+\end{vbframe}
+
+
+\begin{vbframe}{Types: transposed convolutions - shortcomings}
+    \begin{itemize}
+        \item One drawback of transposed convolutions in this distill-pub post: \href{https://distill.pub/2016/deconv-checkerboard/}{https://distill.pub/2016/deconv-checkerboard/}
+        \item Transposed convolutions lead to checkerboard-style artifacts in resulting images
+        \item Explanation: transposed convolution yields an overlap in some feature map values
+        \item Solutions: 
+        \begin{itemize}
+            \item Increase dimensionality via upsampling (biliniear, nearest neighbor) and then convolve this output with regular convolution
+            \item Make sure that the kernel size $k$ is dividable by the stride $s$
+        \end{itemize}
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\frame{
+
+\frametitle{Sparse interactions}
+
+  \center
+  \only<1>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse0.png}}%
+  \only<2>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse1.png}}%
+  \only<3>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse2.png}}%
+  \only<4>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse3.png}}%
+  \only<5>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse4.png}}%
+  \only<6>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse5.png}}%
+  \only<7>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/sparse6.png}}%
+  \only<8>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/dense0.png}}%
+  \only<9>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/dense1.png}}%
+  \only<10>{\includegraphics[width=7cm]{plots/06_conv_properties/sparse/dense2.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item We want to use the \enquote{neuron-wise} representation of our CNN.}
+    \only<2>{\item Moving the filter to the first spatial location..}
+    \only<3>{\item ..yields us the first entry of the feature map..}
+    \only<4>{\item ..which is composed of these four connections.}
+    \only<5>{\item $s_{12}$ is composed by these four connections.}
+    \only<6>{\item $s_{21}$ by these..}
+    \only<7>{\item and finally $s_{22}$ by these.}
+    \only<8>{\item Assume we would replicate the architecture with a dense net.}
+    \only<9>{\item Each input neuron is connected with each hidden layer neuron.}
+    \only<10>{\item In total, we obtain 36 connections!}
+
+  \end{itemize}
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Sparse interactions}
+  \begin{itemize}
+    \item What does that mean?
+    \begin{itemize}
+      \item Our CNN has a \textbf{receptive field} of 4 neurons.
+      \item That means, we apply a \enquote{local search} for features.
+      \item A dense net on the other hand conducts a \enquote{global search}.
+      \item The receptive field of the dense net are 9 neurons.
+    \end{itemize}
+    \item When processing images, it is more likely that features occur at specific locations in the input space.
+    \item For example, it is more likely to find the eyes of a human in a certain area, like the face.
+    \begin{itemize}
+      \item A CNN only incorporates the surrounding area of the filter into its feature extraction process.
+      \item The dense architecture on the other hand assumes that every single pixel entry has an influence on the eye, even pixels far away or in the background.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{Parameter Sharing}
+
+  \center
+  \only<1>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps0.png}}%
+  \only<2>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps1.png}}%
+  \only<3>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps3.png}}%
+  \only<4>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps4.png}}%
+  \only<5>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps5.png}}%
+  \only<6>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps6.png}}%
+  \only<7>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps7.png}}%
+  \only<8>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps8.png}}%
+  \only<9>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/ps9.png}}%
+  \only<10>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/dense0.png}}%
+  \only<11>{\includegraphics[width=7cm]{plots/06_conv_properties/ps/dense1.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item For the next property we focus on the filter entries.}
+    \only<2>{\item In particular, we consider weight $w_{11}$}
+    \only<3>{\item As we move the filter to the first spatial location..}
+    \only<4>{\item ..we observe the following connection for weight $w_{11}$}
+    \only<5>{\item Moving to the next location..}
+    \only<6>{\item ..highlights that we use the same weight more than once!}
+    \only<7>{\item Even three..}
+    \only<8>{\item And in total four times.}
+    \only<9>{\item Alltogether, we have just used four weights.}
+    \only<10>{\item How many weights does a corresponding dense net use?}
+    \only<11>{\item $9 \cdot 4 = 36$! Thats 9 times more weights!}
+
+  \end{itemize}
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Parameter sharing}
+  \begin{itemize}
+    \item Why is that good?
+    \item Less parameters drastically reduce memory requirements.
+    \item Faster runtime:
+    \begin{itemize}
+      \item For $m$ inputs and $n$ outputs, a fully connected network requires $m\times n$ parameters and has $\mathcal{O}(m\times n)$ runtime.
+      \item A CNN has limited connections $k<<m$, thus only $k\times n$ parameters and $\mathcal{O}(k\times n)$ runtime.
+    \end{itemize}
+    \item But it gets even better:
+    \begin{itemize}
+      \item Less parameters mean less overfitting and better generalization!
+    \end{itemize}
+  \end{itemize}
+\framebreak
+  \begin{itemize}
+    \item Example: consider a color image with size $100 \times 100$.
+    \item Suppose we would like to create one single feature map with a \enquote{same} convolution.
+    %(i.e. retain the dim of the input for our feature maps).
+    \begin{itemize}
+      \item Choosing a filter with size $5$ means that we have a total of $5 \cdot 5 \cdot 3 = 75$ parameters (bias unconsidered).
+      \item A dense net with the same amount of \enquote{neurons} in the hidden layer results in 
+      $$\underbrace{(100^2 \cdot 3)}_{\text{input}} \cdot \underbrace{(100^2)}_{\text{hidden layer}} = 300.000.000 $$ parameters.
+      
+      %\item A dense net needs $10.000$ neurons in its hidden layer to replicate that architecture ($100 \cdot 100 = 10.000$). It has $100 \cdot 100 \cdot 3 \cdot 10.000 = 300.000.000$ parameters (bias unconsidered)!
+      
+    \end{itemize}
+  \item Note that this was just a fictitious example. In practice we do not try to replicate CNN architectures with dense networks (actually it isn't even possible since physical limitations like the computer hardware would not allow us to).
+  \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+
+\frametitle{Equivariance to translation}
+
+  \center
+  \only<1>{\includegraphics[width=7cm]{plots/06_conv_properties/equivariance/equi0.png}}%
+  \only<2>{\includegraphics[width=7cm]{plots/06_conv_properties/equivariance/equi1.png}}%
+  \only<3>{\includegraphics[width=7cm]{plots/06_conv_properties/equivariance/equi2.png}}%
+  \only<4>{\includegraphics[width=7cm]{plots/06_conv_properties/equivariance/equi3.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item Think of a specific feature of interest, here highlighted in grey.}
+    \only<2>{\item Furthermore, assume we had a tuned filter looking for exactly that feature.}
+    \only<3>{\item The Filter does not care at what location the feature of interest is located at.}
+    \only<4>{\item It is literally able to find it anywhere! That property is called \textbf{equivariance to translation}.}
+
+  \end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Reminder}
+  \begin{figure}
+  \centering
+    \includegraphics[width=12cm]{plots/03_first_glimpse/cnn10.png}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Detector Stage: Nonlinearity}
+  \begin{itemize}
+    \item To obtain nonlinearity, we use activation functions on all feature map entries.
+    \item Typical candidates for CNNs are:
+    \begin{itemize}
+      \item ReLU as well as other variations of it.
+      \item maybe tanh.
+    \end{itemize}
+      \item Never use the sigmoidal activation function in conv layers!
+      \begin{itemize}
+        \item sigmoids saturate and \enquote{kill} gradients: when the neurons activation saturates at either tail of 0 or 1, the gradient at these regions is almost zero.
+        \item sigmoid outputs are not zero-centered: this has implications on the dynamics during gradient descent, because if the data coming into a neuron is always positive, then the gradient on the weights will during backpropagation become either all be positive, or all negative.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Reminder II}
+  \begin{figure}
+  \centering
+    \includegraphics[width=12cm]{plots/03_first_glimpse/cnn10.png}
+  \end{figure}
+\end{vbframe}
+
+\frame{
+
+\frametitle{Pooling Stage}
+
+  \center
+  \only<1>{\includegraphics[width=10cm]{plots/08_pooling/pool0.png}}%
+  \only<2>{\includegraphics[width=10cm]{plots/08_pooling/pool1.png}}%
+  \only<3>{\includegraphics[width=10cm]{plots/08_pooling/pool2.png}}%
+  \only<4>{\includegraphics[width=10cm]{plots/08_pooling/pool3.png}}%
+  \only<5>{\includegraphics[width=10cm]{plots/08_pooling/pool4.png}}%
+  \only<6>{\includegraphics[width=10cm]{plots/08_pooling/pool5.png}}%
+  \only<7>{\includegraphics[width=10cm]{plots/08_pooling/pool6.png}}%
+  \only<8>{\includegraphics[width=10cm]{plots/08_pooling/pool7.png}}%
+  \only<9>{\includegraphics[width=10cm]{plots/08_pooling/pool8.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item Suppose the overlying feature map.}
+    \only<2>{\item We want to downsample the feature map, but optimally, lose no information}
+    \only<3>{\item Applying the max pooling operation, we simply look for the maximum value at each spatial location}
+    \only<4>{\item That is 8 for the first spatial location.}
+    \only<5>{\item To obtain actual downsampling, we typically chose a stride of 2. For a filter of size 2, that will halve the dimensions.}
+    \only<6>{\item The pooled feature map has entries 8, 6, 9 and 3.}
+    \only<7>{\item We highlight the locations of the activations.}
+    \only<8>{\item If we rotate the feature map, we obtain the very same activations as before (Think of a rotated image, the CNN will still extract the crucial information).}
+    \only<9>{\item Even blurring the image by randomly changing pixel entries by either +1 or -1 will only marginally change activations.}
+
+  \end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Backpropagation}
+  \begin{figure}
+  \centering
+    \includegraphics[width=7cm]{plots/06_conv_properties/ps/dense1.png}
+  \end{figure}
+  \begin{itemize}
+    \item Assume a dense net. We had to compute 36 different gradients to adjust our network (36 weights).
+  \end{itemize}
+\end{vbframe}
+
+\frame{
+\frametitle{Backpropagation}
+
+  \center
+  \only<1>{\includegraphics[width=6.5cm]{plots/09_backprop/bp1.png}}%
+  \only<2>{\includegraphics[width=6.5cm]{plots/09_backprop/bp2.png}}%
+  \only<3>{\includegraphics[width=6.5cm]{plots/09_backprop/bp4.png}}%
+
+  \begin{itemize}
+
+    \only<1>{\item We've already learned that our CNN only has 4 weights.}
+    \only<2>{\item Let us focus once again on weight $w_{11}$}
+    \only<3>{\item The highlited connections shows where $w_{11}$ incorporates.}
+
+  \end{itemize}
+}
+
+\frame{
+\frametitle{Backpropagation}
+
+  \begin{itemize}
+
+    \only<1-5>{\item We know from earlier computations:}
+    \only<1-2>{\item[] $s_{11} = a \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<1-2>{\item[] $s_{12} = b \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<1-2>{\item[] $s_{21} = d \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<1-2>{\item[] $s_{22} = e \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+    \only<3-4>{\item[] $s_{11} = a \cdot \textcolor{red}{w_{11}} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<3-4>{\item[] $s_{12} = b \cdot \textcolor{red}{w_{11}} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<3-4>{\item[] $s_{21} = d \cdot \textcolor{red}{w_{11}} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<3-4>{\item[] $s_{22} = e \cdot \textcolor{red}{w_{11}} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+    \only<5>{\item[] $s_{11} = \textcolor{red}{a} \cdot w_{11} + b \cdot w_{12} + d \cdot w_{21} + e \cdot w_{22}$}
+    \only<5>{\item[] $s_{12} = \textcolor{red}{b} \cdot w_{11} + c \cdot w_{12} + e \cdot w_{21} + f \cdot w_{22}$}
+    \only<5>{\item[] $s_{21} = \textcolor{red}{d} \cdot w_{11} + e \cdot w_{12} + g \cdot w_{21} + h \cdot w_{22}$}
+    \only<5>{\item[] $s_{22} = \textcolor{red}{e} \cdot w_{11} + f \cdot w_{12} + h \cdot w_{21} + i \cdot w_{22}$}
+    \only<1-5>{\item[]}
+    \only<2-5>{\item To obtain gradients for our weights, we simply compute:}
+    \only<1-5>{\item[]}
+    \only<2>{\item
+      $\frac{\delta s_{i,j}}{\delta w}$ = $\begin{pmatrix} 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{11}} & 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{12}} \\ 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{21}} & 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{22}}
+      \end{pmatrix}$    
+    }
+    \only<3>{\item
+      $\frac{\delta s_{i,j}}{\delta w}$ = $\begin{pmatrix} 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta \textcolor{red}{w_{11}}} & 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{12}} \\ 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{21}} & 
+      \sum\limits_{i} \sum\limits_{j} \frac{\delta s_{ij}}{\delta w_{22}}
+      \end{pmatrix}$    
+    }
+    \only<4>{\item 
+      $\frac{\delta s_{i,j}}{\delta w}$ = $\begin{pmatrix} 
+      \frac{\delta s_{11}}{\delta \textcolor{red}{w_{11}}} + 
+      \frac{\delta s_{12}}{\delta \textcolor{red}{w_{11}}} + 
+      \frac{\delta s_{21}}{\delta \textcolor{red}{w_{11}}} + 
+      \frac{\delta s_{22}}{\delta \textcolor{red}{w_{11}}} & &
+      .... \\
+      \textcolor{white}{bla} \\
+      .... & &
+      ....
+      \end{pmatrix}$
+    }
+    \only<5>{\item
+      $\frac{\delta s_{i,j}}{\delta w}$ = $\begin{pmatrix} 
+      \textcolor{red}{a} + \textcolor{red}{b} + \textcolor{red}{d} + \textcolor{red}{e} & &
+      b + c + e + f \\
+      \textcolor{white}{bla} \\
+      d + e + g + h & &
+      e + f + h + i
+      \end{pmatrix}$    
+    }
+  \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+\frametitle{Visualization: filters}
+    \begin{itemize}
+        \item keras stuff: https://blog.keras.io/how-convolutional-neural-networks-see-the-world.html
+        \item show that mathematically (Gradient Ascent)
+    \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+\frametitle{Visualization: attention in images}
+    \begin{itemize}
+        \item fancy heatmaps for different classes (cat/ dog)
+        \item find nice images
+        \item give intuition
+    \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{CNN in mxnet}
+  \begin{itemize}
+    \item Let us fit a CNN in mxnet with the clear goal to outperform our earlier models (with fewer parameters)!
+    \item The heart of the models architecture has two conv layers and one dense layers:
+    \begin{itemize}
+      \item conv1: 64 feature maps with $5 \times 5$ filter
+      \item pool1: max pooling layer
+      \item conv2: 128 feature maps with $5 \times 5$ filter
+      \item pool2: max pooling layer
+      \item dense layer: 1024 neurons and $p = 0.2\%$ dropout rate
+      \item output layer: 10 neurons.
+      \item we only use ReLU for activations and Adam optimizer
+    \end{itemize}
+  \item How many parameters does this model have?
+  \end{itemize}
+\framebreak
+<<mxnet1, size = "scriptsize", cache = TRUE, eval = FALSE, echo = TRUE>>=
+conv1 = mx.symbol.Convolution(data, 
+  kernel = c(5, 5), num_filter = 64)
+act1 = mx.symbol.Activation(conv1, "relu")
+pool1 = mx.symbol.Pooling(act1, 
+  pool_type = "max", kernel = c(2, 2), stride = c(2, 2))
+
+conv2 = mx.symbol.Convolution(pool1,  
+  kernel = c(5, 5), num_filter = 128)
+act2 = mx.symbol.Activation(conv2, "relu")
+pool2 = mx.symbol.Pooling(act2, 
+  pool_type = "max", kernel = c(2, 2), stride = c(2, 2))
+
+flatten = mx.symbol.Flatten(data = pool2)
+
+fc1 = mx.symbol.FullyConnected(flatten, 1024)
+act3 = mx.symbol.Activation(fc1, "relu")
+dropout1 = mx.symbol.Dropout(act3, p = 0.4)
+
+fc2 = mx.symbol.FullyConnected(dropout1, 10)
+softmax = mx.symbol.SoftmaxOutput(data = fc3)
+@
+\framebreak
+  \begin{figure}
+  \centering
+    \includegraphics[width=12cm]{plots/implementations/CNN.png}
+  \end{figure}
+% \framebreak
+%   \begin{itemize}
+%     \item This small and simple model achieves a peak performance of $0.0067$ missclassification!
+%     \item Our best (and much larger!) dense nets archieved at best $0.025$ missclassification.
+%   \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{What do filters actually \enquote{see}?}
+  \begin{figure}
+  \centering
+    \includegraphics[width=10cm]{plots/other/visualization.png}
+    \caption{Visualizing and Understanding Convolutional Networks (Zeiler \& Fergus (2013))}
+  \end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Famous architectures}
+  \begin{itemize}
+    \item AlexNet: 5 conv layers, won ImageNet in 2012)
+  \end{itemize}
+  \begin{figure}
+  \centering
+    \includegraphics[width=10cm]{plots/other/alexnet.png}
+    \caption{ImageNet Classification with Deep Convolutional Neural Networks (Alex Krizhevsky et al (2011))}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item VGG Net: 13 conv layers, only uses $3x3$ filters!
+  \end{itemize}
+  \begin{figure}
+  \centering
+    \includegraphics[width=9cm]{plots/other/vgg16.png}
+    \caption{Very Deep Convolutional Networks for Large-Scale Image Recognition (Simonyan and Zisserman (2014))}
+  \end{figure}
+\framebreak
+  \begin{itemize}
+    \item Other networks one should know:
+    \begin{itemize}
+      \item GoogLeNet: 
+      \begin{itemize}
+        \item introduced \enquote{inception layers} and won ImageNet in 2014
+      \end{itemize}
+      \item Microsoft ResNet
+      \begin{itemize}
+        \item 152 (!) conv layers and won ImageNet in 2015
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  \begin{figure}
+  \centering
+    \includegraphics[width=7cm]{plots/other/deeper.png}
+  \end{figure}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Capsule Network: Idea}
+    \begin{itemize}
+        \item empty yet
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Backprop in CNNs mathematically}
+    \begin{itemize}
+        \item empty yet
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Filter Visualization}
+    \begin{itemize}
+        \item keras post https://blog.keras.io/how-convolutional-neural-networks-see-the-world.html
+        \item explain mathematically
+    \end{itemize}
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Class activation mapping}
+    \begin{itemize}
+        \item Zeiler et al (2013) with occluders: https://arxiv.org/abs/1311.2901
+        \item Grad-CAM blog: https://jacobgil.github.io/deeplearning/class-activation-maps
+        \item Gradient-based Localization (Grad-CAM) Paper: https://arxiv.org/abs/1610.02391
+    \end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Transfer Learning example}
+    \begin{itemize}
+        \item use trained model, freeze and fine-tune the last layers
+        \item practical example
+    \end{itemize}
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Image Segmentation}
+    \begin{itemize}
+        \item nearest neighbor upsampling
+        \item example project
+        \item different upsampling techniques (check \cite{14})
+        \item mask-rcnn video: https://www.youtube.com/watch?v=OOT3UIXZztE
+    \end{itemize}
+
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Consulting project from Niklas Klein and Jann Goschenhofer}
+
+    \center
+    \only<1>{\includegraphics[width=11cm]{plots/outlook/badlabel_combine1.png}}%
+    \only<2>{\includegraphics[width=11cm]{plots/outlook/badmex_combine.png}}%
+    
+\begin{itemize}
+  \only<1>{\item Illustrative example for incorrect labeling of German bridge}
+  \only<2>{\item Illustrative example for incorrect and outdated mapping in Latin America}
+\end{itemize}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Gathering training data}
+  \begin{figure}
+      \includegraphics[width= 10cm]{plots/outlook/train_data.png}
+  \end{figure}
+\begin{itemize}
+  \item Data gathering: we used the Google Maps API to download an arbitrary amount of satellite images (left)  and road maps (middle).
+  \item The road maps were thresholded to create a binary label mask (right).
+\end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{U-net}
+
+    \center
+    \only<1>{\includegraphics[width=8cm]{plots/outlook/architecture_4.png}}%
+    \only<2>{\includegraphics[width=6.5cm]{plots/outlook/unet.png}}%
+    \only<3>{\includegraphics[width=9cm]{plots/outlook/pooling.png}}%
+    \only<4>{\includegraphics[width=9cm]{plots/outlook/upsampling.png}}%
+    \only<5>{\includegraphics[width=8cm]{plots/outlook/unet.png}}%
+    
+  \begin{itemize}
+    
+    \only<1>{\item Scheme for a fully convolutional neural net (FCN). Blue arrows correspond to conv layers. The architecture does only contain convolution layers (and no dense layers). We want the output to have the same height and width as the input, e.g. $512^2$ (to obtain a probability mask for each pixel: \enquote{road} or \enquote{no road}.}
+    \only<2>{\item Illustration of our customized version of the \textit{U-Net} architecture by Ronneberger et al (2015). Blue arrows are convolutions, red arrows max-pooling operations, green arrows upsampling steps and the brown arrows merge layers. The height and width of the feature blocks are shown on the vertical and the depth on the horizontal. D are dropout layers (we used $50\%$ in both blocks).}
+    \only<3>{\item Max-pooling: decreasing the dimensionality of the feature maps comes along with less demand of GPU memory (also greatly speeds up training time). This effect comes along at the expense of a loss in spatial information which is crucial for our task.}
+    \only<4>{\item Illustration of upsampling: the dimension of the blue feature block on the left is doubled via nearest neighbor interpolation. Therefore, each row and column of the feature map is repeated two times to create the higher level analogue. This is shown on a dummy example on the right hand side of the graphic.}
+    \only<5>{\item \enquote{Skip connections [...] to skip features from the contracting path to the expanding path in order to recover spatial information lost during downsampling} (Michal Drozdzal et al. (2016))} 
+
+  \end{itemize}    
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+
+\frametitle{Training and evaluation}
+
+    \center
+    \only<1>{\includegraphics[width=10cm]{plots/outlook/training.png}}%
+    \only<2>{\includegraphics[width=9cm]{plots/outlook/confusion_mat.png}}%
+    \only<3>{\includegraphics[width=6cm]{plots/outlook/f1_optimization.png}}%
+    \only<4>{\includegraphics[width=6cm]{plots/outlook/19.png}}%
+    \only<5>{\includegraphics[width=6cm]{plots/outlook/31.png}}%
+    \only<6>{\includegraphics[width=5cm]{plots/outlook/q3_1.png}}%
+    \only<7>{\includegraphics[width=5cm]{plots/outlook/q4_1.png}}%
+    \only<8>{\includegraphics[width=5cm]{plots/outlook/rails1.png}}%
+    
+\begin{itemize}
+    \only<1>{\item $n_\text{train} = 720$, $n_\text{val} = 80$, GTX 1070 (GPU): 300 s/epoch, Ryzen 1600X (CPU): 8000 s/epoch. Early stopping with patience $= 10$ cancels training after 25 epochs. }
+    \only<2>{\item $F_1$ score as the harmonic mean of precision and recall:     \begin{align}
+            F_1 = 2 \cdot \frac{\text{precision } \cdot \text{ recall}}{\text{precision } + \text{ recall}} \notag
+    \end{align}}
+    \only<3>{\item Optimization of the threshold for the resulting probability scores. Depicted are the values for the scores precision, recall, $F_1$ and accuracy with respect to different threshold values.}
+    \only<4>{\item Model prediction on test image from rural area. For this image, our performance measures exhibit a recall of 0.86, a precision of 0.89 and an F1 score of 0.88.}
+    \only<5>{\item Model prediction on test image from rural area.
+        For this image, our performance measures exhibit a recall of 0.70, a precision of 0.74 and an F1 score of 0.72.}
+    \only<6>{\item Badly labeled training sample. The blue line (false negatives) highlights the wrong label of the satellite image. The correct activation of our model is colored in red (false positives). For this image our performance measures exhibit a recall of 0.81, a precision of 0.53 and an F1 score of 0.64.}
+    \only<7>{\item Stability of the model. We added greyish blobs and one street alike rectangle at the top right corner of one image to see whether the network gets fooled by these objects. Judging by the results, the architecture searches for specific patterns instead of simple color gradients.}
+    \only<8>{\item The network gets fooled by the railway, highlighted in plain red (false positives). We receive a recall of 0.71, a precision of 0.42 and an F1 score of 0.53 for this image.}
+\end{itemize}
+
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Test results}
+  \begin{center}
+      %\captionsetup{margin=2cm}
+      \captionof{table}[Main results]{Performance of the model on 40 completely unseen test images}
+          \begin{tabular}{c | c | c | c | c}
+              Precision & Recall & F1 Score & Accuracy & Base Accuracy\\ 
+              \hline
+              \num[round-mode=places,round-precision=4]{0.7830283} & 
+              \num[round-mode=places,round-precision=4]{0.7177028 } & 
+              \num[round-mode=places,round-precision=4]{0.7439453} & 
+              \num[round-mode=places,round-precision=4]{0.9559174} &
+              \num[round-mode=places,round-precision=4]{0.9208350182}
+          \end{tabular}
+  \end{center}
+\begin{itemize}
+  \item Those results can be interpreted as follows: 
+  \begin{itemize}
+    \item 78.30\% of the labeled road pixels in the test data set were classified as such by the model.
+    \item  Furthermore, 71.77\% of those pixels, that were classified as road
+pixels, are also labeled as such.
+  \end{itemize}
+\end{itemize}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Text Mining with CNNs}
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Bayesian CNNs}
+
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Otavio Good, 2015]{2} Otavio Good (2015)
+\newblock How Google Translate squeezes deep learning onto a phone
+\newblock \emph{\url{https://research.googleblog.com/2015/07/how-google-translate-squeezes-deep.html}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Zhang et al., 2016]{3} Zhang, Richard and Isola, Phillip and Efros, Alexei A (2016)
+\newblock Colorful Image Colorization
+\newblock \emph{\url{https://arxiv.org/pdf/1603.08511.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Mariusz Bojarski et al., 2016]{4} Mariusz Bojarski, Davide Del Testa,Daniel Dworakowski,Bernhard Firner,Beat Flepp, Prasoon Goyal, Lawrence D. Jackel, Mathew Monfort, Urs Muller, Jiakai Zhang, Xin Zhang, Jake Zhao, Karol Zieba (2016)
+\newblock End to End Learning for Self-Driving Cars
+\newblock \emph{\url{https://arxiv.org/abs/1604.07316}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Namrata Anand and Prateek Verma, 2016]{5} Namrata Anand and Prateek Verma (2016)
+\newblock Convolutional and recurrent nets for detecting emotion from audio data
+\newblock \emph{\url{http://cs231n.stanford.edu/reports/2015/pdfs/Cs_231n_paper.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Alex Krizhevsky, 2009]{6} Alex Krizhevsky (2009)
+\newblock Learning Multiple Layers of Features from Tiny Images
+\newblock \emph{\url{https://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Matthew D. Zeiler and Rob Fergus, 2013]{7} Matthew D. Zeiler and Rob Fergus (2013)
+\newblock Visualizing and Understanding Convolutional Networks
+\newblock \emph{\url{http://arxiv.org/abs/1311.2901}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Mnih Volodymyr, 2013]{8} Mnih Volodymyr (2013)
+\newblock Machine Learning for Aerial Image Labeling
+\newblock \emph{\url{https://www.cs.toronto.edu/~vmnih/docs/Mnih_Volodymyr_PhD_Thesis.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Hyeonwoo Noh et al., 2013]{9} Hyeonwoo Noh, Seunghoon Hong and Bohyung Han (2015)
+\newblock Learning Deconvolution Network for Semantic Segmentation
+\newblock \emph{\url{http://arxiv.org/abs/1505.04366}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Karen Simonyan and Andrew Zisserman 2014]{10} Karen Simonyan and Andrew Zisserman (2014)
+\newblock Very Deep Convolutional Networks for Large-Scale Image Recognition
+\newblock \emph{\url{https://arxiv.org/abs/1409.1556}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Alex Krizhevsky et al., 2012]{11} Alex Krizhevsky, Ilya Sutskever and Geoffrey E. Hinton (2012)
+\newblock ImageNet Classification with Deep Convolutional Neural Networks
+\newblock \emph{\url{https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Olaf Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
+\newblock U-Net: Convolutional Networks for Biomedical Image Segmentation
+\newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Michal Drozdzal et al., 2016]{13} Michal Drozdzal, Eugene Vorontsov, Gabriel Chartrand, Samuel Kadoury and Chris Pal (2016)
+\newblock The Importance of Skip Connections in Biomedical Image Segmentation
+\newblock \emph{\url{http://arxiv.org/abs/1608.04117}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Vincent Dumoulin et al., 2016]{14} Dumoulin, Vincent and Visin, Francesco (2016)
+\newblock A guide to convolution arithmetic for deep learning
+\newblock \emph{\url{https://arxiv.org/abs/1603.07285v1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Aaron van den Oord et al., 2016]{15} Van den Oord, Aaron, Sander Dielman, Karen Simonyan, Oriol Vinyals, Alex Graves, Nal Kalchbrenner, and Koray Kavukocuoglu (2016)
+\newblock WaveNet: A Generative Model for Raw Audio
+\newblock \emph{\url{https://arxiv.org/abs/1609.03499}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endlecture
+

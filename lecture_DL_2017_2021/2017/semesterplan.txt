@@ -1,0 +1,126 @@
+DeepLearning / PM
+
+Slides plan
+
+Due date
+
+June 07 
+June 14th Regularization(ch2| 1 week)
+July 12th  Optimization(3th | 3 weeks)
+July 17th CNN(ch4 | 1 week )
+Exam + holiday(Niklas)
+Aug  30th LSTM(ch5 | 5 weeks)
+
+Sep 7th Excercise
+Sep 15th ch6 AutoEncoder( ch6 | 3 weeks)
+Sep 22th Final review
+##mlr workshop for two weeks
+Oct 12th Final review
+Due date  for Excercies
+
+Sep 06th Initial planning
+
+
+
+
+Semester start Oct 16th
+
+
+
+Semesterplan SoSe 2017
+
+
+---------------------------------------------
+01 | 24.4. | Mon | Intro 
+  braucht man länger als eine stunde. ein schöneres bsp zu ML wäre gut
+  und ein teil der theory sollte hier raus
+02 | 25.4. | Tue | Learning Theory 1a
+  LT1 braucht jetzt fast 3 slots. 2 passte gar nicht
+01 | 26.4. | Mi  | Intro
+02 | 27.4. | Do  | Learning Theory 1a
+
+---------------------------------------------
+03 | 01.5. | Mon | *(holiday)
+04 | 02.5. | Tue | Exercise 1
+03 | 03.5. | Mi  | *(canceled)
+04 | 04.5. | Do  | Exercise 1
+
+---------------------------------------------
+05 | 08.5. | Mon | LT1b
+ lief gut aber zu viel. mehr basics noch machen.
+06 | 09.5. | Tue | CART
+kam hier hier bis folie 15, weil noch so viel von LT1 übrig war (45 min LT1)
+05 | 10.5. | Mi  | LT1b
+06 | 11.5. | Do  | CART
+
+---------------------------------------------
+07 | 15.5. | Mon | RF
+bin nur bis vor den varimp teil gekommen. ansonsten eigentlich ganz ok.
+08 | 16.5. | Tue | Exercises 2
+07 | 17.5. | Mi  | RF
+08 | 18.5. | Do  | Exercises 2
+
+---------------------------------------------
+09 | 22.5. | Mon | LT2a
+10 | 23.5. | Tue | LT2b
+LT2 ist viel zu schwer und viel zu voll. selbst ohne weiteres material sind schon fast 3 slots.
+(ok ich musste auch noch varim hier in den 2 slots machen)
+es sollte einfach ganz viele plots, besipiele und erläuterende kommentare dazukommen.
+dann einen slot mehr zeit adden.
+09 | 24.5. | Mi  | LT2a
+-- | 25.5. | Do  | *entfällt (Christi-Himmelfahrt)*
+
+---------------------------------------------
+11 | 29.5. | Mon | Resampling 
+12 | 30.5. | Tue | Exercises 3
+10 | 31.5. | Mi  | LT2b
+11 | 01.6. | Do  | Resampling
+
+
+---------------------------------------------
+-- | 05.6. | Mon | *(holiday)*
+-- | 06.6. | Tue | *(holiday)*
+12 | 07.6. | Mi  | Exercises 3
+13 | 08.6. | Do  | B1
+
+---------------------------------------------
+13 | 12.6. | Mon | B1
+14 | 13.6. | Tue | B2
+14 | 14.6. | Mi  | B2 
+-- | 15.6. | Do  | *entfällt (Fronleichnam)*
+
+---------------------------------------------
+15 | 19.6. | Mon | B3
+16 | 20.6. | Tue | Exercises 4
+15 | 21.6. | Mi  | B3
+16 | 22.6. | Do  | Exercises 4
+
+---------------------------------------------
+17 | 26.6. | Mon | ROC - quay 
+18 | 27.6. | Tue | SVM1 - julia  
+17 | 28.6. | Mi  | ROC 
+18 | 29.6. | Do  | SVM1
+
+---------------------------------------------
+19 | 03.7. | Mon | SVM2 
+20 | 04.7. | Tue | Exercises 5
+19 | 05.7. | Mi  | SVM2
+20 | 06.7. | Do  | Exercises 5
+
+---------------------------------------------
+21 | 10.7. | Mon | VS - maria
+22 | 11.7. | Tue | GP - xudong
+21 | 12.7. | Mi  | VS 
+22 | 13.7. | Do  | GP
+
+---------------------------------------------
+23 | 17.7. | Mon | Tuning, mit MBO: überbeiten!!!!! wer macht das???
+24 | 18.7. | Tue | Exercises 6
+23 | 19.7. | Mi  | Tuning, mit MBO
+24 | 20.7. | Do  | Exercises 6
+
+---------------------------------------------
+25 | 24.7. | Mon | LT3 - nested, partial, imbalance, impute, cost, feature generation
+26 | 25.7. | Tue | Exercises 7
+25 | 26.7. | Mi  | LT3
+26 | 27.7. | Do  | Exercises 7
