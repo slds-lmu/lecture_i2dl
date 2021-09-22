@@ -6,7 +6,7 @@ TEMPLATE_ROOT = 'templates'
 QUESTION_ROOT = 'questions'
 SOLUTIONS_ROOT = 'solutions'
 
-SOLUTION_SKIP_EXEC_TAG = '#!TAG SKIPQUESTEXEC'
+QUESTION_SKIP_EXEC_TAG = '#!TAG SKIPQUESTEXEC'
 HW_BEGIN_TAG = '#!TAG HWBEGIN'
 HW_END_TAG = '#!TAG HWEND'
 MSG_TAG = '#!MSG'
@@ -35,7 +35,7 @@ def main():
 
             for line in template_file:
                 # Check for no cell exec in question
-                if SOLUTION_SKIP_EXEC_TAG in line:
+                if QUESTION_SKIP_EXEC_TAG in line:
                     question_file.write('%%script echo \n')
 
                 # Check for HW Tags
