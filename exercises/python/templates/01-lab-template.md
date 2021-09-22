@@ -21,8 +21,6 @@ Welcome to the very first lab, in which we will have fun with logistic regressio
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-from typing import List
-
 import torch
 from torch import Tensor
 
