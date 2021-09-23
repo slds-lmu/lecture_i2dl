@@ -39,11 +39,16 @@ Apart from the `requirements.txt` you will need to install the `jupytext` packag
 pip.
 
 You can directly edit the template`.md` files or convert them to `.ipynb` files with 
-`make convert-template-md-to-ipynb`. Conversion back to `.md` is done via
-`make convert-template-ipynb-to-md`.
+`make convert-md-to-ipynb FILE=<file>`. Conversion back to `.md` is done via
+`make convert-ipynb-to-md FILE=<file>`.
 
-To produce all files for questions and solutions (including `.md`, `.ipynb` and `.pdf`)
-just call `make convert-full`.
+The python script `convert.py` can be utilized to produce all files for questions 
+and solutions (including `.md`, `.ipynb` and `.pdf`):
+
+```shell
+python convert.py -f <file>
+```
+If no `-f` flag is provided, all template markdown files will be converted.
 
 Some tags in the template lead to different behavior in question and solution
 versions:
