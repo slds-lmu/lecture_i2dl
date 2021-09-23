@@ -198,6 +198,8 @@ def convert_ipynb_to_pdf(file_list: List) -> List:
 
         pdf_list.append(str(notebook_file).replace('.ipynb', '.pdf'))
 
+    return pdf_list
+
 
 if __name__ == '__main__':
     main()
