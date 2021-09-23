@@ -188,8 +188,18 @@ def convert_ipynb_to_pdf(file_list: List) -> List:
     for notebook_file in pbar:
         pbar.set_description('Processing {:30}'.format(str(notebook_file)))
 
-        p = subprocess.run(['jupyter', 'nbconvert', '--to', 'pdf', notebook_file],
+        # Direct conversion to pdf with local images is extremely buggy.
+        # A workaround is to convert to .tex and compile it manually with pdflatex
+        p = subprocess.run(['jupyter', 'nbconvert', '--to', 'latex', notebook_file],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        p = subprocess.run(['pdflatex', '-output-directory', Path(notebook_file).parent,
+                            notebook_file.replace('.ipynb', '.tex')],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        for file_path in Path(notebook_file).parent.iterdir():
+            if file_path.suffix in ['.log', '.out', '.aux', '.tex']:
+                file_path.unlink()
+
         try:
             p.check_returncode()
         except subprocess.CalledProcessError:
