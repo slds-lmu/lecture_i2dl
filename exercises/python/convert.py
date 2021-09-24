@@ -7,10 +7,12 @@
 # template folder will be converted.
 
 from argparse import ArgumentParser
+from multiprocessing import Pool
 from pathlib import Path
 import re
+import shutil
 import subprocess
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 
 from tqdm import tqdm
 
@@ -22,6 +24,8 @@ QUESTION_SKIP_EXEC_TAG = '#!TAG SKIPQUESTEXEC'
 HW_BEGIN_TAG = '#!TAG HWBEGIN'
 HW_END_TAG = '#!TAG HWEND'
 MSG_TAG = '#!MSG'
+
+MAX_WORKERS = 4
 
 
 def main():
@@ -80,7 +84,7 @@ def main():
     print('-- Finished -- Converting notebooks to pdfs.')
 
 
-def create_ques_sol_mds(template_files: List) -> Tuple[List, List]:
+def create_ques_sol_mds(template_files: List[Path]) -> Tuple[List[Path], List[Path]]:
     """
     Create question and solution markdowns.
 
@@ -136,33 +140,30 @@ def create_ques_sol_mds(template_files: List) -> Tuple[List, List]:
     return question_files, solution_files
 
 
-def convert_mds_to_ipynb(file_list: List) -> List:
+def convert_mds_to_ipynb(file_list: List[Path]) -> List[Path]:
     """
     Convert a list of markdowns to jupyter notebooks and execute them.
 
     :param file_list: Paths of markdowns to convert.
     :return: Paths to the obtained notebooks.
     """
-    notebook_list: List = []
-
-    pbar = tqdm(file_list, leave=False)
-    for md_file in pbar:
-        pbar.set_description('Processing {:30}'.format(str(md_file)))
-
-        p = subprocess.run(['jupytext', '--to', 'ipynb', '--execute', md_file],
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        try:
-            p.check_returncode()
-        except subprocess.CalledProcessError:
-            print('CONVERSION FAILED FOR {}:'.format(md_file))
-            print(p.stderr)
-
-        notebook_list.append(str(md_file).replace('.md', '.ipynb'))
-
-    return notebook_list
+    return _apply_multiproc(_convert_mds_to_ipynb, file_list, MAX_WORKERS)
 
 
-def remove_cell_artifacts(file_list: List) -> None:
+def _convert_mds_to_ipynb(file_path: Path) -> Path:
+    """Worker function for mds to ipynb conversion."""
+    p = subprocess.run(['jupytext', '--to', 'ipynb', '--execute', file_path],
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        p.check_returncode()
+    except subprocess.CalledProcessError:
+        print('CONVERSION FAILED FOR {}:'.format(file_path))
+        print(p.stderr)
+
+    return Path(str(file_path).replace('.md', '.ipynb'))
+
+
+def remove_cell_artifacts(file_list: List[Path]) -> None:
     """
     Remove cell artifacts.
 
@@ -176,39 +177,58 @@ def remove_cell_artifacts(file_list: List) -> None:
         subprocess.run(['gawk', '-i', 'inplace', '!/%%script echo /', file])
 
 
-def convert_ipynb_to_pdf(file_list: List) -> List:
+def convert_ipynb_to_pdf(file_list: List[Path]) -> List[Path]:
     """
     Convert a list of jupyter notebooks to pdfs.
 
     :param file_list: Paths of notebooks to convert to pdf.
     :return: Paths to the obtained pdfs.
     """
-    pdf_list: List = []
-    pbar = tqdm(file_list, leave=False)
-    for notebook_file in pbar:
-        pbar.set_description('Processing {:30}'.format(str(notebook_file)))
+    pdf_list = _apply_multiproc(_convert_ipynb_to_pdf_worker, file_list, MAX_WORKERS)
 
-        # Direct conversion to pdf with local images is extremely buggy.
-        # A workaround is to convert to .tex and compile it manually with pdflatex
-        p = subprocess.run(['jupyter', 'nbconvert', '--to', 'latex', notebook_file],
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        p = subprocess.run(['pdflatex', '-output-directory', Path(notebook_file).parent,
-                            notebook_file.replace('.ipynb', '.tex')],
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        for file_path in Path(notebook_file).parent.iterdir():
+    # Clean up unnecessary LaTex and auxiliary files.
+    all_parent_dirs = set([file.parent for file in file_list])
+    for parent_dir in all_parent_dirs:
+        for file_path in parent_dir.iterdir():
             if file_path.suffix in ['.log', '.out', '.aux', '.tex']:
                 file_path.unlink()
-
-        try:
-            p.check_returncode()
-        except subprocess.CalledProcessError:
-            print('CONVERSION FAILED FOR {}:'.format(notebook_file))
-            print(p.stderr)
-
-        pdf_list.append(str(notebook_file).replace('.ipynb', '.pdf'))
+            elif file_path.is_dir() and '_files' in file_path.name:
+                shutil.rmtree(file_path)
 
     return pdf_list
+
+
+def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
+    """Worker function for ipynb to pdf conversion."""
+
+    # Direct conversion to pdf with local images is extremely buggy.
+    # A workaround is to convert to .tex and compile it manually with pdflatex
+    p = subprocess.run(['jupyter', 'nbconvert', '--to', 'latex', file_path],
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    p = subprocess.run(['pdflatex', '-output-directory', file_path.parent,
+                        str(file_path).replace('.ipynb', '.tex')],
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    try:
+        p.check_returncode()
+    except subprocess.CalledProcessError:
+        print('CONVERSION FAILED FOR {}:'.format(file_path))
+        print(p.stderr)
+
+    return Path(str(file_path).replace('.ipynb', '.pdf'))
+
+
+def _apply_multiproc(func: Callable, ls: List, max_workers: int) -> List:
+    """Utility function for multiprocessing a function applied to a list of args."""
+    return_ls: List = []
+    with Pool(processes=min(max_workers, len(ls))) as p:
+        with tqdm(total=len(ls), leave=False) as pbar:
+            for pdf_file in p.imap(func, ls):
+                pbar.set_description('Processed {:30}'.format(pdf_file.name))
+                pbar.update()
+                return_ls.append(pdf_file)
+    return return_ls
 
 
 if __name__ == '__main__':
