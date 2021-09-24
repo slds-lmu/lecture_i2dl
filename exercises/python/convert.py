@@ -219,15 +219,16 @@ def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
     return Path(str(file_path).replace('.ipynb', '.pdf'))
 
 
-def _apply_multiproc(func: Callable, ls: List, max_workers: int) -> List:
+def _apply_multiproc(
+        func: Callable[[Path], Path], ls: List[Path], max_workers: int) -> List[Path]:
     """Utility function for multiprocessing a function applied to a list of args."""
     return_ls: List = []
     with Pool(processes=min(max_workers, len(ls))) as p:
         with tqdm(total=len(ls), leave=False) as pbar:
-            for pdf_file in p.imap(func, ls):
-                pbar.set_description('Processed {:30}'.format(pdf_file.name))
+            for path in p.imap(func, ls):
+                pbar.set_description('Processed {:30}'.format(path.name))
                 pbar.update()
-                return_ls.append(pdf_file)
+                return_ls.append(path)
     return return_ls
 
 
