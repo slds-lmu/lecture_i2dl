@@ -15,6 +15,9 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 01
 
+**Authors**: Emilio Dorigatti, Tobias Weber
+
+
 Welcome to the very first lab, in which we will have fun with logistic regression.
 
 ## Imports

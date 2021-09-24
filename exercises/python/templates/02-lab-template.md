@@ -15,6 +15,8 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 2
 
+**Authors**: Emilio Dorigatti, Tobias Weber
+
 ## Imports
 <!-- #endregion -->
 
