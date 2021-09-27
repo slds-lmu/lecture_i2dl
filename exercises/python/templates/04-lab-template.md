@@ -400,7 +400,7 @@ class MSELoss:
 
 
 # Now we bring everything together and create our neural network.
-class Neuron:
+class NeuralLayer:
     def __init__(self, in_features: int, out_features: int, activation: str):
         self.linear = Linear(in_features, out_features)
         
@@ -445,11 +445,11 @@ class NeuralNetwork:
         self.output_size = output_size
         self.hidden_sizes = hidden_sizes
 
-        self.layers: List[Neuron] = []
+        self.layers: List[NeuralLayer] = []
         layer_sizes = [self.input_size] + self.hidden_sizes
         for i in range(1, len(layer_sizes)):
-            self.layers.append(Neuron(layer_sizes[i-1], layer_sizes[i], 'tanh'))
-        self.layers.append(Neuron(hidden_sizes[-1], self.output_size, 'sigmoid'))
+            self.layers.append(NeuralLayer(layer_sizes[i-1], layer_sizes[i], 'tanh'))
+        self.layers.append(NeuralLayer(hidden_sizes[-1], self.output_size, 'sigmoid'))
 
         self.loss = MSELoss()
 
@@ -471,13 +471,13 @@ class NeuralNetwork:
     def backward(self, x: Tensor, y: Tensor) -> None:
         """Compute all gradients over backpropagation."""
         # Perform forward pass.
-        # The z's are automatically saved by our Neuron object.
+        # The z's are automatically saved by our NeuralLayer object.
         y_pred = self.forward(x)
 
         #!TAG HWBEGIN
         #!MSG Compute the gradients.
-        #!MSG Hint: Rely on the objects and structures we defined above. (Especially Neuron!)
-        #!MSG Also remember that the `z_in` and `z_out`s are saved in the the `linear` object of Neuron.
+        #!MSG Hint: Rely on the objects and structures we defined above. (Especially NeuralLayer!)
+        #!MSG Also remember that the `z_in` and `z_out`s are saved in the the `linear` object of NeuralLayer.
 
         # Compute the gradient of the loss.
         loss_grad = self.loss.get_gradient(y, y_pred)
@@ -521,7 +521,7 @@ class NeuralNetwork:
     def apply_gradients(self, learning_rate: float) -> None:
         """Update weights with the computed gradients."""
         #!TAG HWBEGIN
-        #!MSG TODO: Apply the gradients that are stashed in Neuron/Linear to perform gradient descent.
+        #!MSG TODO: Apply the gradients that are stashed in NeuralLayer/Linear to perform gradient descent.
         for layer in self.layers:
             if layer.linear.weight_grad is not None:
                 layer.linear.weight -= learning_rate * layer.linear.weight_grad
