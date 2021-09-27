@@ -12,7 +12,7 @@ jupyter:
     name: python3
 ---
 
-# Lab 2
+# Lab 3
 
 **Authors**: Emilio Dorigatti, Tobias Weber
 
