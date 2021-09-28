@@ -464,7 +464,7 @@ class NeuralNetwork:
     def get_loss(self, x: Tensor, y: Tensor) -> Tensor:
         """Compute the loss for a dataset and given labels."""
         #!TAG HWBEGIN
-        #!MSG Use the loss function and the forward method to compute the loss on the dataset.
+        #!MSG TODO: Use the loss function and the forward method to compute the loss on the dataset.
         return self.loss.forward(y, self.forward(x))
         #!TAG HWEND
 
@@ -475,7 +475,7 @@ class NeuralNetwork:
         y_pred = self.forward(x)
 
         #!TAG HWBEGIN
-        #!MSG Compute the gradients.
+        #!MSG TODO: Compute the gradients.
         #!MSG Hint: Rely on the objects and structures we defined above. (Especially NeuralLayer!)
         #!MSG Also remember that the `z_in` and `z_out`s are saved in the the `linear` object of NeuralLayer.
 
