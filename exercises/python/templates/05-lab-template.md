@@ -826,7 +826,7 @@ class Sum(BinaryOperation):
 
         simple_y = (
             #!TAG HWBEGIN
-            #!MSG Simplify the left part.
+            #!MSG Simplify the right part.
             self.y.simplify()
             #!TAG HWEND
         )
