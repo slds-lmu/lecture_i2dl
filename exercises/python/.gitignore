@@ -132,6 +132,7 @@ dmypy.json
 .idea
 
 # Other stuff
+.data
 questions
 solutions
 *.ipynb
