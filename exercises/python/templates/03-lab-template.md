@@ -633,7 +633,7 @@ best_params = None
 for i in range(10):
     params = torch.randn(9)
 
-    # Make GD
+    # Do GD
     for _ in range(steps):
         gradients = get_gradients(x, y, *params)
         params -= alpha * gradients
