@@ -408,13 +408,13 @@ def apply_sobel(img: Tensor) -> Tensor:
         [-1, 0, 1],
         [-2, 0, 2],
         [-1, 0, 1]],
-    dtype=torch.float)
+        dtype=torch.float)
 
     sobel_y = torch.tensor([
         [-1, -2, -1],
         [0, 0, 0],
         [1, 2, 1]],
-    dtype=torch.float)
+        dtype=torch.float)
 
     # We can use the functional API of torch to perform convolution manually
     conv_x = F.conv2d(img.unsqueeze(0).unsqueeze(0), sobel_x.view(1, 1, 3, 3))
@@ -484,13 +484,13 @@ def apply_custom_sobel(img: Tensor) -> Tensor:
         [-1, 0, 1],
         [-2, 0, 2],
         [-1, 0, 1]],
-    dtype=torch.float)
+        dtype=torch.float)
 
     sobel_y = torch.tensor([
         [-1, -2, -1],
         [0, 0, 0],
         [1, 2, 1]],
-    dtype=torch.float)
+        dtype=torch.float)
 
     # We apply our own convolution
     conv_x = apply_convolution(img, sobel_x)
@@ -696,9 +696,9 @@ def conv_gradient_wrt_input(dloss_dy : Tensor, kernel) -> Tensor:
 #!TAG SKIPQUESTEXEC
 
 sobel_x = torch.tensor([
-        [-1, -2, -1],
-        [0, 0, 0],
-        [1, 2, 1]],
+        [-1, 0, 1],
+        [-2, 0, 2],
+        [-1, 0, 1]],
     dtype=torch.float)
 
 def apply_conv2d(img: Tensor, kernel: Tensor) -> Tensor:
@@ -774,9 +774,9 @@ for _ in range(100):
     #!MSG TODO: Compute the gradient of the loss, and modify `img_maximize` accordingly.
     img_grad = conv_gradient_wrt_input(2 * conv, sobel_x)
     img_maximize += 0.01 * img_grad
+    #!TAG HWEND
 
     losses.append(float(loss))
-  #!hwend
 
 plt.plot(losses)
 plt.show()
