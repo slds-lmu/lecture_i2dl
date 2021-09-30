@@ -483,7 +483,7 @@ def train(
             # Set the model to training mode
             model.train()
 
-            # Forward pass through the models
+            # Forward pass through the model
             y_hat = model(x).squeeze()
             # Obtain the loss
             batch_loss = loss(y_hat, y)
@@ -524,7 +524,7 @@ def train(
 
                 #!TAG HWBEGIN
                 #!MSG TODO: Do a forward pass and get the batch loss
-                # Forward pass through the models
+                # Forward pass through the model
                 y_hat = model(x).squeeze()
                 # Obtain the loss
                 batch_loss = loss(y_hat, y)
