@@ -44,7 +44,7 @@ $$y = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(w^T x+b)$$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{A Single Neuron}
-\textbf{Choices for $\tau$:} a single neuron can represent different functions if we choose suitable activation function for it.
+\textbf{Choices for $\tau$:} a single neuron can represent different functions if we choose a suitable activation function for it.
 \vspace{.5cm}
 \begin{itemize}
 \item The identity function gives us the simple \textbf{linear regression}:
@@ -71,7 +71,7 @@ We consider a logistic regression model for $p = 3$, i.e. $\fx = \tau(w_1\textco
 \begin{figure}
 \includegraphics[width=6cm]{figure/neurep_two.png}
 \end{figure}
-\item The bias term $b$ is implicit. It is not shown visually.
+\item The bias term $b$ is implicit here. It is often not visualized as a separate node.
 \end{itemize}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,7 +79,7 @@ We consider a logistic regression model for $p = 3$, i.e. $\fx = \tau(w_1\textco
 For an explicit graphical representation, we do a simple trick: 
 \begin{itemize}
 \item Add a constant feature to the inputs $\tilde{\xv} = (1, x_1, ..., x_p)^T$
-\item and the bias term to the weight vector $\tilde{\bm{w}} = (b, w_1, ..., w_p)$.
+\item and absorb the bias into the weight vector $\tilde{\bm{w}} = (b, w_1, ..., w_p)$.
 \end{itemize}
 The graphical representation is then: 
 \begin{figure}
@@ -89,7 +89,7 @@ The graphical representation is then:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
-\item Finally, the computation $\tau(w_1x_1 + w_2x2 + w_3x_3 + b)$ is represented by the neuron in the \enquote{output layer}.
+\item Finally, the computation $\tau(w_1x_1 + w_2x_2 + w_3x_3 + b)$ is represented by the neuron in the \enquote{output layer}.
 \begin{figure}
 \includegraphics[width=6cm]{figure/neurep_three.png}
 \end{figure}
@@ -142,7 +142,7 @@ $$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x
 \vspace*{-0.48cm}
 \begin{figure}
 \centering
-\scalebox{0.9}{\includegraphics{figure/neuron_regcls.png}}
+\scalebox{0.7}{\includegraphics{figure/neuron_regcls.png}}
 \vspace*{-0.2cm}
 \begin{tiny}
 \caption{\textit{Left}: A regression line learned by a single neuron. \textit{Right}: A decision-boundary learned by a single neuron in a binary classification task.}
