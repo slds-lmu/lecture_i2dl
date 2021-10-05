@@ -29,7 +29,7 @@
 \centering
 \scalebox{0.25}{\includegraphics{figure/cartesian.png}}
 \end{figure}
-\item However, the neuron can easily separate the classes if the original features are transformed (e.g., from Cartesian to polar coordinate): 
+\item However, the neuron can easily separate the classes if the original features are transformed (e.g., from Cartesian to polar coordinates): 
 \begin{figure}
 \centering
 \scalebox{0.25}{\includegraphics{figure/polar.png}}
@@ -87,10 +87,10 @@
 \item \textbf{Activation:} a non-linear transformation on the weighted sum.
 \end{enumerate}
 \vspace{.5cm}
-\textbf{Single hidden layer networks} consist of two layers:
+\textbf{Single hidden layer networks} consist of two layers (without input layer):
 \begin{enumerate}
 \item \textbf{Hidden Layer:} having a set of neurons.
-\item \textbf{Output Layer:} having one (potentially more) output neuron.
+\item \textbf{Output Layer:} having one or more output neurons.
 \end{enumerate}
 \vspace{.5cm}
 \begin{itemize}
@@ -126,7 +126,7 @@ z_{\text {in }}^{(4)}= 6 * (-3) + (-1) * 1 + 5 * 5 + 1 = 7\end{array}$$}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   1
 
 \begin{frame} {Single Hidden Layer Networks: Example}
-Each hidden neurons perform a non-linear \textbf{activation} transformation on the weight sum:
+Each hidden neuron performs a non-linear \textbf{activation} transformation on the weight sum:
 \begin{figure}
 \centering
 \only<1>{\scalebox{.8}{\includegraphics{figure/singlelay_6.png}}$$\begin{array}{l}
@@ -219,17 +219,17 @@ representations.
 
 \begin{vbframe}{Deep neural networks}
 
-Neural networks today can have dozens or even hundreds of hidden layers. The greater the number of layers, the "deeper" the network. Historically, however, deep neural networks were very challenging to train for several reasons:
+Neural networks today can have dozens or even hundreds of hidden layers. The greater the number of layers, the "deeper" the network. Historically, however, deep neural networks were very challenging to train and not popular until the late '00s for several reasons:
 \lz
 \begin{itemize}
 \item For one thing, the use of sigmoid activations (e.g., logistic sigmoid and tanh) significantly slowed down training due to a phenomenon known as \enquote{vanishing gradients}. The introduction of the ReLU activation largely solved this problem.
 \item Training deep neural networks on CPUs was too slow to be practical. Switching over to GPUs cut down training time by more than an order of magnitude.
-\item Another reason neural networks were not popular until the late '00s is that when dataset sizes are small, other models (such as SVMs) and techniques (such as feature engineering) outperform them. 
+\item When dataset sizes are small, other models (such as SVMs) and techniques (such as feature engineering) often outperform them. 
 \end{itemize}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{itemize}
-\item The availability of large datasets and novel architectures that are capable to handle even complex tensor-shaped data (e.g. CNNs for image data), faster hardware, and better optimization and regularization methods made it feasible to successfully implement deep neural networks in the last decade.
+\item The availability of large datasets and novel architectures that are capable of handling even complex tensor-shaped data (e.g. CNNs for image data), faster hardware, and better optimization and regularization methods made it feasible to successfully implement deep neural networks in the last decade.
 \lz
 
 \item An increase in depth often translates to an increase in performance on a given task. State-of-the-art neural networks, however, are much more sophisticated than the simple architectures we have encountered so far.

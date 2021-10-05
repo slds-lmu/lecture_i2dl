@@ -98,7 +98,7 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
       \end{itemize}
     \item For regression $\tau$ is the identity function.
     \item For binary classification, $\tau$ is a sigmoid function.
-    \item \textbf{Note}: The purpose of the hidden-layer activation function $\sigma$ is to introduce non-linearities so that the network is able to learn complex functions whereas the purpose of $\tau$ is merely to get the final score on the same scale as the target.
+    \item \textbf{Note}: The purpose of the hidden-layer activation function $\sigma$ is to introduce non-linearities so that the network is able to learn complex functions whereas the purpose of $\tau$ is merely to get the final score to the same range as the target.
   \end{itemize}
 
 \framebreak 
@@ -181,7 +181,7 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \item It is important to note that if the hidden layer does not have a non-linear activation, the network can only learn linear decision boundaries.
 \item For simplification purposes, we drop the bias terms in notation and let $\sigma = \text{id}$. Then:
     \begin{eqnarray*}
-        \fx & = & \tau(\wtu^T \hidz) = \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
+        \fx & = & \tau(\wtu^T \hidz) \\
          & = & \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
          & = & \tau(\wtu^T\Wmat^T \xv) = \tau(\mathbf{v}^T \xv)
       \end{eqnarray*}
@@ -239,7 +239,7 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
     \vspace{2mm}
     \item This is the same transformation used in softmax regression!
     \vspace{4mm}
-    \item Derivative $ \frac{\delta\tau(\mathbf{f}_{in})}{\delta \mathbf{f}_{in}} = \text{diag}(\tau(\mathbf{f}_{in})) - \tau(\mathbf{f}_{in}) \tau(\mathbf{f}_{in})^T $
+    \item Derivative $ \frac{\partial \tau(\mathbf{f}_{in})}{\partial \mathbf{f}_{in}} = \text{diag}(\tau(\mathbf{f}_{in})) - \tau(\mathbf{f}_{in}) \tau(\mathbf{f}_{in})^T $
     \vspace{4mm}
     \item It is a \enquote{smooth} approximation of the argmax operation,
         so $\tau((1, 1000, 2)^T) \approx (0, 1, 0)^T$ (picks out 2nd element!).
