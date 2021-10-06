@@ -163,8 +163,10 @@ where $\Lxy$ is a loss function. It compares the network's predictions $\fx$ to 
 
 \vspace{.5cm}
 \item For a single neuron, in both cases, the loss function is convex and the global optimum can be found with an iterative algorithm like gradient descent. 
-\vspace{1cm}
 \item In fact, a single neuron with logistic sigmoid function trained with the bernoulli loss does not only have the same hypothesis space as a logistic regression and is therefore the same model, but will also yield to the very same result when trained until convergence.
+\item Note: In the case of regression and the L2-loss, the solution can
+also be found analytically using the “normal equations”. However,
+a closed-form solution is usually not available.
 \end{itemize}
 \end{vbframe} 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
