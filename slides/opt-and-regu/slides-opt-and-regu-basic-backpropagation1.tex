@@ -14,7 +14,7 @@ In DL, we aim to optimize the empirical risk by gradient descent $$\risket = \fr
 
 Training of NNs happens in 2 consecutive steps, for one observation $\xb$:
 \begin{enumerate}
-\item \textbf{Forward pass}: The information of the inputs flow through the model to produce a prediction. Based on that, we compute the empirical loss. We covered that.
+\item \textbf{Forward pass}: The information of the inputs flow through the model to produce a prediction. Based on that, we compute the empirical risk. We covered that.
 \item \textbf{Backward pass / Backpropagation}: The information of the error that happened in the prediction of $\xb$ flows backwards through the model, we calculate the error contribution of each weight to update weights by the negative gradient. 
 \end{enumerate}
 This is simply gradient descent in disguise (for one observation).
@@ -377,7 +377,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-  \item In our example, we updated w.r.t. a single training example but typically, we feed subsets of the training set (more on this later).
+  \item In our example, we updated w.r.t. a single training example but typically, we feed subsets of the training set (minibatch GD).
     \item The term \enquote{backpropagation} refers to the fact that the computation of the gradient using the chain rule is performed backwards (that is, starting at the output layer and finishing at the first hidden layer). 
       A \textbf{forward} computation using the chain rule also results in the same gradient but can be computationally expensive (see http://colah.github.io/posts/2015-08-Backprop/).
  \end{itemize}
@@ -391,7 +391,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
     \item Next, we once again compute the forward pass for this new set of weights and store the activations.
     \item Then, we compute the gradient of the empirical loss using backpropagation and take another step down the hill.
     \item Rinse and repeat (until the loss stops decreasing substantially). 
-      However, we will see later that this naive approach often results in overfitting!
+      However, training until convergence often results in overfitting (use early stopping).
   \end{itemize}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
