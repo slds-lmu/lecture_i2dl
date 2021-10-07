@@ -21,26 +21,15 @@ jupyter:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-import random
-import shutil
-import urllib.request
-from functools import reduce, partial
-from math import ceil
-from pathlib import Path
-from typing import List, Optional, Callable, Tuple, Dict
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import torch
-from PIL import Image
 from matplotlib_inline.backend_inline import set_matplotlib_formats
-from torch import nn, Tensor
+from torch import Tensor
 from torch.distributions import Normal
-from torch.optim import Adam, Optimizer
 from torch.utils.data import DataLoader, Dataset
-from torchsummary import summary
-from torchvision.transforms import ToTensor
 from torchvision.datasets import MNIST
-from torchvision.models import vgg16
 
 set_matplotlib_formats('png', 'pdf')
 ```
