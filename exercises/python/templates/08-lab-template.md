@@ -393,14 +393,12 @@ summary(model, input_size=(3, 224, 224), device=str(device))
 ### Train the network
 
 As usual, let's define an optimizer, loss function, dataloaders and training loop.
-
-If you do not have the time, you can run less than 100 epochs.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 
-epochs = 100
+epochs = 10
 batch_size = 32
 num_workers = 16
 
@@ -423,13 +421,13 @@ train_loader = DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
     shuffle=True,
-    num_workers=4,
+    num_workers=num_workers,
 )
 
 val_loader = DataLoader(
     dataset=val_dataset,
     batch_size=batch_size,
-    num_workers=4,
+    num_workers=num_workers,
 )
 
 def train(
@@ -472,13 +470,13 @@ def train(
 
             if batch_idx % 10 == 0:
                 print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_train_batches, float(batch_loss) / batch_size), end='\r')
+                      .format(batch_idx, num_train_batches, float(batch_loss)), end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.argmax(y_hat, dim=1) == y))
 
 
-        ep_train_loss = total_loss / len(train_loader.dataset)
+        ep_train_loss = total_loss / num_train_batches
         ep_train_acc = num_correct / len(train_loader.dataset)
 
         # Reset counters
@@ -498,12 +496,12 @@ def train(
 
             if batch_idx % 10 == 0:
                 print('VALIDATION BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_val_batches, float(batch_loss) / batch_size), end='\r')
+                      .format(batch_idx, num_val_batches, float(batch_loss)), end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.argmax(y_hat, dim=1) == y))
 
-        ep_val_loss = total_loss / len(val_loader.dataset)
+        ep_val_loss = total_loss / num_val_batches
         ep_val_acc = num_correct / len(val_loader.dataset)
 
         metrics['train_loss'].append(ep_train_loss)
@@ -555,7 +553,7 @@ get_training_progress_plot(
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 ## Using a pretrained network
-Even with the aid of data augmentation, the network overfits badly. This can be
+Even with the aid of data augmentation, the network does not perform good. This can be
 explained by the fact that the images are quite diverse in relation to the size of the
 training set. Data augmentation can only bring you so far, and even with the aid of
 regularization the task would be difficult.
@@ -564,8 +562,8 @@ One popular trick to overcome this difficulty, known as _pre-training_, is to us
 CNN that has been trained on a different, larger dataset, for a related task. Most of the
 weights of this network are then frozen (i.e., will not be updated),
 and the last few layers (the "head") are replaced with new, freshly re-initialized ones
-and learned from scratch. After the network has converged, the weights are unfrozen,
-and fine-tuned again. What is the rationale behind freezing and unfreezing the weights?
+and learned from scratch.
+What is the rationale behind freezing and unfreezing the weights?
 
 PyTorch offers a variety of [pretrained models to download](https://pytorch.org/vision/stable/models.html).
 
@@ -573,10 +571,7 @@ After obtaining VGG16, our plan is to:
 
     1. Get the body of the downloaded net (accessible over `features` attribute)
     2. Create an extra head.
-    3. Train only the weights of the height.
-    5. Train the complete model.
-
-We achieve this behavior by defining different optimizers for head and body.
+    3. Train only the weights of the head.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
@@ -596,13 +591,6 @@ vgg_head = nn.Sequential(
     nn.Linear(in_features=512, out_features=120),
     #!TAG HWEND
 ).to(device)
-
-body_optimizer = (
-    #!TAG HWBEGIN
-    #!MSG Define an optimizer for the parameters of the body.
-    Adam(vgg_body.parameters())
-    #!TAG HWEND
-)
 
 head_optimizer = (
     #!TAG HWBEGIN
@@ -637,20 +625,16 @@ We train only the head for 10 epochs and then allow optimization of everything.
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-head_epochs = 10
-total_epochs = 30
-
+epochs = 25
 
 def train(
         head: nn.Module,
         body: nn.Module,
         loss: nn.Module,
         head_optimizer: Optimizer,
-        body_optimizer: Optimizer,
         train_loader: DataLoader,
         val_loader: DataLoader,
-        head_epochs: int,
-        total_epochs: int
+        epochs: int
 ) -> Dict:
     # Intermediate results during training will be saved here.
     # This allows plotting the training progress afterwards.
@@ -664,7 +648,7 @@ def train(
     num_train_batches = ceil(len(train_loader.dataset) / batch_size)
     num_val_batches = ceil(len(val_loader.dataset) / batch_size)
 
-    for ep in range(1, total_epochs + 1):
+    for ep in range(1, epochs + 1):
         total_loss = 0
         num_correct = 0
 
@@ -672,39 +656,28 @@ def train(
             x = x.to(device)
             y = y.to(device)
 
-            if ep <= head_epochs:
-                # Not calculating gradients if they are not needed saves computational effort
-                with torch.no_grad():
-                    x_features = body(x)
-                y_hat = head(x_features)
-                batch_loss = loss(y_hat, y)
-
-                head_optimizer.zero_grad()
-                batch_loss.backward()
-                head_optimizer.step()
-
-            else:
-                #!TAG HWBEGIN
-                #!MSG TODO: Forward/Backward pass and update complete network.
-                y_hat = head(body(x))
-                batch_loss = loss(y_hat, y)
-
-                head_optimizer.zero_grad()
-                body_optimizer.zero_grad()
-                batch_loss.backward()
-                head_optimizer.step()
-                body_optimizer.step()
-                #!TAG HWEND
+            #!TAG HWBEGIN
+            #!MSG TODO: Do a forward pass through head/body and get the batch loss
+            #!MSG Hint: Using `no_grad()` on the pass through the body saves a lot of unnecessary computations.
+            with torch.no_grad():
+                x_features = body(x)
+            y_hat = head(x_features)
+            batch_loss = loss(y_hat, y)
+            #!TAG HWEND
+            
+            head_optimizer.zero_grad()
+            batch_loss.backward()
+            head_optimizer.step()
 
             if batch_idx % 10 == 0:
                 print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_train_batches, float(batch_loss) / batch_size), end='\r')
+                      .format(batch_idx, num_train_batches, float(batch_loss)), end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.argmax(y_hat, dim=1) == y))
 
 
-        ep_train_loss = total_loss / len(train_loader.dataset)
+        ep_train_loss = total_loss / num_train_batches
         ep_train_acc = num_correct / len(train_loader.dataset)
 
         # Reset counters
@@ -724,12 +697,12 @@ def train(
 
             if batch_idx % 10 == 0:
                 print('VALIDATION BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_val_batches, float(batch_loss) / batch_size), end='\r')
+                      .format(batch_idx, num_val_batches, float(batch_loss)), end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.argmax(y_hat, dim=1) == y))
 
-        ep_val_loss = total_loss / len(val_loader.dataset)
+        ep_val_loss = total_loss / num_val_batches
         ep_val_acc = num_correct / len(val_loader.dataset)
 
         metrics['train_loss'].append(ep_train_loss)
@@ -747,12 +720,10 @@ metrics = train(
     head=vgg_head,
     body=vgg_body,
     head_optimizer=head_optimizer,
-    body_optimizer=body_optimizer,
     loss=loss,
     train_loader=train_loader,
     val_loader=val_loader,
-    head_epochs=head_epochs,
-    total_epochs=total_epochs
+    epochs=epochs
 )
 ```
 
