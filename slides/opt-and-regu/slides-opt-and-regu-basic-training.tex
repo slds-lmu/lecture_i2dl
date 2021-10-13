@@ -14,13 +14,13 @@
 Training of neural nets is composed of two iterative steps:
 \lz
 \begin{enumerate}
-\item \textbf{Forward pass:} The information of the inputs flows through the model to produce a prediction. Based on this prediction, the empirical loss is computed.
+\item \textbf{Forward pass:} The information of the inputs flows through the model to produce a prediction. Based on this prediction, the empirical risk is computed.
 \lz
 \item \textbf{Backward pass:} The information of the prediction error flows backward through the network to update the weights in a way that the error reduces.
 \end{enumerate}
 \lz
 
-\textbf{Recall:} The error is calculated via a loss function $L(y, f(\xv, \thetab))$, where $y$ and $f(\xv, \thetab)$ are the true target and the network outcome respectively.
+\textbf{Recall:} The error is calculated via a loss function $L(y, f(\xv, \thetab))$, where $y$ and $f(\xv, \thetab)$ are the true target and the network outcome, respectively.
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -29,12 +29,11 @@ Training of neural nets is composed of two iterative steps:
 \begin{itemize}
 \item For regression, the L2 loss is typically used:
 $$\Lxy = \frac{1}{2}(y - \fx)^2$$
-\item For classification, the binary/categorical cross entropy:
-$$\Lxy = y \log \fx + (1 - y) \log(1 - \fx)$$
+\item For binary classification, the binary cross entropy:
+$$\Lxy = - (y \log \fx + (1 - y) \log(1 - \fx))$$
 \end{itemize}
 \lz
-\lz
-\textbf{Note:} Evaluated the loss on the data, the \textbf{risk function} is computed:
+\textbf{Note:} Evaluating the loss on the data, the \textbf{risk function} is computed:
 $$\riske = \frac{1}{n} \sumin \Lxyi$$
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
