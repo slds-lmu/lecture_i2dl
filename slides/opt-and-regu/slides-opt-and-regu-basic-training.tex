@@ -1,11 +1,22 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+\newcommand{\titlefigure}{figure_man/SGD.png}
+\newcommand{\learninggoals}{
+  \item Gradient Descent
+  \item Mini-batch Gradient Descent
+  \item Stochastic Gradient Descent
+  \item Learning Rates and (S)GD specifics
+}
+
+\title{Deep Learning}
+\date{}
+
 \begin{document}
 
-\lecturechapter{2}{Basic Training}
+\lecturechapter{Basic Training}
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,35 +46,136 @@ $$\Lxy = - (y \log \fx + (1 - y) \log(1 - \fx))$$
 \lz
 \textbf{Note:} Evaluating the loss on the data, the \textbf{risk function} is computed:
 $$\riske = \frac{1}{n} \sumin \Lxyi$$
-\framebreak
+\begin{itemize}
+ \item To minimize the risk, the \textbf{gradient descent} (GD) method can be used.
+\end{itemize}
+\end{vbframe}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\lz
-To minimize the risk, the \textbf{gradient descent} (GD) method can be used.
-\lz
-\begin{itemize}
-\item First, we calculate the gradient $\nabla \risk$ at a point $\theta^{[t]}$.
-\lz
-\item \enquote{Standing} at $\thetab^{[t]}$, we then improve the minimization by performing the following update:
-$$\thetab^{[t + 1 ]}  = \thetab^{[t]} - \alpha \nabla \risk\left(\thetab^{[t]}\right).$$
-\item $\alpha$ determines the length of the step and is called the \textbf{learning rate}.
-\end{itemize}
-\lz
-\lz
-\textbf{Note:} Since $\nabla \risk$ always points in the direction of the steepest ascent, $-\nabla \risk$ always points in the direction of the steepest descent!
-\end{vbframe}
+\begin{vbframe}{Gradient descent}
+  \begin{itemize}
+    \item Let $\risk: \R^m \to \R$ be an arbitrary, differentiable, unrestricted function (of $\thetab \in \R^m$). \\
+    \begin{footnotesize}
+    In the context of deep learning, $\risk$ represents the empirical risk function and $\thetab$ represents the weights (and biases) of the network. For simplification, we assume $\bm{\theta} = (\theta_1, ..., \theta_m)$. 
+    \end{footnotesize}
+    \item We want to minimize this function by gradient descent (GD). 
+    \item The negative gradient 
+    $$
+    - \mathbf{g} = - \nabla \riskt = - \left(\frac{\partial \risk}{\partial \theta_1}, \ldots, \frac{\partial \risk}{\partial \theta_m}\right)^\top
+    $$ 
+    points in the direction of the \textbf{steepest descent} since $\nabla \risk$ always points in the direction of the steepest ascent.
+  \end{itemize}
+
+    \framebreak
+
+  \begin{itemize}
+    \item \enquote{Standing} at a point $\thetab^{[t]}$ during minimization, we improve by performing the following update: 
+    $$
+      \thetab^{[t + 1 ]}  = \thetab^{[t]} - \alpha \nabla \risk\left(\thetab^{[t]}\right),
+    $$
+    which implies (for sufficiently small $\alpha$),
+    $$
+    \risk(\bm{\thetab}^{[t+1]}) \leq \risk(\bm{\thetab}^{[t]})
+    $$
+    \item $\alpha$ determines the length of the step and is called \textbf{step size} or, in risk minimization, \textbf{learning rate}.
+  \end{itemize}
+
+\end{vbframe} 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Example: Gradient descent}
 \begin{center}
+ $\risk(\theta_1, \theta_2) = -\sin(\theta_1) \cdot \frac{1}{2\pi} \exp\left( (\theta_2 - \pi / 2)^2 \right)$
 \begin{figure}
 \centering
-\scalebox{1}{\includegraphics{figure_man/hill.pdf}}
+\scalebox{0.9}{\includegraphics{figure_man/hill.pdf}}
 \end{figure}
-\vspace{1 cm}
+\vspace{0.5 cm}
 "Walking down the hill, towards the valley."
 \end{center}
 \end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Gradient Descent and Optimality}
+
+\begin{minipage}{0.45\textwidth}
+    \begin{small}
+    \begin{itemize}
+      \item GD is a greedy algorithm: In every iteration, it makes locally optimal moves.
+      \vspace*{2mm}
+      \item If $\riskt$ is \textbf{convex} and \textbf{differentiable}, and its gradient is Lipschitz continuous, GD is guaranteed to converge to the global minimum (for small enough step-size).  
+      \vspace*{2mm}
+    \item However, if $\riskt$ has multiple local optima and/or saddle points, GD might only converge to a stationary point (other than the global optimum), depending on the starting point. 
+    \end{itemize}
+    \end{small}
+  \end{minipage}\hfill
+  \begin{minipage}{0.5\textwidth}
+    \begin{figure}
+      \centering
+        \scalebox{1}{\includegraphics{figure/gdes3.png}}
+    \end{figure}
+  \end{minipage}  
+
+  \framebreak 
+
+  \textbf{Note: } It might not be that bad if we do not find the global optimum:  
+
+  \begin{itemize}
+    \item We do not optimize the actual quantity of interest, i.e. the (theoretical) risk, but only an approximate version, i.e. the empirical risk. 
+    \item If the model class is very flexible, it might be disadvantageous to optimize too aggressively and increase the risk of overfitting. 
+    \item Early-stopping the optimization might even increase generalization performance. 
+  \end{itemize}
+
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Learning rate}
+
+The step-size $\alpha$ plays a key role in the convergence of the algorithm.
+\lz
+
+If the step size is too small, the training process may converge \textbf{very} slowly (see left image). If the step size is too large, the process may not converge, because it \textbf{jumps} around the optimal point (see right image).
+
+\begin{center}
+\includegraphics[width = 0.3\textwidth]{figure/stepsize_small.png}~~
+\includegraphics[width = 0.3\textwidth]{figure/stepsize_large.png}
+\end{center}
+
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Learning Rate}
+
+
+So far we have assumed a fixed value of $\alpha$ in every iteration:
+
+\vspace*{-0.2cm}
+$$\alpha^{[t]} = \alpha \quad \forall t = {\{1, \ldots, T\}}$$
+
+% \textbf{Konvergenz:} Es sei $f:\R^n \to \R$ konvex, differenzierbar und Liptschitz-stetig, d.h. es gibt ein $L > 0$
+%
+% $$
+% \|\nabla f(\bm{x}) - \nabla f(\bm{y})\| \le L\|\bm{x} - \bm{y}\| \quad \text{f?r alle} x, y
+%
+
+However, it makes sense to adapt $\alpha$ in every iteration:
+
+
+\vspace*{-0.1cm}
+\begin{center}
+\includegraphics[width = 0.3\textwidth]{figure/stepsize_small.png} ~~~ \includegraphics[width = 0.3\textwidth]{figure/stepsize_adaptive.png} \\
+\end{center}
+\begin{footnotesize}
+Steps of gradient descent for $\riskt = 10\,\theta_1^2 + 0.5\,\theta_2^2$. Left:  100 steps for with a fixed learning rate. Right:  40 steps with an adaptive learning rate.
+\end{footnotesize}
+
+
+\end{vbframe}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Weight updates with Backpropagation}
@@ -95,10 +207,10 @@ $$\thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nab
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-An illustration of the SGD algorithm: on the left is GD and on the right is SGD. The black line depicts the averaged value of $\thetab$.
+An illustration of the SGD algorithm: on the left is GD and on the right is SGD (to minimize the function $1.25(x_1 + 6)^2 + (x_2 - 8)^2$). The black line depicts the averaged value of $\thetab$.
 
 \begin{figure}
-\scalebox{1}{\includegraphics{figure_man/SGD.png}}
+\scalebox{0.8}{\includegraphics{figure_man/SGD.png}}
 \tiny{\\ source : Shalev-Shwartz and  Ben-David.
 Understanding machine learning: From theory to algorithms. Cambridge University Press, 2014.}
 \end{figure}
@@ -137,7 +249,17 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
 \\GD (black) versus momentum (red) when dealing with ravines
 \end{figure}
 \end{vbframe}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{vbframe}{Weight Initialization}
+\begin{itemize}
+\item The weights (and biases) of a neural network must be assigned some initial values before training can begin.
+\item It’s important to initialize the weights randomly in order to "break symmetry". If two neurons (with the same activation function in a fully connected network) are connected to the same inputs and have the same initial weights, then both neurons will have the same gradient update in a given iteration and they’ll end up learning the same features.
+\item Weights are typically drawn from a uniform a Gaussian distribution (both centered at 0 with a small variance).
+\item Two common initialization strategies are ’Glorot initialization’ and ’He initialization’ which tune the variance of these distributions based on the topology of the network.
+\end{itemize}
+\end{vbframe}
 
 \endlecture
 \end{document}
