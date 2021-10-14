@@ -1,10 +1,21 @@
+% style/preamble throws error, which is why style/preamble4tex is kept
 \input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+\newcommand{\titlefigure}{figure/bird4.pdf}
+\newcommand{\learninggoals}{
+  \item Relationship of DL and ML
+  \item Concept of representation or feature learning
+  \item Use-cases and data types for DL methods
+}
+
+\title{Deep Learning}
+\date{}
+
 \begin{document}
-\lecturechapter{1}{Introduction}
+\lecturechapter{Introduction}
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -22,7 +33,7 @@ construct models on large amounts of (unstructured) data.
 
 \begin{frame} {Deep Learning and Neural Networks}
 \begin{itemize}
-\item Deep learning and neural networks are mostly equivalent.
+\item Deep learning is a subfield of ML originally based on (deep) artificial neural networks.
 \vspace{.3cm}
 \item Deep learning itself is not \textit{new}:
 \begin{itemize}
