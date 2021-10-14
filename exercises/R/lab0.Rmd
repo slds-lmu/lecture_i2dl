@@ -1,7 +1,7 @@
 ---
 title: "Introduction to the Labs"
 author: "Emilio Dorigatti"
-date: 2020-11-06
+date: 2021-11-19
 output:
   beamer_presentation: default
 ---
@@ -14,12 +14,10 @@ knitr::opts_chunk$set(echo = FALSE)
 
  - Mix of theoretical and practical exercises
  - Not graded! Only final exam counts
- - Exercises posted on Moodle on Tuesday
- - Solutions on Friday
-   - Only presented on popular demand
+ - Exercises and solutions for the previous week posted on Moodle on Tuesday morning
+ - I will present both questions and solutions on Friday
  - Lab sessions exist to discuss and ask questions
    - Attend not to fall behind the schedule
- - I will leave the Zoom call if nobody shows up in the first ten minutes
 
 ## Theory-oriented Exercises
 
@@ -40,7 +38,8 @@ knitr::opts_chunk$set(echo = FALSE)
  - Purpose:
    1. Learn to use a popular Deep Learning Framework
    2. Get a feeling for how neural networks behave
- - Handouts in R, Python is also accepted (and encouraged)
+ - Handouts both in in R and Python
+   - I will present the solutions in R, but you are free to use and ask questions about the Python version
 
 ## Our software stack
 
