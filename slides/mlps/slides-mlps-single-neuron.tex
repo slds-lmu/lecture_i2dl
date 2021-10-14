@@ -154,7 +154,7 @@ $$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x
 \begin{vbframe} {A Single Neuron: Optimization}
 \begin{itemize}
 \item To optimize this model, we minimize the empirical risk 
-$$\riske = \sumin \Lxyi,$$
+$$\riske = \frac{1}{n} \sumin \Lxyi,$$
 where $\Lxy$ is a loss function. It compares the network's predictions $\fx$ to the ground truth $y$. 
 \item For regression, we typically use the L2 loss (rarely L1): $$\Lxy = \frac{1}{2}(y - \fx)^2$$
 \item For binary classification, we typically apply the cross entropy loss (also known as bernoulli loss): $$\Lxy = y \log \fx + (1 - y) \log(1 - \fx)$$
