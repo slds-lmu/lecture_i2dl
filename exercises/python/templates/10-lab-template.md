@@ -21,32 +21,23 @@ jupyter:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
+import string
 from collections import Counter
 from itertools import chain
-import random
-import shutil
-import string
-import urllib.request
-from functools import reduce, partial
 from math import ceil
-from pathlib import Path
-from typing import List, Optional, Callable, Tuple, Dict
+from typing import List, Optional, Tuple, Dict
 
 import matplotlib.pyplot as plt
 import torch
-from PIL import Image
 from matplotlib_inline.backend_inline import set_matplotlib_formats
 from torch import nn, Tensor
-from torch.distributions import Normal
-from torch.optim import Adam, Optimizer
 from torch.nn.utils.rnn import pad_sequence
+from torch.optim import Adam, Optimizer
 from torch.utils.data import DataLoader, Dataset
-from torchsummary import summary
 from torchtext.datasets import IMDB
-from torchvision.transforms import ToTensor
 from torchvision.datasets import MNIST
+from torchvision.transforms import ToTensor
 from torchvision.utils import make_grid
-from torchvision.models import vgg16
 
 set_matplotlib_formats('png', 'pdf')
 ```
@@ -594,10 +585,6 @@ def train_autoencoder(
 
     for ep in range(1, epochs + 1):
         total_loss = 0
-
-        ################################################################################
-        # TRAINING LOOP
-        ################################################################################
 
         for batch_idx, (x, _) in enumerate(train_loader):
             x = x.to(device).view(x.shape[0], -1)
