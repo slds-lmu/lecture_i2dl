@@ -175,67 +175,74 @@ Steps of gradient descent for $\riske(\thetab) = 10\,\theta_1^2 + 0.5\,\theta_2^
 
 
 \end{vbframe}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Weight updates with Backpropagation}
+\begin{vbframe}{Weight Initialization}
 \begin{itemize}
-\lz
-\item To update each weight $w \in \thetab$ in the network, we need their gradients w.r.t. the empirical risk.
-\lz
-\lz
-\item Since weights are stacked in layers inside the network, we need to repeatedly apply the \enquote{chain rule of calculus}. This process is called \textbf{backpropagation}.
-\lz
-\lz
-\item After obtaining the gradients, the weights can be updated by GD:
-$$\thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetab^{[t]})\right)$$
+\item The weights (and biases) of a neural network must be assigned some initial values before training can begin.
+\item It’s important to initialize the weights randomly in order to "break symmetry". If two neurons (with the same activation function in a fully connected network) are connected to the same inputs and have the same initial weights, then both neurons will have the same gradient update in a given iteration and they’ll end up learning the same features.
+\item Weights are typically drawn from a uniform a Gaussian distribution (both centered at 0 with a small variance).
+\item Two common initialization strategies are ’Glorot initialization’ and ’He initialization’ which tune the variance of these distributions based on the topology of the network.
 \end{itemize}
 \end{vbframe}
+
+%\begin{vbframe}{Weight updates with Backpropagation}
+%\begin{itemize}
+%\lz
+%\item To update each weight $w \in \thetab$ in the network, we need their gradients w.r.t. the empirical risk.
+%\lz
+%\lz
+%\item Since weights are stacked in layers inside the network, we need to repeatedly apply the \enquote{chain rule of calculus}. This process is called \textbf{backpropagation}.
+%\lz
+%\lz
+%\item After obtaining the gradients, the weights can be updated by GD:
+%$$\thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetab^{[t]})\right)$$
+%\end{itemize}
+%\end{vbframe}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Stochastic Gradient Descent}
-\begin{itemize}
-\lz
-\item Optimization algorithms that use the entire training set to compute updates in one huge step are called \textbf{batch} or \textbf{deterministic}. This is computationally very costly or often impossible.
-\lz
-\item Instead of running the sum over the whole dataset (\textbf{batch mode}), one can run over small subsets (\textbf{minibatches}) of size $m$.
-\lz
-\item With minibatches of size $m$, a full pass over the training set (called an \textbf{epoch}) consists of $\frac{n}{m}$ gradient updates.
-\lz
-\item This stochastic version of the batch gradient is known as \textbf{Stochastic Gradient Descent} (SGD).
-\end{itemize}
-\framebreak
+\begin{vbframe}{Stochastic gradient descent}
+
+Let us consider GD for empirical risk minimization. The updates are: 
+
+$$
+  \thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetab^{[t]})\right)
+$$
+
+
+  \begin{itemize}
+    \item Optimization algorithms that use the entire training set to compute updates in one huge step are called \textbf{batch} or \textbf{deterministic}. This is computationally very costly or often impossible. 
+    \item \textbf{Idea:} Instead of letting the sum run over the whole dataset (\textbf{batch mode}) one can also let it run only over small subsets (\textbf{minibatches}), or only over a single example $i$. 
+     \item If the index $i$ of the training example is a random variable with uniform distribution, then its expectation is the batch gradient $\nabla_\theta \risket$
+    \item[$\to$] We have a \textbf{stochastic}, noisy version of the batch gradient
+
+    \framebreak 
+
+    \item The gradient w.r.t. a single training observation is fast to compute but not reliable. It can be used simply as a computational trick to deal with large data or to operate on real streams of online data in online learning.
+    \item In contrast, the full
+    batch gradient is costly (or even impossible, e.g., when data does not even fit into memory) to compute, particularly in DL, but it averages out all the noise from sub-sampling.
+    \item Minibatches are in between. The batch size decides upon the compromise
+    between speed and averaging (smoothing).
+    \item In summary: SGD computes an unbiased estimate of the gradient by taking the average gradient over a minibatch (or one sample) to update the parameter $\thetab$ in this direction.
+    % \item Optimization algorithms that use only a single example at a time are called \textbf{stochastic} or \textbf{online}. This can be used simply as a computational trick to deal with large data or to operate on real streams of online data in online learning.
+% Those methods are called \textbf{minibatch} or \textbf{stochastic}.
+  \end{itemize}
+ 
+  \framebreak
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ An illustration of the SGD algorithm (to minimize the function $1.25(x_1 + 6)^2 + (x_2 - 8)^2)$.
+ \begin{figure}
+    \scalebox{0.8}{\includegraphics{figure_man/SGD.png}}
+    \tiny{\\ Source : Shalev-Shwartz and  Ben-David.
+Understanding machine learning: From theory to algorithms. Cambridge University Press, 2014. }
+ \caption{On the left is GD and on the right is SGD. The black line depicts the averaged value of $\thetab$.}
+ \end{figure}
 
-An illustration of the SGD algorithm: on the left is GD and on the right is SGD (to minimize the function $1.25(x_1 + 6)^2 + (x_2 - 8)^2$). The black line depicts the averaged value of $\thetab$.
-
-\begin{figure}
-\scalebox{0.8}{\includegraphics{figure_man/SGD.png}}
-\tiny{\\ source : Shalev-Shwartz and  Ben-David.
-Understanding machine learning: From theory to algorithms. Cambridge University Press, 2014.}
-\end{figure}
-\framebreak
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-  \begin{algorithm}[H]
-  \footnotesize
-    \caption{Basic SGD pseudo code}
-    \begin{algorithmic}[1]
-    \State Initialize parameter vector $\thetab^{[0]}$
-    \State $t \leftarrow 0$
-    \While{stopping criterion not met}
-    \State Randomly shuffle data and partition into minibatches $J_1, ..., J_K$ of size $m$
-      \For{$k\in\{1,...,K\}$}
-      \State $t \leftarrow t + 1$
-      \State Compute gradient estimate with $J_k$:
-      \[\hat{g}^{[t]} \leftarrow \frac{1}{m} \sum_{i \in J_k} \nabla_\theta L(\yi, f(\xi ~|~ \thetab^{[t-1]}))
-      \]
-      \State Apply update: $\thetab^{[t]} \leftarrow \thetab^{[t-1]} - \alpha \hat{g}^{[t]}$
-      \EndFor
-      \EndWhile
-    \end{algorithmic}
-  \end{algorithm}
-\end{vbframe}
+  \end{vbframe}
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{SGD with Momentum}
@@ -252,14 +259,58 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Weight Initialization}
-\begin{itemize}
-\item The weights (and biases) of a neural network must be assigned some initial values before training can begin.
-\item It’s important to initialize the weights randomly in order to "break symmetry". If two neurons (with the same activation function in a fully connected network) are connected to the same inputs and have the same initial weights, then both neurons will have the same gradient update in a given iteration and they’ll end up learning the same features.
-\item Weights are typically drawn from a uniform a Gaussian distribution (both centered at 0 with a small variance).
-\item Two common initialization strategies are ’Glorot initialization’ and ’He initialization’ which tune the variance of these distributions based on the topology of the network.
-\end{itemize}
+\begin{vbframe}
+
+  \begin{algorithm}[H]
+  \footnotesize
+    \caption{Basic SGD pseudo code}
+    \begin{algorithmic}[1]
+    \State Initialize parameter vector $\thetab^{[0]}$ 
+    
+    \State $t \leftarrow 0$
+    \While{stopping criterion not met}
+    \State Randomly shuffle data and partition into minibatches $J_1, ..., J_K$ of size $m$
+      \For{$k\in\{1,...,K\}$} 
+      \State $t \leftarrow t + 1$ 
+      \State Compute gradient estimate with $J_k$: $\hat{g}^{[t]} \leftarrow \frac{1}{m} \sum_{i \in J_k} \nabla_\theta L(\yi, f(\xi ~|~ \thetab^{[t-1]})) $
+      \State Apply update: $\thetab^{[t]} \leftarrow \thetab^{[t-1]} - \alpha \hat{g}^{[t]}$
+      
+      \EndFor
+    
+        
+      \EndWhile
+    \end{algorithmic}
+  \end{algorithm}
+  % \begin{itemize}
+  %   \item Thus, what SGD basically does is computing an unbiased estimate of the gradient by taking the average gradients of a minibatch to update the parameter $\thetab$.
+  % \end{itemize}
+ 
+\framebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace*{0.5cm}
+  \begin{itemize}
+    \item With minibatches of size $m$, a full pass over the training set (called an \textbf{epoch}) consists of $\frac{n}{m}$ gradient updates (\textbf{iterations}).
+    \item SGD and its modifications are the most used optimization algorithms for ML in general and for deep learning in particular.
+    \item SGD (with one or a few samples per batch) updates have a high variance, even though they are unbiased. 
+      Because of this variance, the learning rate $\alpha$ is typically much smaller than in the full-batch scenario.
+    \item SGD with minibatches reduces the variance of the parameter updates and utilizes highly optimized matrix operations to efficiently compute gradients.
+
+
+\framebreak 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace*{0.5cm}
+    \item Minibatch sizes are typically between 50 and 1000.
+    \item When the learning rate is slowly decreased, SGD converges to a local minimum.
+    \item Recent results indicate, that SGD often leads to better generalizing models then GD, and thus may perform some kind of indirect regularization.
+    \item Now we know how we can optimize/train a neural network based on the gradient, but how do we compute the gradient? We will learn more about this in the chapter on backpropagation, a method to efficiently compute gradients.
+  \end{itemize}
 \end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture
 \end{document}
