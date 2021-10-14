@@ -1,11 +1,11 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
 \begin{document}
 
-\lecturechapter{4}{CNN: Conv2D}
+\lecturechapter{CNN: Conv2D}
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -27,16 +27,16 @@
 \begin{itemize}
 \item Edges occur where the intensity over neighboring pixels changes fast.
 \item Thus, approximate the gradient of the intensity of each pixel.
-\item Sobel showed that the gradient image $G_x$ of original image $A$ in x-dimension  can be approximated by:
-$$G_x = 
+\item Sobel showed that the gradient image $\textbf{G}_x$ of original image $\textbf{A}$ in x-dimension  can be approximated by:
+$$ \textbf{G}_x = 
 \begin{bmatrix}
 -1 & 0 & +1 \\
 -2 & 0 & +2 \\
 -1 & 0 & +1 
-\end{bmatrix} * A = S_x * A
+\end{bmatrix} * \textbf{A} = \textbf{S}_x * \textbf{A}
 $$
 where $*$ indicates a mathematical operation known as a \textbf{convolution}, not a traditional matrix multiplication.
-\item The filter matrix $S_x$ consists of the product of an \textbf{averaging} and a \textbf{differentiation} kernel: 
+\item The filter matrix $\textbf{S}_x$ consists of the product of an \textbf{averaging} and a \textbf{differentiation} kernel: 
 $$
 \underbrace{\begin{bmatrix}
 1 & 2 & 1   
@@ -49,18 +49,18 @@ $$
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \begin{itemize}
-        \item Similarly, the gradient image $G_y$ in y-dimension can be approximated by:
+        \item Similarly, the gradient image $\textbf{G}_y$ in y-dimension can be approximated by:
         $$
-            G_y = 
+            \textbf{G}_y = 
             \begin{bmatrix}
                 -1 & -2 & -1  \\
                 0 & 0 & 0 \\
                 +1 & +2 & +1
-            \end{bmatrix} * A = S_y * A
+            \end{bmatrix} * \textbf{A} = \textbf{S}_y * \textbf{A}
         $$
-        \item The combination of both gradient images yields a dimension-independent gradient information $G$:
+        \item The combination of both gradient images yields a dimension-independent gradient information $\textbf{G}$:
         $$
-            G = \sqrt{G_x^2 + G_y^2}
+            \textbf{G} = \sqrt{\textbf{G}_x^2 + \textbf{G}_y^2}
         $$
         \item These matrix operations were used to create the filtered picture of Albert Einstein.
     \end{itemize}
@@ -92,12 +92,12 @@ $$
         \only<1>{\item Let's do this on a dummy image.}
         \only<1>{\item How to represent a digital image?}
         \only<2>{\item Basically as an array of integers.}
-        \only<3>{\item $S_x$ enables us to to detect vertical edges!}
+        \only<3>{\item $\textbf{S}_x$ enables us to to detect vertical edges!}
         \only<4>{\item[]}
         \only<5>{\item[]
         \vspace{-0.8cm}
         \begin{alignat*}{3}
-            (\mathit{G}_x)_{(i,j)} = (I \star S_x)_{(i, j)}
+            (\textbf{G}_x)_{(i,j)} = (\textbf{I} \star \textbf{S}_x)_{(i, j)}
                  & = -1 \cdot 0 \ \ &&+ \ \ 0 \cdot 255 \ \ &&+ \ \ \textbf{1} \cdot \textbf{255} \\
                  &\quad - 2 \cdot 0 &&+ \ \ 0 \cdot 0 &&+ \ \ \textbf{2} \cdot \textbf{255} \\
                  &\quad - 1 \cdot 0 &&+ \ \ 0 \cdot 255 &&+ \ \ \textbf{1} \cdot \textbf{255}
