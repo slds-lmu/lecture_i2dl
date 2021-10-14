@@ -1,11 +1,22 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+\newcommand{\titlefigure}{figure/step2-zin.jpg}
+\newcommand{\learninggoals}{
+  \item Graphical representation of a single neuron
+  \item Affine transformations and non-linear activation functions
+  \item Hypothesis spaces of single neuron architectures
+  \item Typical loss functions
+}
+
+\title{Deep Learning}
+\date{}
+
 \begin{document}
 
-\lecturechapter{2}{Single Neuron / Preceptron}
+\lecturechapter{Single Neuron / Perceptron}
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -124,10 +135,10 @@ Therefore, a neuron performs a 2-step computation:
 \begin{vbframe} {A Single Neuron}
 \begin{itemize}
 \item Even though all neurons compute a weighted sum in the first step, there is considerable flexibility in the type of activation function used in the second step.
-\item For example, setting the activation function to logistic sigmoid function allows a neuron to represent logistic regression. The following neuron represents a logistic regression with two outputs.
+\item For example, setting the activation function to the logistic sigmoid function allows a neuron to represent logistic regression. The following architecture with two neurons represents two logistic regressions using the same input features:
 \end{itemize}
 \begin{figure}
-\includegraphics[width=5.5cm]{figure/logistic_regression.png}
+\includegraphics[width=5cm]{figure/logistic_regression.png}
 \end{figure}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -139,10 +150,10 @@ Therefore, a neuron performs a 2-step computation:
 $$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R\right\}.$$ 
 \end{small}
 \item Both logistic regression and linear regression are subspaces of $\Hspace$ (if $\tau$ is the logistic sigmoid / identity function).  \end{itemize}
-\vspace*{-0.48cm}
+\vspace*{-0.45cm}
 \begin{figure}
 \centering
-\scalebox{0.7}{\includegraphics{figure/neuron_regcls.png}}
+\scalebox{0.6}{\includegraphics{figure/neuron_regcls.png}}
 \vspace*{-0.2cm}
 \begin{tiny}
 \caption{\textit{Left}: A regression line learned by a single neuron. \textit{Right}: A decision-boundary learned by a single neuron in a binary classification task.}
@@ -157,7 +168,7 @@ $$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x
 $$\riske = \frac{1}{n} \sumin \Lxyi,$$
 where $\Lxy$ is a loss function. It compares the network's predictions $\fx$ to the ground truth $y$. 
 \item For regression, we typically use the L2 loss (rarely L1): $$\Lxy = \frac{1}{2}(y - \fx)^2$$
-\item For binary classification, we typically apply the cross entropy loss (also known as bernoulli loss): $$\Lxy = y \log \fx + (1 - y) \log(1 - \fx)$$
+\item For binary classification, we typically apply the cross entropy loss (also known as bernoulli loss): $$\Lxy = -(y \log \fx + (1 - y) \log(1 - \fx))$$
 \framebreak 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
