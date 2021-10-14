@@ -6,8 +6,8 @@
 \newcommand{\titlefigure}{figure_man/SGD.png}
 \newcommand{\learninggoals}{
   \item Gradient Descent
-  \item Mini-batch Gradient Descent
   \item Stochastic Gradient Descent
+  \item Minibatch Gradient Descent
   \item Learning Rates and (S)GD specifics
 }
 
@@ -296,13 +296,16 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
     \item SGD (with one or a few samples per batch) updates have a high variance, even though they are unbiased. 
       Because of this variance, the learning rate $\alpha$ is typically much smaller than in the full-batch scenario.
     \item SGD with minibatches reduces the variance of the parameter updates and utilizes highly optimized matrix operations to efficiently compute gradients.
+   \end{itemize}
 
+\textbf{Note:} Sometimes, SGD with minibatches is referred to as "Minibatch gradient descent" with the term SGD being reserved for updates using a single example.
 
 \framebreak 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \vspace*{0.5cm}
+  \begin{itemize}
     \item Minibatch sizes are typically between 50 and 1000.
     \item When the learning rate is slowly decreased, SGD converges to a local minimum.
     \item Recent results indicate, that SGD often leads to better generalizing models then GD, and thus may perform some kind of indirect regularization.
