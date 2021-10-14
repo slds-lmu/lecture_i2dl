@@ -289,8 +289,6 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
 \framebreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\vspace*{0.5cm}
   \begin{itemize}
     \item With minibatches of size $m$, a full pass over the training set (called an \textbf{epoch}) consists of $\frac{n}{m}$ gradient updates (\textbf{iterations}).
     \item SGD and its modifications are the most used optimization algorithms for ML in general and for deep learning in particular.
@@ -298,7 +296,7 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
       Because of this variance, the learning rate $\alpha$ is typically much smaller than in the full-batch scenario.
     \item SGD with minibatches reduces the variance of the parameter updates and utilizes highly optimized matrix operations to efficiently compute gradients.
    \end{itemize}
-
+\vspace*{0.5cm}
 \textbf{Note:} Sometimes, SGD with minibatches is referred to as "Minibatch gradient descent" with the term SGD being reserved for updates using a single example.
 
 \framebreak 
