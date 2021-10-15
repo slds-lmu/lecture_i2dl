@@ -20,19 +20,19 @@
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {A Single Neuron}
-\begin{itemize}
-\item To illustrate the types of functions that neural networks can represent, let us begin with a simple model: logistic regression.
-\vspace{5mm}
-\item The hypothesis space of logistic regression can be written as follows, where $\tau(z) = (1 + \exp(-z))^{-1}$ is the logistic sigmoid function:
-\begin{small} 
-$$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R \right\},$$ \end{small}
-\vspace{3mm}
-\item It is straightforward to represent $\fx$ graphically as a neuron.
-\vspace{5mm}
-\item Note: $\wtw$ and $b$ together constitute $\thetab$.
-\end{itemize}
-\end{frame}
+%\begin{frame} {A Single Neuron}
+%\begin{itemize}
+%\item To illustrate the types of functions that neural networks can represent, let us begin with a simple model: logistic regression.
+%\vspace{5mm}
+%\item The hypothesis space of logistic regression can be written as follows, where $\tau(z) = (1 + \exp(-z))^{-1}$ is the logistic sigmoid function:
+%\begin{small} 
+%$$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R \right\},$$ \end{small}
+%\vspace{3mm}
+%\item It is straightforward to represent $\fx$ graphically as a neuron.
+%\vspace{5mm}
+%\item Note: $\wtw$ and $b$ together constitute $\thetab$.
+%\end{itemize}
+%\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe} {A Single Neuron}
@@ -41,11 +41,12 @@ $$\Hspace = \left\{f: \R^p \to [0, 1] ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_
 \scalebox{.4}{\includegraphics{figure/perceptron_tau.png}}
 \end{figure}
 \vspace{-2mm}
-\footnotesize Perceptron $z$, with \textbf{input features} $x_1, x_2, ... ,x_p$, \textbf{weights} $w_1, w_2,... ,w_p$, \textbf{bias term} $b$ and \textbf{activation function} $\tau$.
+\footnotesize Perceptron %$z$, 
+with \textbf{input features} $x_1, x_2, ... ,x_p$, \textbf{weights} $w_1, w_2,... ,w_p$, \textbf{bias term} $b$, and \textbf{activation function} $\tau$.
 \vspace{.2cm}
 \normalsize
 \begin{itemize}
-\item The perceptron is the basic computational unit for neural networks.
+\item The perceptron is a single artificial neuron and the basic computational unit of neural networks.
 \vspace{.2cm}
 \item It is a weighted sum of input values, transformed by $\tau$:
 \vspace{-1mm}
@@ -104,11 +105,12 @@ The graphical representation is then:
 \begin{figure}
 \includegraphics[width=6cm]{figure/neurep_three.png}
 \end{figure}
-\item Because this single neuron represents exactly the same hypothesis space as logistic regression, it can only learn linear decision boundaries.
+%\item Because this single neuron represents exactly the same hypothesis space as logistic regression, it can only learn linear decision boundaries.
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\item A nice thing about this graphical representation of functions is that you can picture the input vector being "fed" to the neuron on the left followed by a sequence of computations being performed from left to right. This is called a \textbf{forward pass}.
+\item %A nice thing about this graphical representation of functions is that 
+You can picture the input vector being "fed" to neurons on the left followed by a sequence of computations performed from left to right. This is called a \textbf{forward pass}.
 \end{itemize}
 \vspace{1cm}
 \begin{figure}
@@ -118,7 +120,7 @@ The graphical representation is then:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame} {A Single Neuron}
-Therefore, a neuron performs a 2-step computation:
+A neuron performs a 2-step computation:
 \begin{enumerate}
 \item \textbf{Affine Transformation:} weighted sum of inputs plus bias.
 \begin{figure}
@@ -143,13 +145,16 @@ Therefore, a neuron performs a 2-step computation:
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{A Single Neuron}
+\begin{vbframe}{A Single Neuron: Hypothesis Space}
 \begin{itemize}
-\item The hypothesis space that is formed by single neuron architectures is 
+\item The hypothesis space that is formed by single neuron %architectures 
+is 
 \begin{small}
 $$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x_j + b\right), \wtw \in \R^p, b \in \R\right\}.$$ 
 \end{small}
-\item Both logistic regression and linear regression are subspaces of $\Hspace$ (if $\tau$ is the logistic sigmoid / identity function).  \end{itemize}
+%\item Both logistic regression and linear regression are subspaces of $\Hspace$ (if $\tau$ is the logistic sigmoid / identity function).  
+\item If $\tau$ is the logistic sigmoid or identity function, $\Hspace$ corresponds to the hpothesis space of logistic or linear regression, respectively.
+\end{itemize}
 \vspace*{-0.45cm}
 \begin{figure}
 \centering
@@ -176,8 +181,8 @@ where $\Lxy$ is a loss function. It compares the network's predictions $\fx$ to 
 \item For a single neuron, in both cases, the loss function is convex and the global optimum can be found with an iterative algorithm like gradient descent. 
 \item In fact, a single neuron with logistic sigmoid function trained with the bernoulli loss does not only have the same hypothesis space as a logistic regression and is therefore the same model, but will also yield to the very same result when trained until convergence.
 \item Note: In the case of regression and the L2-loss, the solution can
-also be found analytically using the “normal equations”. However,
-a closed-form solution is usually not available.
+also be found analytically using the “normal equations”. % However,
+%a closed-form solution is usually not available.
 \end{itemize}
 \end{vbframe} 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
