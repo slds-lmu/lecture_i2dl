@@ -3,11 +3,11 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\newcommand{\titlefigure}{figure/cartesian.png}
+\newcommand{\titlefigure}{figure/sinlay_one.png}
 \newcommand{\learninggoals}{
-  \item ...
-  \item ...
-  \item ...
+  \item compact representation of neural network equations
+  \item write states of neuron layers
+  \item write bias parameters as vectors and weights as matrices 
 }
 
 \title{Deep Learning}
@@ -19,27 +19,27 @@
 \lecture{Deep Learning}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}
-\frametitle{Lecture outline}
-\lz
-This chapter introduces a compact way for representing feedforward neural networks: the matrix formalism from linear algebra.
-\lz
-\lz
+%\begin{frame}
+%\frametitle{Lecture outline}
+%\lz
+%This chapter introduces a compact way for representing feedforward neural networks: the matrix formalism from linear algebra.
+%\lz
+%\lz
+%
+%\begin{enumerate}
+%\item First, we explore networks with one hidden layer and one output unit.
+%\lz
+%\item Next, we investigate networks with one hidden layer but multiple output units.
+%\lz
+%\item Finally, we focus on multi-layer feedforward networks with an arbitrary number of hidden layers and output units.
+%\end{enumerate}
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%\section{Single Hidden Layer Networks for Regression and Binary Classification}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{enumerate}
-\item First, we explore networks with one hidden layer and one output unit.
-\lz
-\item Next, we investigate networks with one hidden layer but multiple output units.
-\lz
-\item Finally, we focus on multi-layer feedforward networks with an arbitrary number of hidden layers and output units.
-\end{enumerate}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Single Hidden Layer Networks for Regression and Binary Classification}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{vbframe}{Single Hidden Layer Networks}
+\begin{vbframe}{Single Hidden Layer Networks: Notations}
 
 \begin{itemize}
 \item The input $\xv$ is a column vector with dimensions $p \times 1$. 
@@ -185,167 +185,23 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
   \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Hidden Layer: Activation Function}
-\begin{itemize}
-\item It is important to note that if the hidden layer does not have a non-linear activation, the network can only learn linear decision boundaries.
-\item For simplification purposes, we drop the bias terms in notation and let $\sigma = \text{id}$. Then:
-    \begin{eqnarray*}
-        \fx & = & \tau(\wtu^T \hidz) \\
-         & = & \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
-         & = & \tau(\wtu^T\Wmat^T \xv) = \tau(\mathbf{v}^T \xv)
-      \end{eqnarray*}
-      where $ \mathbf{v} = \Wmat\wtu$. It can be seen that $\fx$ can only yield a linear decision boundary.
-  \end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Single Hidden Layer Networks for Multi-Class Classification}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Multi-class Classification}
-\vspace{20mm}
-\begin{itemize}
-\item We have only considered regression and binary classification problems so far.
-\vspace{5mm}
-\item How can we get a neural network to perform multiclass classification?
-  \end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Multi-class Classification}
-\begin{itemize}
-\item The first step is to add additional neurons to the output layer.
-\item Each neuron in the layer will represent a specific class (number of neurons in the output layer = number of classes).
-\begin{figure}
-\centering
-\scalebox{0.75}{\includegraphics[width=10.2cm]{figure/neuralnet_new.png}}
-\caption{\footnotesize Structure of a single hidden layer, feed-forward neural network for g-class classification problems (bias term omitted).}
-\end{figure}
-\end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Multi-class Classification}
-\vspace{5mm}
-\begin{blocki}{Notation:}
-\item For $g$-class classification, $g$ output units: $$\mathbf{f} = (f_1, \dots, f_g)$$
-\vspace{4mm}
-\item $m$ hidden neurons $z_1, \dots, z_m$, with
-    $$ z_j = \sigma(\mathbf{W}_j^T \xv), \quad j = 1,\ldots,m. $$
-\item Compute linear combinations of derived features $z$:
-    $$ f_{in,k} = \bm{U}_k^T \hidz, \quad \hidz=(z_1,\dots, z_m)^T, \quad k = 1,\ldots,g$$
-\end{blocki}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Multi-class Classification}
-  \begin{itemize}
-    \item The second step is to apply a softmax activation function to the output layer.
-    \vspace{4mm}
-    \item This gives us a probability distribution over $g$ different possible classes:
-    $$ f_{out,k} = \tau_k(f_{in,k}) = \frac{\exp(f_{in,k})}{\sum_{k'=1}^g\exp(f_{in,k'})}$$
-    \vspace{2mm}
-    \item This is the same transformation used in softmax regression!
-    \vspace{4mm}
-    \item Derivative $ \frac{\partial \tau(\mathbf{f}_{in})}{\partial \mathbf{f}_{in}} = \text{diag}(\tau(\mathbf{f}_{in})) - \tau(\mathbf{f}_{in}) \tau(\mathbf{f}_{in})^T $
-    \vspace{4mm}
-    \item It is a \enquote{smooth} approximation of the argmax operation,
-        so $\tau((1, 1000, 2)^T) \approx (0, 1, 0)^T$ (picks out 2nd element!).
-  \end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Multi-class Classification: Example}
-Forward pass (Hidden: Sigmoid, Output: Softmax).
-  \begin{figure}
-    \centering
-      \only<1>{\scalebox{0.95}{\includegraphics{figure/softie_one.png}}}
-      \only<2>{\scalebox{0.95}{\includegraphics{figure/softie_two.png}}}
-      \only<3>{\scalebox{0.95}{\includegraphics{figure/softie_three.png}}}
-      \only<4>{\scalebox{0.95}{\includegraphics{figure/softie_four.png}}}
-      \only<5>{\scalebox{0.95}{\includegraphics{figure/softie_five_a.png}}}
-      \only<6>{\scalebox{0.95}{\includegraphics{figure/softie_five_b.png}}}
-      \only<7>{\scalebox{0.95}{\includegraphics{figure/softie_six.png}}}
-      \only<8>{\scalebox{0.95}{\includegraphics{figure/softie_seven.png}}}
-\end{figure}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Softmax Loss}
-  \begin{itemize}
-\vspace{5mm}
-\item The loss function for a softmax classifier is
-$$L(y, \fx) = - \sum_{k = 1}^g [y = k] \log \left( \frac{\exp(f_{in,k})}{\sum_{k'=1}^g\exp(f_{in,k'})}\right)$$
-where $[y = k] = \begin{cases} 1 & \text{ if } y = k \\
-0 & \text{ otherwise }
-\end{cases}$. 
-\vspace{5mm}
-\item This is equivalent to the cross-entropy loss when the label vector $\bm{y}$ is one-hot coded (e.g. $\mathbf{y} = (0,0,1,0)^T$). 
-\item Optimization:  Again, there is no analytic solution.
-\end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Multi-Layer Feedforward Neural Networks}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{vbframe}{Feedforward neural networks}
-\begin{itemize}
-\vspace{15mm}
-\item We will now extend the model class once again, such that we allow an arbitrary amount of $l$ (hidden) layers.
-\vspace{5mm}
-\item The general term for this model class is (multi-layer) \textbf{feedforward networks} (inputs are passed through the network from left to right, no feedback-loops are allowed)
-\end{itemize}
-\framebreak
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{itemize}
-\item We can characterize those models by the following chain structure: $$\fx = \tau \circ \phi \circ \sigma^{(l)} \circ \phi^{(l)} \circ \sigma^{(l-1)} \circ \phi^{(l-1)} \circ \ldots \circ \sigma^{(1)} \circ \phi^{(1)}$$ where $\sigma^{(i)}$ and $\phi^{(i)}$ are the activation function and the weighted sum of hidden layer $i$, respectively. $\tau$ and $\phi$ are the corresponding components of the output layer.
-\vspace{5mm}
-\item Each hidden layer has: 
-\begin{itemize}
-\vspace{2mm}
-\item an associated weight matrix $\Wmat^{(i)}$, bias $\biasb^{(i)}$ and activations $\hidz^{(i)}$ for $i \in \{ 1 \ldots l\}$
-\vspace{2mm}
-\item $\hidz^{(i)} = \sigma^{(i)}(\phi^{(i)}) = \sigma^{(i)}(\Wmat^{(i)T}\hidz^{(i - 1)} + \biasb^{(i)})$ , where $\hidz^{(0)} = \xv$.
-\end{itemize}
-\vspace{5mm}
-\item Again, without non-linear activations in the hidden layers, the network can only learn linear decision boundaries.
-  \end{itemize}
-\framebreak
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\lz
-\begin{figure}
-\centering
-\includegraphics[width=10.5cm]{figure/deepneuralnet_new.png}
-\caption{Structure of a deep neural network with $l$ hidden layers (bias terms omitted).}
-  \end{figure}
-\end{vbframe}  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Feedforward neural networks: Example}
-\begin{figure}
-\centering
-\only<1>{\scalebox{0.95}{\includegraphics{figure/deepnet_one.png}}}
-\only<2>{\scalebox{0.95}{\includegraphics{figure/deepnet_two.png}}}
-\only<3>{\scalebox{0.95}{\includegraphics{figure/deepnet_three.png}}}
-\only<4>{\scalebox{0.95}{\includegraphics{figure/deepnet_four.png}}}
-\only<5>{\scalebox{0.95}{\includegraphics{figure/deepnet_five.png}}}
-\only<6>{\scalebox{0.95}{\includegraphics{figure/deepnet_six.png}}}
-\only<7>{\scalebox{0.95}{\includegraphics{figure/deepnet_seven.png}}}
-\only<8>{\scalebox{0.95}{\includegraphics{figure/deepnet_eight.png}}}
-\only<9>{\scalebox{0.95}{\includegraphics{figure/deepnet_nine.png}}}
-\only<10>{\scalebox{0.95}{\includegraphics{figure/deepnet_ten.png}}}
-\only<11>{\scalebox{0.95}{\includegraphics{figure/deepnet_eleven.png}}}
-\only<12>{\scalebox{0.95}{\includegraphics{figure/deepnet_twelve.png}}}
-\end{figure}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%
+%\begin{frame} {Hidden Layer: Activation Function}
+%\begin{itemize}
+%\item It is important to note that if the hidden layer does not have a non-linear activation, the network can only learn linear decision boundaries.
+%\item For simplification purposes, we drop the bias terms in notation and let $\sigma = \text{id}$. Then:
+%    \begin{eqnarray*}
+%        \fx & = & \tau(\wtu^T \hidz) \\
+%         & = & \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
+%         & = & \tau(\wtu^T\Wmat^T \xv) = \tau(\mathbf{v}^T \xv)
+%      \end{eqnarray*}
+%      where $ \mathbf{v} = \Wmat\wtu$. It can be seen that $\fx$ can only yield a linear decision boundary.
+%  \end{itemize}
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 \endlecture
 \end{document}
