@@ -5,9 +5,9 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.13.0
   kernelspec:
-    display_name: Python 3
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
@@ -126,6 +126,9 @@ print_scores(y, scores)
 <!-- #region pycharm={"name": "#%% md\n"} -->
 You should make sure that the last two values are close to one and the others
 are close to zero.
+
+**Note:** There are many valid parametrization that lead to a separating hyperplane. How would you prioritize between them?
+
 
 ## Exercise 2
 
@@ -287,11 +290,4 @@ And this is just what a neural network looks like!
 Each neuron is a simple linear classifier, and we just stack linear classifiers on
 top of linear classifiers. And we could go on and on, with many layers of linear
 classifiers.
-
-
-### Proof sketch that this dataset is not linearly separable
-
-The _convex hull_ of a set of points is the smallest convex polygon that encloses them.
-In our case, the convex hull of $x_2,\ldots,x_5$ is a square with those
-points as vertices.
 <!-- #endregion -->

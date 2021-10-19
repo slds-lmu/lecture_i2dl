@@ -2,7 +2,7 @@
 title: "Lab 1"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-11-06
+date: 2021-10-19
 ---
 
 ```{r setup, include=FALSE}
@@ -70,6 +70,8 @@ sigmoid(xs %*% c(a0, a1, a2))
 
 You should make sure that the last two values are close to one, and the others are close to zero.
 
+> **Note:** There are many valid parametrization that lead to a separating hyperplane. How would you prioritize between them?
+
 ## Exercise 2
 
 Continuing from the previous exercise, suppose now that $y_2=y_3=1$ and $y_1=y_2=y_5=0$:
@@ -124,7 +126,7 @@ ggplot(data, aes(x, y)) +
   geom_text(aes(label = t), nudge_x = 0.075)
 ```
 
-Clearly, logistic regression cannot correctly classify this dataset, since the two classes are not linearly separable (optional: prove it, see solution at the bottom).
+Clearly, logistic regression cannot correctly classify this dataset, since the two classes are not linearly separable (optional: prove it).
 
 However, as we have shown in the previous exercises, it is possible to separate $x_2$ and $x_3$ from the rest, and $x_4$ and $x_5$ from the rest.
 
@@ -196,8 +198,3 @@ yhat
 ```
 
 And this is just what a neural network looks like! Each neuron is a simple linear classifier, and we just stack linear classifiers on top of linear classifiers. And we could go on and on, with many layers of linear classifiers.
-
-
-### Proof sketch that this dataset is not linearly separable
-
-The _convex hull_ of a set of points is the smallest convex polygon that encloses them. In our case, the convex hull of $x_2,\ldots,x_5$ is a square with those points as vertices.
