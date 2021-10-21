@@ -1,11 +1,11 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
 \begin{document}
 
-\lecturechapter{4}{CNN: Padding}
+\lecturechapter{CNN: Padding}
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -14,14 +14,14 @@
 
 \begin{itemize}
 \only<1-3>{\item \enquote{Valid} convolution without padding.}
-\only<1>{\item[] Exactly what we just did is called valid convolution. Suppose we have an input of size $5 \times 5$ and a filter of size $2$. }
+\only<1>{\item[] Exactly what we just did is called valid convolution. Suppose we have an input of size $5 \times 5$ and a filter of size $2 \times 2$. }
 \only<2>{\item[] The filter is only allowed to move inside of the input space.}
 \only<3>{\item[] That will inevitably reduce the output dimensions.}
 \end{itemize}
 \center
-\only<1>{\scalebox{0.92}{\includegraphics{figure/valid_conv_2.jpg}}}%
-\only<2>{\scalebox{1.05}{\includegraphics{figure/valid_conv_3.jpg}}}%
-\only<3>{\scalebox{0.92}{\includegraphics{figure/valid_conv_1n.png}}}%
+\only<1>{\scalebox{0.5}{\includegraphics{figure/padding1.png}}}%
+\only<2>{\scalebox{0.5}{\includegraphics{figure/padding2.png}}}%
+\only<3>{\scalebox{1}{\includegraphics{figure/padding3.png}}}%
 \only<3>{\item[] In general, for an input of size $i \:(\times \:i)$ and filter size $k \:(\times \:k)$, the size of the output feature map $o \:(\times \:o)$ claculated by:
     $$ o=  i-k + 1 $$ }
 \end{frame}
@@ -30,17 +30,17 @@
 \begin{frame}{Padding}
 \begin{itemize}
 \only<1-4>{\item Convolution with \enquote{same} padding.}
-\only<1>{\item[] Suppose the following situation: an input with dimensions $5x5$ and a filter with size $3$.}
+\only<1>{\item[] Suppose the following situation: an input with dimensions $5 \times 5$ and a filter with size $3 \times 3$.}
 \only<2>{\item[] We would like to obtain an output with the same dimensions as the input.}
 \only<3>{\item[] Hence, we apply a technique called zero padding. That is to say \enquote{pad} zeros around the input:}
 \only<4>{\item[] That always works! We just have to adjust the zeros according to the input dimensions and filter size (ie. one, two or more rows).}
 
   \end{itemize}
   \center
-  \only<1>{\includegraphics[width=11cm]{figure/same0.png}}%
-  \only<2>{\includegraphics[width=11cm]{figure/same1.png}}%
-  \only<3>{\includegraphics[width=11cm]{figure/same2.png}}%
-  \only<4>{\includegraphics[width=11cm]{figure/same7.png}}%
+  \only<1>{\includegraphics[width=5cm]{figure/padding4.png}}%
+  \only<2>{\includegraphics[width=8cm]{figure/padding5.png}}%
+  \only<3>{\includegraphics[width=8cm]{figure/padding6.png}}%
+  \only<4>{\includegraphics[width=11cm]{figure/padding7.png}}%
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
