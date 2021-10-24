@@ -1,0 +1,7 @@
+Suggested order of slides:
+
+- slides-opt1-and-regu-basic-training
+- slides-opt1-comp-graphs
+- slides-opt1-basic-backpropagation1
+- slides-opt1-basic-backpropagation2
+- slides-opt1-hardware-and-software
