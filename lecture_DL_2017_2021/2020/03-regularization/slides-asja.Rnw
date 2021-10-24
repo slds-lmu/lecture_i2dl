@@ -638,11 +638,11 @@ Second strongest weight decay leads to the best result on the test data.
           \State $\nu^* \leftarrow \nu$
         \EndIf
       \EndWhile
-      \EndState \,  Return $\boldsymbol{\theta}^*$ 
+      \,  Return $\boldsymbol{\theta}^*$ 
     \end{algorithmic}
   \end{algorithm}
   \begin{itemize}
-    \item A possible stopping criterion is the maximum number of times to observe a worsening validation set error after $\boldsymbol{\theta}^*}$ was updated.
+    \item A possible stopping criterion is the maximum number of times to observe a worsening validation set error after $\boldsymbol{\theta}^*$ was updated.
     \item More sophisticated forms of early stopping also apply cross-validation.
   \end{itemize}
 \framebreak

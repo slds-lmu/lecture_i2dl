@@ -1,0 +1,7 @@
+Suggested order of slides:
+
+- slides-opt2-optim-challenges
+- slides-opt2-advanced-optim
+- slides-opt2-initialization
+- slides-opt2-activations
+
