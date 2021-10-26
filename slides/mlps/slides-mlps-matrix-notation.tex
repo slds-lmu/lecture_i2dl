@@ -3,11 +3,11 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\newcommand{\titlefigure}{figure/sinlay_one.png}
+\newcommand{\titlefigure}{figure/sinlay_six.png}
 \newcommand{\learninggoals}{
-  \item compact representation of neural network equations
-  \item write states of neuron layers
-  \item write bias parameters as vectors and weights as matrices 
+  \item Compact representation of neural network equations
+  \item Vector notation for neuron layers
+  \item Vector and matrix notation of bias and weight parameters
 }
 
 \title{Deep Learning}
@@ -43,7 +43,7 @@
 
 \begin{itemize}
 \item The input $\xv$ is a column vector with dimensions $p \times 1$. 
-\item $\Wmat$ is a weight matrix with dimensions $p \times m$:
+\item $\Wmat$ is a weight matrix with dimensions $p \times m$, where $m$ is the amount of hidden neurons:
 $$\Wmat =
      \begin{pmatrix}
       w_{1,1} & w_{1,2} & \cdots & w_{1,m} \\
@@ -51,6 +51,10 @@ $$\Wmat =
       \vdots  & \vdots  & \ddots & \vdots  \\
       w_{p,1} & w_{p,2} & \cdots & w_{p,m}
      \end{pmatrix}$$
+     \end{itemize}
+     \framebreak
+     \textbf{Hidden layer}:
+     \begin{itemize}
 \item For example, to obtain $z_1$, we pick the first column of $W$:
     $$\Wmat_1 =
      \begin{pmatrix}
@@ -59,13 +63,15 @@ $$\Wmat =
       \vdots  \\
       w_{p,1}
      \end{pmatrix}$$
-and compute $z_1 = \sigma(W_1^T \xv + b_1)$, where $b_1$ is the bias of the first hidden neuron and $\sigma: \R \to \R$ is an activation function. 
+and compute 
+$$z_1 = \sigma(\Wmat_1^T \xv + b_1)\enspace,$$
+ where $b_1$ is the bias of the first hidden neuron and $\sigma: \R \to \R$ is an activation function. 
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Single Hidden Layer Networks: Notation}
-  \textbf{General notation}:
+% \textbf{Hidden layer}:
   \begin{itemize}
     \vspace{4mm}
     \item The network has $m$ hidden neurons $z_1, \dots, z_m$ with
@@ -79,7 +85,7 @@ and compute $z_1 = \sigma(W_1^T \xv + b_1)$, where $b_1$ is the bias of the firs
     \vspace{4mm}
     for $j \in \{1,\ldots,m\}$.
     \vspace{4mm}
-    \framebreak 
+    %\framebreak 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \item Vectorized notation:
@@ -87,7 +93,8 @@ and compute $z_1 = \sigma(W_1^T \xv + b_1)$, where $b_1$ is the bias of the firs
 \item $ \hidz_{in} = (z_{in,1}, \dots, z_{in,m})^T = \Wmat^T \xv + \biasb$ \\ (Note: $\Wmat^T \xv$ = $(\xv^T \Wmat)^T$)
 \item $ \hidz = \hidz_{out} = \sigma(\hidz_{in}) = \sigma(\Wmat^T \xv + \biasb)$, where the (hidden layer) activation function $\sigma$ is applied element-wise to $\hidz_{in}$.  
 \end{itemize}
-\item Bias term:         
+\framebreak
+\item \textbf{Bias term}:         
 \begin{itemize}
 \item We sometimes omit the bias term by adding a constant feature to the input $\tilde{\xv} = (1, x_1, ..., x_p)$ and by adding the bias term to the weight matrix 
 $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$ 
@@ -97,7 +104,7 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  \textbf{General notation}:
+  \textbf{Output layer}:
   \begin{itemize}
     \vspace{4mm}
     \item For regression or binary classification: one output unit $f$ where
@@ -114,7 +121,8 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
 \framebreak 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  \textbf{General notation: Multiple inputs}
+  \textbf{%General notation: 
+  Multiple inputs:}
   \begin{itemize}
     \item It is possible to feed multiple inputs to a neural network simultaneously.
     \vspace{2mm}
