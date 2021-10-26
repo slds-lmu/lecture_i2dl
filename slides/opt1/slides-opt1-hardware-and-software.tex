@@ -4,11 +4,11 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\newcommand{\titlefigure}{figure/backprop_gg_new.png}
+\newcommand{\titlefigure}{figure/software_cover.png}
 \newcommand{\learninggoals}{
-  \item 
-  \item 
-  \item 
+  \item GPU training for accelerated learning
+  \item Software for hardware support
+  \item Deep learning software platforms
 }
 
 \title{Deep Learning}
@@ -147,110 +147,110 @@
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Example: MNIST digit recognizer}
-\begin{vbframe}{MNIST digit recognizer}
-  \begin{itemize}
-    \item The MNIST dataset is a large dataset of handwritten digits (black and white) that is commonly used for benchmarking various image processing algorithms.
-    \item It is a good dataset for people who want to try learning techniques and pattern recognition methods on real-world data while spending minimal effort on preprocessing and formatting.
-    \item  There have been a number of scientific papers on attempts to achieve the lowest error rate. One paper, using a hierarchical system of convolutional neural networks (chapter 5), manages to get an error rate of only 0.23 percent.
-  \end{itemize}
-
-\framebreak
-  \begin{figure}
-    \centering
-      \includegraphics[width=10cm]{figure/mnist.png}
-      \caption{Snipped from the mnist data set (LeCun and Cortes (2010)).}
-  \end{figure}
-  \begin{itemize}
-    \item 70k image data of handwritten digits with $28 \times 28$ pixels.
-    \item Classification task with 10 classes (0, 1, 2, ..., 9).
-  \end{itemize}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ ME!!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The following slides include lots of code chunks which have been     %
-% temporarily disabled (eval = FALSE, echo = FALSE) and replaced by    %
-% screenshots of the corresponding outputs (to maintain colorization). %
-% Else, one would need a working version of mxnet (and a fast CPU/GPU) %
-% to compile the code in a finite amount of time.                      %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\framebreak
-  \begin{minipage}{0.45\textwidth}
-    \begin{itemize}
-      \item We attempt classification with the model on the right:
-    \end{itemize}
-  \end{minipage}
-  \begin{minipage}{0.45\textwidth}
-    \begin{figure}
-      \centering
-        \includegraphics[width=1.5cm]{figure/mxnet_codechunk_4b.png}
-    \end{figure}
-  \end{minipage}
-
-
-
-\framebreak
-  \begin{itemize}
-    \item We used SGD with a minibatch of size 100 and trained for 10 epochs.
-    \item Consequently we feed our algorithm successively with 100 training samples before updating the weights.
-    \item After 10 epochs, our neural network begins to stagnate at a training accuracy of roughly $93.5\%$
-    \item Next, we use the model to predict the test data.
-    \item We find that the accuracy of the model on the test data is only $89.843\%$ which is unsatisfactory. 
-  \end{itemize}
-  
-\framebreak
-  \begin{minipage}{0.45\textwidth}
-    \begin{itemize}
-      \item Because the performance of the previous model was somewhat poor, we try the following, much larger, network (all other parameters remain the same)
-      \item Rerunning the training with the new architecture, this model yields us a training accuracy of $99.39\%$ and a test accuracy of $96.514\%$.
-    \end{itemize}
-  \end{minipage}
-  \begin{minipage}{0.45\textwidth}
-    \begin{figure}
-      \centering
-        \includegraphics[width=1.5cm]{figure/mxnet_codechunk_10.png}
-    \end{figure}
-  \end{minipage}
-\end{vbframe}
-
-\begin{frame} {Key hyperparameters}
-  \begin{itemize}
-    \item In addition to the structure/topology of the neural network, the performance of a model is also strongly affected by some key hyperparameters such as:
-      \begin{itemize}
-        \item $\alpha$, the learning rate
-        \item $\lambda$, the regularization coefficient
-        \item $T$, the number of training iterations
-        \item $m$, the minibatch size
-        \item and others...
-      \end{itemize}
-    \item These hyperparameters typically control the complexity of the model and the convergence of the training algorithm.
-    \item In the next couple of lectures, we'll examine methods and techniques to set these hyperparameters and the theoretical motivations behind many of them.
-  \end{itemize}
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\section{References}
-
-\begin{vbframe}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Yann LeCun and Corinna Cortes, 2010]{2} Yann LeCun and Corinna Cortes (2010)
-\newblock MNIST handwritten digit database
-\newblock \emph{\url{http://yann.lecun.com/exdb/mnist/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{thebibliography}
-}
-\end{vbframe}
+%\section{Example: MNIST digit recognizer}
+%\begin{vbframe}{MNIST digit recognizer}
+%  \begin{itemize}
+%    \item The MNIST dataset is a large dataset of handwritten digits (black and white) that is commonly used for benchmarking various image processing algorithms.
+%    \item It is a good dataset for people who want to try learning techniques and pattern recognition methods on real-world data while spending minimal effort on preprocessing and formatting.
+%    \item  There have been a number of scientific papers on attempts to achieve the lowest error rate. One paper, using a hierarchical system of convolutional neural networks (chapter 5), manages to get an error rate of only 0.23 percent.
+%  \end{itemize}
+%
+%\framebreak
+%  \begin{figure}
+%    \centering
+%      \includegraphics[width=10cm]{figure/mnist.png}
+%      \caption{Snipped from the mnist data set (LeCun and Cortes (2010)).}
+%  \end{figure}
+%  \begin{itemize}
+%    \item 70k image data of handwritten digits with $28 \times 28$ pixels.
+%    \item Classification task with 10 classes (0, 1, 2, ..., 9).
+%  \end{itemize}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ ME!!! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% The following slides include lots of code chunks which have been     %
+%% temporarily disabled (eval = FALSE, echo = FALSE) and replaced by    %
+%% screenshots of the corresponding outputs (to maintain colorization). %
+%% Else, one would need a working version of mxnet (and a fast CPU/GPU) %
+%% to compile the code in a finite amount of time.                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%
+%\framebreak
+%  \begin{minipage}{0.45\textwidth}
+%    \begin{itemize}
+%      \item We attempt classification with the model on the right:
+%    \end{itemize}
+%  \end{minipage}
+%  \begin{minipage}{0.45\textwidth}
+%    \begin{figure}
+%      \centering
+%        \includegraphics[width=1.5cm]{figure/mxnet_codechunk_4b.png}
+%    \end{figure}
+%  \end{minipage}
+%
+%
+%
+%\framebreak
+%  \begin{itemize}
+%    \item We used SGD with a minibatch of size 100 and trained for 10 epochs.
+%    \item Consequently we feed our algorithm successively with 100 training samples before updating the weights.
+%    \item After 10 epochs, our neural network begins to stagnate at a training accuracy of roughly $93.5\%$
+%    \item Next, we use the model to predict the test data.
+%    \item We find that the accuracy of the model on the test data is only $89.843\%$ which is unsatisfactory. 
+%  \end{itemize}
+%  
+%\framebreak
+%  \begin{minipage}{0.45\textwidth}
+%    \begin{itemize}
+%      \item Because the performance of the previous model was somewhat poor, we try the following, much larger, network (all other parameters remain the same)
+%      \item Rerunning the training with the new architecture, this model yields us a training accuracy of $99.39\%$ and a test accuracy of $96.514\%$.
+%    \end{itemize}
+%  \end{minipage}
+%  \begin{minipage}{0.45\textwidth}
+%    \begin{figure}
+%      \centering
+%        \includegraphics[width=1.5cm]{figure/mxnet_codechunk_10.png}
+%    \end{figure}
+%  \end{minipage}
+%\end{vbframe}
+%
+%\begin{frame} {Key hyperparameters}
+%  \begin{itemize}
+%    \item In addition to the structure/topology of the neural network, the performance of a model is also strongly affected by some key hyperparameters such as:
+%      \begin{itemize}
+%        \item $\alpha$, the learning rate
+%        \item $\lambda$, the regularization coefficient
+%        \item $T$, the number of training iterations
+%        \item $m$, the minibatch size
+%        \item and others...
+%      \end{itemize}
+%    \item These hyperparameters typically control the complexity of the model and the convergence of the training algorithm.
+%    \item In the next couple of lectures, we'll examine methods and techniques to set these hyperparameters and the theoretical motivations behind many of them.
+%  \end{itemize}
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%%\section{References}
+%
+%\begin{vbframe}
+%\frametitle{References}
+%\footnotesize{
+%\begin{thebibliography}{99}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\bibitem[Yann LeCun and Corinna Cortes, 2010]{2} Yann LeCun and Corinna Cortes (2010)
+%\newblock MNIST handwritten digit database
+%\newblock \emph{\url{http://yann.lecun.com/exdb/mnist/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\end{thebibliography}
+%}
+%\end{vbframe}
 
 \endlecture
 \end{document}
