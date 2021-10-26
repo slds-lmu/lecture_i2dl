@@ -1,15 +1,24 @@
+% style/preamble throws error, hence preamble4tex is kept here
 \input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+\newcommand{\titlefigure}{figure/front.png}
+\newcommand{\learninggoals}{
+  \item CNNs Introduction
+}
+
+\title{Deep Learning}
+\date{}
+
 \begin{document}
 
-\lecturechapter{4}{CNN: Introduction}
+\lecturechapter{CNN: Introduction}
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Convolutional neural networks}
+\begin{vbframe}{Convolutional Neural Networks}
 \begin{itemize}
 \item Convolutional Neural Networks (CNN, or ConvNet) are a powerful family of neural networks that are inspired by biological process in which the connectivity pattern between neurons resembles the organization of the mamel visual cortex.
 \end{itemize}
@@ -22,7 +31,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
-    \item Since 2012, by the success of CNNs model in ImageNet compition, they are state-of-the-art in many fields such as computer vision.
+    \item Since 2012, by the success of CNNs model in ILSVRC compition, they are popular in many fields such as computer vision.
     \item Common applications of CNN-based architectures in computer vision are:
     \begin{itemize}
       \item Image classification.
@@ -30,8 +39,8 @@
       \item Semantic segmentation.
     \end{itemize}
     \item Also widely applied in other domains such as natural language processing (NLP), Speech and even time-series data.
-\item Basic idea: a CNN automatically extracts visual, or, more generally, spatial features from an input such that it is able to make the optimal prediction based on those features.
-\item Therefore, it contains different building blocks...
+\item Basic idea: a CNN automatically extracts visual, or, more generally, spatial features from an input such that it is able to make the optimal prediction based on the extracted features.
+\item Therefore, it contains different building blocks and components. 
 \end{itemize}
 \end{vbframe}
 
