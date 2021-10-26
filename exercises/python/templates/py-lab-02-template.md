@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.13.0
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -44,7 +44,7 @@ with a single hidden layer.](../utils/02-lab-f1.png)
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 **Hint**: start by assuming that such a neural network exists and has two neurons in the
- hidden layer. Consider four points, one for each of the four regions,
+ hidden layer with a generic activation function $\tau(\cdot)$. Consider four points, one for each of the four regions,
  $\textbf{x}_1,\ldots,\textbf{x}_4$ with $y_2=y_4=0$ and $y_1=y_3=1$.
  Compute the difference between the predictions of points with different labels,
  $g(\textbf{x}_1)-g(\textbf{x}_2)$ and $g(\textbf{x}_4)-g(\textbf{x}_3)$.

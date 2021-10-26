@@ -5,9 +5,9 @@
 
 \newcommand{\titlefigure}{figure/deepnet_one.png}
 \newcommand{\learninggoals}{
-  \item ....
-  \item ...
-  \item  ...
+  \item Architectures of deep neural networks
+  \item Deep neural networks as  chained functions
+  %\item  ...
 }
 
 \title{Deep Learning}
@@ -25,7 +25,7 @@
 \begin{vbframe}{Feedforward neural networks}
 \begin{itemize}
 \vspace{15mm}
-\item We will now extend the model class once again, such that we allow an arbitrary amount of $l$ (hidden) layers.
+\item We will now extend the model class once again, such that we allow an arbitrary amount $l$ of hidden layers.
 \vspace{5mm}
 \item The general term for this model class is (multi-layer) \textbf{feedforward networks} (inputs are passed through the network from left to right, no feedback-loops are allowed)
 \end{itemize}
@@ -38,7 +38,7 @@
 \item Each hidden layer has: 
 \begin{itemize}
 \vspace{2mm}
-\item an associated weight matrix $\Wmat^{(i)}$, bias $\biasb^{(i)}$ and activations $\hidz^{(i)}$ for $i \in \{ 1 \ldots l\}$
+\item an associated weight matrix $\Wmat^{(i)}$, bias $\biasb^{(i)}$, and activations $\hidz^{(i)}$ for $i \in \{ 1 \ldots l\}$.
 \vspace{2mm}
 \item $\hidz^{(i)} = \sigma^{(i)}(\phi^{(i)}) = \sigma^{(i)}(\Wmat^{(i)T}\hidz^{(i - 1)} + \biasb^{(i)})$ , where $\hidz^{(0)} = \xv$.
 \end{itemize}
@@ -95,7 +95,8 @@ representations.
 \begin{vbframe}{Deep neural networks}
 
 Neural networks today can have %dozens or even 
-hundreds of hidden layers. The greater the number of layers, the "deeper" the network. Historically, however, DNNs were very challenging to train and not popular until the late '00s for several reasons:
+hundreds of hidden layers. The greater the number of layers, the "deeper" the network. Historically %, however, 
+DNNs were very challenging to train and not popular until the late '00s for several reasons:
 \lz
 \begin{itemize}
 \item %For one thing, the 
@@ -112,8 +113,9 @@ The use of sigmoid activations (e.g., logistic sigmoid and tanh) significantly s
 \item An increase in depth often translates to an increase in performance on a given task. State-of-the-art neural networks, however, are much more sophisticated than the simple architectures we have encountered so far.
 
 \lz
-\item The term "\textbf{deep learning}" encompasses all of these developments and refers to the field as a whole.
+%\item 
 \end{itemize}
+The term "\textbf{deep learning}" encompasses all of these developments and refers to the field as a whole.
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

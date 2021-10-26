@@ -7,7 +7,7 @@
 \newcommand{\learninggoals}{
   \item Graphical representation of a single neuron
   \item Affine transformations and non-linear activation functions
-  \item Hypothesis spaces of single neuron architectures
+  \item Hypothesis spaces of a single neuron
   \item Typical loss functions
 }
 
@@ -51,28 +51,33 @@ with \textbf{input features} $x_1, x_2, ... ,x_p$, \textbf{weights} $w_1, w_2,..
 \vspace{.2cm}
 \item It is a weighted sum of input values, transformed by $\tau$:
 \vspace{-1mm}
-$$f(x) = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(w^T x+b)$$
+$$f(x) = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(\mathbf{w}^T \mathbf{x}+b)$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{A Single Neuron}
-\textbf{Choices for $\tau$:} a single neuron can represent different functions if we choose a suitable activation function for it.
+\textbf{Activation function $\tau$:} a single neuron %can
+ represents different functions %i%f we choose a suitable activation function for it.
+ depending on the choice of activation function.
 \vspace{.5cm}
 \begin{itemize}
 \item The identity function gives us the simple \textbf{linear regression}:
-$$f(x) = \tau(w^T x) = w^T x$$
-\vspace{.5cm}
+$$f(x) = \tau(\mathbf{w}^T \mathbf{x}) = \mathbf{w}^T \mathbf{x}$$
+%\vspace{.5cm}
 \item The logistic function gives us the \textbf{logistic regression}:
-$$f(x) = \tau(w^T x) = \frac{1}{1 + \exp(-w^T x)}$$
+$$f(x) = \tau(\mathbf{w}^T \mathbf{x}) = \frac{1}{1 + \exp(-\mathbf{w}^T \mathbf{x})}$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe} {A Single Neuron}
-We consider a logistic regression model for $p = 3$, i.e. $\fx = \tau(w_1\textcolor{red}{x_1} + w_2\textcolor{red}{x_2} + w_3\textcolor{red}{x_3} + b)$.
+We consider a %logistic regression model for
+ perceptron with
+$3$-dimensional input, i.e. $\fx = \tau(w_1\textcolor{red}{x_1} + w_2\textcolor{red}{x_2} + w_3\textcolor{red}{x_3} + b)$.
 \begin{itemize}
-\item First, features of $\xv$ are represented by nodes in the \enquote{input layer}.
+\item %First, 
+Input features $\xv$ are represented by nodes in the \enquote{input layer}.
 \begin{figure}
 \includegraphics[width=6cm]{figure/neurep_one.png}
 \end{figure}
@@ -80,7 +85,8 @@ We consider a logistic regression model for $p = 3$, i.e. $\fx = \tau(w_1\textco
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\item Next, weights $\mathbf{w}$ are represented by edges from the input layer.
+\item %Next, 
+Weights $\mathbf{w}$ are connected to edges from the input layer.
 \begin{figure}
 \includegraphics[width=6cm]{figure/neurep_two.png}
 \end{figure}
@@ -102,7 +108,8 @@ The graphical representation is then:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
-\item Finally, the computation $\tau(w_1x_1 + w_2x_2 + w_3x_3 + b)$ is represented by the neuron in the \enquote{output layer}.
+\item %Finally, 
+The computation $\tau(w_1x_1 + w_2x_2 + w_3x_3 + b)$ is represented by the neuron in the \enquote{output layer}.
 \begin{figure}
 \includegraphics[width=6cm]{figure/neurep_three.png}
 \end{figure}
@@ -174,13 +181,18 @@ $$\Hspace  = \left\{f: \R^p \to \R ~\bigg|~ \fx = \tau\left(\sum_{j = 1}^p w_j x
 $$\riske = \frac{1}{n} \sumin \Lxyi,$$
 where $\Lxy$ is a loss function. It compares the network's predictions $\fx$ to the ground truth $y$. 
 \item For regression, we typically use the L2 loss (rarely L1): $$\Lxy = \frac{1}{2}(y - \fx)^2$$
-\item For binary classification, we typically apply the cross entropy loss (also known as bernoulli loss): $$\Lxy = -(y \log \fx + (1 - y) \log(1 - \fx))$$
+\item For binary classification, we typically apply the cross entropy loss (also known as Bernoulli loss): $$\Lxy = -(y \log \fx + (1 - y) \log(1 - \fx))$$
 \framebreak 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \vspace{.5cm}
-\item For a single neuron, in both cases, the loss function is convex and the global optimum can be found with an iterative algorithm like gradient descent. 
-\item In fact, a single neuron with logistic sigmoid function trained with the bernoulli loss does not only have the same hypothesis space as a logistic regression and is therefore the same model, but will also yield to the very same result when trained until convergence.
+\item For a single neuron and both choices of $\tau$ the loss function is convex.
+\item The global optimum can be found with an iterative algorithm like gradient descent. 
+\item A single neuron with logistic sigmoid function trained with the Bernoulli loss %does not only have 
+%has the same hypothesis space as a logistic regression %and is therefore the same model, but
+ %will also 
+ yields the %very 
+ same result as logistic regression when trained until convergence.
 \item Note: In the case of regression and the L2-loss, the solution can
 also be found analytically using the “normal equations”. However, in other cases a closed-form solution is usually not available.
 \end{itemize}

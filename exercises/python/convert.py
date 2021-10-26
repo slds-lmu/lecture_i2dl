@@ -43,9 +43,9 @@ def main():
         if str(file_path.parent) != TEMPLATE_ROOT:
             raise ValueError('"{}" does not point to the template subdirectory.'
                              .format(file_path))
-        elif not re.match(r'\d{2}-lab-template\.md', file_path.name):
+        elif not re.match(r'py-lab-\d{2}-template\.md', file_path.name):
             raise ValueError('"{}" does not follow naming convention '
-                             '(xx-lab-template.md).'.format(file_path))
+                             '(py-lab-xx-template.md).'.format(file_path))
         elif not file_path.is_file():
             raise ValueError('"{}" is not a file.'.format(file_path))
 
@@ -53,7 +53,7 @@ def main():
 
     # If no argument is given, list all template mds.
     else:
-        template_pattern = TEMPLATE_ROOT + r'/\d{2}-lab-template\.md'
+        template_pattern = TEMPLATE_ROOT + r'/py-labl-\d{2}-template\.md'
         template_files = [entry for entry in Path(TEMPLATE_ROOT).iterdir()
                           if re.match(template_pattern, str(entry))]
 

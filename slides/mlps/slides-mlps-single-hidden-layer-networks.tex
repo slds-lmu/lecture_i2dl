@@ -5,10 +5,13 @@
 
 \newcommand{\titlefigure}{figure/newrep_n_f.png}
 \newcommand{\learninggoals}{
-  \item architecture of a single hidden layer neural network
-  \item representation learning: understanding the advantage of  hidden layers
-  \item standard non-linear activation functions
+  \item Architecture of  single hidden layer neural networks
+  \item Representation learning/ understanding the advantage of  hidden layers
+  \item Typical (non-linear) activation functions
 }
+
+\title{Deep Learning}
+\date{}
 
 
 \begin{document}
@@ -26,10 +29,19 @@
 \lz
 \item Networks of neurons can represent extremely complex hypothesis spaces.
 \lz
-\item Most importantly, it allows us to define the \enquote{right} kinds of hypothesis spaces to learn functions that are more common in our universe in a data-efficient way (see Lin, Tegmark et al. 2016).
+\item Most importantly, it allows us to define the \enquote{right} kinds of hypothesis spaces to learn functions that are %more 
+common in our universe in a data-efficient way (see Lin, Tegmark et al. 2016).
 \end{itemize}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Can a single neuron perform binary classification of these points?
+%\vspace{2cm}
+\begin{figure}
+\centering
+\scalebox{0.5}{\includegraphics{figure/cartesian.png}}
+\end{figure}
+
+\framebreak
 
 \begin{itemize}
 \item As a single neuron is restricted to learning only linear decision boundaries, its performance on the following task is quite poor:
@@ -194,14 +206,14 @@ $$ \sigma (v) = \max(0,v) $$
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{blocki}{Hyperbolic Tangent Activation:}
-\item Another choice might be the hyperbolic tangent function:
-$$ \sigma (v) = \text{tanh}(v) = \frac{\text{sinh}(v)}{\text{cosh}(v)} = 1 - \frac{2}{\exp(2v) + 1}$$
-\end{blocki}
-\begin{figure}
-\scalebox{0.9}{\includegraphics{figure_man/tanh.png}}
-\end{figure}
-\framebreak
+%\begin{blocki}{Hyperbolic Tangent Activation:}
+%\item Another choice might be the hyperbolic tangent function:
+%$$ \sigma (v) = \text{tanh}(v) = \frac{\text{sinh}(v)}{\text{cosh}(v)} = 1 - \frac{2}{\exp(2v) + 1}$$
+%\end{blocki}
+%\begin{figure}
+%\scalebox{0.9}{\includegraphics{figure_man/tanh.png}}
+%\end{figure}
+%\framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocki}{Sigmoid Activation Function:}

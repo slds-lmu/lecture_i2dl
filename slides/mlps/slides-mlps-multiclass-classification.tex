@@ -3,6 +3,16 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+
+\newcommand{\titlefigure}{figure/neuralnet_new.png}
+\newcommand{\learninggoals}{
+  \item Neural network architectures for multi-class classification 
+  \item Softmax activation function 
+  \item Softmax loss}
+
+\title{Deep Learning}
+\date{}
+
 \begin{document}
 
 \lecturechapter{Single Hidden Layer Networks for Multi-Class Classification}
@@ -39,7 +49,7 @@
 \vspace{5mm}
 \begin{blocki}{Notation:}
 \item For $g$-class classification, $g$ output units: $$\mathbf{f} = (f_1, \dots, f_g)$$
-\vspace{4mm}
+%\vspace{4mm}
 \item $m$ hidden neurons $z_1, \dots, z_m$, with
     $$ z_j = \sigma(\mathbf{W}_j^T \xv), \quad j = 1,\ldots,m. $$
 \item Compute linear combinations of derived features $z$:
@@ -50,7 +60,7 @@
 
 \begin{frame} {Multi-class Classification}
   \begin{itemize}
-    \item The second step is to apply a softmax activation function to the output layer.
+    \item The second step is to apply a \textbf{softmax} activation function to the output layer.
     \vspace{4mm}
     \item This gives us a probability distribution over $g$ different possible classes:
     $$ f_{out,k} = \tau_k(f_{in,k}) = \frac{\exp(f_{in,k})}{\sum_{k'=1}^g\exp(f_{in,k'})}$$
@@ -81,7 +91,7 @@ Forward pass (Hidden: Sigmoid, Output: Softmax).
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Softmax Loss}
+\begin{frame} {Optimization: Softmax Loss}
   \begin{itemize}
 \vspace{5mm}
 \item The loss function for a softmax classifier is

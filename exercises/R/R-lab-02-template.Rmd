@@ -2,7 +2,7 @@
 title: "Lab 2"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-11-13
+date: 2021-10-26
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +15,7 @@ Consider a neural network with one hidden layer with threshold activation functi
 
 ![A region that cannot be classified correctly by a neural network with a single hidden layer.](lab2f1.png){width=250px}
 
-**Hint**: start by assuming that such a neural network exists and has two neurons in the hidden layer. Consider four points, one for each of the four regions, $\textbf{x}_1,\ldots,\textbf{x}_4$ with $y_2=y_4=0$ and $y_1=y_3=1$. Compute the difference between the predictions of points with different labels, $g(\textbf{x}_1)-g(\textbf{x}_2)$ and $g(\textbf{x}_4)-g(\textbf{x}_3)$. You should reach a contradiction, meaning that such a neural network does not exists.
+**Hint**: start by assuming that such a neural network exists and has two neurons in the hidden layer with a generic activation function $\tau(\cdot)$. Consider four points, one for each of the four regions, $\textbf{x}_1,\ldots,\textbf{x}_4$ with $y_2=y_4=0$ and $y_1=y_3=1$. Compute the difference between the predictions of points with different labels, $g(\textbf{x}_1)-g(\textbf{x}_2)$ and $g(\textbf{x}_4)-g(\textbf{x}_3)$. You should reach a contradiction, meaning that such a neural network does not exists.
 
 
 <!--#!solutionbegin-->
