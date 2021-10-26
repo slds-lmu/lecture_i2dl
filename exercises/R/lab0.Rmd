@@ -16,8 +16,10 @@ knitr::opts_chunk$set(echo = FALSE)
  - Not graded! Only final exam counts
  - Exercises and solutions for the previous week posted on Moodle on Tuesday morning
  - I will present questions for the week and solutions for the previous week on Friday
+    - Try to do the exercises on your own before that!
  - Second part of the lab for free form discussions or we end early if there are no topics
- - Lab sessions exist to discuss and ask questions, attend not to fall behind the schedule
+ - Lab sessions exist to discuss and ask questions
+    - Attend not to fall behind the schedule
 
 ## Theory-oriented Exercises
 

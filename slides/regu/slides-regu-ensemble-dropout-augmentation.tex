@@ -1,5 +1,4 @@
-% style/preamble throws error, hence preamble4tex is kept here
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -16,7 +15,7 @@
 
 \begin{document}
 
-\lecturechapter{Other Regularization Techniques}
+\lecturechapter{Dropout and Augmentation}
 \lecture{I2DL}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,7 +32,7 @@
 \item by combining completely different kind of models (using different learning algorithms and loss functions).
 \item by \textbf{bagging}: train the same model on $k$ datasets, constructed by sampling $n$ samples from original dataset.
 \end{itemize}
-\item Since  raining a neural network repeatedly on the same dataset results in different solutions (why?) it can even make sense to combine those.
+\item Since training a neural network repeatedly on the same dataset results in different solutions (why?) it can even make sense to combine those.
 \end{itemize}
 
 \framebreak 
@@ -51,8 +50,6 @@
 
 \begin{vbframe}{Dropout}
   \begin{itemize}
-\item For deep learning bagging seems impractical, since it is
-computationally costly to train and evaluate so many networks.
     \item %Dropout is a regularization technique for 
     Idea: reduce overfitting in neural networks by preventing complex co-adaptations of neurons.
     \item Method: during training, random subsets of the neurons are removed from the network (they are "dropped out").This is done by artificially setting the activations of those neurons to zero.
@@ -111,7 +108,7 @@ computationally costly to train and evaluate so many networks.
       \EndFor
     \end{algorithmic}
   \end{algorithm}
-    \item The derivatives wrt. to each parameter are averaged over the training cases in each mini-batch. Any training case which does not use a parameter contributes a gradient of zero for that parameter.
+    \item The derivatives wrt. each parameter are averaged over the training cases in each mini-batch. Any training case which does not use a parameter contributes a gradient of zero for that parameter.
       \end{itemize}
 \end{vbframe}
 
@@ -146,18 +143,18 @@ computationally costly to train and evaluate so many networks.
   \end{figure}
   \end{minipage}
 \framebreak
-
-\begin{knitrout}\scriptsize
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
-
-{\centering \includegraphics[width=0.95\textwidth]{figure/unnamed-chunk-3-1} 
-
-}
-
-
-\end{knitrout}
-Higher dropout rates lead to higher training error. 
-\framebreak
+%
+%\begin{knitrout}\scriptsize
+%\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+%
+%{\centering \includegraphics[width=0.95\textwidth]{figure/unnamed-chunk-3-1} 
+%
+%}
+%
+%
+%\end{knitrout}
+%Higher dropout rates lead to higher training error. 
+%\framebreak
 
 \begin{knitrout}\scriptsize
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
