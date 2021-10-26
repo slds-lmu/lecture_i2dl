@@ -1,0 +1,6 @@
+Suggested order of slides:
+
+- slides-regu-basic-regularization
+- [Chapters (15.07), 15.08, 15.09 from i2ml (geometric interpretation and additional info)]
+- [Chapter 15.10 from i2ml (early stopping)]
+- slides-regu-dropout
