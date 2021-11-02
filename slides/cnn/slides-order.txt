@@ -6,4 +6,5 @@ Suggested order of slides:
 - slides-cnn-pooling
 - slides-cnn-input-channel
 - slides-cnn-architecture
+- slides-cnn-math
 - slides-cnn-application
