@@ -1,14 +1,13 @@
-% style/preamble throws error, hence preamble4tex is kept here
 \input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\newcommand{\titlefigure}{figure/pool.png}
+\newcommand{\titlefigure}{figure/maxpoolend.png} %modify picture
 \newcommand{\learninggoals}{
   \item Max Pooling
   \item Average Pooling
-  \item Comparision of Max and Average Pooling
+  \item Comparison of Max and Average Pooling
 }
 
 \title{Deep Learning}
@@ -60,7 +59,7 @@
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Comparision of Max and Average Pooling}
+\begin{vbframe}{Comparison of Max and Average Pooling}
 \begin{itemize}
 \item Avg pooling use all information by sum but Max pooling use only highest value.
 \item In Max-pooling operation details are removed therefore it is suitable for sparse information (Image Classification) and Avg pooling is suitable for dense information (NLP) 
