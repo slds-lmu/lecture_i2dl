@@ -5,9 +5,10 @@
 
 \newcommand{\titlefigure}{figure/momentum.png}
 \newcommand{\learninggoals}{
-  \item 
-  \item 
-  \item 
+  \item SGD with Momentum
+  \item Learning Rate Schedules
+  \item Adaptive Learning Rates
+  \item Batch Normalization
 }
 
 \title{Deep Learning}
@@ -455,7 +456,7 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \State \textbf{require} Global learning rate $\alpha$ \strut
     \State \textbf{require} Initial parameter $\thetab$ \strut
     \State \textbf{require} Small constant $\beta$, perhaps $10^{-7}$, for numerical stability \strut
-    \State \textbf{Initialize} gradient accumulation variable $r = 0$
+    \State \textbf{Initialize} gradient accumulation variable $\mathbf{r} = \mathbf{0} $
        \While{stopping criterion not met}
          \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$ \strut}
          \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow \frac{1}{m} \nabla_{\thetab} \sum_{i} \Lxym$
@@ -505,10 +506,10 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \small
     \caption{RMSProp}
     \begin{algorithmic}[1]
-    \State \textbf{require} Global learning rate $\alpha$ and decay rate $\rho$ \strut
+    \State \textbf{require} Global learning rate $\alpha$ and decay rate $\rho \in [0, 1)$ \strut
     \State \textbf{require} Initial parameter $\mathbf{\thetab}$ \strut
-    \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{\textbf{require} Small constant $\beta$, perhaps $10^{-6}$, to stabilize division by small numbers \strut}
-    \State Initialize gradient accumulation variable $r = 0$
+    \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{\textbf{require} Small constant $\beta$, perhaps $10^{-6}$, for numerical stability \strut}
+    \State Initialize gradient accumulation variable $\mathbf{r} = \mathbf{0} $
       \While{stopping criterion not met}
         \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$ \strut}
         \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow \frac{1}{m} \nabla_\theta \sum_{i} \Lxym$
@@ -554,7 +555,7 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
       \State Update biased second moment estimate: $\mathbf{r}^{[t]} \leftarrow \rho_2 \mathbf{r}^{[t-1]}  + (1 - \rho_2) \hat{\mathbf{g}}^{[t]} \odot \hat{\mathbf{g}}^{[t]}$
       \State Correct bias in first moment: $\hat{\mathbf{s}} \leftarrow \frac{\mathbf{s}^{[t]} }{1-\rho_1^t}$
       \State Correct bias in second moment: $\hat{\mathbf{r}} \leftarrow \frac{\mathbf{r}^{[t]} }{1-\rho_2^t}$
-      \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla\thetab = - \alpha \frac{\hat{\mathbf{s}}}{\sqrt{\hat{r}} + \beta}$ \strut}
+      \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla\thetab = - \alpha \frac{\hat{\mathbf{s}}}{\sqrt{\hat{\mathbf{r}}} + \beta}$ \strut}
       \State Apply update: $\thetab \leftarrow \thetab + \nabla\thetab$
       
     \EndWhile
