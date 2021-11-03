@@ -1,16 +1,18 @@
-% style/preamble throws error, hence preamble4tex is kept here
 \input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\newcommand{\titlefigure}{figure/padd.jpg}
+\newcommand{\titlefigure}{figure/padding6.png} %modify picture
 \newcommand{\learninggoals}{
-  \item Padding
+  \item Valid Padding
+  \item Same Padding
 }
 
 \title{Deep Learning}
 \date{}
+
+
 
 \begin{document}
 
@@ -19,11 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\begin{frame}{Padding}
+\begin{frame}{Valid Padding}
 
 \begin{itemize}
-\only<1-3>{\item \enquote{Valid} convolution without padding.}
-\only<1>{\item[] Exactly what we just did is called valid convolution. Suppose we have an input of size $5 \times 5$ and a filter of size $2 \times 2$. }
+%\only<1-3>{\item \enquote{Valid} convolution without padding.}
+\only<1>{\item[] Suppose we have an input of size $5 \times 5$ and a filter of size $2 \times 2$. }
 \only<2>{\item[] The filter is only allowed to move inside of the input space.}
 \only<3>{\item[] That will inevitably reduce the output dimensions.}
 \end{itemize}
@@ -36,9 +38,9 @@
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Padding}
+\begin{frame}{Same Padding}
 \begin{itemize}
-\only<1-4>{\item Convolution with \enquote{same} padding.}
+%\only<1-4>{\item Convolution with \enquote{same} padding.}
 \only<1>{\item[] Suppose the following situation: an input with dimensions $5 \times 5$ and a filter with size $3 \times 3$.}
 \only<2>{\item[] We would like to obtain an output with the same dimensions as the input.}
 \only<3>{\item[] Hence, we apply a technique called zero padding. That is to say \enquote{pad} zeros around the input:}
