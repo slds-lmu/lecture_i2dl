@@ -6,8 +6,8 @@
 
 \newcommand{\titlefigure}{figure/backprop_gg_new.png}
 \newcommand{\learninggoals}{
-  \item Chain Rule of Calculus
-  \item Computational Graphs
+  \item Chain rule of calculus
+  \item Computational graphs
 }
 
 \title{Deep Learning}
@@ -41,20 +41,20 @@
   % \end{itemize}
   \begin{itemize}
     \item The chain rule can be used to compute derivatives of the composition of two or more functions.
-    \item Let $\xb \in \R^m$, $\mathbf{y} \in \R^n$, \\
+    \item Let $\xv \in \R^m$, $\mathbf{y} \in \R^n$, \\
           $g: \R^m \to \R^n$ and $f: \R^n \to \R$. \\
-    \item If $\mathbf{y} = g(\xb)$ and $z = f(\mathbf{y})$, the chain rule yields: $$\frac{\partial z}{\partial x_i} = \sum_j \frac{\partial z}{\partial y_j} \cdot \frac{\partial y_j}{\partial x_i}$$
-          or, in vector notation: $$\nabla_{\xb} z = \Big(\frac{\partial \mathbf{y}}{\partial \xb}\Big)^\top \nabla_{\mathbf{y}} z,$$
-          where $\frac{\partial \mathbf{y}}{\partial \xb}$ is the ($n \times m$) Jacobian matrix of $g$.
+    \item If $\mathbf{y} = g(\xv)$ and $z = f(\mathbf{y})$, the chain rule yields: $$\frac{\partial z}{\partial x_i} = \sum_j \frac{\partial z}{\partial y_j} \cdot \frac{\partial y_j}{\partial x_i}$$
+          or, in vector notation: $$\nabla_{\xv} z = \Big(\frac{\partial \mathbf{y}}{\partial \xv}\Big)^\top \nabla_{\mathbf{y}} z,$$
+          where $\frac{\partial \mathbf{y}}{\partial \xv}$ is the ($n \times m$) Jacobian matrix of $g$.
   \end{itemize}
 \end{vbframe}  
 
 \begin{vbframe}{Computational graphs}
-  \begin{minipage}{0.45\textwidth}
+  \begin{minipage}{0.5\textwidth}
     \begin{itemize}
-      \item Computational graphs are a very helpful language to understand and visualize the chain rule.
-      \item Each node describes a variable.
-      \item Operations are functions applied to one or more variables.
+      \item CGs are nested expresssions, visualized as graphs.
+      \item Each node is a variable, either an input or derived.
+      \item Derived variables are functions applied to other variables.
     \end{itemize}
   \end{minipage}\hfill
   \begin{minipage}{0.5\textwidth}
@@ -106,21 +106,21 @@
       \scalebox{0.27}{\includegraphics{figure/chain_tree.png}}
   \end{figure}
   
-To compute $\nabla_\xb z$, we apply the chain rule % to the computational graph above,
+To compute $\nabla_\xv z$, we apply the chain rule % to the computational graph above,
   \begin{itemize}
     \item $\frac {\partial z}{\partial x_1} = \sum_j \frac{\partial z}{\partial y_j} \frac{\partial y_j}{\partial x_1} = \frac {\partial z}{\partial y_1} \frac {\partial y_1}{\partial x_1} + \frac {\partial z}{\partial y_2} \frac {\partial y_2}{\partial x_1}$
     \item $\frac {\partial z}{\partial x_2} = \sum_j \frac{\partial z}{\partial y_j} \frac{\partial y_j}{\partial x_2} = \frac {\partial z}{\partial y_1} \frac {\partial y_1}{\partial x_2} + \frac {\partial z}{\partial y_2} \frac {\partial y_2}{\partial x_2}$
   \end{itemize}
   \vspace{2mm}
-    Therefore, the gradient of $z$ w.r.t $\xb$ is
+    Therefore, the gradient of $z$ w.r.t $\xv$ is
     \begin{itemize}
-      \item  $\nabla_\xb z = \begin{bmatrix}
+      \item  $\nabla_\xv z = \begin{bmatrix}
                \frac {\partial z}{\partial x_1} \\
                \frac {\partial z}{\partial x_2} \\
              \end{bmatrix} = \underbrace{\begin{bmatrix} \frac{\partial y_1}{\partial x_1}&\frac {\partial y_2}{\partial x_1}\\
                                              \frac {\partial y_1}{\partial x_2}&\frac {\partial y_2}{\partial x_2}\\
-             \end{bmatrix}}_{\textcolor{red}{(\frac{\partial \mathbf{y}}{\partial \xb})^\top}} \underbrace{\begin{bmatrix} \frac {\partial z}{\partial y_1} \\
-            \frac {\partial z}{\partial y_2} \\ \end{bmatrix}}_{\textcolor{red}{\nabla_{\mathbf{y}} z}} = \Big(\frac{\partial \mathbf{y}}{\partial \xb}\Big)^\top \nabla_{\mathbf{y}} z $
+             \end{bmatrix}}_{\textcolor{red}{(\frac{\partial \mathbf{y}}{\partial \xv})^\top}} \underbrace{\begin{bmatrix} \frac {\partial z}{\partial y_1} \\
+            \frac {\partial z}{\partial y_2} \\ \end{bmatrix}}_{\textcolor{red}{\nabla_{\mathbf{y}} z}} = \Big(\frac{\partial \mathbf{y}}{\partial \xv}\Big)^\top \nabla_{\mathbf{y}} z $
   \end{itemize}
 \end{frame}
 
@@ -165,20 +165,20 @@ To compute $\nabla_\xb z$, we apply the chain rule % to the computational graph 
 
 %\section{References}
 
-\begin{vbframe}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99}
+%\begin{vbframe}
+%\frametitle{References}
+%\footnotesize{
+%\begin{thebibliography}{99}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+%\newblock Deep Learning
+%\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\end{thebibliography}
-}
-\end{vbframe}
+%\end{thebibliography}
+%}
+%\end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
