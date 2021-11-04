@@ -5,10 +5,11 @@
 
 \newcommand{\titlefigure}{figure/loss_surface.png}
 \newcommand{\learninggoals}{
+  \item Empirical risk minimization
   \item Gradient descent
   \item Stochastic gradient descent
-  \item Minibatch gradient descent
-  \item Learning rates and (S)GD specifics
+  % \item Minibatch gradient descent
+  % \item Learning rates and (S)GD specifics
 }
 
 \title{Deep Learning}
@@ -21,33 +22,34 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Training Neural Networks}
-\lz
-Training of neural nets is composed of two iterative steps:
-\lz
-\begin{enumerate}
-\item \textbf{Forward pass:} The information of the inputs flows through the model to produce a prediction. Based on this prediction, the empirical risk is computed.
-\lz
-\item \textbf{Backward pass:} The information of the prediction error flows backward through the network to update the weights in a way that the error reduces.
-\end{enumerate}
-\lz
+% \lz
+% Training of NNs has 2 alternating steps (per observation):
+% \lz
+% \begin{enumerate}
+% \item \textbf{Forward pass:} Inputs flow through model to outputs. 
+%     We then compute the observation loss.
+% \lz
+% \item \textbf{Backward pass:} Loss flows backwards to update weights so error is reduced.
+% \end{enumerate}
+% \lz
 
-\textbf{Recall:} The error is calculated via a loss function $L(y, f(\xv, \thetab))$, where $y$ and $f(\xv, \thetab)$ are the true target and the network outcome, respectively.
-\framebreak
+% \textbf{Recall:} Loss is $L(y, f(\xv, \thetab))$, where $y$ is the true label and $f(\xv, \thetab)$ the prediction.
+% \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\lz
-\lz
+% \lz
+% \lz
 \begin{itemize}
-\item For regression, the L2 loss is typically used:
+\item
+In ML we use \textbf{empirical risk minimization} to minimize prediction 
+losses over the training data
+$$\riske = \frac{1}{n} \sumin \Lxyit$$
+\item In DL, $\thetab$ represents the weights (and biases) of the NN. 
+\item Often, L2 in regression:
 $$\Lxy = \frac{1}{2}(y - \fx)^2$$
-\item For binary classification, the binary cross entropy:
+\item or cross-entropy for binary classification
 $$\Lxy = - (y \log \fx + (1 - y) \log(1 - \fx))$$
-\end{itemize}
-\lz
-\textbf{Note:} Evaluating the loss on the data, the \textbf{empirical risk function} is computed:
-$$\riske = \frac{1}{n} \sumin \Lxyi$$
-\begin{itemize}
- \item To minimize the empirical risk, the \textbf{gradient descent} (GD) method can be used.
+ \item ERM can be implemented by \textbf{gradient descent}.
 \end{itemize}
 \end{vbframe}
 
@@ -55,46 +57,44 @@ $$\riske = \frac{1}{n} \sumin \Lxyi$$
 
 \begin{vbframe}{Gradient descent}
   \begin{itemize}
-    \item Let $\riske: \R^m \to \R$ be an arbitrary, differentiable, unrestricted function (of $\thetab \in \R^m$). \\
-    \begin{footnotesize}
-    In the context of deep learning, $\riske$ represents the empirical risk function and $\thetab$ represents the weights (and biases) of the network. For simplification, we assume $\bm{\theta} = (\theta_1, ..., \theta_m)$. 
-    \end{footnotesize}
-    \item We want to minimize this function by gradient descent (GD). 
-    \item The negative gradient 
+    % \item Let $\risket: \R^d \to \R$ be a (differentiable) risk
+    % \begin{footnotesize}
+    % In the context of deep learning, $\riske$ represents the empirical risk function and $\thetab$ represents the weights (and biases) of the network. For simplification, we assume $\bm{\theta} = (\theta_1, ..., \theta_m)$. 
+    % \end{footnotesize}
+    % \item We want to minimize this function by gradient descent. 
+    \item Neg. risk gradient points in the direction of the \textbf{steepest descent}
     $$
-    - \mathbf{g} = - \nabla \riske(\thetab) = - \left(\frac{\partial \riske}{\partial \theta_1}, \ldots, \frac{\partial \riske}{\partial \theta_m}\right)^\top
+    - \mathbf{g} = - \nabla \riske(\thetab) = - \left(\frac{\partial \riske}{\partial \theta_1}, \ldots, \frac{\partial \riske}{\partial \theta_d}\right)^\top
     $$ 
-    points in the direction of the \textbf{steepest descent}, since $\nabla \riske$ always points in the direction of the steepest ascent.
+    % since $\nabla \riske$ always points in the direction of the steepest ascent.
+
+  % \begin{itemize}
+    \item \enquote{Standing} at a point $\thetab^{[t]}$, we locally improve by:
+        % performing the following update: 
+    $$
+      \thetab^{[t + 1 ]}  = \thetab^{[t]} - \alpha \mathbf{g},
+    $$
+    % which implies (for sufficiently small $\alpha$),
+    % $$
+    % \riske(\bm{\thetab}^{[t+1]}) \leq \riske(\bm{\thetab}^{[t]})
+    % $$
+    \item $\alpha$ is called \textbf{step size} or \textbf{learning rate}.
   \end{itemize}
 
-    \framebreak
-
-  \begin{itemize}
-    \item \enquote{Standing} at a point $\thetab^{[t]}$ during minimization, we improve by performing the following update: 
-    $$
-      \thetab^{[t + 1 ]}  = \thetab^{[t]} - \alpha \nabla \riske\left(\thetab^{[t]}\right),
-    $$
-    which implies (for sufficiently small $\alpha$),
-    $$
-    \riske(\bm{\thetab}^{[t+1]}) \leq \riske(\bm{\thetab}^{[t]})
-    $$
-    \item $\alpha$ determines the length of the step and is called \textbf{step size} or, in risk minimization, \textbf{learning rate}.
-  \end{itemize}
-
-\end{vbframe} 
+% \end{vbframe} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{Example: Gradient descent}
-\begin{center}
- $\riske(\theta_1, \theta_2) = -\sin(\theta_1) \cdot \frac{1}{2\pi} \exp\left( (\theta_2 - \pi / 2)^2 \right)$
+% \begin{vbframe}{Example: Gradient descent}
+% \begin{center}
+ % $\riske(\theta_1, \theta_2) = -\sin(\theta_1) \cdot \frac{1}{2\pi} \exp\left( (\theta_2 - \pi / 2)^2 \right)$
 \begin{figure}
 \centering
-\scalebox{0.9}{\includegraphics{figure_man/hill.pdf}}
+\scalebox{0.65}{\includegraphics{figure_man/hill.pdf}}
 \end{figure}
-\vspace{0.4 cm}
-"Walking down the hill, towards the valley."
-\end{center}
+% \vspace{0.4 cm}
+% "Walking down the hill, towards the valley."
+% \end{center}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -123,9 +123,9 @@ $$\riske = \frac{1}{n} \sumin \Lxyi$$
   \textbf{Note: } It might not be that bad if we do not find the global optimum:  
 
   \begin{itemize}
-    \item We do not optimize the actual quantity of interest, i.e. the (theoretical) risk, but only an approximate version, i.e. the empirical risk. 
-    \item If the model class is very flexible, it might be disadvantageous to optimize too aggressively and increase the risk of overfitting. 
-    \item Early-stopping the optimization might even increase generalization performance. 
+    \item We don't optimize the (theoretical) risk, but only an approximate version, i.e. the empirical risk. 
+    \item For very flexible models, aggressive optimization might overfitting. 
+    \item Early-stopping might even increase generalization performance. 
   \end{itemize}
 
 \end{vbframe}
@@ -179,8 +179,9 @@ Steps of gradient descent for $\riske(\thetab) = 10\,\theta_1^2 + 0.5\,\theta_2^
 
 \begin{vbframe}{Weight Initialization}
 \begin{itemize}
-\item The weights (and biases) of a neural network must be assigned some initial values before training can begin.
-\item It’s important to initialize the weights randomly in order to "break symmetry". If two neurons (with the same activation function in a fully connected network) are connected to the same inputs and have the same initial weights, then both neurons will have the same gradient update in a given iteration and they’ll end up learning the same features.
+\item Weights (and biases) of an NN must be initialized in GD.
+\item We somehow must "break symmetry" -- which would happen in full-0-initialization.
+    If two neurons (with the same activation) are connected to the same inputs and have the same initial weights, then both neurons will have the same gradient update and learn the same features.
 \item Weights are typically drawn from a uniform a Gaussian distribution (both centered at 0 with a small variance).
 \item Two common initialization strategies are ’Glorot initialization’ and ’He initialization’ which tune the variance of these distributions based on the topology of the network.
 \end{itemize}
@@ -204,27 +205,25 @@ Steps of gradient descent for $\riske(\thetab) = 10\,\theta_1^2 + 0.5\,\theta_2^
 
 \begin{vbframe}{Stochastic gradient descent}
 
-Let us consider GD for empirical risk minimization. The updates are: 
-
+GD for ERM was: 
 $$
   \thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetab^{[t]})\right)
 $$
-
-
   \begin{itemize}
-    \item Optimization algorithms that use the entire training set to compute updates in one huge step are called \textbf{batch} or \textbf{deterministic}. This is computationally very costly or often impossible. 
-    \item \textbf{Idea:} Instead of letting the sum run over the whole dataset (\textbf{batch mode}) one can also let it run only over small subsets (\textbf{minibatches}), or only over a single example $i$. 
-     \item If the index $i$ of the training example is a random variable with uniform distribution, then its expectation is the batch gradient $\nabla_\theta \risket$
-    \item[$\to$] We have a \textbf{stochastic}, noisy version of the batch gradient
+    \item Using the entire training set in GD to is called \textbf{batch} or \textbf{deterministic} or \textbf{offline training}. This can be computationally costly or impossible, if data does not fit into memory.
+    \item \textbf{Idea:} Instead of letting the sum run over the whole dataset, use small stochastic subsets (\textbf{minibatches}), or only a single $\xi$. 
+     \item If batches are uniformly sampled from $\Dtrain$, our stochastic gradient is in expectation the batch gradient $\nabla_\theta \risket$.
+    \item The gradient w.r.t. a single $\xv$ is fast to compute but not reliable. But its often used in a theoretical analysis of SGD.
+    \item[$\to$] We have a \textbf{stochastic}, noisy version of the batch GD.
 
-    \framebreak 
+    % \framebreak 
 
-    \item The gradient w.r.t. a single training observation is fast to compute but not reliable. It can be used simply as a computational trick to deal with large data or to operate on real streams of online data in online learning.
-    \item In contrast, the full
-    batch gradient is costly (or even impossible, e.g., when data does not even fit into memory) to compute, particularly in DL, but it averages out all the noise from sub-sampling.
-    \item Minibatches are in between. The batch size decides upon the compromise
-    between speed and averaging (smoothing).
-    \item In summary: SGD computes an unbiased estimate of the gradient by taking the average gradient over a minibatch (or one sample) to update the parameter $\thetab$ in this direction.
+        % t can be used simply as a computational trick to deal with large data or to operate on real streams of online data in online learning.
+    % \item In contrast, the full
+    % batch gradient is costly (or even impossible, e.g., when data does not even fit into memory) to compute, particularly in DL, but it averages out all the noise from sub-sampling.
+    % \item Minibatches are in between. The batch size decides upon the compromise
+    % between speed and averaging (smoothing).
+    % \item In summary: SGD computes an unbiased estimate of the gradient by taking the average gradient over a minibatch (or one sample) to update the parameter $\thetab$ in this direction.
     % \item Optimization algorithms that use only a single example at a time are called \textbf{stochastic} or \textbf{online}. This can be used simply as a computational trick to deal with large data or to operate on real streams of online data in online learning.
 % Those methods are called \textbf{minibatch} or \textbf{stochastic}.
   \end{itemize}
@@ -233,30 +232,30 @@ $$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
- An illustration of the SGD algorithm (to minimize the function $1.25(x_1 + 6)^2 + (x_2 - 8)^2)$.
+ SGD on function $1.25(x_1 + 6)^2 + (x_2 - 8)^2$.
  \begin{figure}
     \scalebox{0.8}{\includegraphics{figure_man/SGD.png}}
     \tiny{\\ Source : Shalev-Shwartz and  Ben-David.
 Understanding machine learning: From theory to algorithms. Cambridge University Press, 2014. }
- \caption{On the left is GD and on the right is SGD. The black line depicts the averaged value of $\thetab$.}
+ \caption{Left = GD, right = SGD. The black line is a smoothed $\thetab$.}
  \end{figure}
 
   \end{vbframe}
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe}{SGD with Momentum}
-\begin{itemize}
-\item While SGD remains a popular optimization strategy, learning with it can sometimes be slow.
-\item Momentum is designed to accelerate learning, by accumulating an exponentially decaying moving average of past gradients.
-\item Nice tool to get a feel for how momentum works: \url{https://distill.pub/2017/momentum/}
-\end{itemize}
-\begin{figure}
-\centering
-\scalebox{.55}{\includegraphics{figure_man/momentum.png}}
-\\GD (black) versus momentum (red) when dealing with ravines
-\end{figure}
-\end{vbframe}
+% \begin{vbframe}{SGD with Momentum}
+% \begin{itemize}
+% \item While SGD remains a popular optimization strategy, learning with it can sometimes be slow.
+% \item Momentum is designed to accelerate learning, by accumulating an exponentially decaying moving average of past gradients.
+% \item Nice tool to get a feel for how momentum works: \url{https://distill.pub/2017/momentum/}
+% \end{itemize}
+% \begin{figure}
+% \centering
+% \scalebox{.55}{\includegraphics{figure_man/momentum.png}}
+% \\GD (black) versus momentum (red) when dealing with ravines
+% \end{figure}
+% \end{vbframe}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -285,31 +284,37 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
   % \begin{itemize}
   %   \item Thus, what SGD basically does is computing an unbiased estimate of the gradient by taking the average gradients of a minibatch to update the parameter $\thetab$.
   % \end{itemize}
+  \begin{itemize}
+    \item A full SGD pass over data is an \textbf{epoch}.
+        % gradient updates (\textbf{iterations}).
+    \item Minibatch sizes are typically between 50 and 1000.
+   \end{itemize}
  
 \framebreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \begin{itemize}
-    \item With minibatches of size $m$, a full pass over the training set (called an \textbf{epoch}) consists of $\frac{n}{m}$ gradient updates (\textbf{iterations}).
-    \item SGD and its modifications are the most used optimization algorithms for ML in general and for deep learning in particular.
-    \item SGD (with one or a few samples per batch) updates have a high variance, even though they are unbiased. 
-      Because of this variance, the learning rate $\alpha$ is typically much smaller than in the full-batch scenario.
-    \item SGD with minibatches reduces the variance of the parameter updates and utilizes highly optimized matrix operations to efficiently compute gradients.
+    \item SGD is the most used optimizer in ML and especially in DL.
+        % gradient updates (\textbf{iterations}).
+    \item We usually have to add a considerable amount of tricks to SGD to make it really 
+        efficient (e.g. momentum). More on this later.
+    \item SGD with (small) batches has a high variance, although is unbiased. 
+      Hence, the LR $\alpha$ is smaller than in the batch mode.
+    % \item SGD with minibatches reduces the variance of the parameter updates and utilizes highly optimized matrix operations to efficiently compute gradients.
+  % \item Note: Sometimes, SGD with minibatches is referred to as "Minibatch gradient descent" with the term SGD being reserved for updates using a single example.
+    \item When LR is slowly decreased, SGD converges to  local minimum.
+    \item Recent results indicate that SGD often leads to better generalization than GD, and may result in indirect regularization.
+    % \item Now we know how we can optimize/train a neural network based on the gradient, but how do we compute the gradient? We will learn more about this in the chapter on backpropagation, a method to efficiently compute gradients.
    \end{itemize}
 \vspace*{0.5cm}
-\textbf{Note:} Sometimes, SGD with minibatches is referred to as "Minibatch gradient descent" with the term SGD being reserved for updates using a single example.
 
-\framebreak 
+% \framebreak 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\vspace*{0.5cm}
-  \begin{itemize}
-    \item Minibatch sizes are typically between 50 and 1000.
-    \item When the learning rate is slowly decreased, SGD converges to a local minimum.
-    \item Recent results indicate, that SGD often leads to better generalizing models then GD, and thus may perform some kind of indirect regularization.
-    \item Now we know how we can optimize/train a neural network based on the gradient, but how do we compute the gradient? We will learn more about this in the chapter on backpropagation, a method to efficiently compute gradients.
-  \end{itemize}
+% \vspace*{0.5cm}
+  % \begin{itemize}
+  % \end{itemize}
 \end{vbframe}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -5,9 +5,7 @@
 
 \newcommand{\titlefigure}{figure/backprop_gg_new.png}
 \newcommand{\learninggoals}{
-  \item Efficiency of backpropagation
-  \item Caching
-  \item Backpropagation formalism
+  \item Backprop formalism and recursion
 }
 
 \title{Deep Learning}
@@ -27,7 +25,7 @@
   \begin{figure}
     \centering
       \includegraphics[width=9cm]{figure/backprop_gg1_new.png}
-      \caption{All five terms of our chain rule}
+      % \caption{All five terms of our chain rule}
   \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,7 +37,7 @@ Next, let us compute:
         \begin{figure}
     \centering
       \includegraphics[width=9cm]{figure/backprop_gg_new.png}
-      \caption{All five terms of our chain rule}
+      % \caption{All five terms of our chain rule}
   \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,43 +51,45 @@ $$\frac{\partial \Lxy}{\partial W_{11}} =
 $$\frac{\partial \Lxy}{\partial W_{21}} =     
 \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}} \cdot  \textcolor{black}{\frac{\partial z_{1,in}}{\partial W_{21}}}$$
 
-\item We see that there is significant overlap / redundancy in the two expressions. A huge chunk of the second expression has already been computed while computing the first one.
-\item \textbf{Again}: Simply cache these subexpressions instead of recomputing them each time.
-\end{itemize}
-\end{frame}
+\item Significant overlap / redundancy in the two expressions.
+\item \textbf{Again}: Let's call this subexpression $\delta_1$ and cache it.
+    % Simply cache these subexpressions instead of recomputing them each time.
+% \end{itemize}
+% \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Backward Computation and Caching}
-\begin{itemize}
-\item Let {\small $$\textcolor{violet}{\delta_1}  = \textcolor{violet}{\frac{\partial \Lxy}{\partial z_{1,in}}} = 
-\textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}}$$} be cached. $\delta_1$ can also be seen as an \textbf{error signal} that represents how much the loss $L$ changes when the input $z_{1,in}$ changes.
-
-\item The two expressions of the previous slide now become,
+% \begin{frame} {Backward Computation and Caching}
+% \begin{itemize}
+{\small $$\textcolor{violet}{\delta_1}  = \textcolor{violet}{\frac{\partial \Lxy}{\partial z_{1,in}}} = 
+\textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} \cdot  \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}} \cdot  \textcolor{violet}{\frac{\partial f_{in}}{\partial z_{1,out}}} \cdot  \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}}$$} 
+% \item  two expressions of the previous slide now become,
 {\small $$\frac{\partial \Lxy}{\partial W_{11}} = \textcolor{violet}{\delta_1} \cdot \frac{\partial z_{1,in}}{\partial W_{11}} \mbox{ \hspace{0.5cm} \small{and} \hspace{0.5cm}} \frac{\partial \Lxy}{\partial W_{21}} = \textcolor{violet}{\delta_1} \cdot \frac{\partial z_{1,in}}{\partial W_{21}} $$}
-where $\delta_1$ is simply "plugged in".
-\item As you can imagine, caching subexpressions in this way and plugging in where needed can result in \textbf{massive} gains in efficiency for deep and "wide" neural networks. 
-\item In fact, this simple algorithm, which was first applied to neural networks way back in 1985, is \textbf{still} the biggest breakthrough in deep learning.
+\item $\delta_1$ can also be seen as an \textbf{error signal} that represents how much the loss $L$ changes when the input $z_{1,in}$ changes.
+
+% where $\delta_1$ is simply "plugged in".
+% \item As you can imagine, caching subexpressions in this way and plugging in where needed can result in \textbf{massive} gains in efficiency for deep and "wide" neural networks. 
+% \item In fact, this simple algorithm, which was first applied to neural networks way back in 1985, is \textbf{still} the biggest breakthrough in deep learning.
 \end{itemize}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Backward Computation and Caching}
-  \begin{itemize}
-    \item On the other hand, if we had done a \textbf{forward} caching of the derivatives
-    {\small $$\frac{\partial \Lxy}{\partial W_{11}} = \Bigg(\Bigg(\Bigg( \frac{\partial z_{1,in}}{\partial W_{11}} \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg)  \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg) \frac{\partial f_{out}}{\partial f_{in}} \Bigg) \frac{\partial \Lxy}{\partial f_{out}}$$}
-      {\small $$\frac{\partial \Lxy}{\partial W_{21}} = 
-        \Bigg(\Bigg(\Bigg( \frac{\partial z_{1,in}}{\partial W_{21}} \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg)  \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg) \frac{\partial f_{out}}{\partial f_{in}} \Bigg) \frac{\partial \Lxy}{\partial f_{out}}$$}
-      there would be no common subexpressions to plug in. We would have to compute the \text{entire} expression for each and every weight!
-    \item This would make the computations too inefficient to make gradient descent tractable for large neural networks.
-  \end{itemize}
-\end{frame}
+% \begin{frame} {Backward Computation and Caching}
+  % \begin{itemize}
+  %   \item On the other hand, if we had done a \textbf{forward} caching of the derivatives
+  %   {\small $$\frac{\partial \Lxy}{\partial W_{11}} = \Bigg(\Bigg(\Bigg( \frac{\partial z_{1,in}}{\partial W_{11}} \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg)  \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg) \frac{\partial f_{out}}{\partial f_{in}} \Bigg) \frac{\partial \Lxy}{\partial f_{out}}$$}
+  %     {\small $$\frac{\partial \Lxy}{\partial W_{21}} = 
+  %       \Bigg(\Bigg(\Bigg( \frac{\partial z_{1,in}}{\partial W_{21}} \frac{\partial z_{1,out}}{\partial z_{1,in}} \Bigg)  \frac{\partial f_{in}}{\partial z_{1,out}} \Bigg) \frac{\partial f_{out}}{\partial f_{in}} \Bigg) \frac{\partial \Lxy}{\partial f_{out}}$$}
+  %     there would be no common subexpressions to plug in. We would have to compute the \text{entire} expression for each and every weight!
+  %   \item This would make the computations too inefficient to make gradient descent tractable for large neural networks.
+  % \end{itemize}
+% \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
-\begin{frame} {Backpropagation: Formalism}
+\begin{frame} {Backprop: Recursion}
   \begin{itemize}
-    \item \small{Let us now derive a general formulation of backpropagation.}
+    \item \small{Let us now derive a general formulation of backprop.}
     \item \small{The neurons in layers $i-1$, $i$ and $i+1$ are indexed by $j$, $k$ and $m$, respectively.
     \item The output layer will be referred to as layer O.}
    \begin{figure}
@@ -101,7 +101,7 @@ where $\delta_1$ is simply "plugged in".
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{vbframe} {Backpropagation: Formalism}
+\begin{vbframe} {Backprop: Recursion}
 
   \vspace*{-0.3cm}
 
@@ -116,13 +116,13 @@ where $\delta_1$ is simply "plugged in".
     {\small
       $$\delta_{\tilde{k}}^{(i)} = \frac{\partial L}{\partial z_{\tilde{k},in}^{(i)}} =  \frac{\partial L}{\partial z_{\tilde{k},out}^{(i)}} \frac{\partial z_{\tilde{k},out}^{(i)}}{\partial z_{\tilde{k},in}^{(i)}}   =  \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial z_{m,in}^{(i+1)}}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial z_{\tilde{k},out}^{(i)}}{\partial z_{\tilde{k},in}^{(i)}} $$}
 
-    \item Note: The sum in the expression above is over all the neurons in layer $i+1$. This is simply an application of the (multivariable) chain rule.
+    \item Note: The sum in the expression above is over all the neurons in layer $i+1$. This is simply an application of the (multivariate) chain rule.
   \end{itemize}
   \end{small}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Backpropagation: Formalism}
+\begin{frame} {Backprop: Recursion}
  Using 
  \vspace*{-5mm}
         {\footnotesize \begin{eqnarray*}
@@ -140,7 +140,7 @@ we get:
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Backpropagation: Formalism}
+\begin{frame} {Backprop: Recursion}
   \begin{itemize}
     \item Given the error signal $\delta_{\tilde{k}}^{(i)}$ of neuron $\tilde{k}$ in layer $i$, the derivative of loss $L$ w.r.t. to the weight $W_{\tilde{j},\tilde{k}}$ is simply:
         $$
@@ -153,16 +153,16 @@ we get:
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Backpropagation: Formalism}
+\begin{frame} {Backprop: Recursion}
 \begin{itemize}
-\item We have seen how to compute the error signals for individual neurons. It can be shown that the error signal $\bm{\delta}^{i}$ for an entire layer $i$ can be computed as follows ($\odot$ = element-wise product):
+\item It is not hard to show that the error signal $\bm{\delta}^{i}$ for an entire layer $i$ is ($\odot$ = element-wise product):
 \begin{itemize}
 \item $\bm{\delta}^{(O)} = \nabla_{f_{out}}L \odot \tau'(f_{in})$
 \item $\bm{\delta}^{(i)} = W^{(i+1)}\bm{\delta}^{(i+1)} \odot \sigma'(z_{in}^{(i)})$
 \end{itemize}
-\item As we have seen earlier, the error signal for a given layer $i$ depends recursively on the error signals of \textbf{later} layers \{i+1, i+2, \ldots , O\}.
+% \item As we have seen earlier, the error signal for a given layer $i$ depends recursively on the error signals of \textbf{later} layers \{i+1, i+2, \ldots , O\}.
 \item Therefore, backpropagation works by computing and storing the error signals \textbf{backwards}. That is, starting at the output layer and ending at the first hidden layer. This way, the error signals of later layers \textbf{propagate backwards} to the earlier layers.
-\item The derivative of the loss $L$ w.r.t. a given weight is computed efficiently by plugging in the cached error signals thereby avoiding expensive and redundant computations. 
+\item The derivative of the loss $L$ w.r.t. a given weight is computed efficiently by plugging in the cached error signals, thereby avoiding expensive and redundant computations. 
 \end{itemize}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
