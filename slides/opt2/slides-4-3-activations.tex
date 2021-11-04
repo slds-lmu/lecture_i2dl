@@ -181,8 +181,8 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
   \begin{itemize}
     \item As we have seen previously, the role of the output activation is to get the final score on the same scale as the target.
     \item The output activations and the loss functions used to train neural networks can be viewed through the lens of maximum likelihood estimation (MLE).
-    \item In general, the function $f(\xb~|~\thetab)$ represented by the neural network defines the conditional $p(y~|~\xb,\thetab)$ in a supervised learning task.
-    \item Maximizing the likelihood is then equivalent to minimizing $- \log p(y~|~\xb,\thetab)$.
+    \item In general, the function $f(\xv~|~\thetab)$ represented by the neural network defines the conditional $p(y~|~\xv,\thetab)$ in a supervised learning task.
+    \item Maximizing the likelihood is then equivalent to minimizing $- \log p(y~|~\xv,\thetab)$.
     \item An output unit with the identity function as the activation can be used to represent the mean of a Gaussian distribution.
     \item For such a unit, training with mean-squared error is equivalent to maximizing the log-likelihood (ignoring issues with non-convexity).
   \end{itemize}
@@ -204,7 +204,7 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
   \begin{itemize}
     \item A neural network can even be used to output the parameters of more complex distributions.
     \item A Mixture Density Network, for example, outputs the parameters of a Gaussian Mixture Model:
-$$p(y | \xb)=\sum_{c=1}^{m} \phi^{(c)} (\xb) ~ \mathcal{N}\left(y ; \boldsymbol{\mu}^{(c)}(\xb), \boldsymbol{\Sigma}^{(c)}(\xb)\right)$$
+$$p(y | \xv)=\sum_{c=1}^{m} \phi^{(c)} (\xv) ~ \mathcal{N}\left(y ; \boldsymbol{\mu}^{(c)}(\xv), \boldsymbol{\Sigma}^{(c)}(\xv)\right)$$
           where $m$ the number of components in the mixture.
     \item In such a network, the output units are divided into groups.
     \item One group of output neurons with softmax activation represents the weights ($\phi^{(c)}$) of the mixture.
@@ -217,7 +217,7 @@ $$p(y | \xb)=\sum_{c=1}^{m} \phi^{(c)} (\xb) ~ \mathcal{N}\left(y ; \boldsymbol{
     \centering
       \scalebox{1}{\includegraphics{figure/mdn.png}}
       \tiny{\\ Source : Goodfellow et al. (2016)}
-      \caption{\footnotesize Samples drawn from a Mixture Density Network. The input $\xb$ is sampled from a uniform distribution and $y$ is sampled from $p(y~|~\xb,\thetab)$.}
+      \caption{\footnotesize Samples drawn from a Mixture Density Network. The input $\xv$ is sampled from a uniform distribution and $y$ is sampled from $p(y~|~\xv,\thetab)$.}
   \end{figure}
 \end{frame}
 
