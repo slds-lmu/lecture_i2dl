@@ -1,28 +1,24 @@
-% style/preamble throws error, hence preamble4tex is kept here
 \input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\newcommand{\titlefigure}{figure/alexnet.jpg}
+\begin{document}
+\newcommand{\titlefigure}{figure/alexnetfront.png}
+%modify picture
 \newcommand{\learninggoals}{
-  \item Appllication
+  \item Application of CNNs in Visual Recognition
 }
 
-\title{Deep Learning}
-\date{}
-
-\begin{document}
-
-\lecturechapter{CNN: Application}
+\lecturechapter{CNN Applications}
 \lecture{I2DL}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{vbframe}{Application - Image Classification}
     \begin{itemize}
-        \item One of use case for CNNs is image classification.
-        \item There exist a broad variety of battle-proven image classification architecture such as the AlexNet , the Inception Net or the ResNet which will be discussed in detail in the next lecture.
-        \item All those architectures rely on a set of subsequent convolutional filters and aim to learn the mapping from an image to a probability score over a set of classes.
+        \item One of use case for the CNNs is image classification.
+        \item There exists a broad variety of network architectures for image classification such as the LeNet, AlexNet, InceptionNet and ResNet which will be discussed in detail in the next lecture.
+        \item All these architectures rely on a set of a sequence of convolutional layers and aim to learn the mapping from an image to a probability score over a set of classes.
     \end{itemize}
 \framebreak
     \begin{figure}
@@ -34,7 +30,7 @@
     \begin{figure}
         \centering
         \includegraphics[width=4cm]{figure/cifar_frog.png}
-        \caption{One example of the Cifar10 data: A highly pixelated, coloured image of a frog with dimension [32, 32, 3]. }
+        \caption{One example of the Cifar10 data: A highly pixelated, coloured image of a frog with dimension [3, 32, 32]. }
     \end{figure}
 \framebreak
     \begin{figure}
@@ -52,6 +48,19 @@
     \end{figure} 
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}{Application - Beyond Image Classification}
+There are many visual recognition problems that are related to image classification, such as:
+
+\begin{itemize}
+    \item object detection
+    \item image captioning
+    \item semantic segmentation
+    \item visual question answering
+    \item visual instruction navigation
+    \item scene graph generation
+\end{itemize}
+\end{vbframe}
+
 
 \begin{vbframe}{Application - Image Colorization}
     \begin{itemize}
@@ -164,6 +173,43 @@
 
             \end{vbframe}
          
+\begin{vbframe}{Semantic Segmentation}
+
+The goal of semantic image segmentation is to label each pixel of an image with a corresponding class of what is being represented. 
+
+\begin{figure}
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{figure/unet.png}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{figure/semantic_segmentation.png}
+\end{minipage}
+\caption\tiny{U-Net, Ronneberger et al. MICCAI 2015}
+\end{figure}
+
+\end{vbframe}
+
+\begin{vbframe}{Semantic Segmentation}
+
+The goal of image captioning is to convert a given input image into a natural language description.
+
+\begin{figure}
+\centering
+\begin{minipage}{.65\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{figure/caption_generation.png}
+\end{minipage}%
+\begin{minipage}{.35\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{figure/example_sample_generation.png}
+\end{minipage}
+\caption\tiny{Caption generation with augmented visual attention by Biswas et al.2020}
+\end{figure}
+
+\end{vbframe}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
