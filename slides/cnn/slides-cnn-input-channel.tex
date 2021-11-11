@@ -1,4 +1,4 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -32,9 +32,9 @@
     
        \item An image consists of the smallest indivisible segments called pixels and every pixel has a strength often known as the pixel intensity. 
        
-       \item A grayscale image has a single input channel and value of each pixel represents the amount of light.
+       \item A grayscale image has a single input channel and the value of each pixel represents the amount of light.
        
-       \item Note a grayscale value can lie between 0 to 255, where 0 value corresponds to black and 255 to white.
+       \item A grayscale value can lie between 0 to 255, where 0 value corresponds to black and 255 to white.
        
        
     \end{itemize}
@@ -55,21 +55,21 @@
   \end{figure}
 
 \begin{itemize}
-       \item A colored digital image usually comes with three color channels, i.e. the Red-Green-Blue channels, popularly known as the RGB values.   
+       \item A colored digital image usually comes with three color channels, i.e. the Red-Green-Blue channels or RGB values.   
         \item Each pixel can be represented by a vector of three numbers (each ranging from 0 to 255) for the three primary color channels.
       
 \end{itemize}
  \begin{figure}
     \centering
     \includegraphics[width=5cm]{figure/1channel.png}
-    \caption{\tiny CNNs takes grayscale image as input.}
+    \caption{\tiny A CNN taking a grayscale image as input.}
   \end{figure}
 
 
  \begin{figure}
     \centering
     \includegraphics[width=5cm]{figure/3channel.png}
-    \caption{\tiny CNNs use colored images where each of the Red, Green and Blue (RGB) color spectrums serve as input. (source: Chaitanya Belwal's Blog)}
+    \caption{\tiny A CNN processing a colored images where each of the color spectrums serve as input. (Source: Chaitanya Belwal's Blog)}
   \end{figure}
   
   
@@ -83,7 +83,7 @@
 
 In this CNN:
     \begin{itemize}
-       \item there are 3 input channel, with the size of 4x4 as an input matrices, 
+       \item there are 3 input channels, represented as 4x4 input matrices, 
        \item one 2x2 filter (also known as kernel), 
        \item a single ReLu layer,
        \item a single pooling layer (which applies the MaxPool function),
@@ -98,7 +98,7 @@ In this CNN:
        \item O: is the dimension (rows and columns) of the output square matrix, 
        \item I: is the dimension (rows and columns) of the input square matrix,
        \item K: is the dimension (rows and columns) of the filter (kernel) square matrix, 
-       \item P: is the number of pixels(cells) of padding added to each side of the input,
+       \item P: is the number of pixels (cells) of padding added to each side of the input,
        \item S: is the stride, or the number of cells skipped each time the kernel is slided.
     \end{itemize}
     \end{itemize}
@@ -108,11 +108,11 @@ In this CNN:
     \includegraphics[width=5cm]{figure/3channel.png}
   \end{figure}
 
-Inserting the values shown in the figure into the equation,
+Inserting the values shown in the figure into the equation yields
 
 \begin{align} 
 O= \frac{I - K + 2.P}{S} + 1&={(4 - 2 + 2.0)\over 2} + 1\\ 
-&=2 
+&=2. 
 \end{align}
 
 \end{vbframe}

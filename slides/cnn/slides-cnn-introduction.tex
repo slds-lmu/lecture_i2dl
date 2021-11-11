@@ -1,14 +1,14 @@
 % style/preamble throws error, hence preamble4tex is kept here
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
 \newcommand{\titlefigure}{figure/front.png} %modify picture
 \newcommand{\learninggoals}{
-  \item Introduction to CNNs
-  \item Applications of CNNs
-  \item A First Glimpse to the Architecture
+  \item What are CNNs
+  \item When to Apply CNNs
+  \item A Glimpse into CNN Architectures
 }
 
 \title{Deep Learning}
@@ -33,7 +33,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{itemize}
-    \item Since 2012, by the success of CNNs model in ILSVRC compition, they are popular in many fields such as computer vision.
+    \item Since 2012, given their success in the ILSVRC competition, CNNs are popular in many fields.
     \item Common applications of CNN-based architectures in computer vision are:
     \begin{itemize}
       \item Image classification.
@@ -52,7 +52,7 @@
   \begin{figure}
     \centering
     \includegraphics[width=7cm]{figure/tesla_autopilot.jpg}
-    \caption{All Tesla cars being produced now have full self-driving hardware and customers can purchase one today (source Tesla website). Twenty-nine states out of fifty states in the U.S. have enacted legislation related to autonomous vehicles. A convolutional neural network is used to map raw pixels from a single front-facing camera directly into steering commands. The system learns to drive in traffic on local roads with or without lane markings as well as on highways.}
+    \caption{All Tesla cars being produced now have full self-driving hardware (Source: Tesla website). A convolutional neural network is used to map raw pixels from a single front-facing camera directly into steering commands. The system learns to drive in traffic, on local roads, with or without lane markings as well as on highways.}
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,7 +60,7 @@
 \begin{figure}
     \centering
     \includegraphics[width=5cm]{figure/cityscapes_visual.png}
-    \caption{Given an input image, first CNN is used to get the feature map of the last convolutional layer, then a pyramid parsing module is applied to harvest different sub-region representations, followed by upsampling and concatenation layers to form the final feature representation, which carries both local and global context information. Finally, the representation is fed into a convolution layer to get the final per-pixel prediction. (Source: pyramid scene parsing network,by Zhao et. al, CVPR 2017) }%mina modify the caption of this figure
+    \caption{Given an input image, a CNN is first used to get the feature map of the last convolutional layer, then a pyramid parsing module is applied to harvest different sub-region representations, followed by upsampling and concatenation layers to form the final feature representation, which carries both local and global context information. Finally, the representation is fed into a convolution layer to get the final per-pixel prediction. (Source: pyramid scene parsing network, by Zhao et. al, CVPR 2017) }%mina modify the caption of this figure % DR: way too complicated
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,14 +80,14 @@
 
 {CNN for personalized medicine}
   \begin{itemize}
-    \item Examples are: Tracking, diagnosis and localization of Covid-19 patients.
-    \item CNN based method (RADLogists) for personalized Covid-19 detection: three CT scans from a single coronavirus patient diagnosed by RADLogists.
+    \item Examples: Tracking, diagnosis and localization of Covid-19 patients.
+    \item CNN based method (RADLogists) for personalized Covid-19 detection: three CT scans from a single Corona virus patient diagnosed by RADLogists. % DR: what is RADLogists? Google search gives 0 results
   \end{itemize}
   
    \begin{figure}
     \centering
     \includegraphics[width=9cm]{figure/hitmap.jpeg}
-    \caption{Four COVID-19 lung CT scans at the top with corresponding colored maps showing coronavirus abnormalities at the bottom (Source: IEEE Spectrum).}
+    \caption{Four COVID-19 lung CT scans at the top with corresponding colored maps showing Corona virus abnormalities at the bottom (Source: IEEE Spectrum).}
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,7 +95,7 @@
   \begin{figure}
     \centering
     \includegraphics[width=9cm]{figure/instanceseg.png}
-    \caption{Various analyses in computational pathology are possible. For example, nuclear segmentation in digital microscopic tissue images enable extraction of high-quality features for nuclear morphometrics (source: Kummar et. al. IEEE Transaction Medical Imaging). }
+    \caption{Various analyses in computational pathology are possible. For example, nuclear segmentation in digital microscopic tissue images enable extraction of high-quality features for nuclear morphometrics (Source: Kummar et. al. IEEE Transaction Medical Imaging). }
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

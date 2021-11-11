@@ -1,5 +1,5 @@
 % style/preamble throws error, hence preamble4tex is kept here
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -25,7 +25,7 @@
 \includegraphics[width=9cm]{figure/cnn_scheme.png}
 \begin{itemize}
 \item Schematic architecture of a CNN.
-\item The input tensor is convolved by different filters yielding different feature maps (coloured) in subsequent layers.
+\item The input tensor is convolved by different filters yielding different feature maps (colored) in subsequent layers.
 \item A dense layer connects the final feature maps with the softmax-activated output neurons.
 \end{itemize}
 \end{vbframe}
@@ -35,7 +35,7 @@
 \includegraphics[width=11cm]{figure/cnn_flat.png}
 \begin{itemize}
 \item Flat view of a CNN architecture for a classification problem.
-\item Consists of 2 CNN layers that are each followed by max-pooling, then flattened and connected with the final output neurons via a dense layer.
+\item The architecture consists of 2 CNN layers, each followed by max-pooling, then flattened and connected with the final output neurons via a FC layer.
 \end{itemize}
 \end{vbframe}
 
@@ -44,8 +44,8 @@
 \includegraphics[width=8cm]{figure/3dviz_fcn.png}
 \begin{itemize}
 % \item Awesome interactive visualization by \cite{29} (\href{http://scs.ryerson.ca/~aharley/vis/}{click here})
-\item Awesome interactive visualization (by Adam Harley)  \href{http://scs.ryerson.ca/~aharley/vis/}{\beamergotobutton{Click here}}.
-\item Vanilla 2-layer densely-connected net on MNIST data for input digit $3$.
+\item Interactive visualization (by Adam Harley)  \href{http://scs.ryerson.ca/~aharley/vis/}{\beamergotobutton{Click here}}.
+\item Vanilla 2-layer FC net on MNIST data for input digit $3$.
 \item Each neuron in layer 1 is connected to each of the input neurons.
 \end{itemize}
 \framebreak
@@ -99,10 +99,10 @@
     \only<10>{\item We actually append them to a new tensor with depth = \# filters.}
     \only<11>{\item All feature map entries will then be activated (e.g. via ReLU), just like the neurons of a standard feedforward net.}
     \only<12>{\item One may use pooling operations to downsample the dimensions of the feature maps.}
-    \only<12>{\item Pooling is applied on each feature map independently: the latter, blue block is the pooled version of the previous, blue feature map.}
+    \only<12>{\item Pooling is applied on each feature map independently: the latter blue block is the pooled version of the previous blue feature map.}
     \only<13>{\item Many of these layers can be placed successively, to extract even more complex features.}
-    \only<13>{\item The feature maps are fed into each other sequentially. For instance, each filter from the second conv layer gets all previous feature maps from the first conv layer as an input. Each filter from the first layer extracts information from the input image tensor.}
-    \only<13>{\item The feature maps of the final conv layer are flattened (into a vector) and fed into a dense layer which, in turn, is followed by more dense layers and finally, the output layer.}
+    \only<13>{\item The feature maps are fed into each other sequentially. For instance, each filter from the second Conv Layer gets all previous feature maps from the first Conv Layer as an input. Each filter from the first layer extracts information from the input image tensor.}
+    \only<13>{\item The feature maps of the final Conv Layer are flattened (into a vector) and fed into a dense layer which, in turn, is followed by more dense layers and finally, the output layer.}
     \end{itemize}
     }
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

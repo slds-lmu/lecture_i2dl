@@ -1,4 +1,4 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -26,10 +26,10 @@
 \only<3>{\includegraphics[width=10cm]{figure/maxpoolend.png}}
 \begin{itemize}
 \only<1>{\item We've seen how convolutions work, but there is one other operation we need to understand.}
-\only<1>{\item We want to downsample the feature map but optimally lose no information.}
+\only<1>{\item We want to downsample the feature map but in the best case also lose no information.}
 \only<2>{\item Applying the max pooling operation, we simply look for the maximum value at each spatial location.}
-\only<2>{\item That is 8 for the first location.}
-\only<2>{\item Due to the filter of size 2 we have the dimensions of the original feature map and obtain downsampling.}
+\only<2>{\item This is 8 for the first location.}
+\only<2>{\item Due to the filter of size 2 and no padding, we obtain a downsampled result.}
 \only<3>{\item The final pooled feature map has entries 8, 6, 9 and 3.
 \only<3>{\item Max pooling brings us 2 properties: 1) dimention reduction and 2) spatial invariance.}
 \item Popular pooling functions: max and (weighted) average.}
@@ -45,14 +45,14 @@
 \only<4>{\includegraphics[width=10cm]{figure/avgpool4.png}}%
 
 \begin{itemize}
-\only<1>{\item We've seen how max pooling worked, there are exists other pooling operation such as Avg Pooling, Fractional Pooling, LP Pooling, Wavelet Pooling, Softmax Pooling, Stochastic Pooling, Blur Pooling, Orderable Pooling, Global Average Pooling, and etc.}
-\only<1>{\item Similar to max pooling, we downsample the feature map but optimally lose no information.}
+\only<1>{\item We've seen how max pooling works. There also exist other pooling operations such as Avg Pooling, Fractional Pooling, LP Pooling, Wavelet Pooling, Softmax Pooling, Stochastic Pooling, Blur Pooling, Orderable Pooling, Global Average Pooling, and etc.}
+\only<1>{\item Similar to max pooling, we downsample the feature map but maybe preserve more information.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \only<2>{\item Applying the average pooling operation, we simply look for the mean/average value at each spatial location.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\only<3>{\item We use all information by Sum and backpropagated to all responses. }
+\only<3>{\item We use all information by due to the sum and backpropagated to all responses. }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\only<3>{\item It is not robust to noise. }
+\only<3>{\item Due to the average, this pooling is not robust to noise. }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \only<4>{\item The final pooled feature map has entries 3.75, 2.5, 4.25 and 1.75. }
 \end{itemize}
@@ -61,13 +61,13 @@
 
 \begin{vbframe}{Comparison of Max and Average Pooling}
 \begin{itemize}
-\item Avg pooling use all information by sum but Max pooling use only highest value.
-\item In Max-pooling operation details are removed therefore it is suitable for sparse information (Image Classification) and Avg pooling is suitable for dense information (NLP) 
+\item Avg pooling uses the information of all inputs while Max pooling uses only the largest value.
+\item In Max-pooling operation details are removed, therefore it is suitable for sparse information (typically in image classification) and Avg pooling is suitable for dense information (typically in NLP) 
 \end{itemize}
 \begin{figure}
 \centering
 \includegraphics[width=5cm]{figure/pooling.png}
-\caption{Shortcomings of Max and Average Pooling using Toy Image (photo source: https://iq.opengenus.org/maxpool-vs-avgpool/)}
+\caption{Shortcomings of Max and Average Pooling using a toy image (photo source: https://iq.opengenus.org/maxpool-vs-avgpool/)}
 \end{figure}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

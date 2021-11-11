@@ -1,12 +1,12 @@
 % style/preamble throws error, hence preamble4tex is kept here
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
 \newcommand{\titlefigure}{figure/conv2d_main_photo.png}% anil figure changed
 \newcommand{\learninggoals}{
-  \item What are the filters? 
+  \item What are filters? 
   \item Convolutional Operation
   \item 2D Convolution
 }
@@ -116,7 +116,7 @@ $$
         \end{alignat*}
         }
 
-\only<6>{\item Applying the Sobel-Operator to every location in the input yields us the \textbf{feature map}.}
+\only<6>{\item Applying the Sobel-Operator to every location in the input yields the \textbf{feature map}.}
 \only<7>{\item Normalized feature map reveals vertical edges.
 \item Note the dimensional reduction compared to the dummy image.}
 \end{itemize}
@@ -131,7 +131,7 @@ $$
     \item In a nutshell:
     \begin{itemize}
       \item We initialize a lot of random filters (like the Sobel but just random entries) and apply them to our input.
-      \item Then, a classifier which is generally a feed forward neural net, uses them as input data.
+      \item Then, a classifier which (e.g. a feed forward neural net) uses them as input data.
       \item Filter entries will be adjusted by common gradient descent methods.
     \end{itemize}
   \end{itemize}

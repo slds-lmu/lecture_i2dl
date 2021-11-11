@@ -1,4 +1,4 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -16,9 +16,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{vbframe}{Application - Image Classification}
     \begin{itemize}
-        \item One of use case for the CNNs is image classification.
-        \item There exists a broad variety of network architectures for image classification such as the LeNet, AlexNet, InceptionNet and ResNet which will be discussed in detail in the next lecture.
-        \item All these architectures rely on a set of a sequence of convolutional layers and aim to learn the mapping from an image to a probability score over a set of classes.
+        \item One use case of CNNs is image classification.
+        \item There exists a broad variety of network architectures for image classification such as the LeNet, AlexNet, InceptionNet and ResNet which will be discussed later in detail.
+        \item All these architectures rely on a set of sequences of convolutional layers and aim to learn the mapping from an image to a probability score over a set of classes.
     \end{itemize}
 \framebreak
     \begin{figure}
@@ -44,7 +44,7 @@
   \begin{figure}
         \centering
           \scalebox{0.75}{\includegraphics{figure/cnn_vs_dense_1.png}}
-        \caption{Performance of a CNN and a fully connected neural net ("Dense") on Cifar-10. Both networks have roughly the same number of layers. They were trained using the same learning rate, weight decay and dropout rate. Of course, the CNN performs better because it has less learnable parameters and the right inductive bias for the task.}
+        \caption{Performance of a CNN and a fully connected neural net ("Dense") on Cifar-10. Both networks have roughly the same number of layers. They were trained using the same learning rate, weight decay and dropout rate. The CNN performs better as it has the right inductive bias for this task.}
     \end{figure} 
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,9 +66,9 @@ There are many visual recognition problems that are related to image classificat
     \begin{itemize}
         \item Basic idea (introduced by Zhang et al., 2016):
         \begin{itemize}
-            \item Train the net on pairs of grayscale and coloured images.
-            \item Force it to make a prediction on the colour-value \textbf{for each pixel} in the grayscale input image.
-            \item Combine the grayscale-input with the colour-output to yield a colorized image.
+            \item Train the net on pairs of grayscale and colored images.
+            \item Force it to make a prediction on the color-value \textbf{for each pixel} in the grayscale input image.
+            \item Combine the grayscale-input with the color-output to yield a colorized image.
         \end{itemize}
         \item Very comprehensive material on the method is provided on the author's website. \href{http://richzhang.github.io/colorization/}{\beamergotobutton{Click here}}
             \end{itemize}
@@ -82,13 +82,13 @@ There are many visual recognition problems that are related to image classificat
             \begin{figure}
             \centering
             \includegraphics[width=5cm]{figure/lab.png}
-            \caption{The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and that with the highest softmax-score is taken as predicted color value. The bin is then mapped back to the corresponding, numeric (a,b) values. The network is optimized using a multinomial cross entropy loss over the 313 quantized (a,b) bins.}
+            \caption{The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and the one with the highest softmax score is taken as predicted color value. The bin is then mapped back to the corresponding numeric (a,b) values. The network is optimized using a multinomial cross-entropy loss over the 313 quantized (a,b) bins.}
             \end{figure}
             \framebreak
             \begin{figure}
             \centering
             \includegraphics[width=11.5cm]{figure/color_architecture.png}
-            \caption{The architecture consists of stacked CNN layers which are upsampled towards the end of the net. It makes use of \textit{dilated convolutions} and \textit{upsampling layers} which are explained in the next lecture. The output is a tensor of dimension [64, 64, 313] that stores the 313 probabilities for each element of the final, downsampled 64x64 feature maps.} 
+            \caption{The architecture consists of stacked CNN layers which are upsampled towards the end of the net. It makes use of \textit{dilated convolutions} and \textit{upsampling layers} which will be explained later. The output is a tensor of dimension [64, 64, 313] that stores the 313 probabilities for each element of the final, downsampled 64x64 feature maps.} 
             \end{figure}
             \framebreak
             \begin{figure}
@@ -127,9 +127,9 @@ There are many visual recognition problems that are related to image classificat
             \end{bmatrix}
             \text{and softmax output}
             \begin{bmatrix}
-            P(y = cat| X, \theta)\\
-            P(y = car| X, \theta)\\
-            P(y = frog| X, \theta)
+            P(y = cat| X, \theta)\\
+            P(y = car| X, \theta)\\
+            P(y = frog| X, \theta)
             \end{bmatrix}
             $$
                 \end{itemize}
@@ -192,7 +192,7 @@ The goal of semantic image segmentation is to label each pixel of an image with 
 
 \end{vbframe}
 
-\begin{vbframe}{Semantic Segmentation}
+\begin{vbframe}{Image Captioning}
 
 The goal of image captioning is to convert a given input image into a natural language description.
 
@@ -206,7 +206,7 @@ The goal of image captioning is to convert a given input image into a natural la
   \centering
   \includegraphics[width=.9\linewidth]{figure/example_sample_generation.png}
 \end{minipage}
-\caption\tiny{Caption generation with augmented visual attention by Biswas et al.2020}
+\caption\tiny{Caption generation with augmented visual attention by Biswas et al., 2020}
 \end{figure}
 
 \end{vbframe}
