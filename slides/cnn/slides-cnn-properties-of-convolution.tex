@@ -45,8 +45,8 @@
     %\only<1>{\item ...yields us the first entry of the feature map...}
     %\only<4>{\item ...which is composed of these four connections.}
     \only<2>{\item Similarly...}%$s_{12}$ is composed by these four connections.}
-    \only<3>{\item Similarly...}%$s_{21}$ by these..}
-    \only<4>{\item Similarly...}%{\item and finally $s_{22}$ by these.}
+    \only<3>{\item Similarly...}
+    \only<4>{\item and finally $s_{22}$ by these and in total, we obtain 16 connections!}
     \only<5>{\item Assume we would replicate the architecture with a dense net.}
     \only<6>{\item Each input neuron is connected with each hidden layer neuron.}
     \only<7>{\item In total, we obtain 36 connections!}
@@ -121,10 +121,10 @@
       \item For $m$ inputs and $n$ outputs, a fully connected layer requires $m\times n$ parameters and has $\mathcal{O}(m\times n)$ runtime.
       \item A convolutional layer has limited connections $k<<m$, thus only $k\times n$ parameters and $\mathcal{O}(k\times n)$ runtime.
     \end{itemize}
-    \item But it gets even better:
-    \begin{itemize}
-      \item Less parameters mean less overfitting and better generalization!
-    \end{itemize}
+    \item Less parameters mean less overfitting and better generalization!
+    %\begin{itemize}
+    %  \item Less parameters mean less overfitting and better generalization!
+    %\end{itemize}
   \end{itemize}
 \framebreak
   \begin{itemize}

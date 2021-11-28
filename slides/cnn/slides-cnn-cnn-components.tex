@@ -6,10 +6,11 @@
 \newcommand{\titlefigure}{figure/stride4.png}
 %modify picture
 \newcommand{\learninggoals}{
+  \item Input Channel
   \item Padding
   \item Stride
   \item Pooling
-  \item Input Channel
+
 }
 
 \title{Deep Learning}
@@ -23,6 +24,63 @@
 \lecture{I2DL}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\frametitle{Input Channel}
+
+\begin{vbframe}{Input Channel}
+         \begin{figure}
+    \centering
+    \includegraphics[width=4cm]{figure/gray.png}
+        \caption{\tiny source: Chaitanya Belwal's Blog}
+  \end{figure}
+    \begin{itemize}
+    
+       \item An image consists of the smallest indivisible segments called pixels and every pixel has a strength often known as the pixel intensity. 
+       
+       \item A grayscale image has a single input channel and value of each pixel represents the amount of light.
+       
+       \item Note a grayscale value can lie between 0 to 255, where 0 value corresponds to black and 255 to white.
+       
+       
+    \end{itemize}
+
+\end{vbframe}
+
+\begin{vbframe}
+
+ \begin{figure}
+    \centering
+    \includegraphics[width=7cm]{figure/RGB.jpeg}
+  \end{figure}
+
+ \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{figure/RGB-1.png}
+    \caption{\tiny Image source: Computer Vision Primer: How AI Sees An Imag eKishan Maladkar's Blog)}
+  \end{figure}
+
+\begin{itemize}
+       \item A colored digital image usually comes with three color channels, i.e. the Red-Green-Blue channels, popularly known as the RGB values.   
+        \item Each pixel can be represented by a vector of three numbers (each ranging from 0 to 255) for the three primary color channels.
+\end{itemize}
+
+% \begin{figure}
+%    \centering
+%    \includegraphics[width=5cm]{figure/1channel.png}
+%    \caption{\tiny CNNs takes grayscale image as input.}
+%  \end{figure}
+
+
+% \begin{figure}
+%    \centering
+%    \includegraphics[width=5cm]{figure/3channel.png}
+%    \caption{\tiny CNNs use colored images where each of the Red, Green and Blue (RGB) color spectrums serve as input. (source: Chaitanya Belwal's Blog)}
+%  \end{figure}
+  
+  
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55%%
 
 \begin{frame}{Valid Padding}
 
@@ -133,7 +191,7 @@
 \only<4>{\includegraphics[width=10cm]{figure/avgpool4.png}}%
 
 \begin{itemize}
-\only<1>{\item We've seen how max pooling worked, there are exists other pooling operation such as Avg Pooling, Fractional Pooling, LP Pooling, Wavelet Pooling, Softmax Pooling, Stochastic Pooling, Blur Pooling, Orderable Pooling, Global Average Pooling, and etc.}
+\only<1>{\item We've seen how max pooling worked, there are exists other pooling operation such as avg pooling, fractional pooling, LP pooling, softmax pooling, stochastic pooling, blur pooling, global average pooling, and etc.}
 \only<1>{\item Similar to max pooling, we downsample the feature map but optimally lose no information.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \only<2>{\item Applying the average pooling operation, we simply look for the mean/average value at each spatial location.}
@@ -149,73 +207,26 @@
 
 \begin{vbframe}{Comparison of Max and Average Pooling}
 \begin{itemize}
-\item Avg pooling use all information by sum but Max pooling use only highest value.
-\item In Max-pooling operation details are removed therefore it is suitable for sparse information (Image Classification) and Avg pooling is suitable for dense information (NLP) 
+\item Avg pooling use all information by sum but max pooling use only highest value.
+\item In max pooling operation details are removed therefore it is suitable for sparse information (Image Classification) and avg pooling is suitable for dense information (NLP). 
 \end{itemize}
 \begin{figure}
 \centering
 \includegraphics[width=5cm]{figure/pooling.png}
-\caption{Shortcomings of Max and Average Pooling using Toy Image (photo source: https://iq.opengenus.org/maxpool-vs-avgpool/)}
+\caption{Shortcomings of max and average pooling using Toy Image (photo source: https://iq.opengenus.org/maxpool-vs-avgpool/)}
 \end{figure}
 \end{vbframe}
-\frametitle{Input Channel}
 
-\begin{vbframe}{Input Channel}
-         \begin{figure}
-    \centering
-    \includegraphics[width=4cm]{figure/gray.png}
-  \end{figure}
-    \begin{itemize}
-    
-       \item An image consists of the smallest indivisible segments called pixels and every pixel has a strength often known as the pixel intensity. 
-       
-       \item A grayscale image has a single input channel and value of each pixel represents the amount of light.
-       
-       \item Note a grayscale value can lie between 0 to 255, where 0 value corresponds to black and 255 to white.
-       
-       
-    \end{itemize}
 
-\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \begin{vbframe}
-
- \begin{figure}
-    \centering
-    \includegraphics[width=7cm]{figure/RGB.jpeg}
-  \end{figure}
-
- \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{figure/RGB-1.png}
-    \caption{\tiny Image source: Computer Vision Primer: How AI Sees An Imag eKishan Maladkar's Blog)}
-  \end{figure}
-
-\begin{itemize}
-       \item A colored digital image usually comes with three color channels, i.e. the Red-Green-Blue channels, popularly known as the RGB values.   
-        \item Each pixel can be represented by a vector of three numbers (each ranging from 0 to 255) for the three primary color channels.
-      
-\end{itemize}
- \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{figure/1channel.png}
-    \caption{\tiny CNNs takes grayscale image as input.}
-  \end{figure}
-
 
  \begin{figure}
     \centering
     \includegraphics[width=5cm]{figure/3channel.png}
     \caption{\tiny CNNs use colored images where each of the Red, Green and Blue (RGB) color spectrums serve as input. (source: Chaitanya Belwal's Blog)}
-  \end{figure}
-  
-  
-\end{vbframe}
-\begin{vbframe}
-
- \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{figure/3channel.png}
   \end{figure}
 
 In this CNN:
@@ -253,6 +264,7 @@ O= \frac{I - K + 2.P}{S} + 1&={(4 - 2 + 2.0)\over 2} + 1\\
 \end{align}
 
 \end{vbframe}
+
 
 
 

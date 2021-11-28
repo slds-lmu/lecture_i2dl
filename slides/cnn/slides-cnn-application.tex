@@ -1,4 +1,4 @@
-\input{../../style/preamble}
+\input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -24,23 +24,23 @@
     \begin{figure}
         \centering
         \includegraphics[width=7cm]{figure/recognition.png}
-        \caption{Image classification with Cifar 10: famous benchmark dataset with 60000 images and 10 classes (Alex Krizhevsky (2009)). There is also a much more difficult version with 60000 images and 100 classes.}
+        \caption{Image classification with Cifar-10: famous benchmark dataset with 60000 images and 10 classes (Alex Krizhevsky (2009)). There is also a much more difficult version with 60000 images and 100 classes.}
     \end{figure}
 \framebreak
     \begin{figure}
         \centering
         \includegraphics[width=4cm]{figure/cifar_frog.png}
-        \caption{One example of the Cifar10 data: A highly pixelated, coloured image of a frog with dimension [3, 32, 32]. }
+        \caption{One example of the Cifar-10 data: A highly pixelated, coloured image of a frog with dimension [3, 32, 32]. }
     \end{figure}
 \framebreak
     \begin{figure}
         \centering
           \scalebox{1}{\includegraphics{figure/cifar10_eg.png}}
-        \caption{An example of a CNN architecture for classification on the Cifar10 dataset (FC = Fully Connected). }
+        \caption{An example of a CNN architecture for classification on the Cifar-10 dataset (FC = Fully Connected). }
     \end{figure}  
 \end{vbframe}
 
-\begin{frame} {CNN vs a Fully Connected net on Cifar10}
+\begin{frame} {CNN vs a Fully Connected net on Cifar-10}
   \begin{figure}
         \centering
           \scalebox{0.75}{\includegraphics{figure/cnn_vs_dense_1.png}}
@@ -81,8 +81,8 @@ There are many visual recognition problems that are related to image classificat
             \framebreak
             \begin{figure}
             \centering
-            \includegraphics[width=5cm]{figure/lab.png}
-            \caption{The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and the one with the highest softmax score is taken as predicted color value. The bin is then mapped back to the corresponding numeric (a,b) values. The network is optimized using a multinomial cross-entropy loss over the 313 quantized (a,b) bins.}
+            \includegraphics[width=4cm]{figure/lab.png}
+            \caption{\small The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and the one with the highest softmax score is taken as predicted color value. The bin is then mapped back to the corresponding numeric (a,b) values. The network is optimized using a multinomial cross-entropy loss over the 313 quantized (a,b) bins.}
             \end{figure}
             \framebreak
             \begin{figure}
@@ -201,15 +201,32 @@ The goal of image captioning is to convert a given input image into a natural la
 \begin{minipage}{.65\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{figure/caption_generation.png}
+  \caption\tiny{}
 \end{minipage}%
 \begin{minipage}{.35\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{figure/example_sample_generation.png}
 \end{minipage}
-\caption\tiny{Caption generation with augmented visual attention by Biswas et al., 2020}
+\caption\tiny{ “a group of people riding on top of an elephant”: Caption generation with augmented visual attention by Biswas et al., 2020 }
 \end{figure}
 
 \end{vbframe}
+
+
+\begin{vbframe}{Visual Question Answering}
+
+Visual Question Answering is a research area about building a computer system to answer questions presented in an image and a natural language.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{figure/VQA.png}
+        \caption{Combining CNN/RNN for VQA (source: https://towardsdatascience.com/)}
+    \end{figure}
+
+
+\end{vbframe}
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
