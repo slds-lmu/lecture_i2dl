@@ -112,7 +112,6 @@
 
 \section{Network in Network (NiN)}
 
-%\subsection{NiN Blocks}
 
 \begin{vbframe}{NiN Blocks}
   \begin{itemize}
@@ -129,6 +128,42 @@
 
 \end{vbframe}
 
+
+\begin{vbframe}{Global average pooling}
+    \begin{itemize}
+        \item Problem setting: tackle overfitting in the final fully connected layer.
+        \begin{itemize}
+        \item Classic pooling removes spatial information and is mainly used for dimension and parameter reduction.
+        \item The elements of the final feature maps are connected to the output layer via a dense layer. This could require a huge number of weights increasing the danger of overfitting.
+        \item Example: 256 feature maps of dim 100x100 connected to 10 output neurons lead to $256\times 10^5$ weights for the final dense layer.
+        \end{itemize}
+        
+
+\framebreak 
+
+        \item Solution: 
+        \begin{itemize}
+            \item Average each final feature map to the element of one global average pooling (GAP) vector.
+            \item Example: 256 feature maps are now reduced to GAP-vector of length 256 yielding a final dense layer with 2560 weights.
+        \end{itemize}
+    \end{itemize}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=8cm]{plots/moderncnn/GAP.png}
+        \small{\caption{An Example of Fully Connected Layer VS Global Average Pooling Layer}}
+    \end{figure}
+
+\framebreak
+
+    \begin{itemize}
+        \item GAP preserves whole information from the single feature maps whilst decreasing the dimension.
+        \item Mitigates the possibly \textbf{destructive} effect of pooling.
+        \item Each element of the GAP output represents the activation of a certain feature on the input data.
+        \item Acts as an additional regularizer on the final fully connected layer.
+    \end{itemize}
+
+\end{vbframe}
 
 
 \begin{vbframe}{Network in Network (NiN)}
