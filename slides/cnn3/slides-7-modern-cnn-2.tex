@@ -67,8 +67,19 @@
 %\subsection{Residual Block}
 
 \begin{vbframe}{Residual Block (Skip connections)}
+
+Problem setting: theoretically, we could build infinitely deep architectures as the net should learn to pick the beneficial layers and skip those that do not improve the performance automatically.
+
+ \begin{figure}
+  \centering
+    \includegraphics[width=8cm]{plots/moderncnn/resnet_problem.png}
+    \tiny{\\ credit : D2DL}
+    \caption{For non-nested function classes, a larger function class does not guarantee to get closer to the “truth” function ($\mathcal{F}*$). This does not happen in nested function classes.}
+  \end{figure}
+
+
+
     \begin{itemize}
-        \item Problem setting: theoretically, we could build infinitely deep architectures as the net should learn to pick the beneficial layers and skip those that do not improve the performance automatically.
         \item But: this skipping would imply learning an identity mapping $\xv = \mathcal{F}(\xv)$. It is very hard for a neural net to learn such a 1:1 mapping through the many non-linear activations in the architecture.
         \item Solution: offer the model explicitly the opportunity to skip certain layers if they are not useful.
         \item Introduced in \textit{He et. al , 2015} and motivated by the observation that stacking evermore layers increases the test- as well as the train-error ($\neq$ overfitting).

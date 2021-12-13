@@ -118,15 +118,20 @@ $\to$ Convolve the data with a 1D-kernel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{vbframe}{Advantages of 1D Convolutions}
-A few advantages of $1 \times 1$ convolutions are:
-   \begin{itemize}
-     \item Dimensionality reduction for efficient computations
-     \item Efficient low dimensional embedding, or feature pooling     
-     \item Applying nonlinearity again after convolution
-     \end{itemize}
-The first two advantages can be observed in the previous examples. After 1 $\times$ 1 convolution, we significantly reduce the dimension depth-wise. Say if the original input has 200 channels, the 1  $\times$ 1 convolution will embed these channels (features) into a single channel. 
 
-The third advantage comes in as after the 1  $\times$ 1 convolution, non-linear activation such as ReLU can be added. The non-linearity allows the network to learn more complex function.
+For certain applications 1D CNNs are advantageous and thus preferable to their 2D counterparts:
+
+   \begin{itemize}
+     \item Computational complexity: Forward propagation and backward propagation in 1D CNNs require simple array operations. 
+     \item Training is easier: Recent studies show that 1D CNNs with relatively shallow architectures are able to learn challenging tasks involving 1D signals.
+     \item Hardware: Usually, training deep 2D CNNs requires special hardware setup (e.g. Cloud computing). However, any CPU implementation over a standard computer is feasible and relatively fast for training compact 1D CNNs.
+     \item Application: Due to their low computational requirements, compact 1D CNNs are well-suited for real-time and low-cost applications especially on mobile or hand-held devices.
+
+     \end{itemize}
+
+%The first two advantages can be observed in the previous examples. After 1 $\times$ 1 convolution, we significantly reduce the dimension depth-wise. Say if the original input has 200 channels, the 1  $\times$ 1 convolution will embed these channels (features) into a single channel. 
+
+%The third advantage comes in as after the 1  $\times$ 1 convolution, non-linear activation such as ReLU can be added. The non-linearity allows the network to learn more complex function.
 
 \end{vbframe}
 
