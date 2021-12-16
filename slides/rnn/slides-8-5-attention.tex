@@ -1,0 +1,226 @@
+
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\newcommand{\titlefigure}{plots/attention3.png}
+%modify picture
+\newcommand{\learninggoals}{
+  \item Attention
+  \item Transformers
+  \item RNN vs CNN
+}
+
+\title{Deep Learning}
+\date{}
+
+
+
+\begin{document}
+
+\lecturechapter{Attention and Transformers}
+\lecture{I2DL}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Attention}
+
+\begin{vbframe}{Attention}
+  \begin{itemize}
+    \item In a classical decoder-encoder RNN all information about the input sequence must be incorporated into the final hidden state, which is then passed as an input to the decoder network.
+    \item With a long input sequence this fixed-sized context vector is unlikely to capture all relevant information about the past.
+      \item Each hidden state contains mostly information from recent inputs. 
+      %In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
+      \item Key idea: Allow the decoder to access all the hidden states of the encoder (instead of just the final one) so that it can dynamically decide which ones are relevant at each time-step of the decoding process.
+      \item This means the decoder can choose to "focus" on different hidden states (of the encoder) at different time-steps of the decoding process similar to how the human eye can focus on different regions of the visual field.
+      \item This is known as an \textbf{attention mechanism}.
+   \end{itemize}
+   
+   \framebreak
+   
+   \begin{itemize}
+      \item The attention mechanism is implemented by an additional component in the decoder.
+      \item For example, this can be a simple single-hidden layer feed-forward neural network which is trained along with the RNN.
+      \item At any given time-step $i$ of the decoding process, the network computes the relevance of encoder state $\bm{z}^{[j]}$ as:
+            $$ rel(\bm{z}^{[j]})^{[i]} = \bm{v}_a^\top \text{tanh} (\bm{W}_a[\bm{g}^{[i-1]};\bm{z}^{[j]}]) $$
+            where $\bm{v}_a$ and $\bm{W}_a$ are the parameters of the feed-forward network, $\bm{g}^{[i-1]}$ is the decoder state from the previous time-step and ';' indicates concatenation.
+      %\item $v_a$ and $W_a$ are also learned through backpropagation.
+      \item The relevance scores (for all the encoder hidden states) are then normalized which gives the \textit{attention weights} $(\alpha^{[j]})^{[i]}$:      
+        $$ (\alpha^{[j]})^{[i]} = \frac{\exp (rel(\bm{z}^{[j]})^{[i]})}{\sum_{j'} \exp(rel(\bm{z}^{[j']})^{[i]})} $$
+   \end{itemize}
+   
+   \framebreak
+   
+   \begin{itemize}  
+    \item The attention mechanism allows the decoder network to focus on different parts of the input sequence by adding connections from all hidden states of the encoder to each hidden state of the decoder.
+  %  \item At each point in time, a set of weights is computed which determine how to combine the hidden states of the encoder into a context vector $c_i$, which holds the necessary information to predict the correct output.
+ %   \item Each hidden state contains mostly information from recent inputs. In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
+  \end{itemize}
+ \begin{figure}
+    \includegraphics[width=4.cm]{figure/seq2seq_3.png}
+    \caption{Attention at $i=t+1$}
+  \end{figure}
+ 
+\framebreak
+\begin{itemize}  
+   % \item An \textbf{attention mechanism} allows the decoder network to focus on different parts of the input sequence by adding connections from all hidden states of the encoder to each hidden state of the decoder
+    \item At each time step $i$, a set of weights $(\alpha^{[j]})^{[i]}$ is computed which determine how to combine the hidden states of the encoder into a context vector $c^{[i]}= \sum_{j=1}^{n_x} (\alpha^{[j]})^{[i]} \bm{z}^{[j]}$, which holds the necessary information to predict the correct output.
+ %   \item Each hidden state contains mostly information from recent inputs. In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
+  \end{itemize}
+  \begin{figure}
+    \includegraphics[width=4.cm]{figure/seq2seq_4.png}
+    \caption{Attention at $i=t+2$}
+  \end{figure}
+  
+\framebreak
+  
+  \lz
+  \lz
+  \begin{figure}
+    \centering
+    \scalebox{0.9}{\includegraphics{plots/attention_example.png}}
+    \tiny{\\Credit: Gabriel Loye}
+    \caption{\footnotesize An illustration of a machine translation task using an encoder-decoder model with an attention mechanism. The attention weights at each time-step of the decoding/translation process indicate which parts of the input sequence are most relevant. (There are 4 attention weights because there are 4 encoder states.)}
+  \end{figure}
+  
+  
+\end{vbframe}
+
+\frame{
+\frametitle{Attention}
+  \begin{figure}
+    \includegraphics[width=5cm]{plots/attention3.png}
+    \caption{Attention for image captioning: the attention mechanism tells the network roughly which pixels to pay attention to when writing the text (Kelvin Xu al. 2015)}
+  \end{figure}
+}
+
+\begin{vbframe}{Transformers}
+  \begin{itemize}
+    \item Advanced RNNs have similar limitations as vanilla RNN network.
+    \begin{itemize}
+      \item Lack of parallelization, RNNs process the input data sequentially, as the output of a step depends on the output of the previous step.
+     \item Difficulties in learning long term dependency, Although GRU or LSTM perform superior compared to vanilla RNN, even they struggle to remember the context from a word which stands much earlier in long sequences.
+    \end{itemize}
+    \item These challenges are successfully tackled by transformer networks.
+    
+    \framebreak
+    
+    \item Transformers are solely based on attention (no RNN or CNN).
+    \item In fact, the paper which coined the term \textit{transformer} is called \textit{Attention is all you need}.
+    \item They are the state-of-the-art networks in natural language processing (NLP) tasks since 2017.
+    \item Transformer architectures like BERT (Bidirectional Encoder Representations from Transformers, 2018) and GPT-3 (Generative Pre-trained Transformer-3, 2020) are pre-trained in a large text and can be fine-tuned (quickly adapt) to specific language tasks.
+  \end{itemize}
+\end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{CNNs or RNNs?}
+
+\begin{frame} {CNNs or RNNs?}
+  \begin{itemize}
+    \item Historically, RNNs were the default models used in sequence processing tasks.
+    \item However, some families of CNNs (especially those based on Fully Convolutional Networks (FCNs)) \textit{can} be used to process variable-length sequences such as text or time-series data.
+    \item If a CNN doesn't contain any fully-connected layers, the total number of weights in the network is independent of the spatial dimensions of the input because of weight-sharing in the convolutional layers.
+    \item Recent research [Bai et al. , 2018] indicates that such convolutional architectures (which the authors term Temporal Convolutional Networks (TCNs)) can outperform RNNs on a wide range of tasks.
+    \item A major advantage of TCNs is that the entire input sequence can be fed to the network at once (as opposed to sequentially).
+    % \item Surprisingly, the TCNs can model long-range dependencies in the inputs even better than recurrent architectures!
+  \end{itemize}
+\end{frame}
+
+\begin{frame} {CNNs or RNNs?}
+  \begin{figure}
+      \centering
+      \scalebox{1}{\includegraphics{plots/tcn2.png}}
+      \caption{\footnotesize{A TCN (we have already seen this in the CNN lecture!) is simply a variant of the one-dimensional FCN which uses a special type of dilated convolutions called \textbf{causal dilated} convolutions.}}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame} {CNNs or RNNs?}
+  \begin{figure}
+      \centering
+      \scalebox{1}{\includegraphics{plots/tcn1.png}}
+      \caption{\footnotesize{Evaluation of TCNs and recurrent architectures on a wide range of sequence modelling tasks. $^h$ means higher is better and ${}^\ell$~ means lower is better. Note: To make the comparisons fair, all models have roughly the same size (for a given task) and the authors used grid search to find good hyperparameters for the recurrent architectures.}}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item RNNs are specifically designed to process sequences of varying lengths. 
+\item  For that recurrent connections are introduced into the network structure.
+\item The gradient is calculated by backpropagation through time.
+\item  An LSTM replaces the  simple hidden neuron by a complex system consisting of cell state, and forget, input, and output gates.
+\item An RNN can be used as a language model, which can be improved by word-embeddings.
+\item Different advanced types of RNNs exist, like Encoder-Decoder architectures and bidirectional RNNs.$^1$
+\end{itemize}
+
+\vspace{8mm}
+\tiny{1. A bidirectional RNN processes the input sequence in both directions (front-to-back and back-to-front).}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Oriol Vinyals et al., 2014]{2} Oriol Vinyals, Alexander Toshev, Samy Bengio and Dumitru Erhan (2014)
+\newblock Show and Tell: A Neural Image Caption Generator
+\newblock \emph{\url{https://arxiv.org/abs/1411.4555}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Alex Graves, 2013]{3} Alex Graves (2013)
+\newblock Generating Sequences With Recurrent Neural Networks
+\newblock \emph{\url{https://arxiv.org/abs/1308.0850}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Namrata Anand and Prateek Verma, 2016]{4} Namrata Anand and Prateek Verma (2016)
+\newblock Convolutional and recurrent nets for detecting emotion from audio data
+\newblock \emph{\url{http://cs231n.stanford.edu/reports/2015/pdfs/Cs_231n_paper.pdf}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Gabriel Loye, 2019]{5} Gabriel Loye (2019)
+\newblock Attention Mechanism
+\newblock \emph{\url{https://blog.floydhub.com/attention-mechanism/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Andrew Owens et al., 2016]{6} Andrew Owens, Phillip Isola, Josh H. McDermott, Antonio Torralba, Edward H. Adelson and  William T. Freeman (2015)
+\newblock Visually Indicated Sounds
+\newblock \emph{\url{https://arxiv.org/abs/1512.08512}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Andrej Karpathy., 2015]{7} Andrej Karpathy (2015)
+\newblock The Unreasonable Effectiveness of Recurrent Neural Networks
+\newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
+% \bibitem[Devlin et al., 2018]{7} Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova (2018)
+% \newblock BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+% \newblock \emph{\url{https://arxiv.org/abs/1810.04805}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Kelvin Xu al., 2016]{8} Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron C. Courville, Ruslan Salakhutdinov, Richard S. Zemel and  Yoshua Bengio (2015)
+\newblock Show, Attend and Tell: Neural Image Caption Generation with Visual Attention
+\newblock \emph{\url{https://arxiv.org/abs/1502.03044}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Bai et al., 2018]{9} Shaojie Bai, J. Zico Kolter, Vladlen Koltun (2018)
+\newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
+\newblock \emph{\url{https://arxiv.org/abs/1803.01271}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Weng 2018]{10} Lilian Weng (2018)
+\newblock Attention? Attention!
+\newblock \emph{\url{https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\endlecture
+\end{document}
