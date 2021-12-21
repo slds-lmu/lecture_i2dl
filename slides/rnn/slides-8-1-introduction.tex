@@ -121,7 +121,7 @@
 \begin{frame} {RNNs - Introduction}
   \begin{itemize}
     \item Our goal is to feed the words to the network sequentially in discrete time-steps.
-    \item A regular dense neural network with a single hidden layer only has two sets of weights: 'input-to-hidden' weights $\bm{W}$ and 'hidden-to- output' weights $\bm{U}$.
+    \item A regular dense neural network with a single hidden layer only has two sets of weights: 'input-to-hidden' weights $\mathbf{W}$ and 'hidden-to- output' weights $\mathbf{U}$.
   \end{itemize}
   \begin{figure}
       \centering
@@ -131,24 +131,24 @@
 
 \begin{frame} {RNNs - Introduction}
   \begin{itemize}
-    \item \small{In order to enable the network to retain information about past inputs, we introduce an \textbf{additional set of weights} $\bm{V}$, from the hidden neurons at time-step $t$ to the hidden neurons at time-step $t+1$.
+    \item \small{In order to enable the network to retain information about past inputs, we introduce an \textbf{additional set of weights} $\mathbf{V}$, from the hidden neurons at time-step $t$ to the hidden neurons at time-step $t+1$.
     \item Having this additional set of weights makes the activations of the hidden layer depend on \textbf{both} the current input and the activations for the \textit{previous} input.}
   \end{itemize}
   \begin{figure}
       \centering
       \scalebox{0.80}{\includegraphics{figure/hidrohid.png}}
-      \caption{\footnotesize Input-to-hidden weights $\bm{W}$ and \textbf{hidden-to-hidden} weights $\bm{V}$. The hidden-to-output weights $\bm{U}$ are not shown for better readability.}
+      \caption{\footnotesize Input-to-hidden weights $\mathbf{W}$ and \textbf{hidden-to-hidden} weights $\mathbf{V}$. The hidden-to-output weights $\mathbf{U}$ are not shown for better readability.}
   \end{figure}
 \end{frame}
 
 \begin{frame} {RNNs - Introduction}
   \begin{itemize}
-    \item With this additional set of hidden-to-hidden weights $\bm{V}$, the network is now a Recurrent Neural Network (RNN).
-    \item In a regular feed-forward network, the activations of the hidden layer are only computed using the input-hidden weights $\bm{W}$ (and bias $\bm{b}$).
-    $$\bm{z}= \sigma(\bm{W}^\top \xv + \bm{b})$$
-    \item In an RNN, the activations of the hidden layer (at time-step $t$) are computed using \textit{both} the input-to-hidden weights $W$ and the hidden-to-hidden weights $\bm{V}$.
-    $$\bm{z}^{[t]} = \sigma(\mathbf{\textcolor{red}{\bm{V}^\top\bm{z}^{[t-1]}}} + \bm{W}^\top \bm{x}^{[t]} + \bm{b})$$
-    \item The vector $\bm{z}^{[t]}$ represents the short-term memory of the RNN because it is a function of the current input $\bm{x}^{[t]}$ and the activations $\bm{z}^{[t-1]}$ of the previous time-step.
+    \item With this additional set of hidden-to-hidden weights $\mathbf{V}$, the network is now a Recurrent Neural Network (RNN).
+    \item In a regular feed-forward network, the activations of the hidden layer are only computed using the input-hidden weights $\mathbf{W}$ (and bias $\mathbf{b}$).
+    $$\mathbf{z}= \sigma(\mathbf{W}^\top \xv + \mathbf{b})$$
+    \item In an RNN, the activations of the hidden layer (at time-step $t$) are computed using \textit{both} the input-to-hidden weights $W$ and the hidden-to-hidden weights $\mathbf{V}$.
+    $$\mathbf{z}^{[t]} = \sigma(\mathbf{\textcolor{red}{\mathbf{V}^\top\mathbf{z}^{[t-1]}}} + \mathbf{W}^\top \mathbf{x}^{[t]} + \mathbf{b})$$
+    \item The vector $\mathbf{z}^{[t]}$ represents the short-term memory of the RNN because it is a function of the current input $\mathbf{x}^{[t]}$ and the activations $\mathbf{z}^{[t-1]}$ of the previous time-step.
     \item Therefore, by recurrence, it contains a "summary" of \textit{all} previous inputs. 
   \end{itemize}
 \end{frame}
@@ -158,8 +158,8 @@
 
 \begin{frame} {Application example - Sentiment Analysis}
   \begin{itemize}
-    \item At $t = 0$, we feed the word "This" to the network and obtain $\bm{z}^{[0]}$.
-    \item $\bm{z}^{[0]} = \sigma(\bm{W}^\top \bm{x}^{[0]} + \bm{b})$
+    \item At $t = 0$, we feed the word "This" to the network and obtain $\mathbf{z}^{[0]}$.
+    \item $\mathbf{z}^{[0]} = \sigma(\mathbf{W}^\top \mathbf{x}^{[0]} + \mathbf{b})$
   \end{itemize}
   \begin{figure}
       \centering
@@ -170,8 +170,8 @@
 
 \begin{frame} {Application example - Sentiment Analysis}
   \begin{itemize}
-    \item At $t = 1$, we feed the second word to the network to obtain $\bm{z}^{[1]}$.
-    \item $\bm{z}^{[1]} = \sigma(\bm{V}^\top\textcolor{red}{\bm{z}^{[0]}} + \bm{W}^\top \xv^{[1]} + \bm{b})$
+    \item At $t = 1$, we feed the second word to the network to obtain $\mathbf{z}^{[1]}$.
+    \item $\mathbf{z}^{[1]} = \sigma(\mathbf{V}^\top\textcolor{red}{\mathbf{z}^{[0]}} + \mathbf{W}^\top \xv^{[1]} + \mathbf{b})$
   \end{itemize}
   \begin{figure}
       \centering
@@ -182,7 +182,7 @@
 \begin{frame} {Application example - Sentiment Analysis}
   \begin{itemize}
     \item At $t = 2$, we feed the next word in the sentence.
-    \item $\bm{z}^{[2]} = \sigma(\bm{V}^\top\textcolor{red}{\bm{z}^{[1]}} + \bm{W}^\top \xv^{[2]} + \bm{b})$
+    \item $\mathbf{z}^{[2]} = \sigma(\mathbf{V}^\top\textcolor{red}{\mathbf{z}^{[1]}} + \mathbf{W}^\top \xv^{[2]} + \mathbf{b})$
   \end{itemize}
   \begin{figure}
       \centering
@@ -193,7 +193,7 @@
 \begin{frame} {Application example - Sentiment Analysis}
   \begin{itemize}
     \item At $t = 3$, we feed the next word ("news") in the sentence.
-    \item $\bm{z}^{[3]} = \sigma(\bm{V}^\top\textcolor{red}{\bm{z}^{[2]}} + \bm{W}^\top \xv^{[3]} + \bm{b})$
+    \item $\mathbf{z}^{[3]} = \sigma(\mathbf{V}^\top\textcolor{red}{\mathbf{z}^{[2]}} + \mathbf{W}^\top \xv^{[3]} + \mathbf{b})$
   \end{itemize}
   \begin{figure}
       \centering
@@ -204,7 +204,7 @@
 \begin{frame} {Application example - Sentiment Analysis}
   \begin{itemize}
     \item Once the entire input sequence has been processed, the prediction of the network can be generated by feeding the activations of the final time-step to the output neuron(s).
-    \item $f = \sigma (\bm{U}^\top \bm{z}^{[4]} + {c})$, where $c$ is the bias of the output neuron.
+    \item $f = \sigma (\mathbf{U}^\top \mathbf{z}^{[4]} + {c})$, where $c$ is the bias of the output neuron.
   \end{itemize}
   \begin{figure}
       \centering
@@ -215,7 +215,7 @@
 \begin{frame} {Parameter Sharing}
   \begin{itemize}
     \item This way, the network can process the sentence one word at a time and the length of the network can vary based on the length of the sequence.
-    \item It is important to note that no matter how long the input sequence is, the matrices $\bm{W}$ and $\bm{V}$ are the same in every time-step. This is another example of \textbf{parameter sharing}.
+    \item It is important to note that no matter how long the input sequence is, the matrices $\mathbf{W}$ and $\mathbf{V}$ are the same in every time-step. This is another example of \textbf{parameter sharing}.
     \item Therefore, the number of weights in the network is independent of the length of the input sequence.
   \end{itemize}
 \end{frame}
@@ -286,15 +286,15 @@
     \only<2>{\item A helpful way to think of an RNN is as multiple copies of the same network, each passing a message to a successor.}
     \only<2>{\item RNNs are networks with loops, allowing information to persist.}
     \only<3>{\item Things might become more clear if we unfold the architecture.}
-    \only<3>{\item We call $\bm{z}^{[t]}$ the \textit{state} of the system at time $t$.}
+    \only<3>{\item We call $\mathbf{z}^{[t]}$ the \textit{state} of the system at time $t$.}
     \only<3>{\item Tthe state contains information about the whole past sequence.}
     \only<4>{\item We went from 
       \begin{eqnarray*} 
-        f &=& \tau(c + \bm{U}^\top \sigma(\bm{b} + \bm{W}^\top \bm{x})) \text{ for the dense net, to } \\
-        f^{[t]} &=& \tau(c + \bm{U}^\top \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})) \text{ for the RNN. }
+        f &=& \tau(c + \mathbf{U}^\top \sigma(\mathbf{b} + \mathbf{W}^\top \mathbf{x})) \text{ for the dense net, to } \\
+        f^{[t]} &=& \tau(c + \mathbf{U}^\top \sigma(\mathbf{b} + \mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]})) \text{ for the RNN. }
       \end{eqnarray*}}
     \only<5>{\item A potential computational graph for time-step $t$ with}
-    \only<5>{\item[] $$f^{[t]} = \tau(c + \bm{U}^\top \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})) $$ }
+    \only<5>{\item[] $$f^{[t]} = \tau(c + \mathbf{U}^\top \sigma(\mathbf{b} + \mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]})) $$ }
   \end{itemize}
 }
 

@@ -42,7 +42,7 @@
     %\item For training the RNN we need to compute $\frac{d L}{d u_{i,j}}$, $\frac{d L}{d v_{i,j}}$, and $\frac{d L}{d w_{i,j}}$.
     %\item To do so, during backpropagation at time step $t$ %for an arbitrary RNN, 
     %we may need to compute
-    $$\frac{d L}{d \bm{z}^{[1]}} = \frac{d L}{d \bm{z}^{[t]}} \frac{d \bm{z}^{[t]}}{d \bm{z}^{[t-1]}} \dots \frac{d \bm{z}^{[2]}}{d \bm{z}^{[1]}}$$
+    $$\frac{d L}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}}$$
 
   %\end{itemize}
 
@@ -133,18 +133,18 @@
 \begin{vbframe}{Long-Term Dependencies}
   
   \begin{itemize}
-    \item Here, $\bm{z}^{[t]} = \sigma(\bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]} + \bm{b})$
+    \item Here, $\mathbf{z}^{[t]} = \sigma(\mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]} + \mathbf{b})$
     \item It follows that:
-    $$ \frac{d \bm{z}^{[t]}}{d\bm{z}^{[t-1]}} = \text{diag}(\sigma' (\bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]} + \bm{b})) \bm{V}^\top = \bm{D}^{[t-1]} \bm{V}^\top $$
-    $$ \frac{d \bm{z}^{[t-1]}}{d\bm{z}^{[t-2]}} = \text{diag}(\sigma' (\bm{V}^\top \bm{z}^{[t-2]} + \bm{W}^\top \xv^{[t-1]} + \bm{b})) \bm{V}^\top= \bm{D}^{[t-2]} \bm{V}^\top $$
+    $$ \frac{d \mathbf{z}^{[t]}}{d\mathbf{z}^{[t-1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]} + \mathbf{b})) \mathbf{V}^\top = \mathbf{D}^{[t-1]} \mathbf{V}^\top $$
+    $$ \frac{d \mathbf{z}^{[t-1]}}{d\mathbf{z}^{[t-2]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[t-2]} + \mathbf{W}^\top \xv^{[t-1]} + \mathbf{b})) \mathbf{V}^\top= \mathbf{D}^{[t-2]} \mathbf{V}^\top $$
     $$ \vdots $$
-    $$ \frac{d \bm{z}^{[2]}}{d\bm{z}^{[1]}} = \text{diag}(\sigma' (\bm{V}^\top \bm{z}^{[1]} + \bm{W}^\top \xv^{[2]} + \bm{b})) \bm{V}^\top = \bm{D}^{[1]} \bm{V}^\top $$
+    $$ \frac{d \mathbf{z}^{[2]}}{d\mathbf{z}^{[1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[1]} + \mathbf{W}^\top \xv^{[2]} + \mathbf{b})) \mathbf{V}^\top = \mathbf{D}^{[1]} \mathbf{V}^\top $$
     
-    $$ \frac{d L}{d \bm{z}¸^{[1]}} = \frac{d L}{d \bm{z}^{[t]}} \frac{d \bm{z}^{[t]}}{d \bm{z}^{[t-1]}} \dots \frac{d \bm{z}^{[2]}}{d \bm{z}^{[1]}} = \bm{D}^{[t-1]} \bm{D}^{[t-2]}   \text{ . . . } \bm{D}^{[1]} (\bm{V}^\top)^{t-1}$$
-%    $$ \frac{d \bm{z}^{[1]}}{d\bm{x}^{[1]}} = \text{diag}(\sigma' (\bm{V}^\top \bm{z}^{[0]} + \bm{W}^\top \xv^{[1]} + \bm{b})) \bm{W}^\top$$
-    \item In general, for an arbitrary time-step $i<t$ in the past, $\frac{d\bm{z}^{[t]}}{d\bm{z}^{[i]}}$ will contain the term $(\bm{V}^\top)^{t-i}$ (this follows from the chain rule).
-    \item Based on the largest eigenvalue of $\bm{V}^\top$, the presence of the term $(\bm{V}^\top)^{t-i}$ can either result in vanishing or exploding gradients.
-    \item This problem is quite severe for RNNs (as compared to feedforward networks) because the \textbf{same} matrix $\bm{V}^\top$ is multiplied several times. \href{https://tinyurl.com/vangrad}{\beamergotobutton{Click here}}
+    $$ \frac{d L}{d \mathbf{z}¸^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}} = \mathbf{D}^{[t-1]} \mathbf{D}^{[t-2]}   \text{ . . . } \mathbf{D}^{[1]} (\mathbf{V}^\top)^{t-1}$$
+%    $$ \frac{d \mathbf{z}^{[1]}}{d\mathbf{x}^{[1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[0]} + \mathbf{W}^\top \xv^{[1]} + \mathbf{b})) \mathbf{W}^\top$$
+    \item In general, for an arbitrary time-step $i<t$ in the past, $\frac{d\mathbf{z}^{[t]}}{d\mathbf{z}^{[i]}}$ will contain the term $(\mathbf{V}^\top)^{t-i}$ (this follows from the chain rule).
+    \item Based on the largest eigenvalue of $\mathbf{V}^\top$, the presence of the term $(\mathbf{V}^\top)^{t-i}$ can either result in vanishing or exploding gradients.
+    \item This problem is quite severe for RNNs (as compared to feedforward networks) because the \textbf{same} matrix $\mathbf{V}^\top$ is multiplied several times. \href{https://tinyurl.com/vangrad}{\beamergotobutton{Click here}}
     \item As the gap between $t$ and $i$ increases, the instability worsens.
     \item It is thus quite challenging for RNNs to learn long-term dependencies. The gradients either \textbf{vanish} (most of the time) or \textbf{explode} (rarely, but with much damage to the optimization).
     \item That happens simply because we propagate errors over very many stages backwards.
