@@ -8,9 +8,9 @@
 \newcommand{\titlefigure}{figure/rnn_sample_z5.png}
 %modify picture
 \newcommand{\learninggoals}{
-  \item Motivation
-  \item Introduction
-  \item Computational Graph
+  \item Why do we need them?
+  \item How do they work?
+  \item Computational Graph o Recurrent Networks
 }
 
 \title{Deep Learning}
@@ -26,14 +26,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame} {Motivation for RNNs}
+\begin{frame} {Motivation for Recurrent Networks}
   \begin{itemize}
-    \item The two major types of neural network architectures that we've seen so far are fully-connected networks and Convolutional Neural Networks (CNNs).
-    \item In both cases, the input layers have a fixed size and, therefore, these networks can (typically) only handle fixed-length inputs.
-    \item The primary reason for this is that it is not possible to vary the size of the input layer without also varying the number of learnable parameters/weights in the network.
-    \item In many cases, we would like to feed \textbf{variable length inputs} to the network.
-    \item Common examples of this are \textbf{sequence data} such as time-series, audio and text.
-    \item Therefore, we need a new class of neural network architectures that are able to handle such variable length inputs: \textbf{Recurrent Neural Networks (RNNs)}.
+    \item The two types of neural network architectures that we've seen so far are fully-connected networks and CNNs.
+    \item Their input layers have a fixed size and (typically) only handle fixed-length inputs.
+    \item The primary reason: if we vary the size of the input layer, we would also have to vary the number of learnable weights in the network.
+    \item This in particular relates to \textbf{sequence data} such as time-series, audio and text.
+    \item \textbf{Recurrent Neural Networks (RNNs)} is a class of architectures that allows varying input lengths and properly accounts for the ordering in sequence data.
   \end{itemize}
 \end{frame}
 
@@ -87,7 +86,7 @@
   \begin{figure}
       \centering
       \scalebox{0.6}{\includegraphics{figure/ffwd.png}}
-      \caption{\footnotesize{Two equivalent visualizations of a dense net with a single hidden layer.}}
+      \caption{\footnotesize{Two equivalent visualizations of a dense net with a single hidden layer, where the left is more abstract showing the network on a layer point-of-view.}}
   \end{figure}
 \end{frame}
 
@@ -105,7 +104,7 @@
 \begin{frame} {RNNs - Introduction}
   \begin{itemize}
    \item %It's important to note that 
-    When words in a sentence are fed to the network one at a time, the inputs are no longer independent. For example, it is much more likely that the word "good" is followed by "morning" rather than "plastic". \textbf{We need to model this (long-term) dependence.} 
+    When words in a sentence are fed to the network one at a time, the inputs are no longer independent. It is much more likely that the word "good" is followed by "morning" rather than "plastic". Hence, we also need to model this \textbf{(long-term) dependency}. 
     \item %Even though we've decided to feed a single word at a time, 
     Each word must still be encoded as a fixed-length vector because the size of the input layer will remain fixed.
     \item Here, for the sake of the visualization, each word is represented as a 'one-hot coded' vector of length 5. (<eos> = 'end of sequence')
@@ -113,7 +112,7 @@
       \centering
       \scalebox{0.55}{\includegraphics{figure/one_hot_1.png}}
   \end{figure}
-    (The standard approach is to use word embeddings (more on this later)).
+    While this is one option to represent words in a network, the standard approach are word embeddings (more on this later).
   \end{itemize}
 \end{frame}
 
@@ -136,7 +135,7 @@
   \begin{figure}
       \centering
       \scalebox{0.80}{\includegraphics{figure/hidrohid.png}}
-      \caption{\footnotesize Input-to-hidden weights $\bm{W}$ and \textbf{hidden-to-hidden} weights $\bm{V}$. The hidden-to-output weights $\bm{U}$ are not shown in the figure.}
+      \caption{\footnotesize Input-to-hidden weights $\bm{W}$ and \textbf{hidden-to-hidden} weights $\bm{V}$. The hidden-to-output weights $\bm{U}$ are not shown for better readability.}
   \end{figure}
 \end{frame}
 
@@ -152,7 +151,7 @@
   \end{itemize}
 \end{frame}
 
-
+\section{Examples}
 
 
 \begin{frame} {Application example - Sentiment Analysis}
@@ -219,25 +218,25 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame} {Sequence Modeling - Design Criteria}
-
-To model sequence we need to:
-
-
-  \begin{itemize}
-    \item Handle variable-length sequence,
-    \item Track long-term dependencies,
-    \item Maintain information about order,
-    \item Share parameter across the sequence.
-  \end{itemize}
-
-  \begin{figure}
-      \centering
-      \scalebox{0.2}{\includegraphics{figure/vanilla_rnn.png}}
-      \caption{\footnotesize {Vanilla RNN}}
-  \end{figure}
-
-\end{frame}
+%\begin{frame} {Sequence Modeling - Design Criteria}
+%
+%To model sequences we need to:
+%
+%
+%  \begin{itemize}
+%    \item Handle variable-length sequence,
+%    \item Track long-term dependencies,
+%    \item Maintain information about order,
+%    \item Share parameter across the sequence.
+%  \end{itemize}
+%
+%  \begin{figure}
+%      \centering
+%      \scalebox{0.2}{\includegraphics{figure/vanilla_rnn.png}}
+%      \caption{\footnotesize {Vanilla RNN}}
+%  \end{figure}
+%
+%\end{frame}
 
 \begin{frame} {RNNs - Use Case specific architectures}
 
@@ -260,7 +259,7 @@ To model sequence we need to:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\section{RNNs - Computational Graph}
+\section{Computational Graph}
 
 \frame{
 \frametitle{RNNs - Computational Graph}
@@ -274,7 +273,7 @@ To model sequence we need to:
   \end{figure}%
   \vspace{-0.2cm}
   \begin{itemize}
-    \only<1>{\item On the left is the computational graph for the dense net on the right. A loss function $L$ measures how far each output
+    \only<1>{\item On the left is an abstract representation of the computational graph for the network on the right. A loss function $L$ measures how far each output
     $f$ is from the corresponding training target $y$. }
     % \only<2-3>{\item In order to derive RNNs we have to extend our notation.}
     % \only<3>{\begin{itemize}
@@ -286,41 +285,40 @@ To model sequence we need to:
     \only<2>{\item RNNs are networks with loops, allowing information to persist.}
     \only<3>{\item Things might become more clear if we unfold the architecture.}
     \only<3>{\item We call $\bm{z}^{[t]}$ the \textit{state} of the system at time $t$.}
-    \only<3>{\item Recall, the state contains information about the whole past sequence.}
+    \only<3>{\item Tthe state contains information about the whole past sequence.}
     \only<4>{\item We went from 
       \begin{eqnarray*} 
         f &=& \tau(c + \bm{U}^\top \sigma(\bm{b} + \bm{W}^\top \bm{x})) \text{ for the dense net, to } \\
         f^{[t]} &=& \tau(c + \bm{U}^\top \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})) \text{ for the RNN. }
       \end{eqnarray*}}
-    \only<5>{\item Potential computational graph for time-step $t$:}
+    \only<5>{\item A potential computational graph for time-step $t$ with}
     \only<5>{\item[] $$f^{[t]} = \tau(c + \bm{U}^\top \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})) $$ }
   \end{itemize}
 }
 
 
 \frame{
-\frametitle{RNNs - Computational Graph with recurrent output-hidden connections}
+\frametitle{Recurrent output-hidden connections}
 
 Recurrent connections do not need to map from hidden to hidden neurons!
 
 \center
 \begin{figure}
 \includegraphics[width=7cm]{figure/recurrent_unfolded_fromoutput.png} 
-     \tiny{\\ An RNN whose only recurrence is the feedback connection from the output to the hidden layer. At each time stept, the input is $x_t$, the hidden layer activations are $z^{(t)}$, the outputs are $f^{(t)}$, the targets are $y^{(t)}$, and the loss is $L^{(t)}$. (Left) Circuitdiagram. (Right) Unfolded computational graph. The RNN in this figure is trained to put a specific output value into $f$, and $f$ is the only information it is allowed to send to the future. There are no direct connections from $z$ going forward. The previous $z$ is connected to the present only indirectly, via the predictions it was used to produce.}
 \end{figure}
-
+ \footnotesize{RNN with feedback connection from the output to the hidden layer. The RNN is only allowed to send $f$ to future time points and, hence, $z^{[t-1]}$ is connected to $z^{[t]}$ only indirectly, via the predictions $f^{[t-1]}$.}
 
 }
 
 \frame{
-\frametitle{RNNs - Computational Graph for seq to one mapping}
+\frametitle{Seq-to-one mappings}
 
 RNNs do not need to produce an output at each time step. Often only one output is produced after processing the whole sequence. 
 
 \center
 \begin{figure}
 \includegraphics[width=5cm]{figure/rnn_last_output.png} 
-     \tiny{\\Time-unfolded recurrent neural network with a single output at the end of the sequence. Such a network can be used to summarize a sequence and produce a fixed size representation used as input for further processing. There might be a target right at the end (as depicted here), or the gradient on the output $f^{(T)}$ can be obtained by backpropagating from further downstream modules.}
+     \footnotesize{\\Time-unfolded recurrent neural network with a single output at the end of the sequence. Such a network can be used to summarize a sequence and produce a fixed size representation.}
 \end{figure}
 
 }
