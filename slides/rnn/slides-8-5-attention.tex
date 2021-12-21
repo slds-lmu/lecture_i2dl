@@ -7,9 +7,12 @@
 \newcommand{\titlefigure}{plots/attention3.png}
 %modify picture
 \newcommand{\learninggoals}{
-  \item Attention
-  \item Transformers
-  \item RNN vs CNN
+  \item Familiarize with the most recent sequence data modeling technique:
+\begin{itemize}
+\item \footnotesize Attention Mechanism
+  \item \footnotesize Transformers
+\end{itemize}
+  \item Get to know the CNN alternative to RNNs
 }
 
 \title{Deep Learning}
@@ -33,7 +36,7 @@
     \item With a long input sequence this fixed-sized context vector is unlikely to capture all relevant information about the past.
       \item Each hidden state contains mostly information from recent inputs. 
       %In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
-      \item Key idea: Allow the decoder to access all the hidden states of the encoder (instead of just the final one) so that it can dynamically decide which ones are relevant at each time-step of the decoding process.
+      \item Key idea: Allow the decoder to access all the hidden states of the encoder (instead of just the final one) so that it can dynamically decide which ones are relevant at each time-step in the decoding.
       \item This means the decoder can choose to "focus" on different hidden states (of the encoder) at different time-steps of the decoding process similar to how the human eye can focus on different regions of the visual field.
       \item This is known as an \textbf{attention mechanism}.
    \end{itemize}
@@ -43,12 +46,12 @@
    \begin{itemize}
       \item The attention mechanism is implemented by an additional component in the decoder.
       \item For example, this can be a simple single-hidden layer feed-forward neural network which is trained along with the RNN.
-      \item At any given time-step $i$ of the decoding process, the network computes the relevance of encoder state $\bm{z}^{[j]}$ as:
-            $$ rel(\bm{z}^{[j]})^{[i]} = \bm{v}_a^\top \text{tanh} (\bm{W}_a[\bm{g}^{[i-1]};\bm{z}^{[j]}]) $$
-            where $\bm{v}_a$ and $\bm{W}_a$ are the parameters of the feed-forward network, $\bm{g}^{[i-1]}$ is the decoder state from the previous time-step and ';' indicates concatenation.
+      \item At any given time-step $i$ of the decoding process, the network computes the relevance of encoder state $\mathbf{z}^{[j]}$ as:
+            $$ rel(\mathbf{z}^{[j]})^{[i]} = \mathbf{v}_a^\top \text{tanh} (\mathbf{W}_a[\mathbf{g}^{[i-1]};\mathbf{z}^{[j]}]) $$
+            where $\mathbf{v}_a$ and $\mathbf{W}_a$ are the parameters of the feed-forward network, $\mathbf{g}^{[i-1]}$ is the decoder state from the previous time-step and ';' indicates concatenation.
       %\item $v_a$ and $W_a$ are also learned through backpropagation.
       \item The relevance scores (for all the encoder hidden states) are then normalized which gives the \textit{attention weights} $(\alpha^{[j]})^{[i]}$:      
-        $$ (\alpha^{[j]})^{[i]} = \frac{\exp (rel(\bm{z}^{[j]})^{[i]})}{\sum_{j'} \exp(rel(\bm{z}^{[j']})^{[i]})} $$
+        $$ (\alpha^{[j]})^{[i]} = \frac{\exp (rel(\mathbf{z}^{[j]})^{[i]})}{\sum_{j'} \exp(rel(\mathbf{z}^{[j']})^{[i]})} $$
    \end{itemize}
    
    \framebreak
@@ -59,18 +62,18 @@
  %   \item Each hidden state contains mostly information from recent inputs. In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
   \end{itemize}
  \begin{figure}
-    \includegraphics[width=4.cm]{figure/seq2seq_3.png}
+    \includegraphics[width=5.cm]{figure/seq2seq_3.png}
     \caption{Attention at $i=t+1$}
   \end{figure}
  
 \framebreak
 \begin{itemize}  
    % \item An \textbf{attention mechanism} allows the decoder network to focus on different parts of the input sequence by adding connections from all hidden states of the encoder to each hidden state of the decoder
-    \item At each time step $i$, a set of weights $(\alpha^{[j]})^{[i]}$ is computed which determine how to combine the hidden states of the encoder into a context vector $c^{[i]}= \sum_{j=1}^{n_x} (\alpha^{[j]})^{[i]} \bm{z}^{[j]}$, which holds the necessary information to predict the correct output.
+    \item At each time step $i$, a set of weights $(\alpha^{[j]})^{[i]}$ is computed which determine how to combine the hidden states of the encoder into a context vector $\mathbf{g}^{[i]}= \sum_{j=1}^{n_x} (\alpha^{[j]})^{[i]} \mathbf{z}^{[j]}$, which holds the necessary information to predict the correct output.
  %   \item Each hidden state contains mostly information from recent inputs. In the case of a bidirectional RNN to encode the input sequence, a hidden state contains information from recent preceding and following inputs.
   \end{itemize}
   \begin{figure}
-    \includegraphics[width=4.cm]{figure/seq2seq_4.png}
+    \includegraphics[width=5.cm]{figure/seq2seq_4.png}
     \caption{Attention at $i=t+2$}
   \end{figure}
   
@@ -96,22 +99,31 @@
   \end{figure}
 }
 
+\section{Transformers}
+
 \begin{vbframe}{Transformers}
   \begin{itemize}
-    \item Advanced RNNs have similar limitations as vanilla RNN network.
+    \item Advanced RNNs have similar limitations as vanilla RNN networks:
     \begin{itemize}
-      \item Lack of parallelization, RNNs process the input data sequentially, as the output of a step depends on the output of the previous step.
-     \item Difficulties in learning long term dependency, Although GRU or LSTM perform superior compared to vanilla RNN, even they struggle to remember the context from a word which stands much earlier in long sequences.
+      \item RNNs process the input data sequentially.
+     \item Difficulties in learning long term dependency (although GRU or LSTM perform better than vanilla RNNs, they sometimes struggle to remember the context introduced earlier in long sequences).
     \end{itemize}
-    \item These challenges are successfully tackled by transformer networks.
+    \item These challenges are tackled by transformer networks.
     
     \framebreak
     
     \item Transformers are solely based on attention (no RNN or CNN).
     \item In fact, the paper which coined the term \textit{transformer} is called \textit{Attention is all you need}.
     \item They are the state-of-the-art networks in natural language processing (NLP) tasks since 2017.
-    \item Transformer architectures like BERT (Bidirectional Encoder Representations from Transformers, 2018) and GPT-3 (Generative Pre-trained Transformer-3, 2020) are pre-trained in a large text and can be fine-tuned (quickly adapt) to specific language tasks.
+    \item Transformer architectures like BERT (Bidirectional Encoder Representations from Transformers, 2018) and GPT-3 (Generative Pre-trained Transformer-3, 2020) are pre-trained on a large corpus and can be fine-tuned to specific language tasks.
   \end{itemize}
+
+\framebreak
+
+\begin{center}
+\includegraphics[width=6.5cm]{plots/transformer.png}
+\end{center}
+
 \end{vbframe}
 
 
@@ -122,10 +134,10 @@
 
 \begin{frame} {CNNs or RNNs?}
   \begin{itemize}
-    \item Historically, RNNs were the default models used in sequence processing tasks.
+    \item Historically, RNNs were the default for sequence processing tasks.
     \item However, some families of CNNs (especially those based on Fully Convolutional Networks (FCNs)) \textit{can} be used to process variable-length sequences such as text or time-series data.
     \item If a CNN doesn't contain any fully-connected layers, the total number of weights in the network is independent of the spatial dimensions of the input because of weight-sharing in the convolutional layers.
-    \item Recent research [Bai et al. , 2018] indicates that such convolutional architectures (which the authors term Temporal Convolutional Networks (TCNs)) can outperform RNNs on a wide range of tasks.
+    \item Recent research [Bai et al. , 2018] indicates that such convolutional architectures, so-called Temporal Convolutional Networks (TCNs), can outperform RNNs on a wide range of tasks.
     \item A major advantage of TCNs is that the entire input sequence can be fed to the network at once (as opposed to sequentially).
     % \item Surprisingly, the TCNs can model long-range dependencies in the inputs even better than recurrent architectures!
   \end{itemize}
@@ -140,29 +152,29 @@
 \end{frame}
 
 
-\begin{frame} {CNNs or RNNs?}
-  \begin{figure}
-      \centering
-      \scalebox{1}{\includegraphics{plots/tcn1.png}}
-      \caption{\footnotesize{Evaluation of TCNs and recurrent architectures on a wide range of sequence modelling tasks. $^h$ means higher is better and ${}^\ell$~ means lower is better. Note: To make the comparisons fair, all models have roughly the same size (for a given task) and the authors used grid search to find good hyperparameters for the recurrent architectures.}}
-  \end{figure}
-\end{frame}
+%\begin{frame} {CNNs or RNNs?}
+%  \begin{figure}
+%      \centering
+%      \scalebox{1}{\includegraphics{plots/tcn1.png}}
+%      \caption{\footnotesize{Evaluation of TCNs and recurrent architectures on a wide range of sequence modelling tasks. $^h$ means higher is better and ${}^\ell$~ means lower is better. Note: To make the comparisons fair, all models have roughly the same size (for a given task) and the authors used grid search to find good hyperparameters for the recurrent architectures.}}
+%  \end{figure}
+%\end{frame}
 
 
-\begin{frame}{Summary}
-\begin{itemize}
-\item RNNs are specifically designed to process sequences of varying lengths. 
-\item  For that recurrent connections are introduced into the network structure.
-\item The gradient is calculated by backpropagation through time.
-\item  An LSTM replaces the  simple hidden neuron by a complex system consisting of cell state, and forget, input, and output gates.
-\item An RNN can be used as a language model, which can be improved by word-embeddings.
-\item Different advanced types of RNNs exist, like Encoder-Decoder architectures and bidirectional RNNs.$^1$
-\end{itemize}
-
-\vspace{8mm}
-\tiny{1. A bidirectional RNN processes the input sequence in both directions (front-to-back and back-to-front).}
-
-\end{frame}
+%\begin{frame}{Summary}
+%\begin{itemize}
+%\item RNNs are specifically designed to process sequences of varying lengths. 
+%\item  For that recurrent connections are introduced into the network structure.
+%\item The gradient is calculated by backpropagation through time.
+%\item  An LSTM replaces the  simple hidden neuron by a complex system consisting of cell state, and forget, input, and output gates.
+%\item An RNN can be used as a language model, which can be improved by word-embeddings.
+%\item Different advanced types of RNNs exist, like Encoder-Decoder architectures and bidirectional RNNs.$^1$
+%\end{itemize}
+%
+%\vspace{8mm}
+%\tiny{1. A bidirectional RNN processes the input sequence in both directions (front-to-back and back-to-front).}
+%
+%\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
