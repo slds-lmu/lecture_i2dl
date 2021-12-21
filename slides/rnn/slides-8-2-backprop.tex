@@ -8,7 +8,7 @@
 \newcommand{\titlefigure}{figure/backpropagation_rnn.png}
 %modify picture
 \newcommand{\learninggoals}{
-  \item Backpropagation
+  \item How does Backpropagation work for RNNs?
   \item Exploding and Vanishing Gradients
 }
 
@@ -28,6 +28,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \frame{
 
@@ -141,11 +142,11 @@
     
     $$ \frac{d L}{d \bm{z}¸^{[1]}} = \frac{d L}{d \bm{z}^{[t]}} \frac{d \bm{z}^{[t]}}{d \bm{z}^{[t-1]}} \dots \frac{d \bm{z}^{[2]}}{d \bm{z}^{[1]}} = \bm{D}^{[t-1]} \bm{D}^{[t-2]}   \text{ . . . } \bm{D}^{[1]} (\bm{V}^\top)^{t-1}$$
 %    $$ \frac{d \bm{z}^{[1]}}{d\bm{x}^{[1]}} = \text{diag}(\sigma' (\bm{V}^\top \bm{z}^{[0]} + \bm{W}^\top \xv^{[1]} + \bm{b})) \bm{W}^\top$$
-    \item Therefore, for an arbitrary time-step $i$ in the past, $\frac{d\bm{z}^{[t]}}{d\bm{z}^{[i]}}$ will contain the term $(\bm{V}^\top)^{t-i}$ within it (this follows from the chain rule).
+    \item In general, for an arbitrary time-step $i<t$ in the past, $\frac{d\bm{z}^{[t]}}{d\bm{z}^{[i]}}$ will contain the term $(\bm{V}^\top)^{t-i}$ (this follows from the chain rule).
     \item Based on the largest eigenvalue of $\bm{V}^\top$, the presence of the term $(\bm{V}^\top)^{t-i}$ can either result in vanishing or exploding gradients.
     \item This problem is quite severe for RNNs (as compared to feedforward networks) because the \textbf{same} matrix $\bm{V}^\top$ is multiplied several times. \href{https://tinyurl.com/vangrad}{\beamergotobutton{Click here}}
     \item As the gap between $t$ and $i$ increases, the instability worsens.
-    \item It is quite challenging for RNNs to learn long-term dependencies. The gradients either \textbf{vanish} (most of the time) or \textbf{explode} (rarely, but with much damage to the optimization).
+    \item It is thus quite challenging for RNNs to learn long-term dependencies. The gradients either \textbf{vanish} (most of the time) or \textbf{explode} (rarely, but with much damage to the optimization).
     \item That happens simply because we propagate errors over very many stages backwards.
   \end{itemize}
   
@@ -171,19 +172,16 @@
 
 
   \begin{itemize}
-    \item Even if we assume that the parameters are such that the recurrent network is stable (can store memories, with gradients not exploding), the difficulty with long-term dependencies arises from the exponentially smaller weights given to long-term interactions (involving the multiplication of many Jacobians) compared to short-term ones.
-    \item A more sophisticated solution is needed for the vanishing gradient problem in RNNs.
-    \item The \textbf{vanishing gradient problem} is heavily dependent on the parameter initialization method, but in particular on the choice of the activation functions.
-    \begin{itemize}
-      \item For example, the sigmoid maps a real number into a \enquote{small} range (i.e. $[0, 1]$).
-      \item As a result, large regions of the input space are mapped into a very small range.
-      \item Even a huge change in the input will only produce a small change in the output. Hence, the gradient will be small.
-      \item This becomes even worse when we stack multiple layers of such non-linearities on top of each other (For instance, the first layer maps a large input to a smaller output region, which will be mapped to an even smaller region by the second layer, which will be mapped to an even smaller region by the third layer and so on..).
-      \item We can avoid this problem by using activation functions which do not have the property of \enquote{squashing} the input.
-      \item The most popular choice is obviously the Rectified Linear Unit (ReLU) which maps $x$ to $max(0,x)$.
-      \item The really nice thing about ReLU is that the gradient is either $0$ or $1$, which means it never saturates. Thus, gradients can't vanish.
-      \item The downside of this is that we can obtain a \enquote{dead} ReLU. It will always return $0$  and consequently never learn because the gradient is not passed through.
+    \item Even for a stable RNN (gradients not exploding), there will be exponentially smaller weights for long-term interactions compared to short-term ones and a more sophisticated solution is needed for this vanishing gradient problem (discussed in the next chapters).
+    \item The {vanishing gradient problem} heavily depends on the choice of the activation functions.
+    \begin{itemize} 
+      \item Sigmoid maps a real number into a \enquote{small} range (i.e. $[0, 1]$) and thus even huge changes in the input will only produce a small change in the output. Hence, the gradient will be small.
+      \item This becomes even worse when we stack multiple layers.
+      \item We can avoid this problem by using activation functions which do not \enquote{squash} the input.
+      \item The most popular choice is ReLU with gradients being either $0$ or $1$, i.e., they never saturate and thus don't vanish.
+      \item The downside of this is that we can obtain a \enquote{dead} ReLU.
     \end{itemize}
+
   \end{itemize}
 
 

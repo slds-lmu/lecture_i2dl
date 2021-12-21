@@ -8,8 +8,8 @@
 \newcommand{\titlefigure}{figure/gru_vs_lstm.png}
 %modify picture
 \newcommand{\learninggoals}{
-  \item LSTM
-  \item GRU
+  \item LSTM cell
+  \item GRU cell
   \item Bidirectional RNNs
 }
 
@@ -47,10 +47,11 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
   \begin{figure}
     \only<1>{\includegraphics[width=2cm]{figure/vanilla_rnn.png}}%
     \only<2>{\includegraphics[width=5cm]{figure/vanilla_rnn_lstm.png}}%
+\tiny{\\\only<2>{Left:} A simple RNN mechanism; \only<2>{Right: An LSTM cell}}
   \end{figure}
   \begin{itemize}
-    \only<1-2>{\item Until now, we simply computed $$\bm{z}^{[t]} = \sigma(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]})$$}
-    \only<2>{\item Now we introduce the LSTM cell (which is a small network on its own). }
+    \only<1-2>{\item Until now, we simply computed $$\mathbf{z}^{[t]} = \sigma(\mathbf{b} + \mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]})$$}
+    \only<2>{\item Now we introduce the LSTM cell, a small network on its own. }
   \end{itemize}
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,36 +93,36 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
   
   \begin{itemize}
 
-    \only<1>{\item The key to LSTMs is the \textbf{cell state} $\bm{s}^{[t]}$.}
+    \only<1>{\item The key to LSTMs is the \textbf{cell state} $\mathbf{s}^{[t]}$.}
     \only<1>{%\item The LSTM does have the ability to remove or add information to the cell state, carefully regulated by structures called gates.
-    \item $\bm{s}^{[t]}$ can be manipulated by different \textbf{gates} to forget old information, add new information, and read information out of it.}
-\only<1>{\item Each gate is a vector of the same size as the $\bm{s}^{[t]}$ with elements between 0 ("let nothing pass") and 1 ("let everything pass").
+    \item $\mathbf{s}^{[t]}$ can be manipulated by different \textbf{gates} to forget old information, add new information, and read information out of it.}
+\only<1>{\item Each gate is a vector of the same size as $\mathbf{s}^{[t]}$ with elements between 0 ("let nothing pass") and 1 ("let everything pass").
 }
     
-    \only<2>{\item \textbf{Forget gate}  $\bm{e}^{[t]}$: indicates which information of the old cell state we should forget. 
+    \only<2>{\item \textbf{Forget gate}  $\mathbf{e}^{[t]}$: indicates which information of the old cell state we should forget. 
     \item Intuition: Think of a model trying to predict the next word based on all the previous ones. The cell state might include the gender of the present subject, so that the correct pronouns can be used. When we now see a new subject, we want to forget the gender of the old one.}
     \only<3>{\item We obtain the forget gate by computing 
 %    $$f^{[t]} = \sigma(b^{(f)} + V^{(f)T} z^{[t-1]} + W^{(f)T} x^{[t]})$$
-    $$\bm{e}^{[t]} = \sigma(\bm{b}_{f} + \bm{V}_e^\top \bm{z}^{[t-1]} + \bm{W}_e^\top \xv^{[t]})$$}
-    \only<3>{\item $\sigma()$ is  a sigmoid, squashing the values to $[0,1]$, and $\bm{V}_e, \bm{W}_f$ are forget gate specific weights.}
-    \only<4>{\item To compute the cell state $\bm{s}^{[t]}$, the first step is to multiply (element-wise) the previous cell state $\bm{s}^{[t-1]}$ by the forget gate $\bm{e}^{[t]}$. $$\bm{e}^{[t]} \odot \bm{s}^{[t-1]}, \text{ with } \bm{e}^{[t]} \in [0,1]$$}
-    \only<5>{\item \textbf{Input gate} $i^{[t]}$: indicates which new information should be added to  $\bm{s}^{[t]}$.}
+    $$\mathbf{e}^{[t]} = \sigma(\mathbf{b}_{f} + \mathbf{V}_e^\top \mathbf{z}^{[t-1]} + \mathbf{W}_e^\top \xv^{[t]})$$}
+    \only<3>{\item $\sigma()$ is  a sigmoid and $\mathbf{V}_e, \mathbf{W}_e$ are forget gate specific weights.}
+    \only<4>{\item To compute the cell state $\mathbf{s}^{[t]}$, the first step is to multiply (element-wise) the previous cell state $\mathbf{s}^{[t-1]}$ by the forget gate $\mathbf{e}^{[t]}$. $$\mathbf{e}^{[t]} \odot \mathbf{s}^{[t-1]}, \text{ with } \mathbf{e}^{[t]} \in [0,1]$$}
+    \only<5>{\item \textbf{Input gate} $\mathbf{i}^{[t]}$: indicates which new information should be added to  $\mathbf{s}^{[t]}$.}
     %\only<5>{\item We again incorporate the information in the previous hidden state $z^{[t-1]}$.}
     \only<5>{\item Intuition: In our example, this is where we add the new information about the gender of the new subject.}
    % \only<6>{\item The cell recurrent connection needs a function whose derivatives sustain for a long span to address the vanishing gradient problem.}
-    \only<6>{\item The new information is given by $\tilde{\bm{s}}^{[t]} = \text{tanh}(\bm{b} + \bm{V}^\top \bm{z}^{[t-1]} + \bm{W}^\top \xv^{[t]}) \in [-1, 1]$.}
-    \only<6>{\item The input gate is given by $\bm{i}^{[t]} = \sigma(\bm{b}_i + \bm{V}_i^\top \bm{z}^{[t-1]} + \bm{W}_i^\top \xv^{[t]}) \in [0,1]$.}
-   \only<6>{\item $\bm{W}$ and $\bm{V}$ are weights of the new information, $\bm{W}_i$ and $\bm{V}_i$ the weights of the input gate.}
-    \only<7>{\item Now we can finally compute the cell state $\bm{s}^{[t]}$: 
-    $$\bm{s}^{[t]} = \bm{e}^{[t]} \odot \bm{s}^{[t-1]} + \bm{i}^{[t]} \odot \tilde{\bm{s}}^{[t]}$$}
+    \only<6>{\item The new information is given by $\tilde{\mathbf{s}}^{[t]} = \text{tanh}(\mathbf{b} + \mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]}) \in [-1, 1]$.}
+    \only<6>{\item The input gate is given by $\mathbf{i}^{[t]} = \sigma(\mathbf{b}_i + \mathbf{V}_i^\top \mathbf{z}^{[t-1]} + \mathbf{W}_i^\top \xv^{[t]}) \in [0,1]$.}
+   \only<6>{\item $\mathbf{W}$ and $\mathbf{V}$ are weights of the new information, $\mathbf{W}_i$ and $\mathbf{V}_i$ the weights of the input gate.}
+    \only<7>{\item Now we can finally compute the cell state $\mathbf{s}^{[t]}$: 
+    $$\mathbf{s}^{[t]} = \mathbf{e}^{[t]} \odot \mathbf{s}^{[t-1]} + \mathbf{i}^{[t]} \odot \tilde{\mathbf{s}}^{[t]}$$}
     %\only<7>{\item[] By the way: this does not mean that our lstm is complete! }
    % \only<8>{\item In order to complete the lstm cell, one final ingredient is missing.}
    % \only<8>{\item The output of the LSTM cell will be a filtered version of our cell state.}
     \only<8>{\item %First, we run a sigmoid layer which decides what parts of the cell
-   \textbf{Output gate} $\bm{o}^{[t]}$:  Indicates which information form the cell state is filtered.
-   \item It is given by $\bm{o}^{[t]} = \sigma(\bm{b}_o + \bm{V}_o^\top \bm{z}^{[t-1]} + \bm{W}_o^\top \xv^{[t]})$, with specific weights $\bm{W}_o, \bm{V}_o$.}
+   \textbf{Output gate} $\mathbf{o}^{[t]}$:  Indicates which information form the cell state is filtered.
+   \item It is given by $\mathbf{o}^{[t]} = \sigma(\mathbf{b}_o + \mathbf{V}_o^\top \mathbf{z}^{[t-1]} + \mathbf{W}_o^\top \xv^{[t]})$, with specific weights $\mathbf{W}_o, \mathbf{V}_o$.}
     %\only<8>{\item }
-    \only<9>{\item Finally, the new state $\bm{z}^{[t]}$ of the LSTM is a function of the cell state, multiplied by the output gate: $$\bm{z}^{[t]} = \bm{o}^{[t]} \odot \text{tanh}(\bm{s}^{[t]})$$}
+    \only<9>{\item Finally, the new state $\mathbf{z}^{[t]}$ of the LSTM is a function of the cell state, multiplied by the output gate: $$\mathbf{z}^{[t]} = \mathbf{o}^{[t]} \odot \text{tanh}(\mathbf{s}^{[t]})$$}
 
   \end{itemize}
 
@@ -139,11 +140,11 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
    \begin{itemize}
      \item The key distinction between regular RNNs and GRUs is that the latter support gating of the hidden state. 
      \item Here, we have dedicated mechanisms for when a hidden state should be updated and also when it should be reset.
-     \item These mechanisms are learned and they address the listed concerns: 
+     \item These mechanisms are learned to: 
      \begin{itemize}
            \item avoid the vanishing/exploding gradient problem which comes with a standard recurrent neural network.
-           \item GRUs are able to solve the vanishing gradient problem by using an update gate and a reset gate. 
-           \item the update gate controls information that flows into memory, and the reset gate controls the information that flows out of memory. 
+           \item solve the vanishing gradient problem by using an update gate and a reset gate. 
+           \item control tge information that flows into (update gate) and out of (reset gate) memory.
      \end{itemize}
    \end{itemize}
    
@@ -157,9 +158,9 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
   \end{figure}
   \begin{itemize}
     %\item as shown by Figure1, given the current time step input $X_t$ and the hidden state of the previous time step $H_{t-1}$. The output is given by a fully connected layer with a sigmoid as its activation function.
-    \item For a given time step $t$, the hidden state of the last time step is $\mathbf{z}_{t-1}$. The update gate $\mathbf{u}_t$ is computed as follows:
-   \item $\mathbf{u}_t = \sigma(\bm{W}_{u}^\top \mathbf{x}_t + \bm{V}_{u}^\top \mathbf{z}_{t-1}  + \mathbf{b}_u)$
-    \item We use a sigmoid function to transform input values to the interval $(0,1)$.
+    \item For a given time step $t$, the hidden state of the last time step is $\mathbf{z}^{[t-1]}$. The update gate $\mathbf{u}^{[t]}$ is computed as follows:
+   \item $\mathbf{u}^{[t]} = \sigma(\mathbf{W}_{u}^\top \mathbf{x}^{[t]} + \mathbf{V}_{u}^\top \mathbf{z}^{[t-1]}  + \mathbf{b}_u)$
+    \item We use a sigmoid to transform input values to $(0,1)$.
   \end{itemize}
 \end{vbframe}
 
@@ -171,8 +172,8 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
   \end{figure}
   \begin{itemize}
     %\item as shown by Figure1, given the current time step input $X_t$ and the hidden state of the previous time step $H_{t-1}$. The output is given by a fully connected layer with a sigmoid as its activation function.
-    \item Similarly, the reset gate $\mathbf{r}_t$ is computed as follows:
-   \item $\mathbf{r}_t = \sigma(\bm{W}_{r}^\top \mathbf{x}_t +\bm{V}_{r}^\top \mathbf{z}_{t-1} + \mathbf{b}_r)$
+    \item Similarly, the reset gate $\mathbf{r}^{[t]}$ is computed as follows:
+   \item $\mathbf{r}^{[t]} = \sigma(\mathbf{W}_{r}^\top \mathbf{x}^{[t]} +\mathbf{V}_{r}^\top \mathbf{z}^{[t-1]} + \mathbf{b}_r)$
 
   \end{itemize}
 \end{vbframe}
@@ -182,14 +183,14 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
      \begin{figure}
       \centering
       \scalebox{0.4}{\includegraphics{figure/gru_25.png}}
-      \caption{\footnotesize{Candidate hidden state computation in a GRU. The multiplication is carried out elementwise.}}
+      \caption{\footnotesize{Hidden state computation in GRU. Multiplication is carried out elementwise.}}
   \end{figure}
   \begin{itemize}
    %\item If we want to be able to reduce the influence of the previous states we can multiply $H_{t−1}$ with $R_t$ elementwise. 
   % Whenever the entries in the reset gate $R_t$ are close to 1, we recover a conventional RNN. For all entries of the reset gate $R_t$ that are close to 0, the hidden state is the result of an MLP with $X_t$ as input. Any pre-existing hidden state is thus reset to defaults. This leads to the following candidate hidden state (it is a candidate since we still need to incorporate the action of the update gate).
 
-  \item  $\tilde{\mathbf{z}}_t = \tanh(\mathbf{W}_{z}^\top \mathbf{x}_t + \mathbf{V}_{z}^\top \left(\mathbf{r}_t \odot \mathbf{z}_{t-1}\right)  + \mathbf{b}_z).$
-   \item In a conventional RNN, we would have an hidden state update of the form:  $\mathbf{z}_t = \tanh(\mathbf{W}_{z}^\top \mathbf{x}_t + \mathbf{V}_{z}^\top \mathbf{z}_{t-1} + \mathbf{b}_z).$
+  \item  $\tilde{\mathbf{z}}^{[t]} = \tanh(\mathbf{W}_{z}^\top \mathbf{x}^{[t]} + \mathbf{V}_{z}^\top \left(\mathbf{r}^{[t]} \odot \mathbf{z}^{[t-1]}\right)  + \mathbf{b}_z).$
+   \item In a conventional RNN, we would have an hidden state update of the form:  $\mathbf{z}^{[t]} = \tanh(\mathbf{W}_{z}^\top \mathbf{x}^{[t]} + \mathbf{V}_{z}^\top \mathbf{z}^{[t-1]} + \mathbf{b}_z).$
    \end{itemize}
   
 \end{vbframe}
@@ -202,8 +203,8 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
   \end{figure}
   
   \begin{itemize}
-  \item The update gate $u_t$ determines the extent the old state $z_{t-1}$ and the new candidate state $\tilde{\mathbf{z}}_t$ is used. 
-  \item $\mathbf{z}_t = \mathbf{u}_t \odot \mathbf{z}_{t-1}  + (1 - \mathbf{u}_t) \odot \tilde{\mathbf{z}}_t.$
+  \item The update gate $\mathbf{u}^{[t]}$ determines how much the old state $\mathbf{z}^{[t-1]}$ and the new candidate state $\tilde{\mathbf{z}}^{[t]}$ is used. 
+  \item $\mathbf{z}^{[t]} = \mathbf{u}^{[t]} \odot \mathbf{z}^{[t-1]}  + (1 - \mathbf{u}^{[t]}) \odot \tilde{\mathbf{z}}^{[t]}.$
   \end{itemize}
   \begin{figure}
       \centering
@@ -235,14 +236,14 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
   \begin{itemize}
     \item Another generalization of the simple RNN are bidirectional RNNs.
     \item These allow us to process sequential data depending on both past and future inputs, e.g. an application predicting missing words, which probably depend on both preceding and following words.
-    \item One RNN processes inputs in the forward direction from $x^{[1]}$ to $x^{[T]}$ computing a sequence of hidden states $(z^{[1]}, \dots, z^{(T)})$, another RNN in the backward direction from $x^{[T]}$ to $x^{[1]}$ computing hidden states $(g^{[T]}, \dots, g^{[1]})$
+    \item One RNN processes inputs in the forward direction from $\mathbf{x}^{[1]}$ to $\mathbf{x}^{[T]}$ computing a sequence of hidden states $(\mathbf{z}^{[1]}, \dots, \mathbf{z}^{(T)})$, another RNN in the backward direction from $\mathbf{x}^{[T]}$ to $\mathbf{x}^{[1]}$ computing hidden states $(\mathbf{g}^{[T]}, \dots, \mathbf{g}^{[1]})$
     \item Predictions are then based on both hidden states, which could be \textbf{concatenated}.
     \item With connections going back in time, the whole input sequence must be known in advance
 to train and infer from the model.
     \item Bidirectional RNNs are often used for the encoding of a sequence in machine translation.
   \end{itemize}
 \framebreak  
-\textbf{Computational graph of an bidirectional RNN:}
+\textbf{Computational graph of a bidirectional RNN:}
   \begin{figure}
     \includegraphics[width=4.5cm]{figure/bidirectional_rnn.png}
     \caption{A bidirectional RNN consists of a forward RNN processing inputs from left to right and a backward RNN processing inputs backwards in time.}
@@ -334,9 +335,9 @@ to train and infer from the model.
 \newblock Deep Learning
 \newblock \emph{\url{http://www.deeplearningbook.org/}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Michael Nguyen, 2018]{1} Michael Nguyen (2018)
-\newblock Illustrated Guide to LSTM's and GRU's: A step by step explanation
-newblock \emph{\url{https://towardsdatascience.com/illustrated-guide-to-lstms-and-gru-s-a-step-by-step-explanation-44e9eb85bf21}}
+%\bibitem[Michael Nguyen, 2018]{1} Michael Nguyen (2018)
+%\newblock Illustrated Guide to LSTM's and GRU's: A step by step explanation
+%newblock \emph{\url{https://towardsdatascience.com/illustrated-guide-to-lstms-and-gru-s-a-step-by-step-explanation-44e9eb85bf21}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{thebibliography}
 }
