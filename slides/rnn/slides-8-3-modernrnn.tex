@@ -103,7 +103,7 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
     \item Intuition: Think of a model trying to predict the next word based on all the previous ones. The cell state might include the gender of the present subject, so that the correct pronouns can be used. When we now see a new subject, we want to forget the gender of the old one.}
     \only<3>{\item We obtain the forget gate by computing 
 %    $$f^{[t]} = \sigma(b^{(f)} + V^{(f)T} z^{[t-1]} + W^{(f)T} x^{[t]})$$
-    $$\mathbf{e}^{[t]} = \sigma(\mathbf{b}_{f} + \mathbf{V}_e^\top \mathbf{z}^{[t-1]} + \mathbf{W}_e^\top \xv^{[t]})$$}
+    $$\mathbf{e}^{[t]} = \sigma(\mathbf{b}_{e} + \mathbf{V}_e^\top \mathbf{z}^{[t-1]} + \mathbf{W}_e^\top \xv^{[t]})$$}
     \only<3>{\item $\sigma()$ is  a sigmoid and $\mathbf{V}_e, \mathbf{W}_e$ are forget gate specific weights.}
     \only<4>{\item To compute the cell state $\mathbf{s}^{[t]}$, the first step is to multiply (element-wise) the previous cell state $\mathbf{s}^{[t-1]}$ by the forget gate $\mathbf{e}^{[t]}$. $$\mathbf{e}^{[t]} \odot \mathbf{s}^{[t-1]}, \text{ with } \mathbf{e}^{[t]} \in [0,1]$$}
     \only<5>{\item \textbf{Input gate} $\mathbf{i}^{[t]}$: indicates which new information should be added to  $\mathbf{s}^{[t]}$.}
@@ -144,7 +144,7 @@ The LSTM provides a way of dealing with vanishing gradients and modelling long-t
      \begin{itemize}
            \item avoid the vanishing/exploding gradient problem which comes with a standard recurrent neural network.
            \item solve the vanishing gradient problem by using an update gate and a reset gate. 
-           \item control tge information that flows into (update gate) and out of (reset gate) memory.
+           \item control the information that flows into (update gate) and out of (reset gate) memory.
      \end{itemize}
    \end{itemize}
    

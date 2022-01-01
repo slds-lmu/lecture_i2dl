@@ -30,67 +30,69 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\frame{
 
-\frametitle{Backpropagation through time}
-
-  \center
-  \includegraphics[width=6cm]{figure/backpropagation_rnn.png}
-
-  %\begin{itemize}
-
-    %\item For training the RNN we need to compute $\frac{d L}{d u_{i,j}}$, $\frac{d L}{d v_{i,j}}$, and $\frac{d L}{d w_{i,j}}$.
-    %\item To do so, during backpropagation at time step $t$ %for an arbitrary RNN, 
-    %we may need to compute
-    $$\frac{d L}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}}$$
-
-  %\end{itemize}
-
-}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{vbframe}{Nlp - Example}
-%       Example: 
-%   \begin{itemize}
-%     \item Suppose we only had a vocabulary of four possible letters: \enquote{h}, \enquote{e}, \enquote{l} and \enquote{o}
-%     \item We want to train an RNN on the training sequence \enquote{hello}.
-%     \item This training sequence is in fact a source of 4 separate training examples:
-%       \begin{itemize}
-%         \item The probability of \enquote{e} should be likely given the context of \enquote{h}
-%         \item \enquote{l} should be likely in the context of \enquote{he}
-%         \item \enquote{l} should also be likely given the context of \enquote{hel}
-%         \item and \enquote{o} should be likely given the context of \enquote{hell}
-%       \end{itemize}
-%   \end{itemize}
-% \end{vbframe}
+\begin{vbframe}{Simple Example: Character Level Language Model}
+       Task: Learn character probability distribution from input text
+   \begin{itemize}
+     \item Suppose we only had a vocabulary of four possible letters: \enquote{h}, \enquote{e}, \enquote{l} and \enquote{o}
+     \item We want to train an RNN on the training sequence \enquote{hello}.
+     \item This training sequence is in fact a source of 4 separate training examples:
+       \begin{itemize}
+         \item The probability of \enquote{e} should be likely given the context of \enquote{h}
+         \item \enquote{l} should be likely in the context of \enquote{he}
+         \item \enquote{l} should also be likely given the context of \enquote{hel}
+         \item and \enquote{o} should be likely given the context of \enquote{hell}
+       \end{itemize}
+   \end{itemize}
+   
+   \begin{minipage}{0.55\textwidth}
+      \begin{figure}
+         \includegraphics[width=3.5cm]{plots/nlp1a.png}%
+     \end{figure}
+  \end{minipage}%
+
+   \begin{minipage}{0.55\textwidth}
+     \begin{figure}
+         \includegraphics[width=5.5cm]{plots/nlp1b.png}%
+         \end{figure}
+    \end{minipage}%
+    
+   \begin{minipage}{0.55\textwidth}         
+    \begin{figure}     
+         \includegraphics[width=6.5cm]{plots/nlp1c.png}%
+       \end{figure}
+    \end{minipage}% 
+ \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \frame{
-% 
-% \frametitle{Nlp - Example}
-% 
-% The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.
-%   \begin{itemize}
-%     \item[]
-%   \end{itemize}
-%   \begin{minipage}{0.55\textwidth}
-%     \begin{figure}
-%         \only<1>{\includegraphics[width=5.5cm]{plots/nlp1.png}}%
-%         \only<2>{\includegraphics[width=5.5cm]{plots/nlp2.png}}%
-%     \end{figure}
-%   \end{minipage}%\hfill
-%   \begin{minipage}{0.45\textwidth}
-%   %\vspace{-0.3cm}
+ \frame{
+ 
+ \frametitle{Simple Example: Character Level Language Model}
+ 
+ The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.
+   \begin{itemize}
+     \item[]
+   \end{itemize}
+   \begin{minipage}{0.55\textwidth}
+     \begin{figure}
+         \only<1>{\includegraphics[width=5.5cm]{plots/nlp1.png}}%
+         \only<2>{\includegraphics[width=5.5cm]{plots/nlp2.png}}%
+     \end{figure}
+   \end{minipage}%\hfill
+   \begin{minipage}{0.45\textwidth}
+   %\vspace{-0.3cm}
+   
+     \begin{itemize}
+       \only<1>{\item[] \textcolor{white}{Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).}} 
+       \only<2>{\item[] Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$). How can we now train the network? \textbf{Backpropagation through time!}} 
+     \end{itemize}
+   \end{minipage}
 %   
-%     \begin{itemize}
-%       \only<1>{\item[] \textcolor{white}{Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).}} 
-%       \only<2>{\item[] Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).} 
-%     \end{itemize}
-%   \end{minipage}
-%   
-% }
+ }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \begin{vbframe}{Word Embeddings (Word2vec)}
@@ -129,6 +131,26 @@
 %   \end{minipage}
 % \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\frame{
+
+\frametitle{Backpropagation through time}
+
+  \center
+  \includegraphics[width=6cm]{figure/backpropagation_rnn.png}
+
+  \begin{itemize}
+
+    \item For training the RNN, we need to compute $\frac{d L}{d u_{i,j}}$, $\frac{d L}{d v_{i,j}}$, and $\frac{d L}{d w_{i,j}}$.
+    \item To do so, during backpropagation at time step $t$ for an arbitrary RNN, 
+    we need to compute
+    $$\frac{d L}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}}$$
+
+  \end{itemize}
+
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{vbframe}{Long-Term Dependencies}
   
