@@ -2,7 +2,7 @@
 title: "Lab 3"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-11-20
+date: 2020-11-09
 papersize: a4
 header-includes:
   - \usepackage{bbold}
@@ -59,7 +59,7 @@ gradient_descent_optimizer = function(x0, func, grad, max_steps, alpha) {
   # grad computes the gradient of the function at a given point
   # max_steps is the maximum number of gradient descent steps
   # alpha is the learning rate
-  
+
   #!hwbegin TODO use a for loop to do gradient descent
   x = x0
   v = func(x0)
@@ -174,7 +174,7 @@ You will notice that there are lots of redundancies. We will see how to improve 
 #### Question 1
 \begin{align*}
 \frac{\partial\mathcal{L}(y,  f_{out})}{\partial f_{out}}
-&=\frac{\partial}{\partial f_{out}}\bigg(y\log f_{out}+(1-y)\log(1- f_{out})\bigg)\\
+&=\frac{\partial}{\partial f_{out}}\bigg(-y\log f_{out}-(1-y)\log(1- f_{out})\bigg)\\
 &=-\frac{y}{ f_{out}}+\frac{1-y}{1- f_{out}}
 \end{align*}
 
@@ -370,7 +370,7 @@ nnet.predict = function(params) {
   w11 = params[3]; w12 = params[4];
   w21 = params[5]; w22 = params[6];
   c = params[7]; u1 = params[8]; u2 = params[9];
-  
+
   #!hwbegin TODO compute and return the output of the network
   z1 = tanh(b1 + data.x1 * w11 + data.x2 * w21)
   z2 = tanh(b2 + data.x1 * w12 + data.x2 * w22)
@@ -406,22 +406,22 @@ nnet.gradient = function(params) {
   w11 = params[3]; w12 = params[4];
   w21 = params[5]; w22 = params[6];
   c = params[7]; u1 = params[8]; u2 = params[9];
-  
+
   #!hwbegin TODO compute all the partial derivatives
   # first, we perform the forward pass
   z1in = b1 + data.x1 * w11 + data.x2 * w21
   z1out = tanh(z1in)
-  
+
   z2in = b2 + data.x1 * w12 + data.x2 * w22
   z2out = tanh(z2in)
-  
+
   fin = c + u1 * z1out + u2 * z2out
   fout = sigmoid(fin)
-  
+
   # now we start back-propagation through the loss and the output neuron
   dL_dfout = -data.y / (fout + 1e-15) + (1 - data.y) / (1 - fout + 1e-15)
   dfout_dfin = sigmoid(fin) * (1 - sigmoid(fin))
-  
+
   # compute the gradients for the parameters of the output layer
   dfin_dc = 1
   dfin_du1 = z1out
@@ -430,28 +430,28 @@ nnet.gradient = function(params) {
   dL_dc = mean(dL_dfout * dfout_dfin * dfin_dc)
   dL_du1 = mean(dL_dfout * dfout_dfin * dfin_du1)
   dL_du2 = mean(dL_dfout * dfout_dfin * dfin_du2)
-  
+
   # back-propagate through the neurons in the first hidden layer
   dfin_dz1out = u1
   dfin_dz2out = u2
-  
+
   dz1out_dz1in = 1 - tanh(z1in)^2
   dz2out_dz2in = 1 - tanh(z2in)^2
-  
+
   # and compute the derivatives of the parameters of the hidden layer
   dz1in_db1 = dz2in_db2 = 1
   dL_db1 = mean(dL_dfout * dfout_dfin * dfin_dz1out * dz1out_dz1in * dz1in_db1)
   dL_db2 = mean(dL_dfout * dfout_dfin * dfin_dz2out * dz2out_dz2in * dz2in_db2)
-  
+
   dz1in_dw11 = dz2in_dw12 = data.x1
   dL_dw11 = mean(dL_dfout * dfout_dfin * dfin_dz1out * dz1out_dz1in * dz1in_dw11)
   dL_dw12 = mean(dL_dfout * dfout_dfin * dfin_dz2out * dz2out_dz2in * dz2in_dw12)
-  
+
   dz1in_dw21 = dz2in_dw22 = data.x2
   dL_dw21 = mean(dL_dfout * dfout_dfin * dfin_dz1out * dz1out_dz1in * dz1in_dw21)
   dL_dw22 = mean(dL_dfout * dfout_dfin * dfin_dz2out * dz2out_dz2in * dz2in_dw22)
   #!hwend
-  
+
   # return the derivatives in the same order as the parameters vector
   c(
     dL_db1, dL_db2,
@@ -476,7 +476,7 @@ for(i in 1:9) {
   neg_params = c(params);
   neg_params[i] = neg_params[i] - eps;
   neg_value = nnet.loss(neg_params);
-  
+
   # compute loss when adding eps to parameter i
   pos_params = c(params);
   pos_params[i] = pos_params[i] + eps;
@@ -484,7 +484,7 @@ for(i in 1:9) {
 
   # compute the "empirical" gradient of parameter i
   fdiff_gradient = mean((pos_value - neg_value) / (2 * eps));
-  
+
   # error if difference is too large
   stopifnot(abs(gradient[i] - fdiff_gradient) < 1e-5);
 }
@@ -506,7 +506,7 @@ for(i in 1:10) {
   )
   final_loss = nnet.loss(optimized_params)
   cat("Loss", final_loss, ifelse(final_loss < 0.1, "*", ""), "\n")
-  
+
   if(final_loss < min_loss) {
     min_loss = final_loss
     best_params = optimized_params

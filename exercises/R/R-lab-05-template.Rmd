@@ -2,7 +2,7 @@
 title: "Lab 5"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-12-04
+date: 2020-11-16
 papersize: a4
 header-includes:
   - \usepackage{bbold}
@@ -153,7 +153,7 @@ In a similar way, the function `to.string` below should call itself to "stringif
 ```{r}
 to.string = function(node) {
   # return a vector of strings representing each parts of the node
-  
+
   if(node$op == "const") {
     # the string representation of a constant is its value
     c(node$value)
@@ -167,19 +167,19 @@ to.string = function(node) {
     operator = list(
       sum = "+", sub = "-", mul = "*", div = "/"
     )[[node$op]]
-    
+
     string_x = (
       #!hwbegin TODO use the function `to.string` to find the string\n# representation of the left part
       to.string(node$x)
       #!hwend
     )
-    
+
     string_y = (
       #!hwbegin TODO use the function `to.string` to find the string\n#  representation of the right part
       to.string(node$y)
       #!hwend
     )
-    
+
     c(
       "(",
       #!hwbegin TODO return the string representation of this operation\n#  by "assembling" the individual pieces
@@ -215,7 +215,7 @@ We can now write a function to compute the value of an expression given values f
 ```{r}
 compute = function(node, var_values) {
   # compute the numerical result of the node using the provided variable values
-  
+
   if(node$op == "const") {
     # the value of a constant is its value
     node$value
@@ -236,13 +236,13 @@ compute = function(node, var_values) {
       compute(node$x, var_values)
       #!hwend
     )
-    
+
     value_y = (
       #!hwbegin TODO compute the value for the right operand
       compute(node$y, var_values)
       #!hwend
     )
-    
+
     # add the values and return the result
     value_x + value_y
   }
@@ -303,7 +303,7 @@ differentiate = function(node, variable) {
   # VERY IMPORTANT: this function returns a graph, which can only contain nodes.
   # Therefore, you must use the functions n.const, n.sum, etc., instead of normal
   # numbers and operations.
-  
+
   if(node$op == "const") {
     # derivative of a constant is always zero
     n.const(0)
@@ -356,7 +356,7 @@ differentiate.sum = function(node, variable) {
     differentiate(node$y, variable)
     #!hwend
   )
-  
+
   # return a new node that sums the derivatives of the left and right part
   #
   # note that we are returning a new graph node that connects the two
@@ -385,7 +385,7 @@ differentiate.div = function(node, variable) {
   #!hwbegin TODO differentiate the quotient x / y
   # we differentiate only once and re-use this part of the graph
   dy = differentiate(node$y, variable)
-  
+
   n.div(
     n.sub(
        n.mul(
@@ -469,7 +469,7 @@ is.one = function(node) {
 
 simplify = function(node) {
   # simplifies the provided node, returning a new computational graph
-  
+
   if(node$op %in% c("const", "var")) {
     # constants and variables cannot be simplified
     node
@@ -512,7 +512,7 @@ simplify.sum = function(node) {
     simplify(node$y)
     #!hwend
   )
-  
+
   if(is.zero(simple_x)) {
     # rule: 0 + y = y
     simple_y
@@ -535,7 +535,7 @@ simplify.sub = function(node) {
   #!hwbegin TODO simplify x - y
   sx = simplify(node$x)
   sy = simplify(node$y)
-  
+
   if(is.zero(sx)) {
     # 0 - y = -1 * y
     n.mul(n.const(-1), sy)
@@ -559,7 +559,7 @@ simplify.mul = function(node) {
   #!hwbegin TODO simplify x * y
   sx = simplify(node$x)
   sy = simplify(node$y)
-  
+
   if(is.zero(sx) || is.zero(sy)) {
     # 0 * y = x * 0 = 0
     n.const(0)
@@ -587,13 +587,13 @@ simplify.div = function(node) {
   #!hwbegin TODO simplify x / y
   sx = simplify(node$x)
   sy = simplify(node$y)
-  
+
   if(is.zero(sx)) {
     # 0 / y = 0 (even when y = 0)
     n.const(0)
   }
   else if(is.zero(sy)) {
-    # cannot do x / 0 
+    # cannot do x / 0
     stop("division by zero")
   }
   else if(is.one(sy)) {
@@ -789,7 +789,7 @@ compute(z1out, list(
   b1 = 1.543385, w11 = 3.111573, w12 = -2.808800,
   b2 = 1.373085, w21 = 3.130452, w22 = -2.813466,
   c = -4.241453, u1 = 4.036489, u2 = 4.074885,
-  
+
   # values for the input
   x1 = 1, x2 = -1
 ))
@@ -802,7 +802,7 @@ Which should be about 0.9. We now have to compute the cross-entropy loss. For nu
 f_{in}-f_{in}\cdot y+\log(1+e^{-f_{in}})
 \end{equation}
 
-<!--solutionbegin-->
+<!--#!solutionbegin-->
 
 Solution:
 
@@ -819,7 +819,7 @@ y\cdot\log\left(1+e^{-f_{in}}\right)
 &\qquad=f_{in}-f_{in}\cdot y+\log(1+e^{-f_{in}})
 \end{align}
 
-<!--solutionend-->
+<!--#!solutionend-->
 
 ```{r}
 # this variable contains the label for the sample the network is predicting
@@ -887,7 +887,7 @@ values = as.list(sapply(param_names, function(p) {
 losses = list()
 for(e in 0:250) {
   epoch_loss = 0.0
-  
+
   for(j in 1:5) {
     # set the correct values for the inputs and label
     values$x1 = data.x1[j]
@@ -899,13 +899,13 @@ for(e in 0:250) {
       compute(loss, values)
       #!hwend
     )
-    
+
     gradients = sapply(param_names, function(p) {
       #!hwbegin TODO compute the gradient for parameter p
       compute(gradient_graphs[[p]], values)
       #!hwend
     })
-    
+
     values = as.list(sapply(param_names, function(p) {
       #!hwbegin TODO update parameter p with one step of gradient descent
       values[[p]] - 0.5 * gradients[[p]]
@@ -949,7 +949,7 @@ This exercise should improve your understanding of weight decay (or L2 regulariz
       - Through algebraic manipulation, obtain $\tilde{\textbf{w}}_i$ as a function of $\textbf{w}^*_i$.
       - Interpret this result geometrically.
       - Note: $\textbf{H}$ is square, symmetric, and positive definite, which means that its eigenvectors are pairwise orthogonal and its eigenvalues are positive (spectral theorem).
-  
+
   2. Consider a linear network of the form $y=\textbf{w}^T\textbf{x}$ and the mean squared error as a loss function. Assume that every observation is corrupted with Gaussian noise $\epsilon\sim\mathcal{N}(\textbf{0}, \sigma^2\textbf{I})$. Compute the expectation of the gradient under $\epsilon$ and, show that adding gaussian noise to the inputs has the same effect of weight decay.
 
 
@@ -1061,7 +1061,7 @@ The expectation with respect to $\epsilon$ is
 -\epsilon_i\hat{y}+\epsilon_i\textbf{w}^T\textbf{x}+\epsilon_i\textbf{w}^T\epsilon
 \right] \\
 &\stackrel{*}{=} \frac{\partial E}{\partial w_i}+\sum_j w_j\mathbb{E}\left[\epsilon_i\epsilon_j\right] \\
-&= \frac{\partial E}{\partial w_i}+w_i\sigma^2    
+&= \frac{\partial E}{\partial w_i}+w_i\sigma^2
 \end{align*}
 
 Where we used $\partial E/\partial w_i$ to denote the gradient of the error of the de-noised sample, and the step marked with $*$ follows because $\mathbb{E}[\epsilon_i\epsilon_j]=\text{Cov}\left[\epsilon_i, \epsilon_j\right]=\delta_{ij}\sigma^2$.

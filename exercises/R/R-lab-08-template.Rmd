@@ -2,7 +2,7 @@
 title: "Lab 8"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2021-01-08
+date: 2021-12-07
 papersize: a4
 ---
 
@@ -229,6 +229,8 @@ history = fit_generator(
   verbose = 0,
   #!hwend
 )
+
+plot(history)
 ```
 
 ```{r, echo=FALSE}
@@ -299,6 +301,8 @@ history = fit_generator(
   validation_steps = validation_steps
   #!hwend
 )
+
+plot(history)
 ```
 
 ```{r, echo = FALSE}

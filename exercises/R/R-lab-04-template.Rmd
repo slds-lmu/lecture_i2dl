@@ -2,7 +2,7 @@
 title: "Lab 4"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-11-20
+date: 2020-11-09
 papersize: a4
 header-includes:
   - \usepackage{bbold}
@@ -314,32 +314,32 @@ nnet.new = function(layer_sizes) {
     loss = mse,
     loss_derivative = mse_derivative
   )
-  
+
   # create random weight matrices and bias vectors
   last_size = layer_sizes[1]  # the first element is the number of inputs
   for(l in 2:length(layer_sizes)) {
     this_size = layer_sizes[l]
-    
+
     # weights are initialize using the the famous "Glorot" initialization
     b = sqrt(6 / (this_size + last_size))
     nnet$weights[[l - 1]] = matrix(
       runif(last_size * this_size, -b, b), ncol = this_size
     )
-    
+
     # biases are initialized to zero
     nnet$biases[[l - 1]] = rep(0, this_size)
-    
+
     # set the activation
     nnet$activations[[l - 1]] = tanh
     nnet$activations_derivatives[[l - 1]] = tanh_derivative
-    
+
     last_size = this_size
   }
-  
+
   # change the output activation to sigmoid
   nnet$activations[[length(nnet$activations)]] = sigmoid
   nnet$activations_derivatives[[length(nnet$activations)]] = sigmoid_derivative
-  
+
   nnet
 }
 
@@ -397,7 +397,7 @@ Now, we code backpropagation to compute the gradients. Use the vectorized formul
 nnet.gradients = function(nnet, x, y) {
   # x is be a matrix with samples on rows
   # y is a vector with the labels
-  
+
   n_layers = length(nnet$weights)
   activations = list(x)
   pre_activations = list(x)
@@ -410,7 +410,7 @@ nnet.gradients = function(nnet, x, y) {
   }
   #!hwend
   loss = nnet$loss(y, activations[[length(activations)]])
-  
+
   weights_gradients = list()
   biases_gradients = list()
   #!hwbegin TODO compute the gradients
@@ -421,7 +421,7 @@ nnet.gradients = function(nnet, x, y) {
   for(l in n_layers:1) {
     weights_gradients[[l]] = t(activations[[l]]) %*% deltas  # Eq. 6
     biases_gradients[[l]] = colSums(deltas)  # Eq. 7
-    
+
     if(l > 1) {
       # Eq. 8
       deltas = deltas %*% t(
@@ -430,13 +430,13 @@ nnet.gradients = function(nnet, x, y) {
     }
   }
   #!hwend
-  
+
   # make sure the gradients have the correct size
   for(l in 1:n_layers) {
     stopifnot(dim(nnet$weights[[l]]) == dim(weights_gradients[[l]]))
     stopifnot(length(nnet$biases[[l]]) == length(biases_gradients[[l]]))
   }
-  
+
   # return gradients as a list
   list(
     loss = loss,
@@ -462,7 +462,7 @@ nnet.gradient_descent_step = function(nnet, gradients, learning_rate) {
     nnet$weights[[l]] = (
       nnet$weights[[l]] - learning_rate * gradients$weights_gradients[[l]]
     )
-    
+
     nnet$biases[[l]] = (
       nnet$biases[[l]] - learning_rate * gradients$biases_gradients[[l]]
     )
@@ -474,7 +474,7 @@ nnet.gradient_descent_step = function(nnet, gradients, learning_rate) {
 
 nnet.train = function(nnet, x, y, n_epochs, learning_rate) {
   losses = list()
-  
+
   #!hwbegin TODO iterate over the dataset for the given number of epochs and\n# modify the weights at each epoch.\n# use all the data to compute the gradients
   for(e in 1:n_epochs) {
     gradients = nnet.gradients(nnet, x, y)
@@ -482,7 +482,7 @@ nnet.train = function(nnet, x, y, n_epochs, learning_rate) {
     losses[[length(losses) + 1]] = gradients$loss
   }
   #!hwend
-  
+
   list(
     losses = unlist(losses),
     nnet = nnet

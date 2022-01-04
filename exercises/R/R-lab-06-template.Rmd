@@ -2,7 +2,7 @@
 title: "Lab 6"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-12-11
+date: 2020-11-23
 papersize: a4
 ---
 

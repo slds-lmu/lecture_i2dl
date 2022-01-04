@@ -2,7 +2,7 @@
 title: "Lab 7"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2020-12-18
+date: 2020-11-30
 papersize: a4
 header-includes:
   - \usepackage{bbold}
@@ -199,10 +199,10 @@ apply_sobel <- function(conv_fn) {
   # convolve both filters on the image
   conv_x = conv_fn(img, sobel_x)
   conv_y = conv_fn(img, sobel_y)
-  
+
   # combine the two convolutions
   conv = sqrt(conv_x^2 + conv_y^2)
-  
+
   # normalize maximum value to 1
   conv / max(conv)
 }
@@ -242,7 +242,7 @@ our_conv <- function(image, kernel) {
     nrow(image) - nrow(kernel) + 1
     #!hwend
   )
-  
+
   result_cols = (
     #!hwbegin TODO compute the number of columns of the result
     ncol(image) - ncol(kernel) + 1
@@ -253,7 +253,7 @@ our_conv <- function(image, kernel) {
   vec = apply(expand.grid(1:result_rows, 1:result_cols), 1, function(pos) {
     compute_convolution_at_position(pos[1], pos[2], image, kernel)
   })
-  
+
   # reshape to a matrix
   matrix(vec, nrow = result_rows, ncol = result_cols)
 }
@@ -441,7 +441,7 @@ conv_gradient_wrt_input <- function(dloss_dy, kernel) {
     nrow(dloss_dy) + nrow(kernel) - 1
     #!hwend
   )
-  
+
   image_cols = (
     #!hwbegin TODO compute the number of columns of the original image
     ncol(dloss_dy) + ncol(kernel) - 1
@@ -457,20 +457,20 @@ conv_gradient_wrt_input <- function(dloss_dy, kernel) {
     ll = max(1, j - image_cols + ncol(kernel))
     uk = min(nrow(kernel), i)
     ul = min(ncol(kernel), j)
-    
+
     gradient_ij = 0.0
     for(k in lk:uk) {
       for(l in ll:ul) {
         a = i - k + 1
         b = j - l + 1
-        
+
         gradient_ij = gradient_ij + dloss_dy[a, b] * kernel[k, l]
       }
     }
     gradient_ij
     #!hwend
   })
-  
+
   matrix(vec, nrow = image_rows, ncol = image_cols)
 }
 
@@ -507,7 +507,7 @@ img[i, j] = img[i, j] + eps
 # NB: we sum the differences to get a more accurate result
 empirical_gradient = sum(conv_pos^2 - conv_neg^2) / (2 * eps)
 
-# compare empirical and analytical gradients 
+# compare empirical and analytical gradients
 c(empirical_gradient, input_gradient[i, j])
 ```
 
@@ -528,7 +528,7 @@ losses = lapply(1:250, function(i) {
   grad = conv_gradient_wrt_input(2 * conv, sobel_x)
   maxim <<- maxim + 0.01 * grad
   #!hwend
-  
+
   loss
 })
 
