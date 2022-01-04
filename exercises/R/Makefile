@@ -13,8 +13,8 @@ generated/R-lab-%-questions.Rmd: R-lab-%-template.Rmd make-handouts.py
 generated/R-lab-%-questions.pdf: generated/R-lab-%-questions.Rmd make-handouts.py
 	Rscript -e 'rmarkdown::render("generated/R-lab-$*-questions.Rmd")'
 
-generated/R-lab-%-solutions.Rmd: lab%-template.Rmd make-handouts.py
-	python make-handouts.py lab$*-template.Rmd
+generated/R-lab-%-solutions.Rmd: R-lab-%-template.Rmd make-handouts.py
+	python make-handouts.py R-lab-$*-template.Rmd
 
 generated/R-lab-%-solutions.pdf: generated/R-lab-%-solutions.Rmd make-handouts.py
 	Rscript -e 'rmarkdown::render("generated/R-lab-$*-solutions.Rmd")'
