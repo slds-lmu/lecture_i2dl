@@ -2,7 +2,7 @@
 title: "Lab 10"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2021-01-22
+date: 2022-01-18
 papersize: a4
 ---
 
@@ -41,7 +41,7 @@ x_train = (
 
 x_test =(
   #!hwbegin TODO pad the testing reviews to the same length we used above
-  pad_sequences(x_test, 250) 
+  pad_sequences(x_test, 250)
   #!hwend
 )
 ```
@@ -65,298 +65,199 @@ model %>% compile(
 summary(model)
 ```
 
-
-
 ```{r}
 hist = model %>% fit(
   x_train,
   y_train,
   batch_size = 32,
-  epochs = 8,
-  verbose = 1,
+  epochs = 6,
+  verbose = 0,
   validation_data = list(x_test, y_test)
 )
-```
 
-```{r}
 plot(hist)
 ```
 
 The model seems to be learning more easily than the simple baseline we created time ago, which had an accuracy of 85-88% on the test data. Let it train for longer and tune the architecture above to reach as high accuracy as possible! (note that evaluating on the same data that you used for early stopping is cheating).
 
 ## Exercise 2
-In this exercise, we are going to implement an autoencoder and train it on the MNIST dataset. We will do this in Tensorflow, the library underlying Keras.
 
-Tensorflow is a general numerical computation library that is able to automatically differentiating expressions by using a computational graph, just like we did some time ago. In practice, this means that any optimization problem solvable using analytic differentiation can be coded in Tensorflow. It also handles running the code on GPU and/or distributing it across a cluster of machines.
+In this exercise, we are going to build a model that is able to sum two numbers, each given as a sequence of images of handwritten digits. The network will first use a convolutional encoder to transform each digit into a feature vector. These feature vectors will then be processed by a LSTM that will produce as output each digit of the sum.
 
-You should have installed Tensorflow together with Keras, if not refer to this guide [here](https://tensorflow.rstudio.com/installation/).
+In doing this, we will learn how to use Keras's functional API to create models with more than one inputs, as well as how to apply the same model independently to each item of a sequence.
+
+### Dataset
+We are now going to create a synthetic dataset using images from MNIST.
 
 ```{r}
-library(tensorflow)
 library(keras)
 
 mnist = dataset_mnist()
+
 x_train = mnist$train$x / 255
-input_size = 28 * 28
-dim(x_train) <- c(nrow(x_train), input_size)
+y_train = to_categorical(mnist$train$y)
+dim(x_train) <- c(nrow(x_train), 28, 28)
 ```
 
-As an introduction, we will train PCA, i.e. an autoencoder with linear encoder $\textbf{z}=\textbf{Ex}$ and linear decoder: $\textbf{x'}=\textbf{Dz}$.
-
-The first step is to create variables for $\textbf{E}$ and $\textbf{D}$.
+The first function we need is used to encode all digits of a number into a one-hot representation. From here on, we use `max_len` to indicate the maximum number of digits in a number. If a number has fewer digits we will pad it with zeros.
 
 ```{r}
-latent_size = 64
+encode_number_to_onehot <- function(num, max_len) {
+  num_str <- sprintf(paste("%0", max_len, "d", sep=""), num)
 
-weights_encoder = tf$Variable(
-  matrix(
-    rnorm(input_size * latent_size,  sd=sqrt(6 / (latent_size + input_size))),
-    nrow = input_size
-  )
+  encoded <- array(0, dim=c(max_len, 10))
+  for(i in 1:max_len) {
+    n <- as.integer(substring(num_str, i, i))
+    encoded[i,n+1] <- 1
+  }
+
+  encoded
+}
+
+encode_number_to_onehot(195, 4)
+```
+We now write a function to extract from MNIST the images of each digit in a given number.
+
+```{r}
+encode_number_to_images <- function(num, max_len) {
+  images <- array(0, dim=c(max_len, 28, 28, 1))
+  num_str <- sprintf(paste("%0", max_len, "d", sep=""), num)
+  for(i in 1:max_len) {
+    n <- as.integer(substring(num_str, i, i))
+    digit_idx <- (1:nrow(x_train))[y_train[,n+1] == 1]
+    img_idx <- sample(digit_idx, 1)
+    images[i,,,1] <- x_train[img_idx,,]
+  }
+
+  images
+}
+```
+
+Let's now create a synthetic dataset with 25,000 random pairs of numbers and their sum.
+
+```{r}
+make_dataset <- function(n_samples, max_len) {
+  x1 <- array(0, dim=c(n_samples, max_len, 28, 28, 1))
+  x2 <- array(0, dim=c(n_samples, max_len, 28, 28, 1))
+  yy <- array(0, dim=c(n_samples, max_len, 10))
+
+  for(i in 1:n_samples) {
+    # ensure the sum always has at most max_len digits
+    n1 <- sample.int(10**max_len / 2 - 1, 1)
+    n2 <- sample.int(10**max_len / 2 - 1, 1)
+
+    #!hwbegin TODO encode n1 and n2 to images and save them into x1 and x2
+    x1[i,,,,] <- encode_number_to_images(n1, max_len)
+    x2[i,,,,] <- encode_number_to_images(n2, max_len)
+    #!hwend
+
+    #!hwbegin TODO encode the sum of n1 and n2 as one-hot and save into yy
+    yy[i,,] <- encode_number_to_onehot(n1 + n2, max_len)
+    #!hwend
+  }
+
+  list(x1=x1, x2=x2, y=yy)
+}
+
+max_len = 3
+train_set <- make_dataset(25000, max_len)
+```
+
+### The model
+
+Let's now see how to create the model in Keras.
+
+This network will have two inputs, one for each number. The numbers have three digits, each of which is an image of size 28 x 28 x 1.
+To use the functional API, we need to manually create the input layers and specify the proper input shape (as we always did):
+
+```{r}
+in_shape = c(
+  #!hwbegin TODO determine the input shape
+  max_len, 28, 28, 1
+  #!hwend
 )
 
-weights_decoder = tf$Variable(
-  matrix(
-    rnorm(input_size * latent_size,  sd=sqrt(6 / (latent_size + input_size))),
-    nrow = latent_size
-  )
+first_number_input <- layer_input(shape = in_shape)
+second_number_input <- layer_input(shape = in_shape)
+```
+
+The network will use the same convolutional encoder for all digits in both numbers. Let us first define this encoder as its own model, a normal CNN:
+
+```{r}
+digit_encoder <- keras_model_sequential() %>%
+  #!hwbegin TODO add some convolutional and pooling layers as you see fit
+  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_conv_2d(filters = 128, kernel_size = c(3, 3), activation = "relu") %>%
+  #!hwend
+  layer_global_average_pooling_2d()
+```
+
+This CNN will transform each digit from a tensor of shape (28, 28, 1) to a vector of size, for example, 64. In order to apply this encoder to all digits of a number, we need to use a special layer called `time_distributed` (read its [documentation](https://keras.rstudio.com/reference/time_distributed.html)!). This is how it is used:
+
+```{r}
+first_number_input %>% time_distributed(digit_encoder)
+```
+
+The input of this sequence of transformations has shape (3, 28, 28, 1) while its output has shape (3, 64). This is because each (28, 28, 1) slice is processed by the CNN into a vector with 64 elements.
+
+After we apply the CNN to both numbers, we need to "merge" the two sequence of vectors. There are several options here, here we choose to concatenate the two vectors in each time-step to produce a single vector of size 128:
+
+```{r}
+encoded_numbers <- layer_concatenate(list(
+  #!hwbegin TODO apply the encoder to both input numbers
+  first_number_input %>% time_distributed(digit_encoder),
+  second_number_input %>% time_distributed(digit_encoder)
+  #!hwend
+))
+```
+
+This will result in a tensor of shape (3, 128). Let's feed this into a bidirectional LSTM, followed by a dense layer with to perform the final classification for each digit of the result. In order to do so, you may find the `bidirectional` layer useful (documentation [here](https://keras.rstudio.com/reference/bidirectional.html)). Also be mindful of returning all hidden states from the LSTM, not only the last one. Refer again to the [documentation](https://keras.rstudio.com/reference/layer_lstm.html).
+
+```{r}
+model_output <- encoded_numbers %>%
+  #!hwbegin create the final classifier
+  layer_dropout(0.5) %>%
+  bidirectional(layer_lstm(units = 64, return_sequences = TRUE)) %>%
+  layer_dense(10, "softmax")
+  #!hwend
+```
+
+We now have all components of the model. Let's then create and compile it:
+
+```{r}
+model <- keras_model(
+  inputs = list(first_number_input, second_number_input),
+  outputs = model_output
 )
+
+model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = "adam",
+  metrics=c("accuracy")
+)
+
+model
 ```
-These two variables are managed by Tensorflow, and are called _tensors_:
+### Training and validation
+
+Finally, let's train this model on the synthetic dataset we created earlier. Since the model has two inputs, we must pass a `list` with two elements to `fit`:
 
 ```{r}
-weights_encoder
-```
-
-Tensorflow can only operate on data that is stored inside a `tf$Variable`. If you do not create one yourself, Tensorflow will do it automatically, but this will considerably slow down your program.
-
-Now, we can train the autoencoder for one epoch.
-
-```{r}
-optimizer = tf$optimizers$Adam(learning_rate = 0.001)
-
-batch_size = 32
-num_batches = floor(nrow(x_train) / batch_size)
-
-# tensorflow is very sensitive about the data types of variables:
-# all operands must be of the same type, and you have to take care
-# of this. the default data type is tf$float64.
-#
-# try to comment the following line and get familiar with the error message
-# when you try to run this chunk of code, because you will encounter it often.
-bs = tf$cast(batch_size, tf$float64)
-
-for(i in 1:num_batches) {
-  batch = x_train[((i - 1) * batch_size):(i * batch_size - 1),]
-  
-  # gradient tapes keep track of the operations that are performed on tensors
-  with(tf$GradientTape() %as% tape, {
-    # all the computations need to be performed inside this block,
-    # otherwise the tape will not be able to compute the gradients
-    
-    # here we perform the forward pass, two simple matrix multiplications
-    latent = tf$matmul(batch, weights_encoder)
-    reconstruction = tf$matmul(latent, weights_decoder)
-    
-    # then compute the mean squared error
-    loss = tf$reduce_sum(tf$square(reconstruction - batch)) / bs
-  })
-  
-  # now we use the gradient tape to compute the gradient of the loss
-  # with respect to the two matrices
-  variables = list(weights_encoder, weights_decoder)
-  gradients = tape$gradient(loss, variables)
-  
-  # finally, we pass the gradients and the respective variables to the optimizer
-  # which will update the variables by performing one step of gradient descent
-  optimizer$apply_gradients(list(
-    list(gradients[[1]], variables[[1]]),
-    list(gradients[[2]], variables[[2]])
-  ))
-  
-  # we print the loss every once in a while
-  if(i %% 250 == 0) {
-    cat("Batch", i, "- Loss:", loss$numpy(), "\n")
-    flush.console()
-  }
-}
-```
-Let us now create a more advanced autoencoder. Tensorflow includes utilities to load and transform data, which is especially convenient when your dataset does not fit in memory and you have to load it from disk and transform it on the fly as training progresses.
-
-```{r}
-if(!require(tfdatasets)) {
-  install.packages("tfdatasets")
-  library(tfdatasets)
-}
-
-batch_size = 32
-num_epochs = 15
-
-train_dataset = mnist$train$x %>%
-  # with this function, we create a "dataset" from matrices that we have in memory
-  # in particular, `mnist$train$x` is a 3D tensor of shape (60000, 28, 28)
-  # this function creates samples by moving along the first dimension
-  # i.e. the i-th sample is `mnist$train$x[i,,]`
-  tensor_slices_dataset() %>%
-  
-  # here we transform every element of the dataset
-  dataset_map(function(x) {
-    # we first flatten it to a vector
-    x = k_flatten(x)
-    
-    # then convert it to smaller precision 
-    x = tf$cast(x, tf$float32)
-    
-    # finally we normalize from 0 to 1
-    x / 255
-  }) %>% 
-  
-  # shuffle the data at the beginning of every epoch
-  dataset_shuffle(nrow(mnist$train$x)) %>%
-  
-  # iterate over the dataset for a given number of epochs
-  dataset_repeat(num_epochs) %>%
-  
-  # split the dataset into batches of the given size
-  dataset_batch(batch_size)
-```
-
-Now, we can use a simple for-loop to iterate over this dataset, and we will receive batches with the right size and the transformations we requested.
-
-Before doing this, let us define more elaborate encoders and decoders. Try to have several dense layers and experiment with different activation functions (e.g. `tf$nn$tanh`, `tf$nn$relu`, etc.).
-
-```{r}
-# utility functions to create the weights and biases for a dense layer
-make_weights = function(input_size, output_size) {
-  b = sqrt(6 / (output_size + input_size))
-  weights = matrix(
-    runif(input_size * output_size,  -b, b),
-    nrow = input_size
-  )
-  
-  tf$Variable(weights, dtype = tf$float32)
-}
-
-make_bias = function(size) {
-  tf$Variable(tf$zeros(c(1, size), dtype=tf$float32))
-}
-
-#!hwbegin TODO create the parameters needed for the encoder
-ew1 = make_weights(784, 256)
-eb1 = make_bias(256)
-ew2 = make_weights(256, 64)
-eb2 = make_bias(64)
-#!hwend
-
-#!hwbegin TODO create the parameters needed for the encoder
-dw1 = make_weights(64, 256)
-db1 = make_bias(256)
-dw2 = make_weights(256, 784)
-db2 = make_bias(784)
-#!hwend
-
-
-# now, create functions to encode and decode the inputs / latent variables
-# using the parameters defined above
-
-encoder = function(inputs) {
-  #!hwbegin TODO encode the inputs
-  x = tf$matmul(inputs, ew1) + eb1
-  x = tf$nn$tanh(x)
-  tf$matmul(x, ew2) + eb2
+hist <- model %>% fit(
+  list(train_set$x1, train_set$x2),
+  train_set$y,
+  #!hwbegin TODO insert appropriate parameters for fitting
+  validation_split = 0.2,
+  epochs = 20,
+  batch_size = 32,
+  verbose = 0
   #!hwend
-}
+)
 
-decoder = function(latent) {
-  #!hwbegin TODO decode the latent variables
-  x = tf$matmul(latent, dw1) + db1
-  x = tf$nn$tanh(x)
-  tf$matmul(x, dw2) + db2
-  #!hwend
-}
+plot(hist)
 ```
 
-
-When we trained PCA earlier, Tensorflow created the computational graph gradually as each operation was executed. After each operation completed, the results were returned to R and sent to the next operation. This is very inefficient, and it is possible to create the graph at once from the R code.
-
-```{r}
-# this library automatically creates the computational graph from the R code
-if(!require(tfautograph)) {
-  install.packages("tfautograph")
-  library(tfautograph)
-}
-
-optimizer = tf$optimizers$Adam(learning_rate = 0.01)
-
-training_step = autograph(function(batch) {
-  #!hwbegin TODO perform the forward pass, computing the loss.\n# remember to use the gradient tape!
-  with(tf$GradientTape() %as% tape, {
-    reconstruction = decoder(encoder(batch))
-    loss = tf$reduce_sum(tf$square(reconstruction - batch)) / as.numeric(nrow(batch))
-  })
-  #!hwend
-  
-  #!hwbegin TODO compute the gradients
-  variables = list(ew1, eb1, ew2, eb2, dw1, db1, dw2, db2)
-  gradients = tape$gradient(loss, variables)
-  #!hwend
-  
-  #!hwbegin TODO do one step of gradient descent
-  # mapply(list, gradients, variables, SIMPLIFY=FALSE)
-  optimizer$apply_gradients(list(
-    list(gradients[[1]], variables[[1]]),
-    list(gradients[[2]], variables[[2]]),
-    list(gradients[[3]], variables[[3]]),
-    list(gradients[[4]], variables[[4]]),
-    list(gradients[[5]], variables[[5]]),
-    list(gradients[[6]], variables[[6]]),
-    list(gradients[[7]], variables[[7]]),
-    list(gradients[[8]], variables[[8]])
-  ))
-  #!hwend
-  
-  loss
-})
-
-
-# simply wrap the top level function inside autograph to
-# automatically generate the computational graph
-train = autograph(function(num_batches) {
-  i = 0
-  for(batch in train_dataset) {
-    loss = training_step(batch)
-    
-    if(i %% 250 == 0) {
-      cat("Batch", i, "- Loss:", loss$numpy(), "\n")
-      flush.console()
-    }
-    
-    i = i + 1
-    if(i >= num_batches) {
-      break
-    }
-  }
-})
-
-
-train(1500)
-```
-
-Finally, let us inspect the reconstruction for an image:
-
-```{r}
-img = tf$cast(matrix(x_train[5,], nrow = 1), tf$float32)
-dec = decoder(encoder(img))$numpy()
-rec = matrix(dec, nrow = 28)
-  
-rec[rec < 0] = 0
-rec[rec > 1] = 1
-
-grid::grid.raster(rec, interpolate = FALSE)
-```
-
-Which does not look too different from the input:
-
-```{r}
-grid::grid.raster(matrix(x_train[5,], nrow = 28), interpolate = FALSE)
-```
+It is amazing what we achieved with such a small (for the standard of deep learning) model and dataset!
