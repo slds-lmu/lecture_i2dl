@@ -2,7 +2,7 @@
 title: "Lab 11"
 output: pdf_document
 author: Emilio Dorigatti
-date: 2021-01-29
+date: 2022-01-25
 papersize: a4
 ---
 
@@ -163,7 +163,7 @@ OurDense <- R6::R6Class(
     activation = NULL,
     weights = NULL,
     bias = NULL,
-    
+
     # this function receives the parameters for the layer
     # and saves them in the variables above. in order to access
     # these variables, you must always use "self$" before their name
@@ -171,24 +171,24 @@ OurDense <- R6::R6Class(
       self$units = units
       self$activation = activation
     },
-    
+
     # this function creates the weight matrix and the bias vector.
     # keras conveniently provides an utility function to do so, `add_weight`,
     # which can accept other parameters, such as regularizers, etc.
     build = function(input_shape) {
       self$weights <- self$add_weight(
-        name = 'weights', 
+        name = 'weights',
         shape = list(input_shape[[2]], self$units),
         initializer = initializer_glorot_normal(),
       )
-      
+
       self$bias <- self$add_weight(
         name = 'bias',
         shape = list(self$units),
         initializer = initializer_constant(),
       )
     },
-    
+
     # this function computes the output from the input.
     # Keras provides functions to do this through the so-called
     # "backend", which is just a wrapper around Tensorflow.
@@ -197,7 +197,7 @@ OurDense <- R6::R6Class(
     call = function(x, mask = NULL) {
       self$activation(k_dot(x, self$weights) + self$bias)
     },
-    
+
     # this function computes the output shape
     compute_output_shape = function(input_shape) {
       list(input_shape[[1]], self$units)
@@ -210,8 +210,8 @@ OurDense <- R6::R6Class(
 # here you have to gather all parameters that are needed for the `initialize` method in
 # the class above, as well as the input shape.
 layer_our_dense <- function(object, units, activation, input_shape = NULL) {
-  
-  # `create_layer` function is provided by keras, we pass the layer class, the previous 
+
+  # `create_layer` function is provided by keras, we pass the layer class, the previous
   # object in the network, and a list of parameters to create the layer.
   create_layer(OurDense, object, list(
     units = as.integer(units),  # do not forget
@@ -224,7 +224,7 @@ layer_our_dense <- function(object, units, activation, input_shape = NULL) {
 Now we can use this as any other Keras layer:
 
 ```{r}
-model <- keras_model_sequential() %>% 
+model <- keras_model_sequential() %>%
   layer_our_dense(units = 32, activation = activation_relu,
                   input_shape = tf$TensorShape(as.integer(784))) %>%
   layer_our_dense(units = 10, activation = activation_softmax)
@@ -253,40 +253,40 @@ Let us start from the custom layer.
 kl_weight = k_variable(1.0)
 
 SamplingLayer <- R6::R6Class("SamplingLayer",
-                                  
+
   inherit = KerasLayer,
-  
+
   public = list(
     # we do not need any parameters for this layer
     initialize = function() { },
-    
+
     build = function(input_shape) { },
-    
+
     call = function(x, mask = NULL) {
       # here `x` is a list of two matrices,
       # the mean and log variance of the latent codes.
       # (samples are on rows and latent dimensions on columns)
       mu = x[[1]]
       log_var = x[[2]]
-      
+
       kl_loss = (
         #!hwbegin TODO compute the KL divergence according to equation 2\n# some useful functions are k_sum, k_exp and k_square
         -k_mean(k_sum(1 + log_var - k_square(mu) - k_exp(log_var), axis=-1)) / 2
         #!hwend
       )
-      
+
       self$add_loss(
         kl_weight * kl_loss / 784  # scale the KL to a magnitude comparable to the MSE
       )
-      
+
       # generate the random noise
       eps = k_random_normal(k_shape(mu))
-      
+
       #!hwbegin TODO compute the latent code using the reparametrization trick
       mu + eps * k_exp(log_var / 2)
       #!hwend
     },
-    
+
     compute_output_shape = function(input_shape) {
       # `input_shape` is a list of lists, i.e.
       # list(list(batch_size, mean_size), list(batch_size, std_size))
@@ -307,7 +307,7 @@ We now create the model, starting from the encoder.
 ```{r}
 latent_dim = 32
 hidden_dim = 512
-sample_dim = 784 
+sample_dim = 784
 
 input  = layer_input(shape = list(sample_dim))
 
@@ -376,23 +376,23 @@ Creating a custom callback is very similar to creating a custom layer (see the d
 ```{r}
 KlAnnealingCallback <- R6::R6Class("KlAnnealingCallback",
   inherit = KerasCallback,
-  
+
   public = list(
     epoch_start = NULL,
     duration_epochs = NULL,
     variable = NULL,
-    
+
     initialize = function(epoch_start, duration_epochs, variable) {
       self$epoch_start = epoch_start
       self$duration_epochs = duration_epochs
       self$variable = variable
     },
-    
+
     # no kl at the beginning of training
     on_train_begin = function(logs = list()) {
       self$variable$assign(0.0)
     },
-    
+
     # update the weight at the beginning of every epoch
     on_epoch_begin = function(epoch, logs = list()) {
       epoch = epoch + 1  # it starts from zero
@@ -405,7 +405,7 @@ KlAnnealingCallback <- R6::R6Class("KlAnnealingCallback",
           pmin(1, (epoch - self$epoch_start) / self$duration_epochs)
           #!hwend
         )
-        
+
         self$variable$assign(new_weight)
         message("kl weight is ", new_weight, " at epoch ", epoch)
       }
