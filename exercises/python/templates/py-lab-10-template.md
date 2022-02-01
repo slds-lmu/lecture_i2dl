@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.13.5
   kernelspec:
     display_name: Python 3
     language: python
@@ -23,7 +23,6 @@ jupyter:
 ```python pycharm={"name": "#%%\n"}
 import string
 from collections import Counter
-from itertools import chain
 from math import ceil
 from typing import List, Optional, Tuple, Dict
 
@@ -36,7 +35,6 @@ from torch.optim import Adam, Optimizer
 from torch.utils.data import DataLoader, Dataset
 from torchtext.datasets import IMDB
 from torchvision.datasets import MNIST
-from torchvision.transforms import ToTensor
 from torchvision.utils import make_grid
 
 set_matplotlib_formats('png', 'pdf')
@@ -99,6 +97,7 @@ def tokenize(data_list: List[str]) -> List[List[str]]:
         token_list.append(data_string.split())
     return token_list
 
+
 train_x = tokenize(train_x)
 test_x = tokenize(test_x)
 
@@ -128,6 +127,7 @@ class CountVectorizer:
 
     def transform_to_str(self, token_list: List[int]) -> List[str]:
         return [self.vec_to_str_map.get(rank) for rank in token_list]
+
 
 train_words = [word for word_list in train_x for word in word_list]
 test_words = [word for word_list in test_x for word in word_list]
@@ -160,6 +160,7 @@ def filter_word_ranks(
             output.append(word_rank)
             seq_len += 1
     return output
+
 
 train_x = [filter_word_ranks(word_list) for word_list in train_x]
 test_x = [filter_word_ranks(word_list) for word_list in test_x]
@@ -215,7 +216,6 @@ test_x = (
     pad_sequence(test_x, batch_first=True).to(device)
     #!TAG HWEND
 )
-
 
 train_y = torch.tensor(train_y, dtype=torch.float, device=device)
 test_y = torch.tensor(test_y, dtype=torch.float, device=device)
@@ -351,7 +351,6 @@ def train(
         epochs: int,
         batch_size: int
 ) -> Dict:
-
     metrics: Dict = {
         'train_loss': [],
         'train_acc': [],
@@ -364,7 +363,6 @@ def train(
 
     train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size)
-
 
     for ep in range(1, epochs + 1):
         total_loss = 0
@@ -388,11 +386,11 @@ def train(
 
             if batch_idx % 10 == 0:
                 print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_train_batches, float(batch_loss)), end='\r')
+                      .format(batch_idx, num_train_batches, float(batch_loss)),
+                      end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
-
 
         ep_train_loss = total_loss / len(train_dataset)
         ep_train_acc = num_correct / len(train_dataset)
@@ -430,18 +428,17 @@ def train(
 
         print('EPOCH:\t{:5}\tTRAIN LOSS:\t{:.3f}\tTRAIN ACCURACY:\t{:.3f}\tTEST LOSS:\t'
               '{:.3f}\tTEST ACCURACY:\t{:.3f}'
-              .format(ep, ep_train_loss, ep_train_acc,ep_test_loss, ep_test_acc,
-                      end='\r'))
+              .format(ep, ep_train_loss, ep_train_acc, ep_test_loss, ep_test_acc))
     return metrics
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-We declare model, optimizer, datasets, loss, epochs, batch size and then train!
+We declare model, optimizer, datasets, loss, epochs, batch size and then start training!
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-epochs = 15
+epochs = 10
 batch_size = 32
 
 model = (
@@ -454,7 +451,7 @@ model = (
 optimizer = (
     #!TAG HWBEGIN
     #!MSG TODO: Define an optimizer.
-    Adam(model.parameters(), lr=1e-2)
+    Adam(model.parameters(), lr=5e-3)
     #!TAG HWEND
 )
 
@@ -479,7 +476,6 @@ test_dataset = (
     #!TAG HWEND
 )
 
-
 metrics = train(model, loss, optimizer, train_dataset, test_dataset, epochs, batch_size)
 ```
 
@@ -502,7 +498,460 @@ def get_training_progress_plot(
     ax2.set_title('Accuracy')
     ax2.plot(train_accs, label='Train Accuracy')
     ax2.plot(val_accs, label='Test Accuracy')
+    ax2.set_ylim(0, 1)
     ax2.legend()
+
+
+get_training_progress_plot(
+    metrics['train_loss'],
+    metrics['train_acc'],
+    metrics['test_loss'],
+    metrics['test_acc'],
+)
+```
+
+<!-- #region -->
+The model seems to be learning more easily than the simple baseline we created time ago,
+which had an accuracy of 85-88% on the test data.
+Let it train for longer and tune the
+architecture above to reach as high accuracy as possible! (note that evaluating on the
+same data that you used for early stopping is cheating).
+
+
+## Exercise 2
+
+In this exercise, we are going to build a model that is able to sum two numbers, each given as a sequence
+of images of handwritten digits. The network will first use a convolutional encoder to transform each
+digit into a feature vector. These feature vectors will then be processed by a LSTM that will produce as
+output each digit of the sum.
+
+### Dataset
+We are now going to create a synthetic dataset using images from MNIST.
+
+First, we define some auxiliary functions.
+We need a function that converts an integer to a padded tensor.
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+
+def convert_int_to_vector(num: int, length: int) -> Tensor:
+    """
+    Take an integer and convert it to a vector.
+
+    Example: 123 with a length of 3 returns a tensor with [1, 2, 3].
+    5 with a length of 3 returns [0, 0, 5]
+    """
+    #!TAG HWBEGIN
+    #!MSG TODO: Fill the function.
+    num_str = str(num).zfill(length)
+    return torch.tensor([int(n) for n in num_str])
+    #!TAG HWEND
+```
+
+<!-- #region pycharm={"name": "#%% md\n"} -->
+Then, we need a function that generates our training labels.
+The result of the function should be a dictionary that contains 3 tensors (first numbers, second numbers, sum of first + second) of shape `(num_samples, max_length)`.
+We need the summands for drawing matching images later, while the latter is our actual label.
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+
+def generate_labels(num_samples: int, max_length: int) -> Dict:
+    """
+    Generate random numbers, whose sum does not exceed maximum length.
+
+    We will pad numbers that are less than max_length with zeros.
+    """
+
+    num_1s = []
+    num_2s = []
+    sums = []
+
+    for _ in range(num_samples):
+
+        # Ensure the sum always has at most max_len digits
+        num_1 = torch.randint(10**max_length // 2 - 1, (1,))
+        num_2 = torch.randint(10**max_length // 2 - 1, (1,))
+
+        num_1s.append(convert_int_to_vector(int(num_1), max_length))
+        num_2s.append(convert_int_to_vector(int(num_2), max_length))
+
+        #!TAG HWBEGIN
+        #!MSG TODO: Add the two numbers and save the result as padded tensor
+        sums.append(convert_int_to_vector(int(num_1 + num_2), max_length))
+        #!TAG HWEND
+
+    return {
+        'num_1': torch.stack(num_1s),
+        'num_2': torch.stack(num_2s),
+        'sum': torch.stack(sums)
+    }
+```
+
+<!-- #region pycharm={"name": "#%% md\n"} -->
+For our training, we need our `Dataset` object. Here, we will also draw the images to create our input tensors. One image is of shape `(1 x 28 x 28)`.
+Thus, a constructed input tensor is of shape `(max_length x 1 x 28 x 28)`
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+
+class NumberMNIST(Dataset):
+    def __init__(
+            self,
+            max_length: int = 3,
+            train: bool = True
+    ) -> None:
+        mnist_base = MNIST('.data', train=train, download=True)
+        mnist_base.data = mnist_base.data.float() / 255
+
+        self.max_length = max_length
+        # We choose 20k samples for training and 5k for testing.
+        self.num_samples = 20000 if train else 5000
+        self.digit_idxs = NumberMNIST._generate_digit_groups(mnist_base.targets)
+
+        self.labels = generate_labels(self.num_samples, self.max_length)
+
+        self.num_1s = torch.zeros(self.num_samples, self.max_length, 1, 28, 28)
+        self.num_2s = torch.zeros(self.num_samples, self.max_length, 1, 28, 28)
+
+        for i in range(self.num_samples):
+
+            imgs = []
+            for num_1_digit in self.labels['num_1'][i]:
+                # Get corresponding index group
+                digit_idxs = self.digit_idxs[int(num_1_digit)]
+                # Sample a random index from the digit class
+                rand_idx = digit_idxs[torch.randint(len(digit_idxs), (1, ))]
+                # Obtain image for the sampled index
+                imgs.append(mnist_base.data[rand_idx])
+            # Add images to main tensor.
+            self.num_1s[i] = torch.stack(imgs)
+
+            #!TAG HWBEGIN
+            #!MSG TODO: Repeat the procedure for the second number
+            imgs = []
+            for num_2_digit in self.labels['num_2'][i]:
+                digit_idxs = self.digit_idxs[int(num_2_digit)]
+                rand_idx = digit_idxs[torch.randint(len(digit_idxs), (1, ))]
+                imgs.append(mnist_base.data[rand_idx])
+            self.num_2s[i] = torch.stack(imgs)
+            #!TAG HWEND
+
+
+
+    @staticmethod
+    def _generate_digit_groups(targets: Tensor) -> Dict:
+        """Separates the dataset in groups based on the label. Returns a Dict with indices."""
+        res = {}
+        for i in range(10):
+            idxs = (targets == i).nonzero().squeeze(-1)
+            res.update({i: idxs})
+        return res
+
+    @property
+    def shape(self) -> Tuple:
+        return self.data.shape
+
+    def __len__(self) -> int:
+        return len(self.num_1s)
+
+    def __getitem__(self, idx: int) -> Dict:
+        #!TAG HWBEGIN
+        #!MSG TODO: Given an index return a dictionary with images
+        #!MSG for the first and second digit (Keys: 'num_1' and 'num_2') & sum as label (Key: 'label').
+        return {
+            'num_1': self.num_1s[idx],
+            'num_2': self.num_2s[idx],
+            'label': self.labels['sum'][idx],
+        }
+        #!TAG HWEND
+```
+
+<!-- #region pycharm={"name": "#%% md\n"} -->
+Let's initialize our datasets and see if everything works as expected.
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+train_dataset = NumberMNIST(train=True, max_length=3)
+test_dataset = NumberMNIST(train=False, max_length=3)
+```
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+def plot_digits(num_1: Tensor, num_2: Tensor) -> None:
+    grid_img = make_grid(torch.cat([num_1, num_2]), nrow=3)
+    plt.imshow(grid_img.permute(1, 2, 0))
+    plt.show()
+
+idx = int(torch.randint(len(test_dataset), (1,)))
+sample = test_dataset[idx]
+
+print('Sum:', [int(i) for i in sample['label']])
+plot_digits(sample['num_1'], sample['num_2'])
+```
+
+<!-- #region pycharm={"name": "#%% md\n"} -->
+### The model
+
+Let's now see how to create the model.
+
+This network will have two inputs, one for each number. The numbers have three digits, each of which is an image of size 1 x 28 x 28.
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+class AdditionModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.latent_dim = 128
+
+        # The network will use the same convolutional encoder for all digits in both numbers.
+        # Let us first define this encoder as its own submodule, a normal CNN:
+
+        self.digit_encoder = nn.Sequential(
+            #!TAG HWBEGIN
+            #!MSG TODO: Add some convolutional and pooling layers as you see fit.
+            #!MSG Note: We will encode each digit on its own. Expect an input one single grayscale mnist image.
+            nn.Conv2d(1, 32, (3, 3)),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
+            nn.Conv2d(32, 64, (3, 3)),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
+            nn.Conv2d(64, self.latent_dim, (3, 3)),
+            nn.ReLU(),
+            nn.MaxPool2d((2, 2)),
+            #!TAG HWEND
+            nn.AdaptiveAvgPool2d((1, 1))
+        )
+
+        # Our second model in this szenario will be a bidrectional LSTM.
+        # The input for this model are the concatenated latent vectors that we obtained from
+        # the digit encoder.
+        # For flexibility, we do not use a sequential but have the final layers as single attributes in this module class.
+
+        # Let's also apply a bit of dropout to prevent overfitting too much.
+        self.dropout = (
+            #!TAG HWBEGIN
+            #!MSG TODO: Add a dropout layer.
+            nn.Dropout(0.3)
+            #!TAG HWEND
+        )
+
+        self.lstm = (
+            #!TAG HWBEGIN
+            #!MSG TODO: Add a bidirectional LSTM.
+            nn.LSTM(
+                input_size=self.latent_dim * 2,
+                hidden_size=64,
+                batch_first=True,
+                bidirectional=True
+            )
+            #!TAG HWEND
+        )
+
+        # Finally, we add a fully connected layer as output.
+        # Note that the input size of the linear layer should be twice the hidden size
+        # of the LSTM (bidirectional).
+        self.fc = (
+            #!TAG HWBEGIN
+            #!MSG TODO: Add an output linear layer.
+            nn.Linear(128, 10)
+            #!TAG HWEND
+        )
+
+
+    def forward(self, num_1: Tensor, num_2: Tensor) -> Tensor:
+        # Note: num_1 and num_2 are of shape (batch_size x max_length x 1 x 28 x 28)
+        batch_size = num_1.shape[0]
+        max_length = num_1.shape[1]
+
+        enc_1 = torch.zeros(batch_size, max_length, self.latent_dim, device=num_1.device)
+        enc_2 = torch.zeros(batch_size, max_length, self.latent_dim, device=num_1.device)
+        #!TAG HWBEGIN
+        #!MSG TODO: Encode each digit of the batched tensors with the encoder.
+        #!MSG TODO: Fill enc_1 and enc_2 with the results
+        for i in range(max_length):
+            enc_1[:, i] = self.digit_encoder(num_1[:, i]).view(batch_size, -1)
+            enc_2[:, i] = self.digit_encoder(num_2[:, i]).view(batch_size, -1)
+        #!TAG HWEND
+
+        # After we apply the CNN to both numbers, we need to "merge" the two sequence of vectors.
+        # There are several options here, here we choose to concatenate the two tensor in each time-step
+        # to produce a single tensor of shape (batch_size, max_len, latent_dim * 2).
+        enc_total = (
+        #!TAG HWBEGIN
+        #!MSG TODO: Concat enc_1 and enc_2 as described above
+            torch.cat([enc_1, enc_2], dim=2)
+        #!TAG HWEND
+        )
+
+        # Now, we pass the total encoded tensor through the dropout, lstm and output layer.
+        enc_total = self.dropout(enc_total)
+
+        # We obtain all hidden states from each timestep resulting in a tensor of shape (batch_size, max_length, lstm_hidden_dim)
+        out, _ = self.lstm(enc_total)
+        # Due to broadcasting, we can feed this tensor directly to the fully connected layer.
+        out = self.fc(out)
+        # Our loss function does accept a tensor of shape (batch_size, num_classes, max_length)
+        # So we reshape before returning the network output.
+        return out.permute(0, 2, 1)
+```
+
+<!-- #region pycharm={"name": "#%% md\n"} -->
+We can mainly reuse the training loop from the exercise before, but we need to change the computation of the accuracy and dataloading.
+Let's initialize our modules and start training!
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+device = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define the device you want to use.
+    torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #!TAG HWEND
+)
+
+def train(
+        model: AdditionModel,
+        loss: nn.Module,
+        optimizer: Optimizer,
+        train_dataset: Dataset,
+        test_dataset: Dataset,
+        epochs: int,
+        batch_size: int
+) -> Dict:
+    metrics: Dict = {
+        'train_loss': [],
+        'train_acc': [],
+        'test_loss': [],
+        'test_acc': [],
+    }
+
+    num_train_batches = ceil(len(train_dataset) / batch_size)
+    num_test_batches = ceil(len(test_dataset) / batch_size)
+
+    train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size)
+
+    for ep in range(1, epochs + 1):
+        total_loss = 0
+        num_correct = 0
+
+        ################################################################################
+        # TRAINING LOOP
+        ################################################################################
+
+        for batch_idx, sample in enumerate(train_loader):
+
+            num_1 = sample['num_1'].to(device)
+            num_2 = sample['num_2'].to(device)
+            y = sample['label'].to(device)
+
+
+            #!TAG HWBEGIN
+            #!MSG TODO: Add forward pass + batch loss, backpropagation and apply gradients
+            y_hat = model(num_1, num_2)
+            batch_loss = loss(y_hat, y)
+
+            optimizer.zero_grad()
+            batch_loss.backward()
+            optimizer.step()
+            #!TAG HWEND
+
+            if batch_idx % 10 == 0:
+                print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+                      .format(batch_idx, num_train_batches, float(batch_loss)),
+                      end='\r')
+
+            total_loss += float(batch_loss)
+
+            num_correct += int(torch.sum(torch.all(torch.eq(torch.argmax(y_hat, dim=1), y), dim=1)))
+
+        ep_train_loss = total_loss / len(train_dataset)
+        ep_train_acc = num_correct / len(train_dataset)
+
+        total_loss = 0
+        num_correct = 0
+
+        ################################################################################
+        # TEST LOOP
+        ################################################################################
+
+        for batch_idx, sample in enumerate(test_loader):
+            num_1 = sample['num_1'].to(device)
+            num_2 = sample['num_2'].to(device)
+            y = sample['label'].to(device)
+
+            with torch.no_grad():
+                #!TAG HWBEGIN
+                #!MSG TODO: Do a forward pass and get the batch loss
+                y_hat = model(num_1, num_2)
+                batch_loss = loss(y_hat, y)
+                #!TAG HWEND
+
+            if batch_idx % 50 == 0:
+                print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+                      .format(batch_idx, num_test_batches, float(batch_loss)), end='\r')
+
+            total_loss += float(batch_loss)
+
+            num_correct += int(torch.sum(torch.all(torch.eq(torch.argmax(y_hat, dim=1), y), dim=1)))
+
+        ep_test_loss = total_loss / len(test_dataset)
+        ep_test_acc = num_correct / len(test_dataset)
+
+        metrics['train_loss'].append(ep_train_loss)
+        metrics['train_acc'].append(ep_train_acc)
+        metrics['test_loss'].append(ep_test_loss)
+        metrics['test_acc'].append(ep_test_acc)
+
+        print('EPOCH:\t{:5}\tTRAIN LOSS:\t{:.3f}\tTRAIN ACCURACY:\t{:.3f}\tTEST LOSS:\t'
+              '{:.3f}\tTEST ACCURACY:\t{:.3f}'
+              .format(ep, ep_train_loss, ep_train_acc, ep_test_loss, ep_test_acc))
+    return metrics
+```
+
+<!-- #region pycharm={"name": "#%% md\n"} -->
+Let's initialize our modules and start training!
+
+<!-- #endregion -->
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
+epochs = 20
+batch_size = 32
+
+model = (
+    #!TAG HWBEGIN
+    #!MSG Initialize the model and push it to your device.
+    AdditionModel().to(device)
+    #!TAG HWEND
+)
+
+optimizer = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define an optimizer.
+    Adam(model.parameters())
+    #!TAG HWEND
+)
+
+loss = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define the matching loss function.
+    nn.CrossEntropyLoss()
+    #!TAG HWEND
+)
+
+metrics = train(model, loss, optimizer, train_dataset, test_dataset, epochs, batch_size)
+```
+
+```python pycharm={"name": "#%%\n"}
+#!TAG SKIPQUESTEXEC
 
 get_training_progress_plot(
     metrics['train_loss'],
@@ -513,230 +962,5 @@ get_training_progress_plot(
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-The model seems to be learning more easily than the simple baseline we created time ago,
-which had an accuracy of 85-88% on the test data.
-Let it train for longer and tune the
-architecture above to reach as high accuracy as possible! (note that evaluating on the
-same data that you used for early stopping is cheating).
-
-
-## Exercise 2
-
-In this exercise, we are going to implement an autoencoder and train it on the MNIST
-dataset.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-train_x = MNIST(root='.data', download=True, transform=ToTensor());
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-As an introduction, we will train PCA, i.e. an autoencoder with linear encoder
-$\textbf{z}=\textbf{Ex}$ and linear decoder: $\textbf{x'}=\textbf{Dz}$.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-#!TAG SKIPQUESTEXEC
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# We will flatten the image to a vector
-img_features = 28*28
-
-# This sets the size of our latent space
-latent_size = 8
-
-encoder = (
-    #!TAG HWBEGIN
-    #!MSG Define a linear encoder on your device.
-    nn.Linear(in_features=img_features, out_features=latent_size).to(device)
-    #!TAG HWEND
-)
-
-decoder = (
-    #!TAG HWBEGIN
-    #!MSG Define a linear decoder on your device.
-    nn.Linear(in_features=latent_size, out_features=img_features).to(device)
-    #!TAG HWEND
-)
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-As usual we define a training loop:
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-#!TAG SKIPQUESTEXEC
-
-def train_autoencoder(
-        encoder: nn.Module,
-        decoder: nn.Module,
-        loss: nn.Module,
-        optimizer: Optimizer,
-        mnist_dataset: MNIST,
-        epochs: int,
-        batch_size: int,
-        device: torch.device
-) -> List[float]:
-
-    train_losses = []
-
-    num_train_batches = ceil(len(mnist_dataset) / batch_size)
-    train_loader = DataLoader(mnist_dataset, batch_size, shuffle=True)
-
-    for ep in range(1, epochs + 1):
-        total_loss = 0
-
-        for batch_idx, (x, _) in enumerate(train_loader):
-            x = x.to(device).view(x.shape[0], -1)
-
-            #!TAG HWBEGIN
-            #!MSG TODO: Use Encoder/Decoder to compress/reconstruct an image
-            #!MSG TODO: Compute the reconstruction batch_loss per sample
-            #!MSG TODO: Do the backward pass
-            x_hat = decoder(encoder(x))
-            batch_loss = loss(x, x_hat) / batch_size
-
-            optimizer.zero_grad()
-            batch_loss.backward()
-            optimizer.step()
-            #!TAG HWEND
-
-            if batch_idx % 10 == 0:
-                print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_train_batches, float(batch_loss)), end='\r')
-
-            total_loss += float(batch_loss)
-
-        train_losses.append(total_loss / num_train_batches)
-        print('EPOCH:\t{:5}\tTRAIN LOSS:\t{:.3f}'.format(ep, train_losses[-1], end='\r'))
-
-    return train_losses
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-Next, we initialize a loss function, optimizer and train for 1 epoch.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-#!TAG SKIPQUESTEXEC
-epochs = 1
-batch_size = 32
-
-optimizer = (
-    #!TAG HWBEGIN
-    #!MSG TODO: Define an optimizer.
-    # #!MSG Hint: Use `chain` from itertools to add multiple modules to an optimizer at once.
-    Adam(chain(encoder.parameters(), decoder.parameters()))
-    #!TAG HWEND
-)
-
-loss = (
-    #!TAG HWBEGIN
-    #!MSG TODO: Define the reconstruction loss.
-    #!MSG Hint: Use the `reduction = 'sum'` argument.
-    nn.MSELoss(reduction='sum')
-    #!TAG HWEND
-)
-
-train_autoencoder(encoder, decoder, loss, optimizer, train_x, epochs, batch_size, device)
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-Let's inspect the reconstructions quality for a few samples.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-#!TAG SKIPQUESTEXEC
-
-def plot_reconstruction_grid(
-        encoder: nn.Module, decoder: nn.Module, mnist_dataset: MNIST) -> None:
-    # We have a bit of struggle with converting from devices, ranges and different shapes here.
-    # All this could have been prevented, if all our modules would be packaged in
-    # appropriate classes and utility methods.
-    x_samples = mnist_dataset.data[:100] / 255
-    x_hat_samples = decoder(encoder(x_samples.to(device).view(100, -1)))
-    x_hat_samples = torch.clamp(x_hat_samples.detach().cpu().view(100, 28, 28), 0, 1)
-
-    cur_col = 0
-    image_list = []
-    for _ in range(4):
-        image_list.extend(x_samples[cur_col:cur_col + 25])
-        image_list.extend(x_hat_samples[cur_col:cur_col + 25])
-        cur_col += 25
-
-    image_batch = torch.stack(image_list).unsqueeze(1)
-    image_grid = make_grid(image_batch, nrow=25)
-    plt.imshow(image_grid.permute(1, 2, 0))
-    plt.axis('off')
-    plt.show()
-
-plot_reconstruction_grid(encoder, decoder, train_x)
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-As you can see, reducing the whole image to a latent space of 8 combined with a rather
-short training of 1 epoch results in constructions that lack detail and are far from
-perfect.
-In the next step, we will define a more complex non-linear encoder/decoder and train
-a few epochs more.
-Try to have several dense layers and experiment with different activation functions.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-#!TAG SKIPQUESTEXEC
-epochs = 5
-batch_size = 64
-
-encoder = nn.Sequential(
-    #!TAG HWBEGIN
-    #!MSG Define an encoder.
-    nn.Linear(in_features=img_features, out_features=128),
-    nn.LeakyReLU(),
-    nn.Linear(in_features=128, out_features=64),
-    nn.LeakyReLU(),
-    nn.Linear(in_features=64, out_features=latent_size)
-    #!TAG HWEND
-).to(device)
-
-decoder = nn.Sequential(
-    #!TAG HWBEGIN
-    #!MSG Define a decoder.
-    nn.Linear(in_features=latent_size, out_features=64),
-    nn.LeakyReLU(),
-    nn.Linear(in_features=64, out_features=128),
-    nn.LeakyReLU(),
-    nn.Linear(in_features=128, out_features=img_features)
-    #!TAG HWEND
-).to(device)
-
-optimizer = (
-    #!TAG HWBEGIN
-    #!MSG TODO: Define an optimizer.
-    # #!MSG Hint: Use `chain` from itertools to add multiple modules to an optimizer at once.
-    Adam(chain(encoder.parameters(), decoder.parameters()))
-    #!TAG HWEND
-)
-
-loss = (
-    #!TAG HWBEGIN
-    #!MSG TODO: Define the reconstruction loss.
-    #!MSG Hint: Use the `reduction = 'sum'` argument.
-    nn.MSELoss(reduction='sum')
-    #!TAG HWEND
-)
-
-losses = train_autoencoder(encoder, decoder, loss, optimizer, train_x, epochs, batch_size, device)
-```
-
-```python pycharm={"name": "#%%\n"}
-#!TAG SKIPQUESTEXEC
-
-plot_reconstruction_grid(encoder, decoder, train_x)
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-The reconstructions look way better now! Further training will increase the image
-quality. Keep in mind that autoencoders (like most DL architectures) are prone to
-overfitting. The quality of reconstructions does not automatically coincide with
-good representations.
+It is amazing what we achieved with such a small (for the standard of deep learning) model and dataset!
 <!-- #endregion -->
