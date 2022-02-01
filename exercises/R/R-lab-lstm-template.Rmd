@@ -1,0 +1,217 @@
+---
+title: "Lab 10.5"
+output: pdf_document
+author: Emilio Dorigatti
+date: 2022-01-25
+papersize: a4
+header-includes:
+  - \usepackage{bbold}
+  - \usepackage{tikz}
+  - \usetikzlibrary{snakes,arrows,shapes}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
+```
+
+
+Why does the LSTM not suffer from the vanishing or exploding gradient problems? Let's find out. To simplify matters, assume that the loss function is computed using only the last hidden state.
+
+First show that, for a vanilla RNN, the gradient of the loss $\mathcal{L}$ with respect to the hidden state $k$ steps earlier is given by:
+\begin{equation}
+\nabla_{\textbf{h}^{[\tau-k]}}\mathcal{L}=\left[
+\prod_{i=1}^{k}\textbf{W}^T\text{diag}\left(1-{\textbf{h}^{[\tau-k+i]}}^2\right)
+\right]\cdot\nabla_{\textbf{h}^{[\tau]}}\mathcal{L}
+\label{eq:1}
+\end{equation}
+The goal is to study the behavior of $\vert\vert\nabla_{\textbf{h}^{[\tau-k]}}\textbf{h}^{[\tau]}\vert\vert$ and as $k$ grows, i.e., as the sequences become longer and longer, where $\vert\vert \cdot \vert\vert$ is the L2 norm of a vector or matrix. Therefore, show that:
+\begin{equation}
+\vert\vert\nabla_{\textbf{h}^{[\tau-k]}}\textbf{h}^{[\tau]}\vert\vert
+\leq\vert\vert\textbf{W}\vert\vert^k
+\cdot\left(\max_x \vert1-\tanh(x)^2\vert\right)^k 
+%\cdot\vert\vert
+%\nabla_{\textbf{h}^{[\tau]}}\mathcal{L}
+%\vert\vert
+\label{eq:rnn}
+\end{equation}
+Hint: $\vert\vert\textbf{A}\vert\vert=\sqrt{\rho(\textbf{A}^T\textbf{A})}$, where $\rho(\textbf{B})=\max_i \vert\lambda_i\vert$ and $\lambda_i$ is the $i$-th eigenvalue of $\textbf{B}$. Moreover, $\vert\vert\textbf{AB}\vert\vert\leq\vert\vert\textbf{A}\vert\vert\cdot\vert\vert\textbf{B}\vert\vert$.
+
+What happens as $k\rightarrow\infty$?
+
+It is considerably harder to find a closed-form expression for $\nabla_{\textbf{s}^{[\tau-k]}}\mathcal{L}$ for a LSTM. Instead, we will only show that there exist a path through the unrolled LSTM computational graph where the error signal does not vanish or explode, regardless of $k$. This path goes through the cell state at each time step and never touches the hidden states, where the error signal is scaled down due to the sigmoid and tanh activations.
+
+Therefore, compute the gradient of the loss considering only the cell states, and show that
+\begin{equation}
+\nabla_{\textbf{s}^{[\tau-k]}}\mathcal{L}
+=\left[c+\prod_{i=1}^{k}
+\text{diag}\left(\textbf{e}^{[\tau-k+i]})\right)
+\right]
+\text{diag}\left(1-{\tanh\left(\textbf{s}^{[\tau]}\right)}^2\right)
+\text{diag}\left(\textbf{o}^{[\tau]}\right)
+\nabla_{\textbf{h}^{[\tau]}}\mathcal{L}
+\label{eq:2}
+\end{equation}
+where $c$ contains all terms of the gradient that go through a hidden state, $\textbf{s}^{[t]}$, $\textbf{e}^{[t]}$ and $\textbf{o}^{[t]}$ indicate respectively the cell state, forget and output gates at time step $t$. Now focus on $\vert\vert\nabla_{\textbf{s}^{[\tau-k]}}\textbf{s}^{[\tau]}\vert\vert$ and show that
+\begin{align}
+\vert\vert\nabla_{\textbf{s}^{[\tau-k]}}\textbf{s}^{[\tau]}\vert\vert
+&\leq\vert\vert c\vert\vert+\sup_x \vert\tanh(x)\vert^k
+\label{eq:4}
+\end{align}
+Compare Equations \ref{eq:4} and \ref{eq:rnn}. How do they differ? Why is then the LSTM not affected by $k$?
+
+<!--#!solutionbegin-->
+### Solution
+#### Vanilla RNN
+By the chain rule, we have:
+\begin{equation}
+\nabla_{\textbf{h}^{[\tau-k]}}\mathcal{L}
+=\left[\prod_{i=1}^{k}\nabla_{\textbf{h}^{[\tau-k+i-1]}}\textbf{h}^{[\tau-k+i]}\right]
+\cdot\nabla_{\textbf{h}^{[\tau]}}\mathcal{L}
+\label{eq:5}
+\end{equation}
+which results in Equation \ref{eq:1} (see previous lab). Using the results on matrix and vector norms illustrated in the hint, we can upper bound $\vert\vert\nabla_{\textbf{h}^{[t-1]}}\textbf{h}^{[t]}\vert\vert$ as follows:
+\begin{equation}
+\vert\vert\nabla_{\textbf{h}^{[t-1]}}\textbf{h}^{[t]}\vert\vert
+=\textbf{W}^T\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)
+\leq
+\left\vert\left\vert
+\textbf{W}^T
+\right\vert\right\vert
+\cdot
+\left\vert\left\vert
+\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)
+\right\vert\right\vert
+\end{equation}
+Define $\textbf{v}:=1-{\textbf{h}^{[t]}}^2$ and notice that
+\begin{equation}
+\left\vert\left\vert
+\text{diag}\left(\textbf{v}\right)
+\right\vert\right\vert
+=\sqrt{
+\rho\left(
+\text{diag}\left(\textbf{v}\right)^T\text{diag}\left(\textbf{v}\right)
+\right)}
+=\sqrt{
+\rho\left(
+\text{diag}\left(\textbf{v}^2\right)
+\right)}
+=\sqrt{\max_i \left\vert\textbf{v}_i^2\right\vert}=\max_i\vert\textbf{v}_i\vert
+\label{eq:7}
+\end{equation}
+since the eigenvalues of $\text{diag}(\textbf{v})$ are the elements of $\textbf{v}$ themselves. Thus:
+\begin{equation}
+\vert\vert\nabla_{\textbf{h}^{[t-1]}}\textbf{h}^{[t]}\vert\vert
+\leq
+\left\vert\left\vert
+\textbf{W}^T
+\right\vert\right\vert
+\cdot
+\max_i\left\vert1-{\textbf{h}^{[t]}_i}^2\right\vert
+\leq
+\left\vert\left\vert
+\textbf{W}^T
+\right\vert\right\vert
+\cdot
+\max_x\left\vert 1-\tanh(x)\right\vert^2
+\end{equation}
+and $\vert\vert\nabla_{\textbf{h}^{[\tau-k]}}\textbf{h}^{[\tau]}\vert\vert$ is obtained by raising that above to the $k$-th power.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[>=latex',line join=bevel,]
+%%
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+  \filldraw (0.0bp,0.0bp) -- (0.0bp,57.5bp) -- (217.0bp,57.5bp) -- (217.0bp,0.0bp) -- cycle;
+\end{scope}
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+  \filldraw (0.0bp,0.0bp) -- (0.0bp,57.5bp) -- (217.0bp,57.5bp) -- (217.0bp,0.0bp) -- cycle;
+\end{scope}
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+  \filldraw (0.0bp,0.0bp) -- (0.0bp,57.5bp) -- (217.0bp,57.5bp) -- (217.0bp,0.0bp) -- cycle;
+\end{scope}
+  \node (s0) at (15.0bp,48.0bp) [draw,ellipse] {$\textbf{s}^{[1]}$};
+  \node (h0) at (15.0bp,10.0bp) [draw,ellipse] {$\textbf{h}^{[1]}$};
+  \node (s1) at (81.0bp,48.0bp) [draw,ellipse] {$\textbf{s}^{[2]}$};
+  \node (h1) at (81.0bp,10.0bp) [draw,ellipse] {$\textbf{h}^{[2]}$};
+  \node (s2) at (147.0bp,48.0bp) [draw,ellipse] {$\textbf{s}^{[3]}$};
+  \node (h2) at (147.0bp,10.0bp) [draw,ellipse] {$\textbf{h}^{[3]}$};
+  \node (L) at (207.5bp,10.0bp) [draw,ellipse] {$\mathcal{L}$};
+  \draw [->] (s0) ..controls (15.0bp,35.641bp) and (15.0bp,32.875bp)  .. (h0);
+  \draw [->] (s0) ..controls (36.796bp,48.0bp) and (47.633bp,48.0bp)  .. (s1);
+  \draw [->] (h0) ..controls (36.33bp,22.071bp) and (50.277bp,30.352bp)  .. (s1);
+  \draw [->] (h0) ..controls (37.661bp,10.0bp) and (47.009bp,10.0bp)  .. (h1);
+  \draw [->] (s1) ..controls (81.0bp,35.641bp) and (81.0bp,32.875bp)  .. (h1);
+  \draw [->] (s1) ..controls (102.8bp,48.0bp) and (113.63bp,48.0bp)  .. (s2);
+  \draw [->] (h1) ..controls (102.33bp,22.071bp) and (116.28bp,30.352bp)  .. (s2);
+  \draw [->] (h1) ..controls (103.66bp,10.0bp) and (113.01bp,10.0bp)  .. (h2);
+  \draw [->] (s2) ..controls (147.0bp,35.641bp) and (147.0bp,32.875bp)  .. (h2);
+  \draw [->] (h2) ..controls (169.79bp,10.0bp) and (179.3bp,10.0bp)  .. (L);
+%
+\end{tikzpicture}
+\caption{Simplified computational graph of a LSTM network.}
+\label{fig:lstm}
+\end{figure}
+
+#### LSTM
+For the LSTM, things are a bit more complicated. Refer to Figure \ref{fig:lstm} for a simplified computational graph. Notice how we need to have *two* concurrent recurrence equations, one going through the cell states and one going through the hidden states:
+\begin{equation}
+\begin{cases}
+\nabla_{\textbf{s}^{[t]}}\mathcal{L}
+&=\tilde{\nabla}_{\textbf{s}^{[t]}}\textbf{s}^{[t+1]}\cdot\nabla_{\textbf{s}^{[t+1]}}\mathcal{L}
++\tilde{\nabla}_{\textbf{s}^{[t]}}\textbf{h}^{[t]}\cdot\nabla_{\textbf{h}^{[t]}}\mathcal{L} \\
+\nabla_{\textbf{h}^{[t]}}\mathcal{L}
+&=\tilde{\nabla}_{\textbf{h}^{[t]}}\textbf{h}^{[t+1]}\cdot\nabla_{\textbf{h}^{[t+1]}}\mathcal{L}
++\tilde{\nabla}_{\textbf{h}^{[t]}}\textbf{s}^{[t+1]}\cdot\nabla_{\textbf{s}^{[t+1]}}\mathcal{L} \\
+\end{cases}
+\end{equation}
+where $\tilde{\nabla}_\textbf{x}\textbf{y}$ indicates the gradient of $\textbf{y}$ with respect to $\textbf{x}$ *only* through the direct connection between $\textbf{x}$ and $\textbf{y}$ in the graph (the $\nabla$ operator would consider all paths).
+
+As mentioned in the main text, it suffices to show that there exist *one* path that allows the error signal to flow back uninterrupted. This path goes through the cell states, i.e., we are using the following simplification:
+\begin{equation}
+\nabla_{\textbf{s}^{[t]}}\mathcal{L}
+=c+\tilde{\nabla}_{\textbf{s}^{[t]}}\textbf{s}^{[t+1]}\cdot\nabla_{\textbf{s}^{[t+1]}}\mathcal{L}
+=c+\text{diag}(\textbf{e}^{[t+1]})\cdot\nabla_{\textbf{s}^{[t+1]}}\mathcal{L}
+\end{equation}
+If we only consider cell states, then, we get a single recurrent equation that is readily expanded:
+\begin{equation}
+\nabla_{\textbf{s}^{[\tau-k]}}\mathcal{L}
+=\prod_{i=1}^k\left[
+c+\text{diag}(\textbf{e}^{[\tau-k+i]})
+\right]
+\cdot\nabla_{\textbf{s}^{[\tau]}}\mathcal{L}
+\end{equation}
+If we expand the product and collapse all terms involving $c$ we get Equation \ref{eq:2}.
+
+From equation \ref{eq:7} it immediately follows that
+\begin{align}
+\left\vert\left\vert
+\tilde{\nabla}_{\textbf{s}^{[t-1]}}\textbf{s}^{[t]}
+\right\vert\right\vert
+&=\left\vert\left\vert
+\text{diag}\left(\textbf{e}^{[t]}\right)
+\right\vert\right\vert
+\leq\sup_x\vert\tanh(x)\vert
+\end{align}
+Plugging that into the product gives Equation \ref{eq:4} 
+
+#### Comparison of RNN and LSTM
+Notice that $\sup_x\vert\tanh(x)\vert=\max_x\vert1-\tanh(x)^2\vert=1$. Therefore, a LSTM is able to store patterns indefinitely as long as the forget gate remains open. In fact, the original formulation of the LSTM did not even include a forget gate. On the other hand, for a vanilla RNN everything depends on the eigenvalues of the weight matrix $\textbf{W}$. In practice, a LSTM network can learn to control the forget gate, which is re-computed at every time step, while a RNN has no control on the norm of the weight matrix, which depends on the initialization, the optimizer, the order of the samples presented to the network, etc. While several techniques have been proposed to solve this problem, the LSTM proved to be the most effective. Read the original LSTM paper if you want to know more:
+
+Hochreiter, S. & Schmidhuber, J. Long Short-Term Memory. Neural Computation 9, 1735–1780 (1997). https://doi.org/10.1162/neco.1997.9.8.1735
+
+<!--#!solutionend-->
