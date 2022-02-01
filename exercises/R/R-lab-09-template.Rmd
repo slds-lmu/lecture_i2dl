@@ -144,13 +144,13 @@ The first term is analogous to Eq. \ref{eq:11}, while to find $\nabla_{\textbf{h
 \begin{equation}
 \nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]}
 =\nabla_{\textbf{h}^{[t]}} \tanh\left(\textbf{W} \textbf{h}^{[t]} + \textbf{U} \textbf{x}^{[t+1]} + \textbf{b}\right)
-=\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)
+=\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t+1]}}^2\right)
 \end{equation}
 Therefore,
 \begin{equation}
 \nabla_{\textbf{h}^{[t]}} \mathcal{L}
 = \textbf{V}^{T} \cdot \nabla_{\textbf{y} ^{[t]}}\mathcal{L}
-+\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right) \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
++\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t+1]}}^2\right) \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
 \end{equation}
 where we do not expand $\nabla_{\textbf{h}^{[t+1]}} \mathcal{L}$ further as that is carried over during backpropagation (it corresponds to the $\delta$ in lab 4).
 
