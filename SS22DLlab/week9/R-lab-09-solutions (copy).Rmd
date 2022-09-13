@@ -1,0 +1,280 @@
+---
+title: "Lab 9"
+output: pdf_document
+author: Hüseyin Anil Gündüz
+date: 2022-07-05
+papersize: a4
+header-includes:
+  - \usepackage{bbold}
+  - \usepackage{tikz}
+  - \usetikzlibrary{snakes,arrows,shapes}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = TRUE, echo = TRUE)
+```
+
+In the first part of the lab, we will analytically derive the backpropagation equations for a simple RNN. Then, in the second part, we will implement forward and backward propagation functions for a simple RNN-model, and train to  predict the future temperature based on past weather metrics.
+
+## Exercise 1
+In this part, we derive the backpropagation equations for a simple RNN from forward propagation equations. For simplicity, we will focus on a single input sequence $\textbf{x}^{[1]},\ldots,\textbf{x}^{[\tau]}$. The forward pass in a RNN with hyperbolic tangent activation at time $t$ is given by:
+\begin{align}
+\textbf{h}^{[t]} &= \tanh {(\textbf{W} \textbf{h}^{[t-1]} + \textbf{U} \textbf{x}^{[t]} + \textbf{b})} \\
+\textbf{y}^{[t]} &= \textbf{V}\textbf{h}^{[t]}+\textbf{c}
+\end{align}
+where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,$\textbf{V}$ and $\textbf{W}$, respectively, for input-to-hidden, hidden-to-output and hidden-to-hidden connections. As we will use RNN for a regression problem in the of the exercise, we do not use an activation function in order to compute the output $\textbf{y}^{[t]}$ (at time $t$).
+
+The loss is defined as:
+\begin{equation}
+\mathcal{L}=\sum_{t=1}^{\tau}\mathcal{L}\left(\textbf{y}^{[t]}, \hat{\textbf{y}}^{[t]}\right)
+\end{equation}
+
+Show that:
+\begin{align}
+\nabla_{\textbf{h} ^{[\tau]}} \mathcal{L}
+&= \textbf{V}^{T} (\nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}) \\
+\nabla_{\textbf{h} ^{[t]}}  \mathcal{L}
+&= \textbf{W}^{T} \text{diag}\bigg(1-\big(\textbf{h}^{[t+1]}\big)^{^2} \bigg)(\nabla_{\textbf{h}{^{[t+1]}}}{{L}}) + \textbf{V}^{T} (\nabla_{\textbf{y} ^{[t]}}\mathcal{L}) \\
+\nabla_\textbf{c}  \mathcal{L}
+&= \sum_{t=1}^{\tau}\nabla_{\textbf{y}{^{[t]}}}{{\mathcal{L}}} \\
+\nabla_\textbf{b}  \mathcal{L}
+&= \sum_{t=1}^{\tau} \text{diag}\bigg(1-\big(\textbf{h}^{[t]}\big)^{2} \bigg) \nabla_{\textbf{h}^{[t]}}\mathcal{L} \\
+\nabla_\textbf{V}  \mathcal{L}
+&=\sum_{t=1}^{\tau}(\nabla_{\textbf{y}{^{[t]}}}{\mathcal{L}})  \textbf{h}^{{[t]}^{T}} \\
+\nabla_\textbf{W}  \mathcal{L}
+&=\sum_{t=1}^{\tau} \text{diag}\bigg(1-\big(\textbf{h}^{[t]}\big)^{2} \bigg)\ (\nabla_{\textbf{h}{^{[t]}}}{{\mathcal{L}}}) \textbf{h}^{{[t-1]}^{T}} \\
+\nabla_\textbf{U}  \mathcal{L}
+&= \sum_{t=1}^{\tau} \text{diag}\bigg(1-\big(\textbf{h}^{[t]}\big)^{2} \bigg)(\nabla_{\textbf{h}{^{[t]}}}{{\mathcal{L}}}) \textbf{x}^{{[t]}^{T}}
+\end{align}
+
+Hint 1 (chain rule for vector calculus): given a vector $\textbf{x}\in\mathbb{R}^n$ and two functions $f:\mathbb{R}^n\rightarrow\mathbb{R}^m$ and $g:\mathbb{R}^m\rightarrow\mathbb{R}$, call the outputs $\textbf{y}=f(\textbf{x})$ and $z=g(\textbf{y})=g(f(\textbf{x}))$, then the following holds:
+\begin{equation}
+\nabla_{\textbf{x}} z
+=
+\nabla_{\textbf{x}}\textbf{y}
+\cdot
+\nabla_{\textbf{y}} z
+\end{equation}
+where $\nabla_{\textbf{y}} z\in\mathbb{R}^m$ and $\nabla_{\textbf{x}}\textbf{y}\in\mathbb{R}^n\times\mathbb{R}^m$.
+
+Hint 2: draw a computational graph representing the computation performed by the RNN unrolled over time, then use this graph to compute the gradients: multiply gradients via the chain rule when traversing edges, and sum the gradients obtained along each path from the loss to the item you are differentiating against.
+
+
+### Solution
+
+\begin{figure}
+\centering\begin{tikzpicture}[>=latex',line join=bevel,]
+%%
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+  \filldraw (0.0bp,0.0bp) -- (0.0bp,187.0bp) -- (206.0bp,187.0bp) -- (206.0bp,0.0bp) -- cycle;
+\end{scope}
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+  \filldraw (0.0bp,0.0bp) -- (0.0bp,187.0bp) -- (206.0bp,187.0bp) -- (206.0bp,0.0bp) -- cycle;
+\end{scope}
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+  \filldraw (0.0bp,0.0bp) -- (0.0bp,187.0bp) -- (206.0bp,187.0bp) -- (206.0bp,0.0bp) -- cycle;
+\end{scope}
+  \node (x1) at (15.0bp,170.5bp) [draw,ellipse] {$\mathbf{x}^{[1]}$};
+  \node (h1) at (15.0bp,115.5bp) [draw,ellipse] {$\mathbf{h}^{[1]}$};
+  \node (y1) at (15.0bp,44.5bp) [draw,ellipse] {$\mathbf{y}^{[1]}$};
+  \node (L) at (103.0bp,9.5bp) [draw,ellipse] {$\mathcal{L}$};
+  \node (x2) at (103.0bp,177.5bp) [draw,ellipse] {$\mathbf{x}^{[2]}$};
+  \node (h2) at (103.0bp,122.5bp) [draw,ellipse] {$\mathbf{h}^{[2]}$};
+  \node (y2) at (103.0bp,65.5bp) [draw,ellipse] {$\mathbf{y}^{[2]}$};
+  \node (x3) at (191.0bp,170.5bp) [draw,ellipse] {$\mathbf{x}^{[3]}$};
+  \node (h3) at (191.0bp,115.5bp) [draw,ellipse] {$\mathbf{h}^{[3]}$};
+  \node (y3) at (191.0bp,51.5bp) [draw,ellipse] {$\mathbf{y}^{[3]}$};
+  \draw [->] (x1) ..controls (15.0bp,153.89bp) and (15.0bp,144.25bp)  .. (h1);
+  \definecolor{strokecol}{rgb}{0.0,0.0,0.0};
+  \pgfsetstrokecolor{strokecol}
+  \draw (3.0bp,143.25bp) node {$\mathbf{U}$};
+  \draw [->] (h1) ..controls (15.0bp,94.854bp) and (15.0bp,78.682bp)  .. (y1);
+  \draw (3.0bp,80.5bp) node {$\mathbf{V}$};
+  \draw [->] (h1) ..controls (43.1bp,117.71bp) and (62.398bp,119.28bp)  .. (h2);
+  \draw (59.0bp,128.5bp) node {$\mathbf{W}$};
+  \draw [->] (y1) ..controls (42.952bp,33.531bp) and (67.468bp,23.554bp)  .. (L);
+  \draw [->] (x2) ..controls (103.0bp,160.89bp) and (103.0bp,151.25bp)  .. (h2);
+  \draw (91.0bp,150.25bp) node {$\mathbf{U}$};
+  \draw [->] (h2) ..controls (103.0bp,105.38bp) and (103.0bp,95.746bp)  .. (y2);
+  \draw (91.0bp,94.5bp) node {$\mathbf{V}$};
+  \draw [->] (h2) ..controls (131.1bp,120.29bp) and (150.4bp,118.72bp)  .. (h3);
+  \draw (147.0bp,128.5bp) node {$\mathbf{W}$};
+  \draw [->] (y2) ..controls (103.0bp,47.19bp) and (103.0bp,37.749bp)  .. (L);
+  \draw [->] (x3) ..controls (191.0bp,153.89bp) and (191.0bp,144.25bp)  .. (h3);
+  \draw (179.0bp,143.25bp) node {$\mathbf{U}$};
+  \draw [->] (h3) ..controls (191.0bp,96.593bp) and (191.0bp,83.722bp)  .. (y3);
+  \draw (179.0bp,84.0bp) node {$\mathbf{V}$};
+  \draw [->] (y3) ..controls (163.56bp,38.589bp) and (138.16bp,26.183bp)  .. (L);
+%
+\end{tikzpicture}
+\caption{A simplified computational graph for three steps of a RNN. Biases omitted for simplicity.}
+\label{fig:cg}
+\end{figure}
+
+The computational graph is shown in Figure \ref{fig:cg}. There is only one path connecting $\textbf{h}^{[\tau]}$ to the loss:
+\begin{equation}
+\nabla_{\textbf{h}^{[\tau]}} \mathcal{L}
+= \nabla_{\textbf{h}^{[\tau]}}  \textbf{y}^{[\tau]} \cdot \nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}
+= \textbf{V}^{T}\cdot \nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}
+\label{eq:11}
+\end{equation}
+while every other hidden activation influences the loss via its associated output and the following hidden activation, thus:
+\begin{equation}
+\nabla_{\textbf{h}^{[t]}} \mathcal{L}
+= \nabla_{\textbf{h}^{[t]}} \textbf{y}^{[t]} \cdot \nabla_{\textbf{y} ^{[t]}}\mathcal{L}
++ \nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]} \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
+\end{equation}
+The first term is analogous to Eq. \ref{eq:11}, while to find $\nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]}$ we need to apply the chain rule again:
+\begin{equation}
+\nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]}
+=\nabla_{\textbf{h}^{[t]}} \tanh\left(\textbf{W} \textbf{h}^{[t]} + \textbf{U} \textbf{x}^{[t+1]} + \textbf{b}\right)
+=\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)
+\end{equation}
+Therefore,
+\begin{equation}
+\nabla_{\textbf{h}^{[t]}} \mathcal{L}
+= \textbf{V}^{T} \cdot \nabla_{\textbf{y} ^{[t]}}\mathcal{L}
++\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right) \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
+\end{equation}
+where we do not expand $\nabla_{\textbf{h}^{[t+1]}} \mathcal{L}$ further as that is carried over during backpropagation (it corresponds to the $\delta$ in lab 4).
+
+We now compute the gradients with respect to the parameters of the network, starting with the easy biases. $\textbf{c}$ is used to compute $\textbf{y}^{[t]}$ for every $t$, thus:
+\begin{equation}
+\nabla_\textbf{c} \mathcal{L}
+=\sum_{t=1}^\tau
+\nabla_{\textbf{c}}\textbf{y}^{[t]}\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L}
+=\sum_{t=1}^\tau\nabla_{\textbf{y}^{[t]}}\mathcal{L}
+\end{equation}
+Similarly, $\textbf{b}$ is used to compute $\textbf{h}^{[t]}$, therefore:
+\begin{equation}
+\nabla_\textbf{b} \mathcal{L}
+=\sum_{t=1}^\tau
+\nabla_{\textbf{b}}\textbf{h}^{[t]}\cdot\nabla_{\textbf{h}^{[t]}}\mathcal{L}
+=\sum_{t=1}^\tau
+\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)
+\cdot\nabla_{\textbf{h}^{[t]}}\mathcal{L}
+\end{equation}
+
+Moving on to the three weight matrices, we have:
+\begin{equation}
+\nabla_\textbf{V} \mathcal{L}
+=\sum_{t=1}^\tau
+\nabla_{\textbf{V}^{[t]}} \textbf{y}^{[t]}\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L}
+\end{equation}
+where we use $\nabla_{\textbf{V}^{[t]}} \textbf{y}^{[t]}$ to denote the gradient of $\textbf{y}^{[t]}$ with respect to $\textbf{V}$ *without* backpropagating, i.e., the contribution of $\textbf{V}$ only at time $t$. In other words, you can think of $\textbf{V}^{[1]},\ldots,\textbf{V}^{[t]}$ as dummy variables that all equal $\textbf{V}$. Note that we must now deal with tensors: let $\textbf{V}^{[t]}\in\mathbb{R}^{n\times m}$, then $\nabla_{\textbf{V}^{[t]}} \textbf{y}^{[t]}\in\mathbb{R}^{n\times m\times n}$, so that, since $\nabla_{\textbf{y}^{[t]}}\mathcal{L}\in\mathbb{R}^{n}$, $\nabla_\textbf{V} \mathcal{L}\in\mathbb{R}^{n\times m}$ (the last dimension disappears due to the dot products, just like normal matrix multiplication). Let's analyze each item of the final gradient:
+\begin{align}
+\left(\nabla_V \mathcal{L}\right)_{ij}
+&=\frac{\partial}{\partial\textbf{V}_{ij}}\mathcal{L} \\
+&=\sum_{t=1}^{\tau}\sum_{k=1}^n \frac{\partial \mathcal{L}}{\partial y^{[t]}_k}\cdot\frac{\partial y^{[t]}_k}{\partial V^{[t]}_{ij}} \\
+&=\sum_{t=1}^{\tau}\sum_{k=1}^n \frac{\partial \mathcal{L}}{\partial y^{[t]}_k}\cdot
+\frac{\partial}{\partial V^{[t]}_{ij}}\sum_{\ell=1}^m V^{[t]}_{k\ell}h^{[t]}_{\ell} \\
+&=\sum_{t=1}^{\tau}\sum_{k=1}^n \frac{\partial \mathcal{L}}{\partial y^{[t]}_k}\cdot
+\delta_{ik}h^{[t]}_j \\
+&=\sum_{t=1}^{\tau}
+\frac{\partial \mathcal{L}}{\partial y^{[t]}_i}\cdot
+h^{[t]}_j
+\end{align}
+Therefore, via the outer product:
+\begin{equation}
+\nabla_\textbf{V} \mathcal{L}=\sum_{t=1}^{\tau}\nabla_{\textbf{y}^{[t]}}\mathcal{L}\cdot {\textbf{h}^{[t]}}^T
+\end{equation}
+A faster way of reaching the same result is via:
+\begin{equation}
+\nabla_\textbf{V} \mathcal{L}
+=\sum_{t=1}^{\tau}
+\sum_{i=1}^n
+\nabla_{\textbf{V}}y_i^{[t]}
+\cdot
+\nabla_{y_i^{[t]}}\mathcal{L}
+\end{equation}
+and noticing that $\nabla_{\textbf{V}}y_i^{[t]}$ is a matrix with all zeros except for row $i$ which equals ${\textbf{h}^{[t]}}^T$.
+
+Moving on to $\textbf{W}$, using the same insight, we have:
+\begin{equation}
+\nabla_{\textbf{W}}\mathcal{L}
+=\sum_{t=1}^{\tau} \nabla_{\textbf{W}}\textbf{h}^{[t]}\cdot \nabla_{\textbf{h}^{[t]}}\mathcal{L}
+=\sum_{t=1}^{\tau} \sum_{i=1}^{n} \nabla_{\textbf{W}}h_i^{[t]}\cdot \nabla_{h_i^{[t]}}\mathcal{L}
+\end{equation}
+where the $i$-th row of $\nabla_{\textbf{W}}h_i^{[t]}$ equals, by the chain rule,
+\begin{equation}
+\nabla_{\textbf{W}}h_i^{[t]}
+=\left(1-{{h}_i^{[t]}}^2\right)\cdot{\textbf{h}^{[t-1]}}^T
+\end{equation}
+therefore:
+\begin{equation}
+\nabla_{\textbf{W}}\mathcal{L}
+=\sum_{t=1}^{\tau} \sum_{i=1}^{n} \nabla_{\textbf{W}}h_i^{[t]}\cdot \nabla_{h_i^{[t]}}\mathcal{L}
+=\sum_{t=1}^{\tau}
+\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L} \cdot{\textbf{h}^{[t-1]}}^T
+\end{equation}
+
+Finally, in a similar way,
+\begin{equation}
+\nabla_{\textbf{U}}\mathcal{L}
+=\sum_{t=1}^{\tau} \nabla_{\textbf{U}}\textbf{h}^{[t]}\cdot \nabla_{\textbf{h}^{[t]}}\mathcal{L}
+=\sum_{t=1}^{\tau} \sum_{i=1}^{n} \nabla_{\textbf{U}}h_i^{[t]}\cdot \nabla_{h_i^{[t]}}\mathcal{L}
+=\sum_{t=1}^{\tau}
+\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L} \cdot{\textbf{x}^{[t]}}^T
+\end{equation}
+
+
+## Exercise 2
+In the third exercise, we are going to be estimating only the temperature value of the next hour from the given past 24 hours of weather-related information. Thus we will not be computing any intermediate output from the RNN and only one scalar value at the final step. Additionally, we will use mean square error as a loss function.
+
+Given this information, show that:
+
+\begin{align}
+\nabla_{\textbf{h} ^{[\tau]}} \mathcal{L}
+&=2(\hat y-y) \textbf{V}^{T} \\
+\nabla_{\textbf{h} ^{[t]}}\mathcal{L}
+&= \textbf{W}^{T} \cdot \text{diag}\bigg(1-{\textbf{h}^{[t+1]}}^{2} \bigg)\cdot\nabla_{\textbf{h}{^{[t+1]}}}{\mathcal{L}} \\
+\nabla_{\textbf{c}} \mathcal{L}
+&= 2(\hat y-y) \\
+\nabla_\textbf{V} \mathcal{L}
+&= 2(\hat y-y) \textbf{h}^{{[\tau]}^{T}}
+\end{align}
+
+
+### Solution
+
+In the first formula we can directly expand the gradient of the loss:
+\begin{equation}
+\nabla_{\textbf{h}^{[\tau]}} \mathcal{L}
+= \textbf{V}^{T}\cdot \nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}
+= \textbf{V}^{T}\cdot 2(y-\hat{y})
+\end{equation}
+
+In the other cases, since only the last output is connected to the loss, the formulas developed above do not need to consider the paths connecting intermediate outputs. Therefore,
+\begin{equation}
+\nabla_{\textbf{h}^{[t]}} \mathcal{L}
+=\nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]} \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
+=\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right) \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
+\end{equation}
+for the bias:
+\begin{equation}
+\nabla_{\textbf{c}} \mathcal{L}
+=\nabla_{\textbf{c}}\textbf{y}^{[\tau]}\cdot \nabla_{\textbf{y}^{[\tau]}}\mathcal{L}
+= 2(\hat y-y)
+\end{equation}
+and for the last weight matrix:
+\begin{equation}
+\nabla_\textbf{V} \mathcal{L}
+=\nabla_\textbf{V} \textbf{y}^{[\tau]}\cdot \nabla_{\textbf{y}^{[\tau]}}\mathcal{L}
+= 2(\hat y-y) \textbf{h}^{{[\tau]}^{T}}
+\end{equation}
+where $\textbf{V}$ now has only one row since the network outputs scalars.
