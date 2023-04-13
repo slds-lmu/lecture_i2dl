@@ -1,4 +1,0 @@
-Suggested order of slides:
-
-- slides-intro-introduction
-- slides-intro-brief-history
