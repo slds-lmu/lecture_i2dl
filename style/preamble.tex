@@ -56,9 +56,9 @@
 \newcommand{\xmark}{\ding{55}}%
 
 
-\usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 
+\usepackage[english]{babel}
 \usepackage{dsfont}
 \usepackage{verbatim}
 \usepackage{amsmath}
@@ -87,6 +87,13 @@
 \usepackage{amsmath}
 \usepackage{pifont}
 \usepackage{xcolor} %colored math symbols
+\usepackage{adjustbox}
+\usepackage{verbatimbox}
+\usepackage{tcolorbox}
+\usepackage{siunitx}
+\def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip1em
+  \hbox{}\nobreak\hfill #1%
+  \parfillskip=0pt \finalhyphendemerits=0 \endgraf}}
 
 \usetikzlibrary{shapes,arrows,automata,positioning,calc,chains,trees, shadows}
 \tikzset{
@@ -107,6 +114,11 @@
     shorten <=2pt,
     shorten >=2pt,}
 }
+
+\newsavebox\mybox
+\newenvironment{aquote}[1]
+  {\savebox\mybox{#1}\begin{quote}\openautoquote\hspace*{-.7ex}}
+  {\unskip\closeautoquote\vspace*{1mm}\signed{\usebox\mybox}\end{quote}}
 
 \usepackage{subfig}
 
