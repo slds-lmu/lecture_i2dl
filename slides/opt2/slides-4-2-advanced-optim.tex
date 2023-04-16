@@ -70,7 +70,7 @@
 Suppose momentum always observes the same gradient $g(\theta)$:
   \footnotesize 
   \begin{eqnarray*}
-    \theta^{[t+1]} &=& \theta^{[t]} - \alpha \displaystyle\sum_{j = 0}^{t} \varphi^j g(\theta^{[j]}) + \varphi^{t+1}\nu_0 \\
+    \theta^{[t+1]} &=& \theta^{[t]} - \alpha \displaystyle\sum_{j = 0}^{t} \varphi^j g(\theta^{[t-j]}) + \varphi^{t+1}\nu_0 \\
                  &=& \theta^{[t]} - \alpha g(\theta) \displaystyle\sum_{j = 0}^{t} \varphi^j + \varphi^{t+1}\nu_0 \\
                  &=& \theta^{[t]} - \alpha g(\theta) \frac{1 - \varphi^{t+1}}{1 - \varphi} + \varphi^{t+1} \nu_0 \\
                  &\to& \theta^{[t]} - \alpha g(\theta) \frac{1}{1 - \varphi} \qquad \text{ for } t \to \infty. 
