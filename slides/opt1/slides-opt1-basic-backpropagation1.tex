@@ -1,5 +1,5 @@
 % style/preamble throws error, hence preamble4tex is kept here
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -78,10 +78,10 @@ a lot of intermediate results.
 \begin{itemize}
 \item We will divide the FP into four steps:
 \begin{itemize}
-\item the inputs of $z_i$: $\bm{\textcolor{teal}{z_{i,in}}}$
-\item the activations of $z_i$: $\bm{\textcolor{teal}{z_{i,out}}}$
-\item the input of $f$: $\bm{\textcolor{teal}{f_{in}}}$
-\item and finally the activation of $f$: $\bm{\textcolor{teal}{f_{out}}}$
+\item the inputs of $z_i$: $\bm{{z_{i,in}}}$
+\item the activations of $z_i$: $\bm{{z_{i,out}}}$
+\item the input of $f$: $\bm{{f_{in}}}$
+\item and finally the activation of $f$: $\bm{{f_{out}}}$
 \end{itemize}
 \begin{figure}
 \centering
@@ -147,7 +147,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 % \begin{itemize}
    The main ingredients of the backward pass are: 
     \begin{itemize}
-      \item to reuse the results of the forward pass \\ (here:  $\textcolor{teal}{z_{i, in}, z_{i, out}, f_{in},f_{out}}$)
+      \item to reuse the results of the forward pass \\ (here:  ${z_{i, in}, z_{i, out}, f_{in},f_{out}}$)
       \item reuse the \textcolor{violet}{intermediate results} from the chain rule 
       \item the derivative of the activations and some affine functions
     \end{itemize}
@@ -168,10 +168,10 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-    \item 1st step: The derivative of L2 is easy; we know $\textcolor{teal}{f_{out}}$ from FP.
+    \item 1st step: The derivative of L2 is easy; we know ${f_{out}}$ from FP.
   \end{itemize}
     \begin{eqnarray*}
-      \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} &=& \frac{d}{\partial f_{out}} \frac{1}{2}(y - f_{out})^2 = -\underbrace{(y - \textcolor{teal}{f_{out}})}_{\hat{=} \text{residual}} \\
+      \textcolor{violet}{\frac{\partial \Lxy}{\partial f_{out}}} &=& \frac{d}{\partial f_{out}} \frac{1}{2}(y - f_{out})^2 = -\underbrace{(y - {f_{out}})}_{\hat{=} \text{residual}} \\
        &=& -(1 - \num[round-mode=places,round-precision=4]{0.7525469}) = \num[round-mode=places,round-precision=4]{-0.2474531}
     \end{eqnarray*}
     \begin{figure}
@@ -183,10 +183,10 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-    \item 2nd step. $f_{out} = \sigma(f_{in})$, use rule for $\sigma'$, use $\textcolor{teal}{f_{in}}$ from FP.
+    \item 2nd step. $f_{out} = \sigma(f_{in})$, use rule for $\sigma'$, use ${f_{in}}$ from FP.
   \end{itemize}
     \begin{eqnarray*}
-      \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}}  &=& \sigma(\textcolor{teal}{f_{in}})\cdot(1-\sigma(\textcolor{teal}{f_{in}})) \\
+      \textcolor{violet}{\frac{\partial f_{out}}{\partial f_{in}}}  &=& \sigma({f_{in}})\cdot(1-\sigma({f_{in}})) \\
       &=& \num[round-mode=places,round-precision=4]{0.7525469} \cdot (1 - \num[round-mode=places,round-precision=4]{0.7525469}) = \num[round-mode=places,round-precision=4]{0.1862201}
     \end{eqnarray*}
       \vspace{-0.5cm}
@@ -199,10 +199,10 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-    \item 3rd step. Derivative of the linear input is easy; use $\textcolor{teal}{z_{1, out}}$ from FP.
+    \item 3rd step. Derivative of the linear input is easy; use ${z_{1, out}}$ from FP.
   \end{itemize}
     \begin{eqnarray*}
-      \textcolor{violet}{\frac{\partial f_{in}}{\partial u_1}} = \frac{\partial (u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + c \cdot 1)}{\partial u_1} = \textcolor{teal}{z_{1, out}} = \num[round-mode=places,round-precision=4]{0.3705169}
+      \textcolor{violet}{\frac{\partial f_{in}}{\partial u_1}} = \frac{\partial (u_1 \cdot z_{1,out} + u_2 \cdot z_{2,out} + c \cdot 1)}{\partial u_1} = {z_{1, out}} = \num[round-mode=places,round-precision=4]{0.3705169}
     \end{eqnarray*}
     \begin{figure}
       \centering
@@ -275,7 +275,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
     \item Next. Use rule for $\sigma'$ and FP results:
   \end{itemize}
   \begin{eqnarray*}
-    \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}}  &=& \sigma(\textcolor{teal}{z_{1,in}}) \cdot (1-\sigma(\textcolor{teal}{z_{1,in}})) \\&=&  \num[round-mode=places,round-precision=4]{0.3705169} \cdot (1 - \num[round-mode=places,round-precision=4]{0.3705169}) = \num[round-mode=places,round-precision=4]{0.2332341}
+    \textcolor{violet}{\frac{\partial z_{1,out}}{\partial z_{1,in}}}  &=& \sigma({z_{1,in}}) \cdot (1-\sigma({z_{1,in}})) \\&=&  \num[round-mode=places,round-precision=4]{0.3705169} \cdot (1 - \num[round-mode=places,round-precision=4]{0.3705169}) = \num[round-mode=places,round-precision=4]{0.2332341}
   \end{eqnarray*}
   \begin{figure}
     \centering

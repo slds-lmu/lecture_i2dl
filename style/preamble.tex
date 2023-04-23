@@ -1,5 +1,7 @@
 \documentclass[11pt,compress,t,notes=noshow, xcolor=table]{beamer}
-\usepackage[]{graphicx}\usepackage[]{color}
+\usepackage[]{graphicx}
+
+\usepackage[]{color}
 % maxwidth is the original width if it is less than linewidth
 % otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -49,13 +51,12 @@
 \definecolor{errorcolor}{rgb}{1, 0, 0}
 \newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
 
-\usepackage{alltt}
 \newcommand{\SweaveOpts}[1]{}  % do not interfere with LaTeX
 \newcommand{\SweaveInput}[1]{} % because they are not real TeX commands
 \newcommand{\Sexpr}[1]{}       % will only be parsed by R
 \newcommand{\xmark}{\ding{55}}%
 
-
+\usepackage{alltt}
 \usepackage[utf8]{inputenc}
 
 \usepackage[english]{babel}
@@ -94,6 +95,10 @@
 \def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip1em
   \hbox{}\nobreak\hfill #1%
   \parfillskip=0pt \finalhyphendemerits=0 \endgraf}}
+
+% basic latex stuff
+\newcommand{\col}{\par\colorbox{code}{\parbox{\textwidth}{\theverbbox}}\par}
+
 
 \usetikzlibrary{shapes,arrows,automata,positioning,calc,chains,trees, shadows}
 \tikzset{

@@ -58,15 +58,15 @@
     \begin{figure}
       \centering
         \includegraphics[width=8cm]{figure/xor_rep.png}%
-        \caption{A neural network with two neurons in the hidden layer. The matrix $\Wmat$ describes the mapping from $\xb$ to $\hidz$. The vector $\wtu$ from $\hidz$ to $y$.}
+        \caption{A neural network with two neurons in the hidden layer. The matrix $\Wmat$ describes the mapping from $\xv$ to $\hidz$. The vector $\wtu$ from $\hidz$ to $y$.}
     \end{figure}
 \framebreak
   \begin{itemize}
     \item Let use ReLU $\sigma(z) = \max\left\{0, z \right\}$ as activation function and a simple thresholding function $\tau(z) = [ z > 0 ] =  \begin{cases} 1 & \text{ if } z > 0 \\ 0 & \text{otherwise} \end{cases} $ \\ as output transformation function. We can represent the architecture of the model by the following equation: 
   \end{itemize}
   \begin{eqnarray*}
-    f(\xb~|~\thetab) &=& f(\xb~|~ \Wmat, \biasb, \wtu, \biasc) = \tau\left(\wtu^\top\sigma(\Wmat^\top \xb+\biasb)+\biasc\right) \\
-                &=& \tau\left(\wtu^\top \max\{0, \Wmat^\top \xb+\biasb\} + \biasc\right)
+    f(\xv~|~\thetab) &=& f(\xv~|~ \Wmat, \biasb, \wtu, \biasc) = \tau\left(\wtu^\top\sigma(\Wmat^\top \xv+\biasb)+\biasc\right) \\
+                &=& \tau\left(\wtu^\top \max\{0, \Wmat^\top \xv+\biasb\} + \biasc\right)
   \end{eqnarray*}
   % \begin{footnotesize}
   % \textbf{Note:} To simplify calculations, we \enquote{falsely} treat the problem as a regression problem (no final output transformation $\tau$ to map scores to $[0, 1]$). We will see later that transformation to $[0, 1]$ is not necessary in this very special case.
@@ -213,7 +213,7 @@
     \item In a final step we have to multiply the activated values of matrix $\bm{Z}$ with the vector $\wtu$ and add the bias term $c$:
   \end{itemize}
   \begin{eqnarray*}
-    f(\xb ~|~ \Wmat, \biasb, \wtu, c) &=&
+    f(\xv ~|~ \Wmat, \biasb, \wtu, c) &=&
     \begin{pmatrix}
       0 & 0 \\
       1 & 0 \\
