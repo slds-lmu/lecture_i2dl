@@ -1,94 +1,329 @@
-
-\input{../../2021/style/preamble_mina.tex} 
+\input{../../style/preamble4tex}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
-\begin{document}
+\title{Deep Learning}
 
-\newcommand{\vphi}{\bm{\phi}}
-\lecturechapter{10}{Variational Autoencoder (VAE)}
-\lecture{Deeplearning}
+\date{}
+
+\begin{document}
+\newcommand{\titlefigure}{plots/frontpage.png}
+
+\newcommand{\learninggoals}{
+  \item introduction and intution of VAE
+  \item VAE-parameter fitting
+  \item reparametrization trick
+}
+
+\lecturechapter{Variational Autoencoder (VAE)}
+\lecture{I2DL}
 
 
 \begin{frame}
-\frametitle{Variational Autoencoder (VAE)}
+\frametitle{Variational Autoencoder (VAE): Intution}
 
-%The classic DAG problem: How do we efficiently learn $p_{\thetab}(\mathbf{z}| \xv )$?
-    
- Independently proposed by:
+Independently proposed by:
 \small{
 \begin{itemize}
 \item Kingma and Welling, \emph{Auto-Encoding Variational Bayes}, ICLR 2014
 \item Rezende, Mohamed and Wierstra, \emph{Stochastic back-propagation and variational inference in deep latent Gaussian models.} ICML 2014
 \end{itemize}}
 
-\vspace{2mm}
-    Instead of mapping the input into a fixed vector, we want to map it into a distribution. Let's label this distribution as $p_{\thetab}$, parameterized by ${\thetab}$. The relationship between the data input $x$ and the latent encoding vector $z$ can be fully defined by:
+\vspace{1mm}
+
+Conventional AEs compute a deterministic feature vector that describes the attributes of the input in latent space:
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=7cm]{plots/ae_intution.png}
+                \vspace{-8pt}
+                \caption{\tiny{source: https://www.jeremyjordan.me/variational-autoencoders/}}
+                \end{figure}
+    
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Variational Autoencoder (VAE)}
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=9cm]{plots/vae_motivation.png}
+                \vspace{-6pt}
+                \caption{\tiny{source: https://www.jeremyjordan.me/variational-autoencoders/}}
+                \end{figure}
+                \vspace{-10pt}
 
 \begin{itemize}
-\item Prior $p_{\thetab}(\mathbf{z})$
-\item Liklihood $p_{\thetab}( \xv|\mathbf{z})$
-\item Posterior $p_{\thetab}(\mathbf{z} | \xv)$
-\end{itemize}
-    
-    %Idea: introduce an \textbf{inference model $q_{\vphi }(\mathbf{z}| \xv)$}  that learns to approximate the posterior $p_{\thetab}(\mathbf{z}| \xv )$
-    
-    %\hspace{1.5cm}\includegraphics[width=0.7\framewidth]{plots/VAE-full.png}
-
-
-
-
-    %Idea: introduce an \textbf{inference model $q_{\vphi }(\mathbf{z}| \xv)$}  that learns to approximate the posterior $p_{\thetab}(\mathbf{z}| \xv )$
-
-
-
-%\begin{itemize}
-%\item To do inference one would like to calculate $p(\mathbf{z}| \xv ) = \frac{p(\xv| \mathbf{z})p_{\thetab}(\mathbf{z})}{p(\xv)}$.
-%
-%\pause
-%\item But $p_{\thetab}(\xv)=\int p_{\thetab}(\xv|\mathbf{z}) p_{\thetab}(\mathbf{z}) d\mathbf{z}$ is intractable.
-%\end{itemize}
-
-%An VAE contains two directed graphical models
-%An VAE  consists of directed graphical models
-
-%\vspace{0.7cm}
-%\only<1-3>{
-    %\hspace{2,3cm}
-    %\includegraphics[width=0.7\framewidth]{VAE}
-    %\vspace{0.7cm}
-    %with distributions
-    %with distribution
-    %\vspace{-0.4cm}
-    %\begin{align}
-    % p(\xVec, \hVec)  &= p(\xVec|\hVec_1) p(\hVec_1|\hVec_2) ... p(\hVec_L) \nonumber
-    %\end{align}
-    %\pause
-    %\vspace{-0.4cm}
-    %\begin{itemize}
-    %\item To do inference one would like to calculate $p(\vec h| \xv ) = \frac{p(\xv| \vec h)p(\vec h)}{p(\xv)}$.
-    %
-    %\pause
-    %\item But $p(\xv)=\int p(\xv|\vec h) p(\vec h) d\vec h$ is intractable.
-    %\end{itemize}
-    %}
-%\only<4>{\hspace{2,3cm} \includegraphics[width=0.7\framewidth]{VAE-full}\\
-    
-    %with distributions
-    %\vspace{-0.4cm}
-    %with distribution
-    %\begin{align}
-    % p(\xVec, \hVec)  &= p(\xVec|\hVec) p(\hVec)  \nonumber \\
-    %q(\hVec | \xVec) &= q(\hVec|\xVec) q(\hVec|\hVec_1) ... %q(\hVec_L | \hVec_{L-1}) \nonumber
-    % \nonumber
-    %\end{align}}
-
-%\small{[Kingma and Welling, Auto-Encoding Variational Bayes, ICLR 2014]}
-
-%\small{[Rezende, Mohamed and Wierstra, Stochastic back-propagation and variational inference in deep latent Gaussian models. ICML 2014]}
+\item Key difference in variational autoencoders are:
+  \begin{itemize}
+    \item Uses a variational approach to learn the latent representation
+    \item Allows to describe observation in latent space in probablistic manner.
+  \end{itemize}     
+\end{itemize}  
 
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Variational Autoencoder (VAE): Intution}
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=7cm]{plots/vae_intution.png}
+                \vspace{-8pt}
+                \caption{\tiny{source: https://www.jeremyjordan.me/variational-autoencoders/}}
+                \end{figure}
+
+
+\begin{itemize}
+\item Describe each latent attribute as probability distribution
+\item Allows to model uncertainty in input data
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{VAE: Statistical motivation}
+
+\begin{itemize}
+\item Suppose the hidden variable $z$ which generates an observation $x$
+\pause
+\item By training variational autoencoder, we determin the distribution $z$ and would like to compute $p(z|x)$. \\
+\centering{$p\left( {z|x} \right) = \frac{{p\left( {x|z} \right)p\left( z \right)}}{{p\left( x \right)}}$}\\
+\vspace{5pt}
+\pause
+\item \raggedright{However, computing $p(x)$ is difficult since it is an intractable distribution!} \\
+\centering{$p\left( x \right) = \int {p\left( {x|z} \right)p\left( z \right)dz}$}\\
+\vspace{5pt}
+\pause
+\item \raggedright{Instead we can apply variational inference} \\
+\pause
+\item \raggedright{Let's approximate $p(z|x)$ by tractable distribution $q(z|x)$ which is very similar to $p(z|x)$.} \\
+
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\begin{frame}
+\frametitle{VAE: Statistical motivation}
+
+\begin{itemize}
+\item \raggedright{KL divergence measures of difference between two probability distributions. Thus, if we wanted to ensure that $q(z|x)$ was similar to $p(z|x)$, we could minimize the KL divergence between the two distributions:} \\
+\centering{$\min KL\left( {q\left( {z|x} \right)||p\left( {z|x} \right)} \right)$} \\
+\pause
+\raggedright{by maximizing the following:}\\
+\paused
+\centering{$\max {E_{q\left( {z|x} \right)}}\log p\left( {x|z} \right) - KL\left( {q\left( {z|x} \right)||p\left( z \right)} \right)$} \\
+\vspace{5pt}
+\item \raggedright{The first term represents the reconstruction likelihood and the second term ensures that our learned distribution $q$ is similar to the true prior distribution $p$.}
+\item which forces $q(z|x)$ to be similar to true prior distribution $p(z)$
+
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{VAE: Statistical motivation}
+
+\begin{itemize}
+\item $p(z)$ often assumed to be Guassian distribution \\ $\righttarrow$ determining $q(z|x)$ boils down to estimating $\mu$ and $\sigma$.
+\item Use neural network to estimate $q(z|x)$ and $p(z|x)$
+\end{itemize}
+
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=9cm]{plots/vae.png}
+                \vspace{-6pt}
+                \caption{\tiny{source: https://www.jeremyjordan.me/variational-autoencoders/}}
+                \end{figure}
+                \vspace{-10pt}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{VAE Training}
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=7cm]{plots/vae_training.png}
+                \vspace{-6pt}
+                \caption{\tiny{source: https://www.jeremyjordan.me/variational-autoencoders/}}
+                \end{figure}
+  
+  
+\begin{itemize}
+\item Loss function: $ L(\theta, \phi; x, z) = E_{q_{\phi} ({z|x})} \log p_{\theta} ({x|z}) - KL ({q_{\phi} ({z|x})|| p_{\theta} (z)})$
+\item Problem: network contains \textbf{sampling} operator $\rightarrow$ we can not backpropagate through!
+\end{itemize}              
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Reparametrization Trick}
+
+\begin{itemize}
+\item We can not backpropagate through random sampling- what now?
+\pause
+\item "Push" random sampling out of backpropagation path by reparametrization
+\end{itemize}  
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=11cm]{plots/vae_reparam.png}
+                \end{figure}
+                
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Visualization of latent space}
+
+\vspace{3mm}
+
+                \begin{figure}
+                \centering
+                \includegraphics[width=11cm]{plots/vae_visualization.png}
+                \end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Variational autoencoders as a generative model}
+
+\begin{itemize}
+\item New data can be generated by sampling from distributions in the latent space $\rightarrow$ reconstructed by decoder
+\pause
+\item Diagonal prior enforces independent latent variables $\rightarrow$ can encode different factors of variations
+\pause
+\item Examples of generated samples:
+
+\end{itemize}  
+\end{frame}
+
+\frame{
+    \frametitle{Latent Variables learned by a VAE}
+    
+    \begin{figure}
+    \centering
+    \scalebox{0.4}{\includegraphics{plots/LatentVariables-FF.png}}
+    \caption{\footnotesize Images generated by a VAE are superimposed on the latent vectors that generated them. In the two-dimensional latent space of the VAE, the first dimension encodes the position of the face and the second dimension encodes the expression. Therefore, starting at any point in the latent space, if we move along either axis, the corresponding property will change in the generated image.    (Goodfellow et al.,  2016)}
+    \end{figure}
+    
+}
+
+\frame{
+    \frametitle{Latent Variables learned by a VAE}
+    
+    \begin{figure}
+    \centering
+    \scalebox{0.5}{\includegraphics{plots/vae_mnist_n.png}}
+    \caption{\footnotesize Images generated by a VAE are superimposed on the latent vectors that generated them. The two-dimensional latent space of the VAE captures much of the variation present in MNIST. Different regions in the latent space correspond to different digits in the generated images. (Goodfellow et al.,  2016)}
+    \end{figure}
+    
+}
+
+
+
+\frame{
+    \frametitle{Samples from a vanilla VAE}
+    
+    \begin{figure}
+      \centering
+      \scalebox{0.9}{\includegraphics{plots/vae_faces.png}}
+      \tiny{\\ Credit : Wojciech Mormul}
+      \caption{\footnotesize Samples generated by a VAE that was trained on images of people's faces.}
+    \end{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Variational autoencoders: Summary}
+
+\begin{itemize}
+  \item Probabilistic models $\rightarrow$ allow to generate data
+  \item Intractable density $\rightarrow$ optimises variational lower bound instead
+  \item Trained by back propagation by using reparametrization
+  \pause
+  \item Pros:
+    \begin{itemize}
+      \item Principled approach to generative models
+      \item Latent space reparametrization can be useful for other tasks
+    \end{itemize}  
+  \pause
+  \item Cons:
+    \begin{itemize}
+      \item Only maximizes lower bound of likelihood
+      \item Samples in standard models often of lower equality compared to GANs
+    \end{itemize} 
+  \item Active area of research!
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Jeremy, 2018]{4} Jeremy Jordan (2018)
+\newblock Variational Autoencoders
+\newblock \emph{\url{https://www.jeremyjordan.me/variational-autoencoders/}}
+
+\bibitem[Weng, 2014]{5} Lilian Weng (2018)
+\newblock From Autoencoder to Beta-VAE
+\newblock \emph{\url{https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}
+\frametitle{Appendix: Loss Function ELBO }
+
+\begin{itemize}
+\item In this section, we provide more details on loss function; 
+\item In VAE, instead of mapping the input into a fixed vector, we want to map it into a distribution. Let's label this distribution as $p_{\thetab}$, parameterized by ${\thetab}$. The relationship between the data input $x$ and the latent encoding vector $z$ can be fully defined by:
+
+  \begin{itemize}
+    \item Prior $p_{\thetab}(\mathbf{z})$
+    \item Liklihood $p_{\thetab}( \xv|\mathbf{z})$
+    \item Posterior $p_{\thetab}(\mathbf{z} | \xv)$
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \begin{frame}
 \frametitle{VAE-Parameter Fitting}
@@ -99,8 +334,8 @@ Assuming that we know the real parameter ${\theta}^*$ for this distribution.
 To generate a sample from a real data point $x^{(i)}$:
 
 \begin{itemize}
-\item sample a $x^{(i)}$ from a prior distribution $p_{{\theta}^*} (z)$
-\item a value $x^{(i)}$ is generated from a conditional distribution $p_{{\theta}^*} (x|z=z^{(i))}$ 
+\item sample $x^{(i)}$ from a prior distribution $p_{{\theta}^*} (z)$
+\item a value $x^{(i)}$ is generated from a conditional distribution $p_{{\theta}^*} (x|z=z^{(i)})$ 
 \end{itemize}
 
 \vspace{1mm}
@@ -112,7 +347,7 @@ ${\theta}^* = \argmax_{\theta} \prod_{i=1}^{n}  p_{\thetab} (x^{(i)})$
 }
 \vspace{2mm}
 
-we use the log probabilities to convert the product on RHS to a sum:
+we use the log probabilities to convert the product on right-hand side to a sum:
 
 \vspace{2mm}
 \centering{
@@ -121,9 +356,7 @@ ${\theta}^* = \argmax_{\theta} \sum_{i=1}^{n} log p_{\thetab} (x^{(i)})$
 
 \end{frame}  
 
-%\end{frame}
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 
 \begin{frame}
 \frametitle{VAE-Parameter Fitting}
@@ -142,7 +375,7 @@ Unfortunately it is not easy to compute $ p_{\thetab} (\xv^{(i)}) $ in this way,
 \end{frame}
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
 \frametitle{VAE-Parameter Fitting: Variational Lower Bound}
@@ -205,6 +438,7 @@ Unfortunately it is not easy to compute $ p_{\thetab} (\xv^{(i)}) $ in this way,
 
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
 \begin{frame}
 \frametitle{VAE-Parameter Fitting: Variational Lower Bound}
@@ -266,6 +500,7 @@ Unfortunately it is not easy to compute $ p_{\thetab} (\xv^{(i)}) $ in this way,
 
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
 \frame{
     \frametitle{VAE-Model Definition}
@@ -290,6 +525,8 @@ Unfortunately it is not easy to compute $ p_{\thetab} (\xv^{(i)}) $ in this way,
         \end{figure}
         
 }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
 \frame{
     \frametitle{VAE-Model Definition}
@@ -335,9 +572,6 @@ Unfortunately it is not easy to compute $ p_{\thetab} (\xv^{(i)}) $ in this way,
         }
         
 }
-
-
-
 
 
 \begin{frame}
@@ -411,99 +645,7 @@ Let $\bm{\epsilon}$ be standard normally distributed, i.e. $\bm{\epsilon} \sim\m
 
 \end{frame}
 
-
-
-\frame{
-    \frametitle{VAE-Training with Backpropagation}
-    
-    Due to the reparameterization trick, we can simultaneously train both the generative model  $p_{\thetab}(\xv| \mathbf{z})$  and the inference model $q_{\vphi}(\mathbf{z}| \xv)$   by maximizing the ELBO based on gradient ascent and backpropagation.
-    
-    
-    
-    \begin{figure}
-    \centering
-    \includegraphics[width=6cm]{plots/VAE-BackProp.png}
-    \end{figure}
-    
-}
-
-\begin{frame}{Illustration of forward pass}
-  \begin{figure}
-    \centering
-    \scalebox{1}{\includegraphics{plots/vae_forwardpass.png}}
-    \tiny{\\ credit: Lillian Weng}
-    \caption{\footnotesize Illustration of the forward pass in a VAE. For a given $\xv$, the encoder network outputs the mean(s) $\bm{\mu}_{\mathbf{z}}(\xv)$ and standard deviation(s) $\bm{\sigma}_{\mathbf{z}}(\xv)$ of $\mathcal{N}(\mathbf{z}; \bm{\mu}_{\mathbf{z}}(\xv), \bm{\sigma}^2_{\mathbf{z}}(\xv))$. From this, a vector $\mathbf{z}$ is sampled and fed to the decoder network which gives us $\xv'$. If $\xv$ is an image, $\xv'$ is commonly interpreted as the reconstructed image. }
-    \end{figure}
-\end{frame}
-
-\frame{
-    \frametitle{Latent Variables learned by a VAE}
-    
-    \begin{figure}
-    \centering
-    \scalebox{0.4}{\includegraphics{plots/LatentVariables-FF.png}}
-    \caption{\footnotesize Images generated by a VAE are superimposed on the latent vectors that generated them. In the two-dimensional latent space of the VAE, the first dimension encodes the position of the face and the second dimension encodes the expression. Therefore, starting at any point in the latent space, if we move along either axis, the corresponding property will change in the generated image.    (Goodfellow et al.,  2016)}
-    \end{figure}
-    
-}
-
-\frame{
-    \frametitle{Latent Variables learned by a VAE}
-    
-    \begin{figure}
-    \centering
-    \scalebox{0.5}{\includegraphics{plots/vae_mnist_n.png}}
-    \caption{\footnotesize Images generated by a VAE are superimposed on the latent vectors that generated them. The two-dimensional latent space of the VAE captures much of the variation present in MNIST. Different regions in the latent space correspond to different digits in the generated images. (Goodfellow et al.,  2016)}
-    \end{figure}
-    
-}
-
-
-
-\frame{
-    \frametitle{Samples from a vanilla VAE}
-    
-    % \begin{figure}
-    % \centering
-    % \includegraphics[width=5cm]{plots/SamplesVAE-Faces.png}
-    % %\hspace{0.3cm}
-    % \includegraphics[width=6cm]{plots/SamplesVAE-ImageNet.png}
-    % \caption{\footnotesize Samples generated by a VAE trained on }
-    % \end{figure}
-    % %\vspace{-1cm}
-    % \texttt{ \small{ Labeled Faces in the Wild (LFW)}    \;\;\;\;\;\;\;\;\;\;\;\ \small{ImageNet (small)}}
-    % %
-    
-    \begin{figure}
-      \centering
-      \scalebox{0.9}{\includegraphics{plots/vae_faces.png}}
-      \tiny{\\ Credit : Wojciech Mormul}
-      \caption{\footnotesize Samples generated by a VAE that was trained on images of people's faces.}
-    \end{figure}
-}
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{vbframe}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Weng, 2014]{5} Lilian Weng (2018)
-\newblock From Autoencoder to Beta-VAE
-\newblock \emph{\url{https://lilianweng.github.io/lil-log/2018/08/12/from-autoencoder-to-beta-vae.html}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\end{thebibliography}
-}
-\end{vbframe}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture
 \end{document}
