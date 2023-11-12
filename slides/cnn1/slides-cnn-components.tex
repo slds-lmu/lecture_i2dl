@@ -1,4 +1,4 @@
-\input{../../style/preamble4tex}
+\input{../../style/preamble}
 \input{../../latex-math/basic-math}
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
@@ -30,6 +30,7 @@
          \begin{figure}
     \centering
     \includegraphics[width=4cm]{figure/gray.png}
+        \caption{\tiny source: Chaitanya Belwal's Blog}
   \end{figure}
     \begin{itemize}
     
@@ -60,8 +61,8 @@
 \begin{itemize}
        \item A colored digital image usually comes with three color channels, i.e. the Red-Green-Blue channels, popularly known as the RGB values.   
         \item Each pixel can be represented by a vector of three numbers (each ranging from 0 to 255) for the three primary color channels.
-      
-%\end{itemize}
+\end{itemize}
+
 % \begin{figure}
 %    \centering
 %    \includegraphics[width=5cm]{figure/1channel.png}
@@ -76,48 +77,6 @@
 %  \end{figure}
   
   
-\end{vbframe}
-\begin{vbframe}
-
- \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{figure/3channel.png}
-  \end{figure}
-
-In this CNN:
-    \begin{itemize}
-       \item there are 3 input channel, with the size of 4x4 as an input matrices, 
-       \item one 2x2 filter (also known as kernel), 
-       \item a single ReLu layer,
-       \item a single pooling layer (which applies the MaxPool function),
-       \item and a single fully connected (FC) layer.
-    \end{itemize}
-
-    \begin{itemize}
-       \item The elements of the filter matrix are equivalent to the unit weights in a standard NN and will be updated during the backpropagation phase.
-       \item Assuming a stride of 2 with no padding, the output size of the convolution layer is determined by the following equation:
-       \item $ O = \frac{I - K + 2.P}{S} + 1$ where: 
-    \begin{itemize}
-       \item O: is the dimension (rows and columns) of the output square matrix, 
-       \item I: is the dimension (rows and columns) of the input square matrix,
-       \item K: is the dimension (rows and columns) of the filter (kernel) square matrix, 
-       \item P: is the number of pixels(cells) of padding added to each side of the input,
-       \item S: is the stride, or the number of cells skipped each time the kernel is slided.
-    \end{itemize}
-    \end{itemize}
-
- \begin{figure}
-    \centering
-    \includegraphics[width=5cm]{figure/3channel.png}
-  \end{figure}
-
-Inserting the values shown in the figure into the equation,
-
-\begin{align} 
-O= \frac{I - K + 2.P}{S} + 1&={(4 - 2 + 2.0)\over 2} + 1\\ 
-&=2 
-\end{align}
-
 \end{vbframe}
 
 
@@ -237,7 +196,7 @@ O= \frac{I - K + 2.P}{S} + 1&={(4 - 2 + 2.0)\over 2} + 1\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \only<2>{\item Applying the average pooling operation, we simply look for the mean/average value at each spatial location.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\only<3>{\item We use all information by Sum and backpropagated to all responses. }
+\only<3>{\item We use all information by sum and backpropagated to all responses. }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \only<3>{\item It is not robust to noise. }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -257,6 +216,55 @@ O= \frac{I - K + 2.P}{S} + 1&={(4 - 2 + 2.0)\over 2} + 1\\
 \caption{Shortcomings of max and average pooling using Toy Image (photo source: https://iq.opengenus.org/maxpool-vs-avgpool/)}
 \end{figure}
 \end{vbframe}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{vbframe}
+
+ \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{figure/3channel.png}
+    \caption{\tiny CNNs use colored images where each of the Red, Green and Blue (RGB) color spectrums serve as input. (source: Chaitanya Belwal's Blog)}
+  \end{figure}
+
+In this CNN:
+    \begin{itemize}
+       \item there are 3 input channel, with the size of 4x4 as an input matrices, 
+       \item one 2x2 filter (also known as kernel), 
+       \item a single ReLu layer,
+       \item a single pooling layer (which applies the MaxPool function),
+       \item and a single fully connected (FC) layer.
+    \end{itemize}
+
+    \begin{itemize}
+       \item The elements of the filter matrix are equivalent to the unit weights in a standard NN and will be updated during the backpropagation phase.
+       \item Assuming a stride of 2 with no padding, the output size of the convolution layer is determined by the following equation:
+       \item $ O = \frac{I - K + 2.P}{S} + 1$ where: 
+    \begin{itemize}
+       \item O: is the dimension (rows and columns) of the output square matrix, 
+       \item I: is the dimension (rows and columns) of the input square matrix,
+       \item K: is the dimension (rows and columns) of the filter (kernel) square matrix, 
+       \item P: is the number of pixels(cells) of padding added to each side of the input,
+       \item S: is the stride, or the number of cells skipped each time the kernel is slided.
+    \end{itemize}
+    \end{itemize}
+
+ \begin{figure}
+    \centering
+    \includegraphics[width=5cm]{figure/3channel.png}
+  \end{figure}
+
+Inserting the values shown in the figure into the equation,
+
+\begin{align} 
+O= \frac{I - K + 2.P}{S} + 1&={(4 - 2 + 2.0)\over 2} + 1\\ 
+&=2 
+\end{align}
+
+\end{vbframe}
+
 
 
 
