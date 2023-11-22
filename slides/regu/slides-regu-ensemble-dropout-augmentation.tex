@@ -40,7 +40,7 @@
 \begin{figure}
     \centering
       \includegraphics[width=11cm]{figure/bagging.png}
-      \caption{ A cartoon description of bagging (Goodfellow et al. (2016))}
+      \caption{A cartoon description of bagging (Goodfellow et al., 2016)}
   \end{figure}
 
 \end{vbframe}
@@ -88,7 +88,7 @@
   \begin{itemize}
     \item To train with dropout a minibatch-based learning algorithm such as stochastic gradient descent is used.  
     \item For each training case in a minibatch, we randomly sample a binary vector/mask $\mu$ with one entry for each input or hidden unit in the network. The entries of $\mu$ are sampled independently from each other. 
-    \item The probability of sampling a mask value of 0 (dropout) for one unit is a hyperparameter known as the 'dropout rate'. 
+    \item The probability $p$ of sampling a mask value of 0 (dropout) for one unit is a hyperparameter known as the 'dropout rate'. 
     \item A typical value for the dropout rate is $0.2$ for input units and $0.5$ for hidden units. 
     \item Each unit in the network is multiplied by the corresponding mask value resulting in a $subnet_{\mu}$. 
     \item Forward propagation, backpropagation, and the learning update are run as usual.
@@ -119,7 +119,7 @@
   \begin{figure}
       \centering
     \includegraphics[width=7cm]{figure/dropout_neuron.png}
-    \tiny{\\ Credit: Srivastava et. al. (2014)}
+    \caption{Training vs. Testing (Srivastava et. al., 2014)}
   \end{figure}
   \item Weight scaling ensures that the expected total input to a neuron/unit at test time is roughly the same as the expected total input to that unit at train time, even though many of the units at train time were missing on average
   \item Rescaling of the weights can also be performed at training time instead, after each weight update at the end of the mini-batch. This is sometimes called 'inverse dropout'. Keras and PyTorch deep learning libraries implement dropout in this way.
@@ -204,13 +204,13 @@ Here, dropout leads to a smaller test error than using no regularization or sole
   \begin{figure}
     \centering
       \includegraphics[width=7cm]{figure/data_augmentation_1.png}
-      \caption{(Wu et al. (2015))}
+      \caption{Example for data set augmentation (Wu et al., 2015)}
   \end{figure}
 \framebreak
   \begin{figure}
     \centering
       \includegraphics[width=6cm]{figure/data_augmentation_2.png}
-      \caption{(Wu et al. (2015))}
+      \caption{Example for data set augmentation (Wu et al., 2015)}
   \end{figure}
   $\Rightarrow$ careful when rotating digits (6 will become 9 and vice versa)!
 \end{vbframe}
@@ -241,21 +241,13 @@ Here, dropout leads to a smaller test error than using no regularization or sole
 \footnotesize{
 \begin{thebibliography}{99}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
+\bibitem[Ian Goodfellow et al., 2016]{1} Goodfellow, I., Bengio, Y., \& Courville, A. (2016). \textit{Deep Learning}. MIT Press. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Hinton et al., 2012]{2} Geoffrey E Hinton, Nitish Srivastava, Alex Krizhevsky Ilya Sutskever and Ruslan Salakhutdinov (2012)
-\newblock Improving neural networks by preventing co-adaptation of feature detectors
-\newblock \emph{\url{http://arxiv.org/abs/1207.0580}}
+\bibitem[Hinton et al., 2012]{2} Hinton, G. E., Srivastava , N., Krizhevsky , A., Sutskever , I., \& Salakhutdinov, R. R. (2012). Improving neural networks by preventing co-adaptation of feature detectors. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \bibitem[Srivastava et. al., 2014]{3} Nitish Srivastava, Geoffrey Hinton, Alex Krizhevsky Ilya Sutskever and Ruslan Salakhutdinov (2012)
-  \newblock Dropout:  A Simple Way to Prevent Neural Networks from Overfitting
-  \newblock \emph{\url{http://jmlr.org/papers/v15/srivastava14a.html}}
+    \bibitem[Srivastava et. al., 2014]{3} Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I., \& Salakhutdinov, R. (2014). Dropout: A Simple Way to Prevent Neural Networks from Overfitting. Journal of Machine Learning Research, 15(56), 1929–1958. \url{http://jmlr.org/papers/v15/srivastava14a.html}
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Wu et al., 2015]{4} Wu Ren, Yan Shengen, Shan Yi, Dang Qingqing and Sun Gang (2015)
-\newblock Deep Image: Scaling up Image Recognition
-\newblock \emph{\url{https://arxiv.org/abs/1501.02876}}
+\bibitem[Wu et al., 2015]{4} Wu, R., Yan, S., Shan, Y., Dang, Q., \& Sun, G. (2015). Deep Image: Scaling up Image Recognition. 
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\bibitem[Bishop, Chris M., 1995]{5} Bishop, Chris M. (1995)
 %\newblock Training with Noise is Equivalent to Tikhonov Regularization
