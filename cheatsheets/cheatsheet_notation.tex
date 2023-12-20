@@ -264,9 +264,9 @@ both quardratic images as input and quadratic kernels/filters! \\
 $o = \frac{i - k + 2 \cdot p}{stride} + 1$ \\
 % $I = H - M + 1$ and \\
 % $J = B - N +1$
-\item[] Entry of output matrix $s_{ij}$ with $i \in \{1, \dots, J\}$ and $j \in \{1, \dots, J\}$ \\
-$s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ \\
-where $m,n$ denote the image size and kernel size respectively.
+% \item[] Entry of output matrix $s_{ij}$ with $i \in \{1, \dots, J\}$ and $j \in \{1, \dots, J\}$ \\
+% $s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ \\
+% where $m,n$ denote the image size and kernel size respectively.
 \end{itemize}
 \end{myblock}
 
@@ -282,7 +282,7 @@ where $m,n$ denote the image size and kernel size respectively.
 $$\mathbf{z}^{[t]} = \sigma(\mathbf{V}^\top\mathbf{z}^{[t-1]} + \mathbf{W}^\top \mathbf{x}^{[t]} + \mathbf{b})$$
 \end{itemize}
 \ \\
-\textbf{LSTM}
+\textbf{Long short-term memory (LSTM)}
 \begin{itemize}
 \item[] $\mathbf{z}^{[t]}$: state at $t$
 $$\mathbf{z}^{[t]} = \mathbf{o}^{[t]} \odot \text{tanh}(\mathbf{s}^{[t]})$$
