@@ -52,7 +52,7 @@
   \begin{figure}
     \centering
     \includegraphics[width=7cm]{figure/tesla_autopilot.jpg}
-    \caption{All Tesla cars being produced now have full self-driving hardware (Source: Tesla website). A convolutional neural network is used to map raw pixels from a single front-facing camera directly into steering commands. The system learns to drive in traffic, on local roads, with or without lane markings as well as on highways.}
+    \caption{All Tesla cars being produced now have full self-driving hardware. A convolutional neural network is used to map raw pixels from a single front-facing camera directly into steering commands. The system learns to drive in traffic, on local roads, with or without lane markings as well as on highways (The Tesla Team, 2016).}
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,7 +60,7 @@
 \begin{figure}
     \centering
     \includegraphics[width=5cm]{figure/cityscapes_visual.png}
-    \caption{Given an input image, a CNN is first used to get the feature map of the last convolutional layer, then a pyramid parsing module is applied to harvest different sub-region representations, followed by upsampling and concatenation layers to form the final feature representation, which carries both local and global context information. Finally, the representation is fed into a convolution layer to get the final per-pixel prediction. (Source: pyramid scene parsing network, by Zhao et. al, CVPR 2017) }%mina modify the caption of this figure % DR: way too complicated
+    \caption{Given an input image, a CNN is first used to get the feature map of the last convolutional layer, then a pyramid parsing module is applied to harvest different sub-region representations, followed by upsampling and concatenation layers to form the final feature representation, which carries both local and global context information. Finally, the representation is fed into a convolution layer to get the final per-pixel prediction (Zhao et al., 2017). }%mina modify the caption of this figure % DR: way too complicated
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,26 +68,34 @@
   \begin{figure}
     \centering
     \includegraphics[width=6cm]{figure/road_seg.png}
-    \caption{Road segmentation (Mnih Volodymyr (2013)). Aerial images and possibly outdated map pixels are segmented.}
+    \caption{Road segmentation: Aerial images and possibly outdated map pixels are segmented (Mnih \& Hinton, 2010).}
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{wrapfigure}{R}{0.5\textwidth}
-  \centering
-  \scalebox{0.5}{\includegraphics{figure/coronatrack.jpeg}}
-\end{wrapfigure}
+% \begin{wrapfigure}{R}{0.5\textwidth}
+%   \centering
+%   \scalebox{0.5}{\includegraphics{figure/coronatrack.jpeg}}
+% \end{wrapfigure}
+% 
+% {CNN for personalized medicine}
+%   \begin{itemize}
+%     \item Examples: Tracking, diagnosis and localization of Covid-19 patients.
+%     \item CNN based method (RadLogics algorithm) for personalized Covid-19 detection: three CT scans from a single Corona virus patient (Scudellari, 2020).
+%   \end{itemize}
 
-{CNN for personalized medicine}
-  \begin{itemize}
-    \item Examples: Tracking, diagnosis and localization of Covid-19 patients.
-    \item CNN based method (RADLogists) for personalized Covid-19 detection: three CT scans from a single Corona virus patient diagnosed by RADLogists. % DR: what is RADLogists? Google search gives 0 results
-  \end{itemize}
+
+CNN for personalized medicine e.g tracking, diagnosis and localization of Covid-19 patients.
+\begin{figure}
+  \centering
+  \includegraphics[width=7cm]{figure/coronatrack.jpeg}
+   \caption{CNN based method (RadLogics algorithm) for personalized Covid-19 detection: three CT scans from a single Corona virus patient (Scudellari, 2020).}
+\end{figure}
   
    \begin{figure}
     \centering
     \includegraphics[width=9cm]{figure/hitmap.jpeg}
-    \caption{Four COVID-19 lung CT scans at the top with corresponding colored maps showing Corona virus abnormalities at the bottom (Source: Megan Scudellari, IEEE Spectrum 2021).}
+    \caption{Four COVID-19 lung CT scans at the top with corresponding colored maps showing Corona virus abnormalities at the bottom using the RadLogics algorithm (Scudellari, 2020).}
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,7 +103,7 @@
   \begin{figure}
     \centering
     \includegraphics[width=9cm]{figure/instanceseg.png}
-    \caption{Various analyses in computational pathology are possible. For example, nuclear segmentation in digital microscopic tissue images enable extraction of high-quality features for nuclear morphometrics (Source: Kummar et. al. IEEE Transaction Medical Imaging). }
+    \caption{Various analyses in computational pathology are possible. For example, nuclear segmentation in digital microscopic tissue images enable extraction of high-quality features for nuclear morphometrics (Kumar et al., 2017).}
   \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -103,24 +111,27 @@
   \begin{figure}
     \centering
     \includegraphics[width=11cm]{figure/colorization.png}
-    \caption{Image Colorization is another interesting application of CNN in computer vision (Zhang et al. (2016)). Given a grayscale photo as the input (top row), this network solves the problem of hallucinating a plausible color version of the photo (bottom row, i.e. the prediction of the network).}
+    \caption{Image Colorization: Given a grayscale photo as the input (top row), this network solves the problem of hallucinating a plausible color version of the photo (bottom row, i.e. the prediction of the network) (Zhang et al., 2016).}
   \end{figure}
 \framebreak
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% Diese silde evtl. raus
   \begin{figure}
     \centering
     \includegraphics[width=10cm]{figure/speech.png}
-    \caption{Speech recognition (Anand \& Verma (2015)). Convolutional neural network is used to learn features from the audio data in order to classify emotions.}
+    \caption{Speech recognition: Convolutional neural network is used to learn features from the audio data in order to classify emotions (Anand, 2015).}
   \end{figure}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% Diese silde evtl. raus
 \begin{frame}{CNNs - A First Glimpse} 
 \center
-\only<1>{\includegraphics[width=9cm]{figure/alexnet.png}}%
-\only<2>{\includegraphics[width=9cm]{figure/alexnet.png}}%
+\only<1>{\begin{figure} \includegraphics[width=8cm]{figure/alexnet.png}
+\caption{Example architecture (Simonyan \& Zisserman, 2015)} \end{figure}}%
+\only<2>{\begin{figure} \includegraphics[width=8cm]{figure/alexnet.png}
+\caption{Example architecture (Simonyan \& Zisserman, 2015)}\end{figure}}%
+%\caption{Example CCN structure (Simonyan \& Zisserman, 2015)}
 \begin{itemize}
 \only<1>{\item \textbf{Input layer} takes input data (e.g. image, audio).}
 \only<1>{\item \textbf{Convolution layers} extract feature maps from the previous layers.}
@@ -130,6 +141,33 @@
 \end{itemize}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(The Tesla Team, 2016)]{1} The Tesla Team. (2016, October 19). \textit{All Tesla cars being produced now have full self-driving hardware: Tesla Switzerland}. Tesla. \url{https://www.tesla.com/de_ch/blog/all-tesla-cars-being-produced-now-have-full-self-driving-hardware}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Mnih \& Hinton, 2010)]{2} Mnih, V., \& Hinton, G. E. (2010). Learning to Detect Roads in High-Resolution Aerial Images. In K. Daniilidis, P. Maragos, \& N. Paragios (Eds.), \textit{Computer Vision – ECCV 2010} (pp. 210–223). Springer Berlin Heidelberg.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Zhao et al., 2017)]{3} Zhao, H., Shi, J., Qi, X., Wang, X., \& Jia, J. (2017, July). \textit{Pyramid Scene Parsing Network}. Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Scudellari, 2020)]{4} Scudellari, M. (2020, March 31). \textit{Hospitals deploy AI tools to detect COVID-19 on chest scans}. IEEE Spectrum.  \url{https://spectrum.ieee.org/hospitals-deploy-ai-tools-detect-covid19-chest-scans}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Kumar et al., 2017)]{5}Kumar, N., Verma, R., Sharma, S., Bhargava, S., Vahadane, A., \& Sethi, A. (03 2017). A Dataset and a Technique for Generalized Nuclear Segmentation for Computational Pathology. \textit{IEEE Transactions on Medical Imaging}, 36, 1–1. \url{doi:10.1109/TMI.2017.2677499}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Zhang et al., 2016)]{6} Zhang, R., Isola, P., \& Efros, A. A. (2016). Colorful Image Colorization. In B. Leibe, J. Matas, N. Sebe, \& M. Welling (Eds.), \textit{Computer Vision -- ECCV 2016} (pp. 649–666). Cham: Springer International Publishing.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Anand, 2015)]{7} Anand, N. (2015). \textit{Convoluted Feelings Convolutional and recurrent nets for detecting emotion from audio data}. Retrieved from \url{https://api.semanticscholar.org/CorpusID:209374156}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Simonyan \& Zisserman, 2015)]{8} Simonyan, K., \& Zisserman, A. (2015). Very Deep Convolutional Networks for Large-Scale Image Recognition.
+\end{thebibliography}
+}
+\end{vbframe}
 
 \endlecture
 \end{document}

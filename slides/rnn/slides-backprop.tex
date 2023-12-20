@@ -69,30 +69,57 @@
  \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  \frame{
+%  
+%  \frametitle{Simple Example: Character Level Language Model}
+%  
+%  The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.
+%    \begin{itemize}
+%      \item[]
+%    \end{itemize}
+%    \begin{minipage}{0.55\textwidth}
+%      \begin{figure}
+%          \only<1>{\includegraphics[width=5.5cm]{plots/nlp1.png}}%
+%          \only<2>{\includegraphics[width=5.5cm]{plots/nlp2.png}}%
+%      \end{figure}
+%    \end{minipage}%\hfill
+%    \begin{minipage}{0.45\textwidth}
+%    %\vspace{-0.3cm}
+%    
+%      \begin{itemize}
+%        \only<1>{\item[] \textcolor{white}{Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).}} 
+%        \only<2>{\item[] Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$). How can we now train the network? \textbf{Backpropagation through time!}} 
+%      \end{itemize}
+%    \end{minipage}
+% %   
+%  }
+
+
  \frame{
  
  \frametitle{Simple Example: Character Level Language Model}
- 
- The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.
    \begin{itemize}
      \item[]
    \end{itemize}
    \begin{minipage}{0.55\textwidth}
      \begin{figure}
          \only<1>{\includegraphics[width=5.5cm]{plots/nlp1.png}}%
-         \only<2>{\includegraphics[width=5.5cm]{plots/nlp2.png}}%
+         \only<2>{\includegraphics[width=5.5cm]{plots/nlp1.png}}%
      \end{figure}
    \end{minipage}%\hfill
    \begin{minipage}{0.45\textwidth}
    %\vspace{-0.3cm}
    
      \begin{itemize}
-       \only<1>{\item[] \textcolor{white}{Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$).}} 
+       \only<1>{\item[] The RNN has a 4-dimensional input and output. The exemplary hidden layer consists of 3 neurons. This diagram shows the activations in the forward pass when the RNN is fed the characters \enquote{hell} as input. The output contains confidences the RNN assigns for the next character.} 
        \only<2>{\item[] Our goal is to increase the confidence for the correct letters (green digits) and decrease the confidence of all others (we could also use a softmax activation to squash the digits to probabilities $\in [0,1]$). How can we now train the network? \textbf{Backpropagation through time!}} 
      \end{itemize}
    \end{minipage}
 %   
  }
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \begin{vbframe}{Word Embeddings (Word2vec)}
@@ -162,7 +189,7 @@
     $$ \vdots $$
     $$ \frac{d \mathbf{z}^{[2]}}{d\mathbf{z}^{[1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[1]} + \mathbf{W}^\top \xv^{[2]} + \mathbf{b})) \mathbf{V}^\top = \mathbf{D}^{[1]} \mathbf{V}^\top $$
     
-    $$ \frac{d L}{d \mathbf{z}¸^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}} = \mathbf{D}^{[t-1]} \mathbf{D}^{[t-2]}   \text{ . . . } \mathbf{D}^{[1]} (\mathbf{V}^\top)^{t-1}$$
+    $$ \frac{d L}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}} = \mathbf{D}^{[t-1]} \mathbf{D}^{[t-2]}   \text{ . . . } \mathbf{D}^{[1]} (\mathbf{V}^\top)^{t-1}$$
 %    $$ \frac{d \mathbf{z}^{[1]}}{d\mathbf{x}^{[1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[0]} + \mathbf{W}^\top \xv^{[1]} + \mathbf{b})) \mathbf{W}^\top$$
     \item In general, for an arbitrary time-step $i<t$ in the past, $\frac{d\mathbf{z}^{[t]}}{d\mathbf{z}^{[i]}}$ will contain the term $(\mathbf{V}^\top)^{t-i}$ (this follows from the chain rule).
     \item Based on the largest eigenvalue of $\mathbf{V}^\top$, the presence of the term $(\mathbf{V}^\top)^{t-i}$ can either result in vanishing or exploding gradients.
@@ -211,22 +238,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{vbframe}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Andrej Karpathy., 2015]{1} Andrej Karpathy (2015)
-\newblock The Unreasonable Effectiveness of Recurrent Neural Networks
-\newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{thebibliography}
-}
-\end{vbframe}
+% \begin{vbframe}
+% \frametitle{References}
+% \footnotesize{
+% \begin{thebibliography}{99}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+% \newblock Deep Learning
+% \newblock \emph{\url{http://www.deeplearningbook.org/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Andrej Karpathy., 2015]{1} Andrej Karpathy (2015)
+% \newblock The Unreasonable Effectiveness of Recurrent Neural Networks
+% \newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \end{thebibliography}
+% }
+% \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

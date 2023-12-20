@@ -4,7 +4,7 @@
 \input{../../latex-math/ml-nn}
 
 \begin{document}
-\newcommand{\titlefigure}{figure/alexnetfront.png}
+\newcommand{\titlefigure}{figure/cifar10_eg.png}
 %modify picture
 \newcommand{\learninggoals}{
   \item Application of CNNs in Visual Recognition
@@ -24,19 +24,19 @@
     \begin{figure}
         \centering
         \includegraphics[width=7cm]{figure/recognition.png}
-        \caption{Image classification with Cifar-10: famous benchmark dataset with 60000 images and 10 classes (Alex Krizhevsky (2009)). There is also a much more difficult version with 60000 images and 100 classes.}
+        \caption{Image classification with Cifar-10: famous benchmark dataset with 60000 images and 10 classes (Krizhevsky, 2009). There is also a much more difficult version with 60000 images and 100 classes.}
     \end{figure}
 \framebreak
     \begin{figure}
         \centering
         \includegraphics[width=4cm]{figure/cifar_frog.png}
-        \caption{One example of the Cifar-10 data: A highly pixelated, coloured image of a frog with dimension [3, 32, 32]. }
+        \caption{One example of the Cifar-10 data: A highly pixelated, coloured image of a frog with dimension [3, 32, 32] (Krizhevsky, 2009). }
     \end{figure}
 \framebreak
     \begin{figure}
         \centering
           \scalebox{1}{\includegraphics{figure/cifar10_eg.png}}
-        \caption{An example of a CNN architecture for classification on the Cifar-10 dataset (FC = Fully Connected). }
+        \caption{An example of a CNN architecture for classification on the Cifar-10 dataset (FC = Fully Connected) (based on Krizhevsky, 2009).}
     \end{figure}  
 \end{vbframe}
 
@@ -44,7 +44,7 @@
   \begin{figure}
         \centering
           \scalebox{0.75}{\includegraphics{figure/cnn_vs_dense_1.png}}
-        \caption{Performance of a CNN and a fully connected neural net ("Dense") on Cifar-10. Both networks have roughly the same number of layers. They were trained using the same learning rate, weight decay and dropout rate. The CNN performs better as it has the right inductive bias for this task.}
+        \caption{Performance of a CNN and a fully connected neural net ("Dense") on Cifar-10. Both networks have roughly the same number of layers. They were trained using the same learning rate, weight decay and dropout rate. The CNN performs better as it has the right inductive bias for this task (based on Krizhevsky, 2009).}
     \end{figure} 
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,25 +76,25 @@ There are many visual recognition problems that are related to image classificat
             \begin{figure}
             \centering
             \includegraphics[width=11cm]{figure/fish_lab.png}
-            \caption{The CNN learns the mapping from grayscale (L) to color (ab) for each pixel in the image. The L and ab maps are then concatenated to yield the colorized image. The authors use the LAB color space for the image representation.}
+            \caption{The CNN learns the mapping from grayscale (L) to color (ab) for each pixel in the image. The L and ab maps are then concatenated to yield the colorized image. The authors use the LAB color space for the image representation (Zhang et al., 2016).}
             \end{figure}
             \framebreak
             \begin{figure}
             \centering
             \includegraphics[width=4cm]{figure/lab.png}
-            \caption{\small The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and the one with the highest softmax score is taken as predicted color value. The bin is then mapped back to the corresponding numeric (a,b) values. The network is optimized using a multinomial cross-entropy loss over the 313 quantized (a,b) bins.}
+            \caption{\small The colour space (ab) is quantized in a total of 313 bins. This allows to treat the color prediction as a classification problem where each pixel is assigned a probability distribution over the 313 bins and the one with the highest softmax score is taken as predicted color value. The bin is then mapped back to the corresponding numeric (a,b) values. The network is optimized using a multinomial cross-entropy loss over the 313 quantized (a,b) bins (Zhang et al., 2016).}
             \end{figure}
             \framebreak
             \begin{figure}
             \centering
             \includegraphics[width=11.5cm]{figure/color_architecture.png}
-            \caption{The architecture consists of stacked CNN layers which are upsampled towards the end of the net. It makes use of \textit{dilated convolutions} and \textit{upsampling layers} which will be explained later. The output is a tensor of dimension [64, 64, 313] that stores the 313 probabilities for each element of the final, downsampled 64x64 feature maps.} 
+            \caption{The architecture consists of stacked CNN layers which are upsampled towards the end of the net. It makes use of \textit{dilated convolutions} and \textit{upsampling layers} which will be explained later. The output is a tensor of dimension [64, 64, 313] that stores the 313 probabilities for each element of the final, downsampled 64x64 feature maps (Zhang et al., 2016).} 
             \end{figure}
             \framebreak
             \begin{figure}
             \centering
             \includegraphics[width=11.5cm]{figure/color_architecture.png}
-            \caption{This block is then upsampled to a dimension of 224x224 and the predicted color bins are mapped back to the (a,b) values yielding a depth of 2. Finally, the L and the ab maps are concatenated to yield a colored image.} 
+            \caption{This block is then upsampled to a dimension of 224x224 and the predicted color bins are mapped back to the (a,b) values yielding a depth of 2. Finally, the L and the ab maps are concatenated to yield a colored image (Zhang et al., 2016).} 
             \end{figure}
             \end{vbframe}
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -107,7 +107,7 @@ There are many visual recognition problems that are related to image classificat
             \begin{figure}
             \centering
             \includegraphics[width=4cm]{figure/localize_cat.png}
-            \caption{Classify and detect the location of the cat.}
+            \caption{Classify and detect the location of the cat (Golovko et al., 2019).}
             \end{figure}
             \framebreak
             \begin{itemize}
@@ -164,6 +164,7 @@ There are many visual recognition problems that are related to image classificat
             \begin{figure}
             \centering
             \includegraphics[width=8cm]{figure/naive_localization.png}
+            \caption{General view of the neural network model used to solve the problem of detecting objects in an image (Golovko et al., 2019)}
             \end{figure}
             \begin{itemize}
             \item Naive approach: use a CNN with two heads, one for the class classification and one for the bounding box regression.
@@ -187,7 +188,7 @@ The goal of semantic image segmentation is to label each pixel of an image with 
   \centering
   \includegraphics[width=.9\linewidth]{figure/semantic_segmentation.png}
 \end{minipage}
-\caption\tiny{U-Net, Ronneberger et al. MICCAI 2015}
+\caption{U-net architecture (Ronneberger et al., 2015)}
 \end{figure}
 
 \end{vbframe}
@@ -201,13 +202,12 @@ The goal of image captioning is to convert a given input image into a natural la
 \begin{minipage}{.65\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{figure/caption_generation.png}
-  \caption\tiny{}
 \end{minipage}%
 \begin{minipage}{.35\textwidth}
   \centering
   \includegraphics[width=.9\linewidth]{figure/example_sample_generation.png}
 \end{minipage}
-\caption\tiny{ “a group of people riding on top of an elephant”: Caption generation with augmented visual attention by Biswas et al., 2020 }
+\caption{"A group of people riding on top of an elephant”: Caption generation with augmented visual attention by Biswas et al., 2020.}
 \end{figure}
 
 \end{vbframe}
@@ -220,10 +220,34 @@ Visual Question Answering is a research area about building a computer system to
     \begin{figure}
         \centering
         \includegraphics[width=8cm]{figure/VQA.png}
-        \caption{Combining CNN/RNN for VQA (source: https://towardsdatascience.com/)}
+        \caption{Combining CNN/RNN for VQA (Agrawal et al., 2017)}
     \end{figure}
 
 
+\end{vbframe}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Krizhevsky, 2009)]{1} Krizhevsky, A. (2009). Learning Multiple Layers of Features from Tiny Images.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Zhang et al., 2016)]{2} Zhang, R., Isola, P., \& Efros, A. A. (2016). Colorful Image Colorization. In B. Leibe, J. Matas, N. Sebe, \& M. Welling (Eds.), \textit{Computer Vision -- ECCV 2016} (pp. 649–666). Cham: Springer International Publishing.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Golovko et al., 2019)]{3} Golovko, V. A., Kroshchanka, A., Mikhno, E., Komar, M., Sachenko, A., Bezobrazov, S. V., \& Shylinska, I. (2019). Deep Convolutional Neural Network for Recognizing the Images of Text Documents. \textit{Modern Machine Learning Technologies}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Ronneberger et al., 2015)]{4} Ronneberger, O., Fischer, P., \& Brox, T. (2015). U-Net: Convolutional Networks for Biomedical Image Segmentation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Biswas et al., 2020)]{5}Biswas, S., Parikh, D., et al. (2020). \textit{Caption generation with augmented visual attention. Journal of Deep Learning Research.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Agrawal et al., 2017)]{7} Anand, N. (2015). Agrawal, A., Lu, J., Antol, S., Mitchell, M., Zitnick, C., Parikh, D., \& Batra, D. (05 2017). VQA: Visual Question Answering: www.visualqa.org. International Journal of Computer Vision, 123. \url{doi:10.1007/s11263-016-0966-6}
+
+\end{thebibliography}
+}
 \end{vbframe}
 
 

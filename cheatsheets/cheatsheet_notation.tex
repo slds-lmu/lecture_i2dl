@@ -1,0 +1,485 @@
+\documentclass{beamer}
+
+
+\usepackage[orientation=landscape,size=a0,scale=1.4,debug]{beamerposter}
+\mode<presentation>{\usetheme{mlr}}
+
+
+\usepackage[utf8]{inputenc} % UTF-8
+\usepackage[english]{babel} % Language
+\usepackage{hyperref} % Hyperlinks
+\usepackage{ragged2e} % Text position
+\usepackage[export]{adjustbox} % Image position
+\usepackage[most]{tcolorbox}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{dsfont}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{csquotes}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{enumerate}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{psfrag}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{eqnarray}
+\usepackage{arydshln}
+\usepackage{tabularx}
+\usepackage{placeins}
+\usepackage{tikz}
+\usepackage{setspace}
+\usepackage{colortbl}
+\usepackage{mathtools}
+\usepackage{wrapfig}
+\usepackage{bm}
+
+\input{../latex-math/basic-math}
+\input{../latex-math/basic-ml}
+\input{../latex-math/ml-nn}
+
+
+\title{I2DL :\,: Notation} % Package title in header, \, adds thin space between ::
+\newcommand{\packagedescription}{ \invisible{x} % Package description in header
+	% The \textbf{I2ML}: Introduction to Machine Learning course offers an introductory and applied overview of "supervised" Machine Learning. It is organized as a digital lecture.
+}
+
+\newlength{\columnheight} % Adjust depending on header height
+\setlength{\columnheight}{84cm} 
+
+\newtcolorbox{codebox}{%
+	sharp corners,
+	leftrule=0pt,
+	rightrule=0pt,
+	toprule=0pt,
+	bottomrule=0pt,
+	hbox}
+
+\newtcolorbox{codeboxmultiline}[1][]{%
+	sharp corners,
+	leftrule=0pt,
+	rightrule=0pt,
+	toprule=0pt,
+	bottomrule=0pt,
+	#1}
+	
+
+	
+\begin{document}
+\begin{frame}[fragile]{}
+\vspace{-8ex}
+\begin{columns}
+	\begin{column}{.31\textwidth}
+		\begin{beamercolorbox}[center]{postercolumn}
+			\begin{minipage}{.98\textwidth}
+				\parbox[t][\columnheight]{\textwidth}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% First Column begin
+%-------------------------------------------------------------------------------
+% Disclaimer
+%-------------------------------------------------------------------------------
+\begin{myblock}{}
+\textbf{Note: } The lecture uses many examples from maths, statistics and machine learning. Therefore notation may overlap, but the context should make clear how to uncerstand the notation. If notation is unclear nevertheless, please contact the instructors.
+\end{myblock}
+%-------------------------------------------------------------------------------
+% Data
+%-------------------------------------------------------------------------------
+\begin{myblock}{Data}
+ %$\Xspace \subseteq \R^p$ : $p$-dimensional \textbf{feature space} / input space\\ 
+ $\Xspace$ : \textbf{feature space} / input space \\
+ with dimensions of  $\Xspace$ depending on the type of NN \\
+%sually we assume $\Xspace \equiv \R^p$, but sometimes, dimensions may be \\  
+%bounded (e.g., for categorical or non-negative features.)    \\
+
+$\Yspace$ : \textbf{target space} \\ 
+e.g.: $\Yspace = \R$ for regression, $\Yspace = \setzo$ or $\Yspace = \setmp$ for binary classification, $\Yspace = \gset$ for multi-class classification with $g$ classes\\
+
+%$\xv = \xvec \in \Xspace$ : \textbf{feature vector} / covariate vector\\ 
+$\xv \in \Xspace$ : \textbf{feature vector} / covariate vector\\ 
+
+ 
+$y \in \Yspace$ : \textbf{target variable} / output variable \\
+Concrete samples are called labels \\
+
+$\xyi \in \Xspace\times \Yspace$ : $i$ -th \textbf{observation} / sample / instance / example\\
+
+% $\allDatasets = \defAllDatasets$ : \textbf{set of all finite data sets} \\
+% 
+% $\allDatasetsn = \defAllDatasetsn \subseteq \allDatasets$ : \textbf{set of all finite data sets of size $n$} \\
+
+$\D = \Dset \in \allDatasetsn $ : \textbf{data set} of size $n$.
+An n-tuple, a family indexed by $\{1, \dots, n\}$. 
+We use $\D_n$ to emphasize its size.\\
+ 
+$\Dtrain$, $\Dtest \subseteq \D$ : \textbf{data sets for training and testing} \\ 
+Often: $\D = \Dtrain ~ \dot{\cup} ~ \Dtest$\\
+
+$\D_{subtrain}$, $\D_{val} \subseteq \Dtrain$ : \textbf{data sets in the context of early stopping} \\ 
+Note: Sophisticated forms also apply cross-validation\\
+ 
+
+%$\P_{xy}$ : \textbf{joint probability distribution on} $\Xspace \times \Yspace$ \\
+
+% Ganz vlt nur relevant
+% \underline{Classification}\\
+% 
+% $o_k(y) = \I(y = k) \in \{0,1\}$: multiclass one-hot encoding, if $y$ is class k\\ 
+% We write $\bold{o}(y)$ for the g-length encoding vector and $o_k^{(i)} =  o_k(\yi)$\\
+% 
+% $\pi_k = \P(y = k)$:\textbf{ prior probability} for class $k$ \\
+% In case of binary labels we might abbreviate: $\pi = \P(y = 1)$.
+  
+\end{myblock}
+% %-------------------------------------------------------------------------------
+% Loss and Risk
+%-------------------------------------------------------------------------------
+\begin{myblock}{Loss, Risk and ERM}
+  $L: \Yspace \times \R^g \to \R^+_0$ : \textbf{loss function}:
+ Quantifies "quality" $\Lxy$ of prediction $\fx$. \\
+
+\textbf{(Theoretical) risk:} $\risk:  \Hspace \to \R $,
+$\riskf = \E_{(\xy \sim \Pxy)}[\Lxy]$ \\
+
+\textbf{Empirical risk:} $\riske:  \Hspace \to \R $,
+% summed loss of model over data.
+%$\riskef = \sumin \Lxyi$,  analogously:
+$\riske : \Theta \to \R$; $\risket = \sumin \Lxyit$\\
+
+\textbf{Empirical risk minimization (ERM)}:
+% -- figuring out which model $\fh$ has the smallest summed loss. \\
+$\thetabh \in \argmin \limits_{\thetab \in \Theta} \risket$ \\
+% $= \argmin \limits_{\thetab \in \Theta} \sumin \Lxyit,$ \\
+
+% \textbf{Bayes-optimal model}: $\fbayes = \argmin_{f: \Xspace \rightarrow \R^g}
+% \riskf \\
+
+\textbf{Regularized risk}: $\riskr: \Hspace
+\to \R, \riskrf = \riskef + \lambda \cdot J(f)$ with regularizer $J(f)$,
+complexity control parameter $\lambda > 0$ (analogous for $\thetab$).
+\end{myblock}
+% End First Column
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+				}
+			\end{minipage}
+		\end{beamercolorbox}
+	\end{column}
+	\begin{column}{.31\textwidth}
+		\begin{beamercolorbox}[center]{postercolumn}
+			\begin{minipage}{.98\textwidth}
+				\parbox[t][\columnheight]{\textwidth}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin Second Column
+\begin{myblock}{Gradient based Optimization}
+$\thetabh^{[t]}$ : $t$-th step of an optimizer \\
+$\alpha \in \mathbb{R}_+$ : \textbf{step-size / learning rate} \\
+$\bm{d} \in \mathbb{R}^d$ : descent direction in $\thetabh$ \\
+$J_1, ..., J_K$: mini-batches of fixed size $m$ with $k\in\{1,...,K\}$ 
+\end{myblock}
+
+\begin{myblock}{(Feedforward) Neural Network}
+
+$\Xspace \subseteq \R^p$ : $p$-dimensional \textbf{feature space} / input space\\ 
+
+\textbf{(F)NN}: $\fx = \tau \circ \phi \circ \sigma^{(l)} \circ \phi^{(l)} \circ \sigma^{(l-1)} \circ \phi^{(l-1)} \circ \ldots \circ \sigma^{(1)} \circ \phi^{(1)}$, with
+\begin{itemize}
+\item[] $\phi^{(i)}$: affine transformation in hidden layer $i$ 
+\item[] $\sigma^{(i)}$: activation function in hidden layer $i$ 
+\item[] $\phi$: affine function in output layer
+\item[] $\tau$: activation function in output layer
+\end{itemize}
+\ \\
+\textbf{Hidden layer $i$}, $i \in \{1 \dots l\}$ with $m^{(i)}$ = nmb. of neurons in $i$
+\begin{itemize}
+\item[] $\Wmat^{(i)}$: weight matrix ($m^{(i-1)} \times m^{(i)}$)
+\item[] If $\xv^{(p \times 1)}$:
+\begin{itemize} \normalsize
+\item[] $\biasb^{(i)}$: bias
+\item[] $\hidz^{(i)} = \hidz_{out}^{(i)} = \sigma^{(i)}(\phi^{(i)}) = \sigma^{(i)}(\hidz_{in}^{(i)}) = \sigma^{(i)}(\Wmat^{(i)T}\hidz^{(i - 1)} + \biasb^{(i)})$: activation
+\end{itemize} 
+
+\item[] If $\Xmat^{(n \times p)}$:
+\begin{itemize}\normalsize
+\item[] $\bm{B}^{(i)}$: bias ($n \times m$)
+\item[] $\bm{Z}^{(i)} = \bm{Z}_{out}^{(i)} = \sigma^{(i)}(\phi^{(i)}) = \sigma^{(i)}(\bm{Z}_{in}^{(i)}) = \sigma^{(i)}(\bm{Z}^{(i-1)}\Wmat^{(i)} + \bm{B}^{(i)})$: activation
+\end{itemize}
+\end{itemize}
+\ \\
+\textbf{Neuron $j$}, $j \in \{1 \dots m^{(i)}\}$:
+\begin{itemize}
+\item[] $\Wmat^{(i)}_j$: column $j$ ($m^{(i-1)} \times 1$) of weight matrix
+\item[] If $\xv^{(p \times 1)}$:
+\begin{itemize} \normalsize
+\item[] $b^{(i)}_j$: bias 
+\item[] $\hidz^{(i)}_j = \hidz_{j,out}^{(i)} = \sigma^{(i)}(\phi^{(i)}_j) = \sigma^{(i)}(\hidz_{j,in}^{(i)}) = \sigma^{(i)}(\Wmat_j^{(i)T}\hidz^{(i - 1)} + b^{(i)}_j)$: 
+\end{itemize} 
+
+% \item[] If $\Xmat^{(n \times p)}$:
+% \begin{itemize}\normalsize
+% \item[] $\bm{B}^{(i)}$: bias ($n \times m$)
+% \item[] $\bm{Z}^{(i)} = \sigma^{(i)}(\phi^{(i)}) =\sigma^{(i)}(\bm{Z^}{(i-1)}\Wmat^{(i)} + \bm{B}^{(i)})$: activation
+% \end{itemize}
+\end{itemize}
+
+\end{myblock}
+
+
+
+\begin{myblock}{Convolutional Neural Networks}
+\textbf{Disclaimer}: The given notation and logic only applies to CNNs using
+both quardratic images as input and quadratic kernels/filters! \\ 
+\\ \
+ $\Xspace \subseteq \R^{H \times B \times C}$ : \textbf{feature space} representing images with 
+ % \\ $h \in \{0, \dots, 255\}$: height of image (in pixels), \\
+ % $b \in \{0, \dots, 255\}$:: breadth/width of image (in pixels), \\ 
+ % c: number of channels/depth of image \\
+\\ $H$: height of image (in pixels), \\
+ $B$: breadth/width of image (in pixels), \\ 
+ $C$: number of channels/depth of image 
+ \end{myblock}
+
+% End Second Column
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+				}
+			\end{minipage}
+		\end{beamercolorbox}
+	\end{column}
+	\begin{column}{.31\textwidth}
+		\begin{beamercolorbox}[center]{postercolumn}
+			\begin{minipage}{.98\textwidth}
+				\parbox[t][\columnheight]{\textwidth}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Begin Third Column#
+% 
+% 
+\begin{myblock}{}
+\textbf{2D Covolution} for quadratic input and quadratic filter per channel $c$:
+\begin{itemize}
+\item[] $\mathbf{I} \in \R^{i \times i}$: quadratic Input ($\rightarrow h == b$)
+\item[] $\mathbf{W} \in \R^{k \times k}$: Filter/kernel 
+\item[] $\mathbf{p} \in \N$: Padding
+\item[] $\mathbf{stride} \in \N$: Stride
+\item[] $\mathbf{S} \in \R^{o \times o}$: Output matrix with 
+$o = \frac{i - k + 2 \cdot p}{stride} + 1$ \\
+% $I = H - M + 1$ and \\
+% $J = B - N +1$
+\item[] Entry of output matrix $s_{ij}$ with $i \in \{1, \dots, J\}$ and $j \in \{1, \dots, J\}$ \\
+$s_{ij} = \sum_{m,n} I_{i+m-1, j+n-1} w_{mn}$ \\
+where $m,n$ denote the image size and kernel size respectively.
+\end{itemize}
+\end{myblock}
+
+
+\begin{myblock}{Recurrent Neural Networks}
+\textbf{Recurrent Neural Networks}
+\begin{itemize}
+\item[] $t$: current step in RNN
+\item[] $\Wmat$: weight matrix 
+\item[] $\mathbf{V}$: additional set of weights from the hidden neurons at time-step $t$ to the hidden neurons at time-step $t+1$
+\item[] $\mathbf{x}^{[t]}$: Input at current step $t$
+\item[] $\mathbf{z}^{[t]}$: state at $t$/vector of short-term memory 
+$$\mathbf{z}^{[t]} = \sigma(\mathbf{V}^\top\mathbf{z}^{[t-1]} + \mathbf{W}^\top \mathbf{x}^{[t]} + \mathbf{b})$$
+\end{itemize}
+\ \\
+\textbf{LSTM}
+\begin{itemize}
+\item[] $\mathbf{z}^{[t]}$: state at $t$
+$$\mathbf{z}^{[t]} = \mathbf{o}^{[t]} \odot \text{tanh}(\mathbf{s}^{[t]})$$
+\item[] $\mathbf{o}^{[t]}$: output gate
+\begin{itemize} \normalsize
+\item[]$\mathbf{o}^{[t]} = \sigma(\mathbf{b}_o + \mathbf{V}_o^\top \mathbf{z}^{[t-1]} + \mathbf{W}_o^\top \xv^{[t]})$
+\end{itemize}
+\item[] $\mathbf{s}^{[t]}$: cell state 
+\begin{itemize} \normalsize
+\item[]$\mathbf{s}^{[t]} = \mathbf{e}^{[t]} \odot \mathbf{s}^{[t-1]} + \mathbf{i}^{[t]} \odot \tilde{\mathbf{s}}^{[t]}$
+\end{itemize}
+\item[] $\tilde{\mathbf{s}}^{[t]}$: new information 
+\begin{itemize} \normalsize
+\item[]$\tilde{\mathbf{s}}^{[t]} = \text{tanh}(\mathbf{b} + \mathbf{V}^\top \mathbf{z}^{[t-1]} + \mathbf{W}^\top \xv^{[t]}) \in [-1, 1]$
+\end{itemize}
+\item[] $\mathbf{i}^{[t]}$: input gate 
+\begin{itemize} \normalsize
+\item[]$\mathbf{i}^{[t]} = \sigma(\mathbf{b}_i + \mathbf{V}_i^\top \mathbf{z}^{[t-1]} + \mathbf{W}_i^\top \xv^{[t]}) \in [0,1]$
+\end{itemize}
+\item[] $\mathbf{e}^{[t]}$: forget gate
+\begin{itemize} \normalsize
+\item[]$\mathbf{e}^{[t]} = \sigma(\mathbf{b}_{e} + \mathbf{V}_e^\top \mathbf{z}^{[t-1]} + \mathbf{W}_e^\top \xv^{[t]})$
+\end{itemize}
+\end{itemize}
+\ \\
+\textbf{Gated Recurrent Units (GRU)}
+\begin{itemize}
+\item[] $\mathbf{z}^{[t]}$: state at $t$
+$$\mathbf{z}^{[t]} = \mathbf{u}^{[t]} \odot \mathbf{z}^{[t-1]}  + (1 - \mathbf{u}^{[t]}) \odot \tilde{\mathbf{z}}^{[t]}$$
+\item[] $\mathbf{u}^{[t]}$:  update gate 
+\begin{itemize} \normalsize
+\item[]$\mathbf{u}^{[t]} = \sigma(\mathbf{W}_{u}^\top \mathbf{x}^{[t]} + \mathbf{V}_{u}^\top \mathbf{z}^{[t-1]}  + \mathbf{b}_u)$
+\end{itemize}
+\item[]$\tilde{\mathbf{z}}^{[t]}$: new candidate state 
+\begin{itemize} \normalsize
+\item[]$\tilde{\mathbf{z}}^{[t]} = \tanh(\mathbf{W}_{z}^\top \mathbf{x}^{[t]} + \mathbf{V}_{z}^\top \left(\mathbf{r}^{[t]} \odot \mathbf{z}^{[t-1]}\right)  + \mathbf{b}_z)$
+\end{itemize}
+\item[] $\mathbf{r}^{[t]}$: reset gate 
+\begin{itemize} \normalsize
+\item[]$\mathbf{r}^{[t]} = \sigma(\mathbf{W}_{r}^\top \mathbf{x}^{[t]} +\mathbf{V}_{r}^\top \mathbf{z}^{[t-1]} + \mathbf{b}_r)$
+\end{itemize}
+\end{itemize}
+\end{myblock}
+
+
+% %-------------------------------------------------------------------------------
+% % Regression Losses 
+% %------------------------------------------------------------------------------- 
+% \begin{myblock}{Regression Losses}
+%   \textbf{L2 loss / squared error:} 
+% \begin{itemize}    
+%   \setlength{\itemindent}{+.3in}
+%   \item $\Lxy = (y-\fx)^2$ or $\Lxy = 0.5 (y-\fx)^2$
+%   \item Convex and differentiable, non-robust against outliers
+%   % \item Tries to reduce large residuals (loss scaling quadratically)
+%   \item Optimal constant model: $\fxh = \meanin \yi =
+%   \bar{y}$
+%   \item Optimal model over $\Pxy$ for unrestricted $\Hspace$: $\fxh = \E[y | \xv]$
+%   % \item $\fxh = \text{mean of } y | \bm{x}$
+% \end{itemize}
+% 
+% \vspace*{1ex}
+% %        \includegraphics[width=1\columnwidth]{img/reg_loss.PNG}
+% 
+% 
+%   \textbf{L1 loss / absolute error:} 
+% \begin{itemize}
+% \setlength{\itemindent}{+.3in}
+%   \item $\Lxy = |y-\fx|$
+%   \item Convex and more robust, non-differentiable
+%   \item Optimal constant model: $\fxh = \text{med}(y^{(1)}, \ldots, y^{(n)})$
+%   \item Optimal model over $\Pxy$ for unrestricted $\Hspace$: $\fxh = \text{med} [y | \xv]$
+%   % \item \textcolor{orange}{Optimal model for unrestricted $\Hspace$: $\fxh = \meanin \text{med}(\yi | \xi)$}
+%   % \item $\fxh = \text{median of } y | \bm{x}$     
+% \end{itemize}
+%   %\includegraphics[width=1.03\columnwidth]{img/reg_loss_2.PNG} 
+% \end{myblock}
+% 
+% %-------------------------------------------------------------------------------
+% % Classification Losses 
+% %------------------------------------------------------------------------------- 
+% 
+% \begin{myblock}{Classification Losses}
+% 
+% % \textbf{0-1 loss} \\
+% % $\Lhxy = [y \neq \hx]$ ~ for $\Yspace = \setzo$ \\
+% \textbf{0-1-loss (binary case)}\\
+% $L (y, h(\xv)) = \I(y \neq h(\xv))$\\
+% $L (y, \fx) = \I( y\fx < 0)$ for $\Yspace = \setmp$ \\ 
+% Discontinuous, results in NP-hard optimization\\
+% %Optimal constant model: $h(\xv) \in \argmax \limits_{j \in {0,1}} \sumin \I(\yi = j) $\\
+% 
+% \textbf{Brier score (binary case)} \\
+% $\Lpixy = (\pix - y)^2$ for $\Yspace = \setzo$ \\
+% Least-squares on probabilities\\
+% %Optimal constant model: $\pixh = \bar{y}$\\
+% 
+% 
+% \textbf{Log-loss / Bernoulli loss / binomial loss (binary case)}\\
+% $\Lpixy = -y \log(\pix) - (1-y) \log(1-\pix)$ for $\Yspace = \setzo$ \\
+% $\Lpixy = \log(1 + (\frac{\pix}{1-\pix})^{-y})$ for $\Yspace = \setmp$ \\
+% %Optimal constant model: $\pixh = \bar{y}$\\
+% 
+% Assuming a logit-link $\pix = \exp(\fx) / ( 1+\exp(\fx))$:\\
+% $\Lxy = -y \cdot \fx + \log(1 + \exp(\fx))$ for $\Yspace = \setzo$ \\
+% $\Lxy = \log(1 + \exp(- y \cdot \fx))$ for $\Yspace = \setmp$ \\
+% Penalizes confidently-wrong predictions heavily\\
+% 
+% \textbf{Brier score (multi-class case)} \\
+% $\Lpixy =  \sumkg (\pikx - o_k(y))^2$ \\
+% %Optimal constant model: $\pixh = \left(\meanin o_1^{(i)}, \meanin o_g^{(i)}\right)$ \\
+% 
+% \textbf{Log-loss (multi-class case)} \\
+% $ \Lpixy =  - \sumkg o_k(y) \log(\pikx)$ \\  %\\
+% %Optimal constant model: $\pixh = \left(\meanin o_1^{(i)}, \meanin o_g^{(i)}\right)$ \\
+% 
+% \underline{Optimal constant models}\\[-1ex]
+% 0-1-loss: $h(\xv) \in \argmax \limits_{j \in {0,1}} \sumin \I(\yi = j) $\\
+% Brier and log-loss (binary): $\pixh = \bar{y}$\\
+% Brier and log-loss (multiclass): $\pixh = \left(\meanin o_1^{(i)}, \dots, \meanin o_g^{(i)}\right)$ 
+% 
+% %\textcolor{orange}{ADD PROPERTIES OF LOSSES}
+% 
+% \end{myblock}
+%-------------------------------------------------------------------------------
+% Classification 
+%------------------------------------------------------------------------------- 
+
+%\begin{myblock}{Classification}
+% 				    We want to assign new observations to known categories according to criteria learned from a training set.  
+%             \vspace*{1ex}
+%             
+
+%$y \in \Yspace = \gset : $ categorical output variable (label)\\ 
+
+%\textbf{Classification} usually means to construct $g$ \textbf{discriminant functions}:
+  
+%$f_1(\xv), \ldots, \fgx$, so that we choose our class as \\ $h(\xv) = \argmax_{k \in \gset} \fkx$ \\
+
+%\textbf{Linear Classifier:} functions $\fkx$ can be specified as linear functions\\
+
+% \hspace*{1ex}\textbf{Note: }All linear classifiers can represent non-linear decision boundaries \hspace*{1ex}in our original input space if we include derived features. For example: \hspace*{1ex}higher order interactions, polynomials or other transformations of x in \hspace*{1ex}the model.
+
+%\textbf{Binary classification: }If only 2 classes ($\Yspace = \setzo$ or  $\Yspace = \setmp$) exist, we can use a single discriminant function $\fx = f_{1}(\xv) - f_{2}(\xv)$.  \\
+
+
+% \textbf{Generative approach }models $\pdfxyk$, usually by making some assumptions about the structure of these distributions and employs the Bayes theorem: 
+% $\pikx = \postk \propto \pdfxyk \pik$. \\ %It allows the computation of \hspace*{1ex}$\pikx$. \\
+% \textbf{Examples}: Linear discriminant analysis (LDA), Quadratic discriminant analysis (QDA), Naive Bayes\\
+% 
+% \textbf{Discriminant approach }tries to optimize the discriminant functions directly, usually via empirical risk minimization:\\ 
+% $ \fh = \argmin_{f \in \Hspace} \riske(f) = \argmin_{f \in \Hspace} \sumin \Lxyi.$\\
+% \textbf{Examples}: Logistic/softmax regression, kNN
+
+
+%\end{myblock}
+
+%-------------------------------------------------------------------------------
+% HRO - Components of Learning 
+%-------------------------------------------------------------------------------          
+%\begin{myblock}{Components of Learning}
+
+%\textbf{Learning = Hypothesis space + Risk + Optimization} \\
+%\phantom{\textbf{Learning}} \textbf{= }$ \Hspace + \risket + \argmin_{\thetab \in \Theta} 
+%\risket$
+
+% 
+% \textbf{Learning &= Hypothesis space &+ Risk  &+ Optimization} \\
+% &= $\Hspace &+ \risket &+ \argmin_{\thetab \in \Theta} \risket$
+% 
+% \textbf{Hypothesis space: } Defines (and restricts!) what kind of model $f$
+% can be learned from the data.
+% 
+% Examples: linear functions, decision trees
+% 
+% \vspace*{0.5ex}
+% 
+% \textbf{Risk: } Quantifies how well a model performs on a given
+% data set. This allows us to rank candidate models in order to choose the best one.
+% 
+% Examples: squared error, negative (log-)likelihood
+% 
+% \vspace*{0.5ex}
+% 
+% \textbf{Optimization: } Defines how to search for the best model, i.e., the model with the smallest {risk}, in the hypothesis space.
+% 
+% Examples: gradient descent, quadratic programming
+
+
+%\end{myblock}
+% End Third Column
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			  }
+			\end{minipage}
+		\end{beamercolorbox}
+	\end{column}
+\end{columns}
+
+\end{frame}
+\end{document}

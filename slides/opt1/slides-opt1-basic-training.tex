@@ -139,11 +139,13 @@ The step-size $\alpha$ plays a key role in the convergence of the algorithm.
 
 If the step size is too small, the training process may converge \textbf{very} slowly (see left image). If the step size is too large, the process may not converge, because it \textbf{jumps} around the optimal point (see right image).
 
+\begin{figure}
 \begin{center}
 \includegraphics[width = 0.3\textwidth]{figure/stepsize_small.png}~~
 \includegraphics[width = 0.3\textwidth]{figure/stepsize_large.png}
+\caption{Small stepsize (left) vs. large stepsize (right) (Tibshirani, 2019)}
 \end{center}
-
+\end{figure}
 \end{vbframe}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -167,12 +169,12 @@ However, it makes sense to adapt $\alpha$ in every iteration:
 
 \vspace*{-0.1cm}
 \begin{center}
-\includegraphics[width = 0.3\textwidth]{figure/stepsize_small.png} ~~~ \includegraphics[width = 0.3\textwidth]{figure/stepsize_adaptive.png} \\
+\begin{figure}
+\includegraphics[width = 0.3\textwidth]{figure/stepsize_small.png} ~~~ 
+\includegraphics[width = 0.3\textwidth]{figure/stepsize_adaptive.png}
+\caption{Steps of gradient descent for $\riske(\thetab) = 10\,\theta_1^2 + 0.5\,\theta_2^2$. Left:  100 steps for with a fixed learning rate. Right:  40 steps with an adaptive learning rate (Tibshirani, 2019).}
+\end{figure}
 \end{center}
-\begin{footnotesize}
-Steps of gradient descent for $\riske(\thetab) = 10\,\theta_1^2 + 0.5\,\theta_2^2$. Left:  100 steps for with a fixed learning rate. Right:  40 steps with an adaptive learning rate.
-\end{footnotesize}
-
 
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -234,10 +236,10 @@ $$
  
  SGD on function $1.25(x_1 + 6)^2 + (x_2 - 8)^2$.
  \begin{figure}
+ \begin{center}
     \scalebox{0.8}{\includegraphics{figure_man/SGD.png}}
-    \tiny{\\ Source : Shalev-Shwartz and  Ben-David.
-Understanding machine learning: From theory to algorithms. Cambridge University Press, 2014. }
- \caption{Left = GD, right = SGD. The black line is a smoothed $\thetab$.}
+ \caption{Left = GD, right = SGD. The black line is a smoothed $\thetab$ (Shalev-Shwartz \& Ben-David, 2022)}
+ \end{center}
  \end{figure}
 
   \end{vbframe}
@@ -317,6 +319,22 @@ Understanding machine learning: From theory to algorithms. Cambridge University 
   % \end{itemize}
 \end{vbframe}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Tibshirani, 2019)]{1} 
+Tibshirani, R. (2019, September 11). \textit{Convex Optimization, Lecture 5: September 11}. Carnegie Mellon University Statistics \& Data Science. \url{https://www.stat.cmu.edu/~ryantibs/convexopt/scribes/grad-descent-scribed.pdf}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Shalev-Shwartz \& Ben-David, 2022)]{2} Shalev-Shwartz, S., \& Ben-David, S. (2022). \textit{Understanding machine learning: From theory to algorithms}. Cambridge University Press. 
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture

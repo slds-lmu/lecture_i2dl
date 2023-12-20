@@ -78,8 +78,8 @@ a lot of intermediate results.
 \begin{itemize}
 \item We will divide the FP into four steps:
 \begin{itemize}
-\item the inputs of $z_i$: $\bm{{z_{i,in}}}$
-\item the activations of $z_i$: $\bm{{z_{i,out}}}$
+\item the inputs of $z_j$: $\bm{{z_{j,in}}}$
+\item the activations of $z_j$: $\bm{{z_{j,out}}}$
 \item the input of $f$: $\bm{{f_{in}}}$
 \item and finally the activation of $f$: $\bm{{f_{out}}}$
 \end{itemize}
@@ -147,7 +147,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 % \begin{itemize}
    The main ingredients of the backward pass are: 
     \begin{itemize}
-      \item to reuse the results of the forward pass \\ (here:  ${z_{i, in}, z_{i, out}, f_{in},f_{out}}$)
+      \item to reuse the results of the forward pass \\ (here:  ${z_{j, in}, z_{j, out}, f_{in},f_{out}}$)
       \item reuse the \textcolor{violet}{intermediate results} from the chain rule 
       \item the derivative of the activations and some affine functions
     \end{itemize}
@@ -230,7 +230,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 \item  With LR $\alpha = 0.5$:
   % \end{itemize}
     \begin{eqnarray*}
-      u_1^{[new]} &=& u_1^{[old]} - \alpha \cdot \textcolor{violet}{\frac{\partial \Lxy}{\partial u_1}} \\
+      u_1^{[t+1]} &=& u_1^{[t]} - \alpha \cdot \textcolor{violet}{\frac{\partial \Lxy}{\partial u_1}} \\
                 &=& -0.22 - 0.5 \cdot (\num[round-mode=places,round-precision=4]{-0.01707369}) = \num[round-mode=places,round-precision=4]{-0.2114632}
     \end{eqnarray*}
   \end{itemize}
@@ -318,7 +318,7 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 
     \item Full SGD update: 
     \begin{eqnarray*}
-      W_{11}^{[new]}  &=& W_{11}^{[old]} - \alpha \cdot  \textcolor{violet}{\frac{\partial \Lxy}{\partial W_{11}}} \\
+      W_{11}^{[t+1]}  &=& W_{11}^{[t]} - \alpha \cdot  \textcolor{violet}{\frac{\partial \Lxy}{\partial W_{11}}} \\
                   &=& -0.07 - 0.5 \cdot \num[round-mode=places,round-precision=4]{0.0023645} = \num[round-mode=places,round-precision=4]{-0.0711823}
     \end{eqnarray*}
   \end{itemize}
@@ -329,17 +329,17 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
     \item We can do this for all weights:
   \end{itemize}
   \begin{eqnarray*}
-    W = \begin{pmatrix}
+    \textbf{W} = \begin{pmatrix}
     \num[round-mode=places,round-precision=4]{-0.0711823} & \num[round-mode=places,round-precision=4]{0.9425785} \\
     0.22 & 0.46
     \end{pmatrix},
-    b = \begin{pmatrix}
+    \textbf{b} = \begin{pmatrix}
     \num[round-mode=places,round-precision=4]{-0.4611822} \\
     \num[round-mode=places,round-precision=4]{0.1025782}
     \end{pmatrix},
   \end{eqnarray*}
   \begin{eqnarray*}
-    u = \begin{pmatrix}
+    \textbf{u} = \begin{pmatrix}
     \num[round-mode=places,round-precision=4]{-0.2114632} \\
     \num[round-mode=places,round-precision=4]{0.5970234}
     \end{pmatrix}
@@ -349,10 +349,10 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-    \item Yields $f(\xv ~|~\thetab^{[new]}) = \num[round-mode=places,round-precision=4]{0.7614865}$ and loss 
+    \item Yields $f(\xv ~|~\thetab^{[t+1]}) = \num[round-mode=places,round-precision=4]{0.7614865}$ and loss 
         $\frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7614865})^2 = \num[round-mode=places,round-precision=4]{0.02844434}.$
         % $\Lxy = \frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7614865})^2 = \num[round-mode=places,round-precision=4]{0.02844434}.$$
-    \item Before, we had $f(\xv ~|~\thetab^{[old]}) = \num[round-mode=places,round-precision=4]{0.7525469}$ and higher loss $\num[round-mode=places,round-precision=4]{0.03061652}$.
+    \item Before, we had $f(\xv ~|~\thetab^{[t]}) = \num[round-mode=places,round-precision=4]{0.7525469}$ and higher loss $\num[round-mode=places,round-precision=4]{0.03061652}$.
 
   \end{itemize}
 \lz

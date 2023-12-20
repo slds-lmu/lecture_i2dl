@@ -307,9 +307,8 @@ Recurrent connections do not need to map from hidden to hidden neurons!
 \center
 \begin{figure}
 \includegraphics[width=7cm]{figure/recurrent_unfolded_fromoutput.png} 
+\caption{RNN with feedback connection from the output to the hidden layer. The RNN is only allowed to send $f$ to future time points and, hence, $z^{[t-1]}$ is connected to $z^{[t]}$ only indirectly, via the predictions $f^{[t-1]}$.}
 \end{figure}
- \footnotesize{RNN with feedback connection from the output to the hidden layer. The RNN is only allowed to send $f$ to future time points and, hence, $z^{[t-1]}$ is connected to $z^{[t]}$ only indirectly, via the predictions $f^{[t-1]}$.}
-
 }
 
 \frame{
@@ -320,7 +319,7 @@ RNNs do not need to produce an output at each time step. Often only one output i
 \center
 \begin{figure}
 \includegraphics[width=5cm]{figure/rnn_last_output.png} 
-     \footnotesize{\\Time-unfolded recurrent neural network with a single output at the end of the sequence. Such a network can be used to summarize a sequence and produce a fixed size representation.}
+     \caption{Time-unfolded recurrent neural network with a single output at the end of the sequence. Such a network can be used to summarize a sequence and produce a fixed size representation.}
 \end{figure}
 
 }
@@ -332,22 +331,22 @@ RNNs do not need to produce an output at each time step. Often only one output i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{vbframe}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Andrej Karpathy., 2015]{1} Andrej Karpathy (2015)
-\newblock The Unreasonable Effectiveness of Recurrent Neural Networks
-\newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{thebibliography}
-}
-\end{vbframe}
+% \begin{vbframe}
+% \frametitle{References}
+% \footnotesize{
+% \begin{thebibliography}{99}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+% \newblock Deep Learning
+% \newblock \emph{\url{http://www.deeplearningbook.org/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Andrej Karpathy., 2015]{1} Andrej Karpathy (2015)
+% \newblock The Unreasonable Effectiveness of Recurrent Neural Networks
+% \newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \end{thebibliography}
+% }
+% \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

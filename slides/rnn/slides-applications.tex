@@ -91,7 +91,7 @@
     \item In an earlier example, we built a 'sequence-to-one' RNN model to perform 'sentiment analysis'.
     \item Another common task in Natural Language Processing (NLP) is \textbf{'language modelling'}.
     \item Input: word/character, encoded as a one-hot vector.
-    \item Output: probability distribution over words/characters given previous words $$\P(y^{[1]}, \dots, y^{[\tau]}) = \displaystyle \prod_{i=1}^{\tau} \P(y^{[i]}|y^{[1]}, \dots, y^{[i-1]})$$
+    \item Output: probability distribution over words/characters given previous words $$\P(y^{[1]}, \dots, y^{[T]}) = \displaystyle \prod_{i=1}^{T} \P(y^{[i]}|y^{[1]}, \dots, y^{[i-1]})$$
     \item[] $\to$ given a sequence of previous characters, ask the RNN to model the probability distribution of the next character in the sequence!
    \end{itemize}
 \end{vbframe}
@@ -273,7 +273,7 @@
     \item  The context vector summarizes important information from the input sequence, e.g. the intent of a question in a question answering task or the meaning of a text in the case of machine translation.
     \item The decoder RNN uses this information to predict the output, a sequence of length $n_y$, which could vary from $n_x$. 
     \item In machine translation, the decoder is a language model with recurrent connections between the output at one time step and the hidden state at the next time step as well as recurrent connections between the hidden states:
-    $$\P(y^{[1]}, \dots, y^{[y_n]}|\xv^{[1]}, \dots, \xv^{[x_n]}) = \displaystyle \prod_{t=1}^{n_y} p(y^{[t]}|C; y^{[1]}, \dots, y^{[t-1]})$$ with $C$ being the context-vector.
+    $$\P(y^{[1]}, \dots, y^{[n_y]}|\xv^{[1]}, \dots, \xv^{[n_x]}) = \displaystyle \prod_{t=1}^{n_y} p(y^{[t]}|C; y^{[1]}, \dots, y^{[t-1]})$$ with $C$ being the context-vector.
     \item This architecture is now jointly trained to minimize the translation
 error given a source sentence.
     \item Each conditional probability is then $$p(y^{[t]}|y^{[1]}, \dots, y^{[t-1]};C) = f(y^{[t-1]}, g^{[t]}, C)$$ where $f$ is a non-linear function, e.g. the tanh and $g^{[t]}$ is the hidden state of the decoder network.
