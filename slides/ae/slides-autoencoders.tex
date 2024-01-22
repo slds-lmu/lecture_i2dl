@@ -64,7 +64,7 @@
   The general structure of an AE as a computational graph:
   \begin{figure}
     \centering
-    \includegraphics[width=5.5cm]{plots/autoencoder_basic_structure.png}
+    \includegraphics[width=5.5cm]{plots/autoencoders_basic_structure_updated.png}
   \end{figure}
   \begin{itemize}
     \item An AE has two computational steps:
@@ -317,10 +317,11 @@ Increasing the number of layers adds capacity to autoencoders:
     \framebreak 
 
     \item This is an equivalent formulation to \textbf{Principal Component Analysis (PCA)}, which uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of values of linearly uncorrelated variables called \textbf{principal components}. 
-    \item The transformation is defined in such a way that the first principal component has the largest possible variance (i.e., accounts for as much of the variability in the data as possible).  
+    \item The transformation is defined s.t. the first principal component has the largest possible variance (i.e., accounts for as much of the variability in the data as possible).  
     \begin{figure}
     \centering
-    \includegraphics[width=3.5cm]{plots/PCA.png}
+    \includegraphics[width=2.0cm]{plots/PCA.png}
+    \caption{A bivariate Gaussian distribution. The directions represent its PCs (Wikipedia, 2016).}
     \end{figure}
 
     \framebreak 
@@ -340,7 +341,7 @@ Increasing the number of layers adds capacity to autoencoders:
     \begin{figure}
     \begin{center}
     \includegraphics[width=0.3\textwidth]{plots/manifold1.png}
-    \caption{Credits: Jeremy Jordan \enquote{Introduction to autoencoders}}
+    \caption{AEs are capable of learning nonlinear manifolds (Jordan, 2018).}
     \end{center}
     \end{figure}
 
@@ -357,10 +358,12 @@ Increasing the number of layers adds capacity to autoencoders:
 \footnotesize{
 \begin{thebibliography}{99}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
+\bibitem[(Goodfellow et al., 2016)]{1} 
+Goodfellow, I., Bengio, Y., \& Courville, A. (2016). \textit{Deep Learning}. MIT Press.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Wikipedia, 2016)]{2} Wikipedia. (2016). Datei:gaussianscatterpca.svg. \url{https://de.m.wikipedia.org/wiki/Datei:GaussianScatterPCA.svg}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Jordan, 2018)]{3}Jordan, J. (2018, March 19). \textit{Introduction to autoencoders}. Jeremy Jordan. https://www.jeremyjordan.me/autoencoders/ 
 
 \end{thebibliography}
 }
