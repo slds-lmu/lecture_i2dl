@@ -54,7 +54,7 @@ To understand better how the curvature of a function influences the outcome of a
 
 \begin{itemize}
   \item The second derivative corresponds to the curvature of the graph of a function. 
-  \item The \textbf{Hessian} matrix of a function $\riskt: \R^m \to \R$ is the matrix of second-order partial derivatives
+  \item The \textbf{Hessian} matrix of a function $\riskt: \mathbb{R}^m \to \mathbb{R}$ is the matrix of second-order partial derivatives
   $$
     H_{ij} = \frac{\partial^2}{\partial \theta_i \partial \theta_j} \riskt.
   $$
@@ -338,7 +338,7 @@ Potential snippet from a loss surface of a deep neural network with many local m
     \item In optimization we look for areas with zero gradient.
     \item A variant of zero gradient areas are saddle points.
     \item For the empirical risk $\risk$ of a neural network, the expected ratio of the number of saddle points to local minima typically grows exponentially with $m$ 
-    $$\risk: \R^m \rightarrow \R$$ 
+    $$\risk: \mathbb{R}^m \rightarrow \mathbb{R}$$ 
     In other words: Networks with more parameters (deeper networks or larger layers) exhibit a lot more saddle points than local minima.
      \item Why is that?
     \item The Hessian at a local minimum has only positive eigenvalues. At a saddle point it is a mixture of positive and negative eigenvalues.

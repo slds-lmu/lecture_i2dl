@@ -65,10 +65,10 @@ $$\Wmat =
      \end{pmatrix}$$
 and compute 
 $$z_1 = \sigma(\Wmat_1^T \xv + b_1)\enspace,$$
- where $b_1$ is the bias of the first hidden neuron and $\sigma: \R \to \R$ is an activation function. 
+ where $b_1$ is the bias of the first hidden neuron and $\sigma: \mathbb{R} \to \mathbb{R}$ is an activation function. 
 \end{itemize}
 \end{vbframe}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%s%%%%
 
 \begin{vbframe}{Single Hidden Layer Networks: Notation}
 % \textbf{Hidden layer}:
@@ -78,9 +78,9 @@ $$z_1 = \sigma(\Wmat_1^T \xv + b_1)\enspace,$$
     $$ z_j = \sigma(\mathbf{W}_j^T \xv + b_j)$$
     \vspace{-0.5cm}
     \begin{itemize}
-    \item $z_{in,j}  = \mathbf{W}_j^T \xv + b_j$
+    \item $z_{j,in}  = \mathbf{W}_j^T \xv + b_j$
     \vspace{2mm}
-    \item $z_{out,j} = \sigma(z_{in,j}) = \sigma(\mathbf{W}_j^T \xv + b_j)$
+    \item $z_{j,out} = \sigma(z_{j,in}) = \sigma(\mathbf{W}_j^T \xv + b_j)$
     \end{itemize}
     \vspace{4mm}
     for $j \in \{1,\ldots,m\}$.
@@ -90,7 +90,7 @@ $$z_1 = \sigma(\Wmat_1^T \xv + b_1)\enspace,$$
 
 \item Vectorized notation:
 \begin{itemize}
-\item $ \hidz_{in} = (z_{in,1}, \dots, z_{in,m})^T = \Wmat^T \xv + \biasb$ \\ (Note: $\Wmat^T \xv$ = $(\xv^T \Wmat)^T$)
+\item $ \hidz_{in} = (z_{1,in}, \dots, z_{m,in})^T = \Wmat^T \xv + \biasb$ \\ (Note: $\Wmat^T \xv$ = $(\xv^T \Wmat)^T$)
 \item $ \hidz = \hidz_{out} = \sigma(\hidz_{in}) = \sigma(\Wmat^T \xv + \biasb)$, where the (hidden layer) activation function $\sigma$ is applied element-wise to $\hidz_{in}$.  
 \end{itemize}
 \framebreak

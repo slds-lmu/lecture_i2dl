@@ -38,7 +38,7 @@
   \begin{figure}
     \centering
       \scalebox{0.75}{\includegraphics{plots/moderncnn/inception.png}}
-    \caption{Inception Block.}
+    \caption{Inception Block (Dive into Deep Learning).}
   \end{figure}
         \end{vbframe}
 
@@ -54,8 +54,7 @@
   \begin{figure}
   \centering
     \includegraphics[width=2cm]{plots/moderncnn/inception-full.png}
-    \tiny{\\ credit : D2DL}
-    \caption{The GoogLeNet architecture.}
+    \caption{The GoogLeNet architecture (Dive into Deep Learning).}
   \end{figure}
     
 \end{vbframe}
@@ -73,8 +72,7 @@ Problem setting: theoretically, we could build infinitely deep architectures as 
  \begin{figure}
   \centering
     \includegraphics[width=8cm]{plots/moderncnn/resnet_problem.png}
-    \tiny{\\ credit : D2DL}
-    \caption{For non-nested function classes, a larger function class does not guarantee to get closer to the “truth” function ($\mathcal{F}*$). This does not happen in nested function classes.}
+    \caption{For non-nested function classes, a larger function class does not guarantee to get closer to the “truth” function ($\mathcal{F}*$). This does not happen in nested function classes (Dive into Deep Learning).}
   \end{figure}
 
 
@@ -89,15 +87,13 @@ Problem setting: theoretically, we could build infinitely deep architectures as 
  \begin{figure}
   \centering
     \includegraphics[width=6cm]{plots/moderncnn/residual-block.png}
-    \tiny{\\ credit : D2DL}
-    \caption{A regular block (left) and a residual block (right).}
+    \caption{A regular block (left) and a residual block (right) (Dive into Deep Learning).}
   \end{figure}
 
   \begin{figure}
   \centering
     \includegraphics[width=6cm]{plots/moderncnn/resnet-block.png}
-    \tiny{\\ credit : D2DL}
-    \caption{ResNet block with and without $1 \times 1$ convolution.The information flows through two layers and the identity function. Both streams of information are then element-wise summed and jointly activated.}
+    \caption{ResNet block with and without $1 \times 1$ convolution.The information flows through two layers and the identity function. Both streams of information are then element-wise summed and jointly activated (Dive into Deep Learning).}
   \end{figure}
 
 \framebreak
@@ -137,8 +133,7 @@ Problem setting: theoretically, we could build infinitely deep architectures as 
      \begin{figure}
   \centering
     \includegraphics[width=2cm]{plots/moderncnn/resnet18.png}
-    \tiny{\\ credit : D2DL}
-    \caption{The ResNet-18 architecture.}
+    \caption{The ResNet-18 architecture (Dive into Deep Learning).}
   \end{figure}
   
  \end{vbframe}
@@ -164,8 +159,7 @@ Problem setting: theoretically, we could build infinitely deep architectures as 
      \begin{figure}
   \centering
     \includegraphics[width=4cm]{plots/moderncnn/densenet-block.png}
-    \tiny{\\ credit : D2DL}
-    \caption{ DensNet Block.}
+    \caption{ DensNet Block (Dive into Deep Learning).}
   \end{figure}
   
 \small 
@@ -184,8 +178,7 @@ The name DenseNet arises from the fact that the dependency graph between variabl
   \begin{figure}
     \centering
     \includegraphics[width=4cm]{plots/moderncnn/densenet.png}
-    \tiny{\\ credit : D2DL}
-    \caption{The DensNet architecture.}
+    \caption{The DensNet architecture (Dive into Deep Learning).}
   \end{figure}
   
  \end{vbframe}
@@ -250,44 +243,51 @@ The name DenseNet arises from the fact that the dependency graph between variabl
 \footnotesize{
 \begin{thebibliography}{99}
 
+\bibitem[(Dive into Deep Learning)]{1} Dive into Deep Learning . (n.d.-a). \textit{8.4. Multi-branch networks (googlenet)}. \url{http://d2l.ai/chapter_convolutional-modern/googlenet.html}
+
+\bibitem[(Dive into Deep Learning)]{2} Dive into Deep Learning . (n.d.-b). \textit{8.6. Residual Networks (ResNet) and ResNeXt}. \url{http://d2l.ai/chapter_convolutional-modern/resnet.html}
+
+\bibitem[(Dive into Deep Learning)]{3} Dive into Deep Learning . (n.d.-c). \textit{8.7. Densely Connected Networks (DenseNet)
+}. \url{http://d2l.ai/chapter_convolutional-modern/densenet.html}
+
+% % \bibitem[Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
+% % \newblock U-Net: Convolutional Networks for Biomedical Image Segmentation
+% % \newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Zhou et. al , 2016]{25} B. Zhou, Khosla, A., Labedriza, A., Oliva, A. and A. Torralba (2016)
+% \newblock Deconvolution and Checkerboard Artifacts
+% \newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Szegedy et. al , 2014]{26} Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke and Andrew Rabinovich (2014)
+% \newblock Going deeper with convolutions
+% \newblock \emph{\url{https://arxiv.org/abs/1409.4842}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % \bibitem[Jie Hu et. al , 2014]{27} Jie Hu, Shen, Li and Gang Sun (2017)
+% % \newblock Squeeze-and-Excitation Networks
+% % \newblock \emph{\url{https://arxiv.org/abs/1709.01507}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % \bibitem[Szegedy Christian et. al , 2015]{28} Christian Szegedy, Vanhoucke, Vincent, Sergey, Ioffe, Shlens, Jonathan and Wojna Zbigniew (2015)
+% % \newblock Rethinking the Inception Architecture for Computer Vision
+% % \newblock \emph{\url{https://arxiv.org/abs/1512.00567}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[He et. al , 2015]{29} Kaiming He, Zhang, Xiangyu, Ren, Shaoqing, and Jian Sun (2015)
+% \newblock Deep Residual Learning for Image Recognition
+% \newblock \emph{\url{https://arxiv.org/abs/1512.03385}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Zhou et. al, 2016]{32} Bolei Zhou, Aditya Khosla, Agata Lapedriza, Aude Oliva and Antonio Torralba (2016)
+% \newblock Learning Deep Features for Discriminative Localization
+% \newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
 % \bibitem[Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
 % \newblock U-Net: Convolutional Networks for Biomedical Image Segmentation
 % \newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
+% 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Zhou et. al , 2016]{25} B. Zhou, Khosla, A., Labedriza, A., Oliva, A. and A. Torralba (2016)
-\newblock Deconvolution and Checkerboard Artifacts
-\newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Szegedy et. al , 2014]{26} Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke and Andrew Rabinovich (2014)
-\newblock Going deeper with convolutions
-\newblock \emph{\url{https://arxiv.org/abs/1409.4842}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \bibitem[Jie Hu et. al , 2014]{27} Jie Hu, Shen, Li and Gang Sun (2017)
-% \newblock Squeeze-and-Excitation Networks
-% \newblock \emph{\url{https://arxiv.org/abs/1709.01507}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \bibitem[Szegedy Christian et. al , 2015]{28} Christian Szegedy, Vanhoucke, Vincent, Sergey, Ioffe, Shlens, Jonathan and Wojna Zbigniew (2015)
-% \newblock Rethinking the Inception Architecture for Computer Vision
-% \newblock \emph{\url{https://arxiv.org/abs/1512.00567}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[He et. al , 2015]{29} Kaiming He, Zhang, Xiangyu, Ren, Shaoqing, and Jian Sun (2015)
-\newblock Deep Residual Learning for Image Recognition
-\newblock \emph{\url{https://arxiv.org/abs/1512.03385}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Zhou et. al, 2016]{32} Bolei Zhou, Aditya Khosla, Agata Lapedriza, Aude Oliva and Antonio Torralba (2016)
-\newblock Learning Deep Features for Discriminative Localization
-\newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
-\bibitem[Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
-\newblock U-Net: Convolutional Networks for Biomedical Image Segmentation
-\newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 

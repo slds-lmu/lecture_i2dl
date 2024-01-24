@@ -117,7 +117,7 @@
     \begin{figure}
         \centering
         \includegraphics[width=8cm]{plots/05_conv_variations/dilated/tcn.png}
-        \caption{Application of (a variant of) dilated convolutions on time series for classification or seq2seq prediction (e.g. machine translation). Given an input sequence $x_0,x_1, \ldots, x_T$, the model generates an output sequence $\yh_0,\yh_1, \ldots, \yh_T$ . Dilation factors $d = 1, 2, 4$ shown above, each with a kernel size $k = 3$. The dilations are used to drastically increase the context information for each output neuron with relatively few layers.}
+        \caption{Application of (a variant of) dilated convolutions on time series for classification or seq2seq prediction (e.g. machine translation). Given an input sequence $x_0,x_1, \ldots, x_T$, the model generates an output sequence $\yh_0,\yh_1, \ldots, \yh_T$ . Dilation factors $d = 1, 2, 4$ shown above, each with a kernel size $k = 3$. The dilations are used to drastically increase the context information for each output neuron with relatively few layers (Roy, 2019).}
     \end{figure}
 
 \end{vbframe}
@@ -185,7 +185,7 @@ Example 2 : Convolution as a matrix multiplication :
 \begin{figure}
 \centering
 \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/transpose_mat_1.png}}
-\tiny{\\credit:Stanford University}
+\tiny{\\(Li, 2023)}
 \caption{A "regular" 1D convolution. stride = 1 , padding = 1. The vector $a$ is the 1D input feature map. }
 \end{figure}
    
@@ -195,7 +195,7 @@ Example 2 : Transposed Convolution as a matrix multiplication :
 \begin{figure}
 \centering
 \scalebox{0.6}{\includegraphics{plots/05_conv_variations/transpose/transpose_mat_2.png}}
-\tiny{\\credit:Stanford University}
+\tiny{\\(Li, 2023)}
 \caption{"Transposed" convolution upsamples a vector of length 4 to a vector of length 6. Stride is 1. Note the change in padding.}
 \end{figure}
 \small{Important : Even though the "structure" of the matrix here is the transpose of the original matrix, the non-zero elements are, in general, different from the correponding elements in the original matrix. These (non-zero) elements/weights are tuned by backpropagation.} 
@@ -206,7 +206,7 @@ Example 3: Convolution as matrix multiplication:
 \begin{figure}
 \centering
 \scalebox{0.85}{\includegraphics{plots/05_conv_variations/transpose/tr_ex21.png}}
-\caption{A regular 1D convolution with  stride = 1 ,and padding = 0. The vector $z$ is in the input feature map. The matrix $K$ represents the convolution operation.}
+\caption{A regular 1D convolution with  stride = 1 ,and padding = 0. The vector $z$ is in the input feature map. The matrix $K$ represents the convolution operation (Li, 2023).}
 \end{figure}
   A regular convolution decreases the dimensionality of the feature map from 6 to 4.\\
 \end{vbframe}
@@ -219,7 +219,7 @@ Example 3: Transposed Convolution as matrix multiplication:
 \begin{figure}
 \centering
 \scalebox{0.75}{\includegraphics{plots/05_conv_variations/transpose/tr_ex22.png}}
-\caption{\footnotesize{A transposed convolution can be used to upsample the feature vector of length 4 back to a feature vector of length 6.}}
+\caption{\footnotesize{A transposed convolution can be used to upsample the feature vector of length 4 back to a feature vector of length 6 (Li, 2023).}}
 \end{figure}
 
 \vspace*{-0.4cm}
@@ -243,8 +243,7 @@ Example 3: Transposed Convolution as matrix multiplication:
   \begin{figure}
       \centering
       \scalebox{0.9}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_1.png}}
-      \tiny{\\credit: Stanford University}
-      \caption{Regular $3\times 3$ convolution, stride 2, padding 1.}
+      \caption{Regular $3\times 3$ convolution, stride 2, padding 1 (Li, 2023).}
   \end{figure}
  }
 
@@ -252,8 +251,7 @@ Example 3: Transposed Convolution as matrix multiplication:
   \begin{figure}
       \centering
       \scalebox{0.9}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_2.png}}
-      \tiny{\\credit: Stanford University}
-      \caption{Regular $3\times 3$ convolution, stride 2, padding 1.}
+      \caption{Regular $3\times 3$ convolution, stride 2, padding 1 (Li, 2023).}
   \end{figure}
  }
 
@@ -261,8 +259,7 @@ Example 3: Transposed Convolution as matrix multiplication:
   \begin{figure}
       \centering
       \scalebox{0.8}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_3.png}}
-      \tiny{\\credit: Stanford University}
-      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2, padding 1. Note: stride now refers to the "stride" in the \textit{output}.}
+      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2, padding 1. Note: stride now refers to the "stride" in the \textit{output} (Li, 2023).}
   \end{figure}
 
    Here, the filter is \textit{scaled} by the input.\\
@@ -273,8 +270,7 @@ Example 3: Transposed Convolution as matrix multiplication:
   \begin{figure}
       \centering
       \scalebox{0.8}{\includegraphics{plots/05_conv_variations/transpose/tr_conv_4.png}}
-      \tiny{\\credit: Stanford University}
-      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2, padding 1. Note: stride now refers to the "stride" in the \textit{output}.}
+      \caption{\textit{Transposed} $3\times 3$ convolution, stride 2, padding 1. Note: stride now refers to the "stride" in the \textit{output} (Li, 2023).}
   \end{figure}
   Here, the filter is \textit{scaled} by the input.
 
@@ -287,7 +283,7 @@ Example 3: Transposed Convolution as matrix multiplication:
     \begin{figure}
         \centering
         \includegraphics[width=8cm]{plots/05_conv_variations/transpose/transpose_artifact.png}
-        \caption{Artifacts produced by transposed convolutions.}
+        \caption{Artifacts produced by transposed convolutions (Odena et al., 2016).}
     \end{figure}
     \begin{itemize}
         \item Transposed convolutions lead to checkerboard-style artifacts in resulting images.
@@ -304,7 +300,7 @@ Example 3: Transposed Convolution as matrix multiplication:
         \begin{figure}
             \centering
               \scalebox{0.65}{\includegraphics{plots/05_conv_variations/transpose/deconv_blog.png}}
-            \caption{\footnotesize{1D example. In both images, top row = input and bottom row = output. \textit{Top}: Here, kernel weights overlap unevenly which results in a checkerboard pattern. \textit{Bottom}: There is no checkerboard pattern as the kernel size is divisible by the stride.}}
+            \caption{\footnotesize{1D example. In both images, top row = input and bottom row = output. \textit{Top}: Here, kernel weights overlap unevenly which results in a checkerboard pattern. \textit{Bottom}: There is no checkerboard pattern as the kernel size is divisible by the stride. (Odena et al., 2016)}}
         \end{figure}
        
 \framebreak
@@ -331,70 +327,77 @@ Example 3: Transposed Convolution as matrix multiplication:
 \frametitle{References}
 \footnotesize{
 \begin{thebibliography}{99}
+\bibitem[(Roy, 2019)]{1} Roy, R. (2019, February 4). \textit{Temporal Convolutional Networks}. Medium. \url{https://medium.com/@raushan2807/temporal-convolutional-networks-bfea16e6d7d2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Li, 2023)]{6} Li, F.-F. (2023). \textit{Lecture 11: Detection and segmentation - Stanford University}. CS231n. \url{http://cs231n.stanford.edu/slides/2017/cs231n_2017_lecture11.pdf}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Odena et al., 2016)]{3}Odena, A., Dumoulin, V., \& Olah, C. (2016, October 17). \textit{Deconvolution and checkerboard artifacts}. Distill. \url{https://distill.pub/2016/deconv-checkerboard/}
 
-\bibitem[Dumoulin et al., 2016]{14} Dumoulin, Vincent and Visin, Francesco (2016)
-\newblock A guide to convolution arithmetic for deep learning
-\newblock \emph{\url{https://arxiv.org/abs/1603.07285v1}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[van den Oord et al., 2016]{15} Van den Oord, Aaron, Sander Dielman, Karen Simonyan, Oriol Vinyals, Alex Graves, Nal Kalchbrenner, and Koray Kavukocuoglu (2016)
-\newblock WaveNet: A Generative Model for Raw Audio
-\newblock \emph{\url{https://arxiv.org/abs/1609.03499}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Gennart et al., 1996]{17} Benoit A., Gennart, Bernard Krummenacher, Roger D. Hersch, Bernard Saugy, J.C. Hadorn and D. Mueller (1996)
-\newblock The Giga View Multiprocessor Multidisk Image Server
-\newblock \emph{\url{https://www.researchgate.net/publication/220060811_The_Giga_View_Multiprocessor_Multidisk_Image_Server}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Tran et al., 2015]{18} Tran, Du, Lubomir Bourdev, Rob Fergus,  Lorenzo Torresani and Paluri Manohar (2015)
-\newblock Learning Spatiotemporal Features with 3D Convolutional Networks
-\newblock \emph{\url{https://arxiv.org/pdf/1412.0767.pdf}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Milletari et al., 2016]{19} Milletari, Fausto, Nassir Navab and  Seyed-Ahmad Ahmadi (2016)
-\newblock V-Net: Fully Convolutional Neural Networks for
-Volumetric Medical Image Segmentation
-\newblock \emph{\url{https://arxiv.org/pdf/1606.04797.pdf}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Zhang et al., 2015]{20} Zhang, Xiang, Junbo Zhao and Yann LeCun (2015)
-\newblock Character-level Convolutional Networks for Text Classification
-\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Wang et al., 2017]{21} Wang, Zhiguang, Weizhong Yan and Tim Oates (2017)
-\newblock Time Series Classification from Scratch with Deep Neural Networks: A Strong Baseline
-\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Yu et. al, 2015]{22} Fisher Yu and Vladlen Koltun (2015)
-\newblock Multi-Scale Context Aggregation by Dilated Convolutions
-\newblock \emph{\url{https://arxiv.org/abs/1511.07122}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Bai et. al, 2018]{23} Bai, Shaojie,  Zico J. Kolter and Vladlen Koltun (2018)
-\newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
-\newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Odena et. al , 2017]{24} Augustus Odena, Vincent Dumoulin and Chris Olah (2016)
-\newblock Deconvolution and Checkerboard Artifacts
-\newblock \emph{\url{https://distill.pub/2016/deconv-checkerboard/}{https://distill.pub/2016/deconv-checkerboard/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Arauho et. al , 2019]{45} Andre Araujo, Wade Norris and Jack Sim (2019)
-\newblock Computing Receptive Fields of Convolutional Neural Networks
-\newblock \emph{\url{https://distill.pub/2019/computing-receptive-fields/}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Wang et. al , 2017]{31} Zhiguang Wang, Yan, Weizhong and Tim Oates (2017)
-\newblock Time series classification from scratch with deep neural networks: A
-strong baseline
-\newblock \emph{\url{https://arxiv.org/1611.06455}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Lin et al., 2017]{38} Lin, Haoning and Shi, Zhenwei and Zou, Zhengxia (2017)
-\newblock Maritime Semantic Labeling of Optical Remote Sensing Images with Multi-Scale Fully Convolutional Network
+
+
+% \bibitem[Dumoulin et al., 2016]{14} Dumoulin, Vincent and Visin, Francesco (2016)
+% \newblock A guide to convolution arithmetic for deep learning
+% \newblock \emph{\url{https://arxiv.org/abs/1603.07285v1}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[van den Oord et al., 2016]{15} Van den Oord, Aaron, Sander Dielman, Karen Simonyan, Oriol Vinyals, Alex Graves, Nal Kalchbrenner, and Koray Kavukocuoglu (2016)
+% \newblock WaveNet: A Generative Model for Raw Audio
+% \newblock \emph{\url{https://arxiv.org/abs/1609.03499}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Gennart et al., 1996]{17} Benoit A., Gennart, Bernard Krummenacher, Roger D. Hersch, Bernard Saugy, J.C. Hadorn and D. Mueller (1996)
+% \newblock The Giga View Multiprocessor Multidisk Image Server
+% \newblock \emph{\url{https://www.researchgate.net/publication/220060811_The_Giga_View_Multiprocessor_Multidisk_Image_Server}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Tran et al., 2015]{18} Tran, Du, Lubomir Bourdev, Rob Fergus,  Lorenzo Torresani and Paluri Manohar (2015)
+% \newblock Learning Spatiotemporal Features with 3D Convolutional Networks
+% \newblock \emph{\url{https://arxiv.org/pdf/1412.0767.pdf}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Milletari et al., 2016]{19} Milletari, Fausto, Nassir Navab and  Seyed-Ahmad Ahmadi (2016)
+% \newblock V-Net: Fully Convolutional Neural Networks for
+% Volumetric Medical Image Segmentation
+% \newblock \emph{\url{https://arxiv.org/pdf/1606.04797.pdf}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Zhang et al., 2015]{20} Zhang, Xiang, Junbo Zhao and Yann LeCun (2015)
+% \newblock Character-level Convolutional Networks for Text Classification
+% \newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Wang et al., 2017]{21} Wang, Zhiguang, Weizhong Yan and Tim Oates (2017)
+% \newblock Time Series Classification from Scratch with Deep Neural Networks: A Strong Baseline
+% \newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Yu et. al, 2015]{22} Fisher Yu and Vladlen Koltun (2015)
+% \newblock Multi-Scale Context Aggregation by Dilated Convolutions
+% \newblock \emph{\url{https://arxiv.org/abs/1511.07122}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Bai et. al, 2018]{23} Bai, Shaojie,  Zico J. Kolter and Vladlen Koltun (2018)
+% \newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
+% \newblock \emph{\url{http://arxiv.org/abs/1509.01626}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Odena et. al , 2017]{24} Augustus Odena, Vincent Dumoulin and Chris Olah (2016)
+% \newblock Deconvolution and Checkerboard Artifacts
+% \newblock \emph{\url{https://distill.pub/2016/deconv-checkerboard/}{https://distill.pub/2016/deconv-checkerboard/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Arauho et. al , 2019]{45} Andre Araujo, Wade Norris and Jack Sim (2019)
+% \newblock Computing Receptive Fields of Convolutional Neural Networks
+% \newblock \emph{\url{https://distill.pub/2019/computing-receptive-fields/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Wang et. al , 2017]{31} Zhiguang Wang, Yan, Weizhong and Tim Oates (2017)
+% \newblock Time series classification from scratch with deep neural networks: A
+% strong baseline
+% \newblock \emph{\url{https://arxiv.org/1611.06455}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Lin et al., 2017]{38} Lin, Haoning and Shi, Zhenwei and Zou, Zhengxia (2017)
+% \newblock Maritime Semantic Labeling of Optical Remote Sensing Images with Multi-Scale Fully Convolutional Network
 
 \end{thebibliography}
 }

@@ -7,9 +7,9 @@
 \newcommand{\titlefigure}{plots/image_caption.png}
 %modify picture
 \newcommand{\learninggoals}{
-  \item Understand Application to Language Modelling
-  \item Get to know Encoder-Decoder Architectures
-  \item Learn about further RNN Applications
+  \item Understand application to Language Modelling
+  \item Get to know Encoder-Decoder architectures
+  \item Learn about further RNN applications
 }
 
 \title{Deep Learning}
@@ -91,7 +91,7 @@
     \item In an earlier example, we built a 'sequence-to-one' RNN model to perform 'sentiment analysis'.
     \item Another common task in Natural Language Processing (NLP) is \textbf{'language modelling'}.
     \item Input: word/character, encoded as a one-hot vector.
-    \item Output: probability distribution over words/characters given previous words $$\P(y^{[1]}, \dots, y^{[\tau]}) = \displaystyle \prod_{i=1}^{\tau} \P(y^{[i]}|y^{[1]}, \dots, y^{[i-1]})$$
+    \item Output: probability distribution over words/characters given previous words $$\P(y^{[1]}, \dots, y^{[T]}) = \displaystyle \prod_{i=1}^{T} \P(y^{[i]}|y^{[1]}, \dots, y^{[i-1]})$$
     \item[] $\to$ given a sequence of previous characters, ask the RNN to model the probability distribution of the next character in the sequence!
    \end{itemize}
 \end{vbframe}
@@ -188,10 +188,9 @@
 \begin{figure}
 \vspace{-0.5cm}
       \centering
-      \captionsetup{font=footnotesize,labelfont=footnotesize, labelfont = bf}
+      %\captionsetup{font=footnotesize,labelfont=footnotesize, labelfont = bf}
       \scalebox{0.65}{\includegraphics{plots/embed1.png}}
-      \tiny{\\Source: Kaggle}
-      \caption{\footnotesize{Two-dimensional embedding space. Typically, the embedding space is much higher dimensional.}}
+      \caption{Two-dimensional embedding space. Typically, the embedding space is much higher dimensional (Ruizendaal, 2018).}
       \vspace{-0.7cm}
         \end{figure}
   \begin{itemize}
@@ -273,7 +272,7 @@
     \item  The context vector summarizes important information from the input sequence, e.g. the intent of a question in a question answering task or the meaning of a text in the case of machine translation.
     \item The decoder RNN uses this information to predict the output, a sequence of length $n_y$, which could vary from $n_x$. 
     \item In machine translation, the decoder is a language model with recurrent connections between the output at one time step and the hidden state at the next time step as well as recurrent connections between the hidden states:
-    $$\P(y^{[1]}, \dots, y^{[y_n]}|\xv^{[1]}, \dots, \xv^{[x_n]}) = \displaystyle \prod_{t=1}^{n_y} p(y^{[t]}|C; y^{[1]}, \dots, y^{[t-1]})$$ with $C$ being the context-vector.
+    $$\P(y^{[1]}, \dots, y^{[n_y]}|\textbf{x}^{[1]},  \dots, \textbf{x}^{[n_x]}) = \displaystyle \prod_{t=1}^{n_y} p(y^{[t]}|C; y^{[1]}, \dots, y^{[t-1]})$$ with $C$ being the context-vector.
     \item This architecture is now jointly trained to minimize the translation
 error given a source sentence.
     \item Each conditional probability is then $$p(y^{[t]}|y^{[1]}, \dots, y^{[t-1]};C) = f(y^{[t-1]}, g^{[t]}, C)$$ where $f$ is a non-linear function, e.g. the tanh and $g^{[t]}$ is the hidden state of the decoder network.
@@ -339,7 +338,7 @@ error given a source sentence.
       \only<1>{\includegraphics[width=9.5cm]{plots/image_caption2.png}}%
       \only<2>{\includegraphics[width=9.5cm]{plots/image_caption.png}}%
   \end{figure}
-\textbf{Figure:} Show and Tell: A Neural Image Caption Generator (Oriol Vinyals et al. 2014). A language generating RNN tries to describe in brief the content of different images.
+\textbf{Figure:} Show and Tell: A Neural Image Caption Generator. A language generating RNN tries to describe in brief the content of different images (Vinyals et al., 2014).
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -349,7 +348,7 @@ error given a source sentence.
       \only<1>{\includegraphics[width=8.5cm]{plots/seq2seq.png}}%
       \only<2>{\includegraphics[width=8.5cm]{plots/seq2seq2.png}}%
   \end{figure}
-\textbf{Figure:} Neural Machine Translation (seq2seq): Sequence to Sequence Learning with Neural Networks (Ilya Sutskever et al. 2014). As we saw earlier, an encoder converts a source sentence into a \enquote{meaning} vector which is passed through a decoder to produce a translation.
+\textbf{Figure:} Neural Machine Translation (seq2seq): Sequence to Sequence Learning with Neural Networks. An encoder converts a source sentence into a \enquote{meaning} vector which is passed through a decoder to produce a translation (Sutskever et al., 2014).
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -357,21 +356,22 @@ error given a source sentence.
   \begin{figure}
     \centering
     \includegraphics[width=10cm]{plots/hand_writing_generation.png}
-    \caption{Generating Sequences With Recurrent Neural Networks (Alex Graves, 2013). Top row are real data, the rest are generated by various RNNs.}
+    \caption{Generating Sequences With Recurrent Neural Networks. Top row are real data, the rest are generated by various RNNs (Graves, 2014).}
   \end{figure}
 \framebreak
   \begin{figure}
     \centering
     \includegraphics[width=11.5cm]{plots/emotion_from_audio_data.png}
-    \caption{Convolutional and recurrent nets for detecting emotion from audio data (Namrata Anand \& Prateek Verma, 2016). We already had this example in the CNN chapter!}
+    \caption{Convolutional and recurrent nets for detecting emotion from audio data (Anand, 2015).}
   \end{figure}  
 \framebreak
   \begin{figure}
     \centering
     \includegraphics[width=11.5cm]{plots/visually_indicated_sounds.png}
-    \caption{Visually Indicated Sounds (Andrew Owens et al. 2016). A model to synthesize plausible impact sounds from silent videos.\href{https://www.youtube.com/watch?v=0FW99AQmMc8&feature=youtu.be&t=61}{\beamergotobutton{Click here}}}
+    \caption{Visually Indicated Sounds. A model to synthesize plausible impact sounds from silent videos.\href{https://www.youtube.com/watch?v=0FW99AQmMc8&feature=youtu.be&t=61}{\beamergotobutton{Click here}} (Owens et al., 2016)}
   \end{figure}   
 \end{vbframe}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -384,50 +384,48 @@ error given a source sentence.
 \footnotesize{
 \begin{thebibliography}{99}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
+\bibitem[(Ruizendaal, 2018)]{1}Ruizendaal, R. (2018, October 21). \textit{Using deep learning for structured data with entity embeddings}. Medium. \url{https://towardsdatascience.com/deep-learning-structured-data-8d6a278f3088}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Oriol Vinyals et al., 2014]{2} Oriol Vinyals, Alexander Toshev, Samy Bengio and Dumitru Erhan (2014)
-\newblock Show and Tell: A Neural Image Caption Generator
-\newblock \emph{\url{https://arxiv.org/abs/1411.4555}}
+\bibitem[(Vinyals et al., 2014)]{2} Vinyals, O., Toshev, A., Bengio, S., \& Erhan, D. (2014). \textit{Show and Tell: A Neural Image Caption Generator.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Alex Graves, 2013]{3} Alex Graves (2013)
-\newblock Generating Sequences With Recurrent Neural Networks
-\newblock \emph{\url{https://arxiv.org/abs/1308.0850}}
+\bibitem[(Graves, 2014)]{3} Graves, A. (2014). Generating Sequences With Recurrent Neural Networks. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Namrata Anand and Prateek Verma, 2016]{4} Namrata Anand and Prateek Verma (2016)
-\newblock Convolutional and recurrent nets for detecting emotion from audio data
-\newblock \emph{\url{http://cs231n.stanford.edu/reports/2015/pdfs/Cs_231n_paper.pdf}}
+\bibitem[(Anand, 2015)]{4} Anand, N. (2015). \textit{Convoluted Feelings Convolutional and recurrent nets for detecting emotion from audio data.} \url{https://api.semanticscholar.org/CorpusID:209374156}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Gabriel Loye, 2019]{5} Gabriel Loye (2019)
-\newblock Attention Mechanism
-\newblock \emph{\url{https://blog.floydhub.com/attention-mechanism/}}
+\bibitem[(Sutskever et al., 2014)]{5}Sutskever, I., Vinyals, O., \& Le, Q. V. (2014). \textit{Sequence to Sequence Learning with Neural Networks.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Andrew Owens et al., 2016]{6} Andrew Owens, Phillip Isola, Josh H. McDermott, Antonio Torralba, Edward H. Adelson and  William T. Freeman (2015)
-\newblock Visually Indicated Sounds
-\newblock \emph{\url{https://arxiv.org/abs/1512.08512}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Andrej Karpathy., 2015]{7} Andrej Karpathy (2015)
-\newblock The Unreasonable Effectiveness of Recurrent Neural Networks
-\newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
-% \bibitem[Devlin et al., 2018]{7} Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova (2018)
-% \newblock BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
-% \newblock \emph{\url{https://arxiv.org/abs/1810.04805}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Kelvin Xu al., 2016]{8} Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron C. Courville, Ruslan Salakhutdinov, Richard S. Zemel and  Yoshua Bengio (2015)
-\newblock Show, Attend and Tell: Neural Image Caption Generation with Visual Attention
-\newblock \emph{\url{https://arxiv.org/abs/1502.03044}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Bai et al., 2018]{9} Shaojie Bai, J. Zico Kolter, Vladlen Koltun (2018)
-\newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
-\newblock \emph{\url{https://arxiv.org/abs/1803.01271}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Weng 2018]{10} Lilian Weng (2018)
-\newblock Attention? Attention!
-\newblock \emph{\url{https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Owens et al., 2016)]{6} 
+Owens, A., Isola, P., McDermott, J., Torralba, A., Adelson, E. H., \& Freeman, W. T. (2016). \textit{Visually Indicated Sounds}.
+
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Gabriel Loye, 2019]{5} Gabriel Loye (2019)
+% \newblock Attention Mechanism
+% \newblock \emph{\url{https://blog.floydhub.com/attention-mechanism/}}
+% 
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Andrej Karpathy., 2015]{7} Andrej Karpathy (2015)
+% \newblock The Unreasonable Effectiveness of Recurrent Neural Networks
+% \newblock \emph{\url{http://karpathy.github.io/2015/05/21/rnn-effectiveness/}}
+% % \bibitem[Devlin et al., 2018]{7} Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova (2018)
+% % \newblock BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+% % \newblock \emph{\url{https://arxiv.org/abs/1810.04805}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Kelvin Xu al., 2016]{8} Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron C. Courville, Ruslan Salakhutdinov, Richard S. Zemel and  Yoshua Bengio (2015)
+% \newblock Show, Attend and Tell: Neural Image Caption Generation with Visual Attention
+% \newblock \emph{\url{https://arxiv.org/abs/1502.03044}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Bai et al., 2018]{9} Shaojie Bai, J. Zico Kolter, Vladlen Koltun (2018)
+% \newblock An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling
+% \newblock \emph{\url{https://arxiv.org/abs/1803.01271}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Weng 2018]{10} Lilian Weng (2018)
+% \newblock Attention? Attention!
+% \newblock \emph{\url{https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{thebibliography}
 }
 \end{vbframe}

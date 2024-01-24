@@ -37,7 +37,7 @@
   \begin{figure}
   \centering
     \includegraphics[width=9cm]{plots/architectures/lenet.png}
-    \caption{LeNet architecture: two conv layers with subsampling, followed by dense layers and a 'Gaussian connections' layer.}
+    \caption{LeNet architecture: two conv layers with subsampling, followed by dense layers and a 'Gaussian connections' layer (PyTorch).}
   \end{figure}
   \framebreak
   \begin{itemize}
@@ -62,7 +62,7 @@
     \begin{figure}
         \centering
         \includegraphics[width=4.5cm]{plots/moderncnn/alexnet.png}
-        \caption{From LeNet (left) to AlexNet (right).}
+        \caption{From LeNet (left) to AlexNet (right) (Dive into Deep Learning).}
     \end{figure}
 \end{vbframe}
 
@@ -81,8 +81,7 @@
     \begin{figure}
   \centering
     \includegraphics[width=3cm]{plots/moderncnn/vggblock.png}
-    \tiny{\\ credit : D2DL}
-    \caption{VGG block.}
+    \caption{VGG block (Dive into Deep Learning).}
   \end{figure}
   
 \end{vbframe}
@@ -104,8 +103,7 @@
   \begin{figure}
   \centering
     \includegraphics[width=7cm]{plots/moderncnn/vgg.png}
-    \tiny{\\ credit : D2DL}
-    \caption{From AlexNet to VGG that is designed from building blocks.}
+    \caption{From AlexNet to VGG that is designed from building blocks (Dive into Deep Learning).}
   \end{figure}
 
 \end{vbframe}
@@ -122,8 +120,7 @@
   \begin{figure}
   \centering
     \includegraphics[width=2cm]{plots/moderncnn/ninblock.png}
-    \tiny{\\ credit : D2DL}
-    \caption{NiN block.}
+    \caption{NiN block (Dive into Deep Learning).}
   \end{figure}
 
 \end{vbframe}
@@ -151,7 +148,7 @@
     \begin{figure}
         \centering
         \includegraphics[width=8cm]{plots/moderncnn/GAP.png}
-        \small{\caption{An Example of Fully Connected Layer VS Global Average Pooling Layer}}
+        \small{\caption{An Example of Fully Connected Layer VS Global Average Pooling Layer (Tsang, 2022).}}
     \end{figure}
 
 \framebreak
@@ -177,8 +174,7 @@
   \begin{figure}
   \centering
     \includegraphics[width=7cm]{plots/moderncnn/nin.png}
-    \tiny{\\ credit : D2DL}
-    \caption{Comparing architectures of VGG and NiN, and their blocks.}
+    \caption{Comparing architectures of VGG and NiN, and their blocks (Dive into Deep Learning).}
   \end{figure}
 
 \end{vbframe}
@@ -198,40 +194,50 @@
 \footnotesize{
 \begin{thebibliography}{99}
 
-% \bibitem[Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
-% \newblock U-Net: Convolutional Networks for Biomedical Image Segmentation
-% \newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
+\bibitem[(PyTorch)]{1} PyTorch. (n.d.). \textit{Neural networks}. Neural Networks - PyTorch Tutorials 2.2.0+cu121 documentation. \url{https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html}
+
+\bibitem[(Dive into Deep Learning)]{2} Dive into Deep Learning. (n.d.). \textit{8.1. Deep Convolutional Neural Networks (alexnet)}. \url{http://preview.d2l.ai/d2l-en/master/chapter_convolutional-modern/alexnet.html}
+
+\bibitem[(Dive into Deep Learning)]{3}Dive into Deep Learning. (n.d.-b). \textit{8.3. Network in network (NIN)}. \url{http://preview.d2l.ai/d2l-en/master/chapter_convolutional-modern/nin.html}
+
+\bibitem[(Dive into Deep Learning)]{4} Dive into Deep Learning. (n.d.-c). \textit{8.2. Networks using blocks (VGG)}. \url{http://preview.d2l.ai/d2l-en/master/chapter_convolutional-modern/vgg.html}
+
+\bibitem[(Tsang, 2022)]{5} Tsang, S.-H. (2022, June 24). \textit{Review: Googlenet (inception V1)- winner of ILSVRC 2014 (image classification)}. Medium. \url{https://medium.com/coinmonks/paper-review-of-googlenet-inception-v1-winner-of-ilsvlc-2014-image-classification-c2b3565a64e7} 
+
+% % \bibitem[Ronneberger et al., 2015]{12} Olaf Ronneberger, Philipp Fischer, Thomas Brox (2015)
+% % \newblock U-Net: Convolutional NetworkNs for Biomedical Image Segmentation
+% % \newblock \emph{\url{http://arxiv.org/abs/1505.04597}}
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Zhou et. al , 2016]{25} B. Zhou, Khosla, A., Labedriza, A., Oliva, A. and A. Torralba (2016)
+% \newblock Deconvolution and Checkerboard Artifacts
+% \newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Zhou et. al , 2016]{25} B. Zhou, Khosla, A., Labedriza, A., Oliva, A. and A. Torralba (2016)
-\newblock Deconvolution and Checkerboard Artifacts
-\newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Szegedy et. al , 2014]{26} Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke and Andrew Rabinovich (2014)
-\newblock Going deeper with convolutions
-\newblock \emph{\url{https://arxiv.org/abs/1409.4842}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \bibitem[Jie Hu et. al , 2014]{27} Jie Hu, Shen, Li and Gang Sun (2017)
-% \newblock Squeeze-and-Excitation Networks
-% \newblock \emph{\url{https://arxiv.org/abs/1709.01507}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \bibitem[Szegedy Christian et. al , 2015]{28} Christian Szegedy, Vanhoucke, Vincent, Sergey, Ioffe, Shlens, Jonathan and Wojna Zbigniew (2015)
-% \newblock Rethinking the Inception Architecture for Computer Vision
-% \newblock \emph{\url{https://arxiv.org/abs/1512.00567}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[He et. al , 2015]{29} Kaiming He, Zhang, Xiangyu, Ren, Shaoqing, and Jian Sun (2015)
-\newblock Deep Residual Learning for Image Recognition
-\newblock \emph{\url{https://arxiv.org/abs/1512.03385}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Zhou et. al, 2016]{32} Bolei Zhou, Aditya Khosla, Agata Lapedriza, Aude Oliva and Antonio Torralba (2016)
-\newblock Learning Deep Features for Discriminative Localization
-\newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Szegedy et. al , 2014]{26} Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke and Andrew Rabinovich (2014)
+% \newblock Going deeper with convolutions
+% \newblock \emph{\url{https://arxiv.org/abs/1409.4842}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % \bibitem[Jie Hu et. al , 2014]{27} Jie Hu, Shen, Li and Gang Sun (2017)
+% % \newblock Squeeze-and-Excitation Networks
+% % \newblock \emph{\url{https://arxiv.org/abs/1709.01507}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % \bibitem[Szegedy Christian et. al , 2015]{28} Christian Szegedy, Vanhoucke, Vincent, Sergey, Ioffe, Shlens, Jonathan and Wojna Zbigniew (2015)
+% % \newblock Rethinking the Inception Architecture for Computer Vision
+% % \newblock \emph{\url{https://arxiv.org/abs/1512.00567}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[He et. al , 2015]{29} Kaiming He, Zhang, Xiangyu, Ren, Shaoqing, and Jian Sun (2015)
+% \newblock Deep Residual Learning for Image Recognition
+% \newblock \emph{\url{https://arxiv.org/abs/1512.03385}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Zhou et. al, 2016]{32} Bolei Zhou, Aditya Khosla, Agata Lapedriza, Aude Oliva and Antonio Torralba (2016)
+% \newblock Learning Deep Features for Discriminative Localization
+% \newblock \emph{\url{http://cnnlocalization.csail.mit.edu/Zhou_Learning_Deep_Features_CVPR_2016_paper.pdf}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 

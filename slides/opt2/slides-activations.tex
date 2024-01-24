@@ -37,6 +37,7 @@
     \begin{figure}
     \centering
       \scalebox{1}{\includegraphics{figure/derivs_sigm_tanh.png}}
+      \caption{Sigmoidal activations (Savino \& Tondolo, 2021)}
     \end{figure}
     \item In each case, the function is only sensitive to its inputs in a small neighborhood around $0$.
     \item Furthermore, the derivative is never greater than 1 and is close to zero across much of the domain.
@@ -62,7 +63,7 @@
 
     Each $k$-th component of the vector expresses how much the loss $L$ changes when the input to the $k$-th neuron $z_{k, in}^{(i)}$ changes. 
     \begin{itemize}
-      \item We know: $\sigma'\left(z\right)< 1$ for all $z \in \R$. 
+      \item We know: $\sigma'(z)< 1$ for all $z \in \mathbb{R}$. 
       \item[$\to$] In each step of the recursive formula above, the value will be multiplied by a value smaller than one
       \begin{eqnarray*}
         \bm{\delta}^{(1)} &=& \Wmat^{(2)} \bm{\delta}^{(2)} \odot \sigma'\left(z_{in}^{(i)}\right) \\
@@ -82,6 +83,7 @@
     \begin{figure}
       \centering
         \scalebox{1}{\includegraphics{figure/relu_deriv.png}}
+        \caption{ReLU activation (Savino \& Tondolo, 2021)}
     \end{figure}
     \item In regions where the activation is positive, the derivative is $1$. 
     \item As a result, the derivatives do not vanish along paths that contain such "active" neurons even if the network is deep.
@@ -95,9 +97,8 @@
     \begin{figure}
     \centering
       \scalebox{0.65}{\includegraphics{figure/relu_vs_tanh.png}}
-      \tiny{\\ Source : Krizhevsky et al. (2012)}
       \caption{\footnotesize A four-layer convolutional neural network with ReLUs (solid line) reaches a 25\% 
-training error rate on the CIFAR-10 dataset six times faster than an equivalent network with tanh neurons (dashed line). }
+training error rate on the CIFAR-10 dataset six times faster than an equivalent network with tanh neurons (dashed line) (Krizhevsky et al., 2012). }
     \end{figure}
   \end{itemize}
 \end{frame}
@@ -108,6 +109,7 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
     \begin{figure}
       \centering
         \scalebox{1}{\includegraphics{figure/relu_deriv.png}}
+        \caption{ReLU activation (Savino \& Tondolo, 2021)}
     \end{figure}
     \item When a ReLU unit "dies", that is, when its activation is 0 for all datapoints, it kills the gradient flowing through it during backpropogation.
     \item This means such units are never updated during training and the problem can be irreversible.
@@ -125,7 +127,8 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
        \end{cases} $$
     \begin{figure}
       \centering
-        \scalebox{0.55}{\includegraphics{figure/leakyrelu_deriv.png}}
+        \scalebox{0.45}{\includegraphics{figure/leakyrelu_deriv.png}}
+        \caption{Leaky ReLU (Savino \& Tondolo, 2021)}
     \end{figure}
     \item Unlike the ReLU, when the input to the Leaky ReLU activation is negative, the derivative is $\alpha$ which is a small positive value (such as $0.01$).
   \end{itemize}
@@ -161,8 +164,8 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
   \begin{figure}
     \centering
       \scalebox{1}{\includegraphics{figure/actfun_comparison.png}}
-      \tiny{\\ Source : Zhang et al. 2018}
-  \end{figure}
+      \caption{Visualization of different generalisations of ReLU (Zhang et al., 2018)}
+      \end{figure}
 \end{frame}
 
 % \begin{frame} {Hidden activations}
@@ -216,8 +219,7 @@ $$p(y | \xv)=\sum_{c=1}^{m} \phi^{(c)} (\xv) ~ \mathcal{N}\left(y ; \boldsymbol{
   \begin{figure}
     \centering
       \scalebox{1}{\includegraphics{figure/mdn.png}}
-      \tiny{\\ Source : Goodfellow et al. (2016)}
-      \caption{\footnotesize Samples drawn from a Mixture Density Network. The input $\xv$ is sampled from a uniform distribution and $y$ is sampled from $p(y~|~\xv,\thetab)$.}
+      \caption{\footnotesize Samples drawn from a Mixture Density Network. The input $\xv$ is sampled from a uniform distribution and $y$ is sampled from $p(y~|~\xv,\thetab)$ (Goodfellow et al., 2016).}
   \end{figure}
 \end{frame}
 
@@ -229,17 +231,20 @@ $$p(y | \xv)=\sum_{c=1}^{m} \phi^{(c)} (\xv) ~ \mathcal{N}\left(y ; \boldsymbol{
 \footnotesize{
 \begin{thebibliography}{99}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
+\bibitem[(Savino \& Tondolo, 2021)]{1}Savino, P., \& Tondolo, F. (2021). Automated classification of civil structure defects based on convolutional neural network. \textit{Frontiers of Structural and Civil Engineering, 15}(2), 305–317. \url{https://doi.org/10.1007/s11709-021-0725-9}
+
+
+\bibitem[Ian Goodfellow et al., 2016]{1} 
+Goodfellow, I., Bengio, Y., \& Courville, A. (2016). \textit{Deep Learning}. MIT Press.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Alex Krizhevsky et al., 2012]{1} Alex Krizhevsky, Ilya Sutskever and Geoffrey E. Hinton (2012)
-\newblock ImageNet Classification with Deep Convolutional Neural Networks
-\newblock \emph{\url{https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf}}
+\bibitem[(Krizhevsky et al., 2012)]{1} 
+Krizhevsky, A., Sutskever, I., \& Hinton, G. E. (2012). ImageNet Classification with Deep Convolutional Neural Networks. In F. Pereira, C. J. Burges, L. Bottou, \& K. Q. Weinberger (Eds.), \textit{Advances in Neural Information Processing Systems} (Vol. 25). Curran Associates, Inc. \url{https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Guoqiang Zhang et al., 2018]{1} Guoqiang Zhang and Haopeng Li (2018)
-\newblock Effectiveness of Scaled Exponentially-Regularized Linear Units 
-\newblock \emph{\url{https://arxiv.org/abs/1807.10117}}
+\bibitem[(Zhang et al., 2018)]{1}
+Zhang, G., \& Li, H. (2018). \textit{Effectiveness of Scaled Exponentially-Regularized Linear Units (SERLUs)}.
+
 \end{thebibliography}
 }
 \end{vbframe}

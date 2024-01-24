@@ -3,6 +3,12 @@
 \input{../../latex-math/basic-ml}
 \input{../../latex-math/ml-nn}
 
+\title{Deep Learning}
+\date{}
+
+
+\begin{document}
+
 \newcommand{\titlefigure}{figure/newrep_n_f.png}
 \newcommand{\learninggoals}{
   \item Architecture of  single hidden layer neural networks
@@ -10,11 +16,6 @@
   \item Typical (non-linear) activation functions
 }
 
-\title{Deep Learning}
-\date{}
-
-
-\begin{document}
 
 \lecturechapter{Single hidden layer neural networks}
 \lecture{I2DL}
@@ -131,17 +132,17 @@ Each neuron in the hidden layer performs an \textbf{affine transformation} on th
 \begin{figure}
 \centering
 \only<1>{\scalebox{.8}{\includegraphics{figure/singlelay_1.png}} $$\begin{array}{l}
-z_{\text {in }}^{(1)}=w_{11} x^{(1)}+w_{21} x^{(2)}+w_{31} x^{(3)}+b_1 \\
-z_{\text {in }}^{(1)}= 3 * (-3) + (-9) * 1 + 2 * 5 + 5 = -3\end{array}$$}
+z_{\text {1,in}}=w_{11} x_1+w_{21} x_2+w_{31} x_3+b_1 \\
+z_{\text {1,in}}= 3 * (-3) + (-9) * 1 + 2 * 5 + 5 = -3\end{array}$$}
 \only<2>{\scalebox{.8}{\includegraphics{figure/singlelay_2.png}} $$\begin{array}{l}
-z_{\text {in }}^{(2)}=w_{12} x^{(1)}+w_{22} x^{(2)}+w_{32} x^{(3)}+b_2 \\
-z_{\text {in }}^{(2)}= 11 * (-3) + (-2) * 1 + 7 * 5 + 2 = 2\end{array}$$}
+z_{\text {2,in}}=w_{12} x_1+w_{22} x_2+w_{32} x_3+b_2 \\
+z_{\text {2,in}}= 11 * (-3) + (-2) * 1 + 7 * 5 + 2 = 2\end{array}$$}
 \only<3>{\scalebox{.8}{\includegraphics{figure/singlelay_3.png}}$$\begin{array}{l}
-z_{\text {in }}^{(3)}=w_{13} x^{(1)}+w_{23} x^{(2)}+w_{33} x^{(3)}+b_3 \\
-z_{\text {in }}^{(3)}= (-6) *(-3) + 3 * 1 + (-4) * 5 - 1 = 0\end{array}$$}
+z_{\text {3,in}}=w_{13} x_1+w_{23} x_2+w_{33} x_3+b_3 \\
+z_{\text {3,in}}= (-6) *(-3) + 3 * 1 + (-4) * 5 - 1 = 0\end{array}$$}
 \only<4>{\scalebox{.8}{\includegraphics{figure/singlelay_4.png}}$$\begin{array}{l}
-z_{\text {in }}^{(4)}=w_{14} x^{(1)}+w_{24} x^{(2)}+w_{34} x^{(3)}+b_4 \\
-z_{\text {in }}^{(4)}= 6 * (-3) + (-1) * 1 + 5 * 5 + 1 = 7\end{array}$$}
+z_{\text {4,in}}=w_{14} x_1+w_{24} x_2+w_{34} x_3+b_4 \\
+z_{\text {4,in}}= 6 * (-3) + (-1) * 1 + 5 * 5 + 1 = 7\end{array}$$}
 \only<5>{\scalebox{.8}{\includegraphics{figure/singlelay_5.png}}}
 \end{figure}
 \end{frame}
@@ -153,7 +154,7 @@ Each hidden neuron performs a non-linear \textbf{activation} transformation on t
 \begin{figure}
 \centering
 \only<1>{\scalebox{.8}{\includegraphics{figure/singlelay_6.png}}$$\begin{array}{l}
-z_\text{out}^{(i)}=\sigma\left(z_{\text {in}}^{(i)}\right)=\frac{1}{1+e^{-z_{\text {in }}^{(i)}}}\end{array}$$}
+z_\text{i,out}=\sigma\left(z_{\text {i,in}}\right)=\frac{1}{1+e^{-z_{\text {in }}^{(i)}}}\end{array}$$}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  2
@@ -163,9 +164,9 @@ The output neuron performs an \textbf{affine transformation} on its inputs:
 \begin{figure}
 \centering
 \only<1>{\scalebox{.8}{\includegraphics{figure/singlelay_7.png}}$$\begin{array}{l}
-f_\text {in}=u_1 z_\text{out}^{(1)}+u_2 z_\text {out}^{(2)}+u_{3} z_{\text {out}}^{(3)}+u_{4} z_{\text {out }}^{(4)}+c\end{array}$$}
+f_\text {in}=u_1 z_\text{1,out}+u_2 z_\text{2,out}+u_{3} z_\text{3,out}+u_{4} z_\text{4,out}+c\end{array}$$}
 \only<2>{\scalebox{.8}{\includegraphics{figure/singlelay_8.png}}$$\begin{array}{l}
-f_\text {in}=u_1 z_\text{out}^{(1)}+u_2 z_\text {out}^{(2)}+u_{3} z_{\text {out}}^{(3)}+u_{4} z_{\text {out }}^{(4)}+c \\ f_{\text {in}}= 3 * 0.05 + (-12) * 0.88 + 8* 0.50 + 1 * 0.99 + 6= 0.57\end{array}$$}
+f_\text {in}=u_1 z_\text{1,out}+u_2 z_\text{2,out}+u_{3} z_\text{3,out}+u_{4} z_\text{4,out}+c \\ f_{\text {in}}= 3 * 0.05 + (-12) * 0.88 + 8* 0.50 + 1 * 0.99 + 6= 0.57\end{array}$$}
 \end{figure}
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   1

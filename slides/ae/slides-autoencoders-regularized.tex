@@ -37,7 +37,7 @@
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.35\linewidth]{plots/AE_overcomplete2.png}
-    \caption{Overcomplete AE that learned to copy its inputs to the hidden layer and then to the output layer (Credits to M. Ponti).} 
+    \caption{Overcomplete AE that learned to copy its inputs to the hidden layer and then to the output layer (Ponti et al., 2016).} 
 \end{figure}
     
     
@@ -110,7 +110,7 @@
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.25\linewidth]{plots/AE_sparse.png}
-    \caption{Sparse Autoencoder (Credits to M. Ponti).} 
+    \caption{Sparse Autoencoder (Ponti et al., 2016).} 
 \end{figure}
 
 \end{vbframe}
@@ -226,7 +226,7 @@ robust to partial corruption of the input pattern.}}
     \centering
     % \includegraphics[width=4.5cm]{plots/denoising_autoencoder.png}
     \scalebox{0.7}{\includegraphics{plots/denoising_autoencoder.png}}
-    \caption{Denoising autoencoders - \enquote{manifold perspective} (Ian Goodfellow et al. (2016))}
+    \caption{Denoising autoencoders - \enquote{manifold perspective} (Goodfellow et al., 2016).}
   \end{figure}
     A DAE is trained to map a corrupted data point $\tilde{\xv}$ back to
 the original data point $\xv$.
@@ -235,7 +235,7 @@ the original data point $\xv$.
     \centering
     \includegraphics[width=4.5cm]{plots/denoising_autoencoder.png}
     % \scalebox{0.7}{\includegraphics{plots/denoising_autoencoder.png}}
-    \caption{Denoising autoencoders - \enquote{manifold perspective} (Ian Goodfellow et al. (2016))}
+    \caption{Denoising autoencoders - \enquote{manifold perspective} (Goodfellow et al., 2016).}
   \end{figure}
   \begin{itemize}
     \item The corruption process $C(\tilde{\xv}|\xv)$ is displayed by the gray circle of equiprobable corruptions
@@ -246,7 +246,7 @@ the original data point $\xv$.
 \begin{figure}
     \centering
     \includegraphics[width=4.5cm]{plots/denoising_autoencoder.png}
-    \caption{Denoising autoencoders - \enquote{manifold perspective} (Ian Goodfellow et al. (2016))}
+    \caption{Denoising autoencoders - \enquote{manifold perspective} (Goodfellow et al., 2016).}
   \end{figure}
   \begin{itemize}
  
@@ -261,7 +261,7 @@ An example of a vector field learned by a DAE.
   \begin{figure}
     \centering
     \includegraphics[width=4.5cm]{plots/DAE-vectorfield.png}
-    \caption{ source: Ian Goodfellow et al. (2016)}
+    \caption{(Goodfellow et al., 2016)}
   \end{figure}
   
   
@@ -377,10 +377,10 @@ An example of a vector field learned by a DAE.
         \centering
         \label{tab:}
         \begin{tabular}{p{5cm}|p{5cm}}
-            \textbf{DAE} & \textbf{CAE}\\
+            \textbf{DAE} \& \textbf{CAE}\\
             \hline
 %            \pause
-            the \textit{decoder} function is trained to resist infinitesimal perturbations of the input. & the \textit{encoder} function is trained to resist infinitesimal perturbations of the input.
+            the \textit{decoder} function is trained to resist infinitesimal perturbations of the input. \& the \textit{encoder} function is trained to resist infinitesimal perturbations of the input.
         \end{tabular}
     \end{table}
 
@@ -401,17 +401,17 @@ An example of a vector field learned by a DAE.
 
 \end{frame}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{vbframe}
 \frametitle{References}
 \footnotesize{
 \begin{thebibliography}{99}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[Ian Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
-\newblock Deep Learning
-\newblock \emph{\url{http://www.deeplearningbook.org/}}
-
-\bibitem[M. Ponti et al., 2016]{1} Everything you wanted to know about Deep Learning for Computer Vision but were afraid to ask (2017)
-\newblock SIBGRAPI Tutorials 2017
+\bibitem[(Goodfellow et al., 2016)]{1} 
+Goodfellow, I., Bengio, Y., \& Courville, A. (2016). \textit{Deep Learning}. MIT Press.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[(Ponti et al., 2016)]{2} M. A. Ponti, L. S. F. Ribeiro, T. S. Nazare, T. Bui and J. Collomosse, "Everything You Wanted to Know about Deep Learning for Computer Vision but Were Afraid to Ask," \textit{2017 30th SIBGRAPI Conference on Graphics, Patterns and Images Tutorials (SIBGRAPI-T)}, Niteroi, Brazil, 2017, pp. 17-41, doi: 10.1109/SIBGRAPI-T.2017.12.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{thebibliography}
