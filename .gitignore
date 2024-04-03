@@ -23,3 +23,4 @@
 /latex-math
 *.DS_Store
 *.Rhistory
+.Rproj.user

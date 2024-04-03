@@ -1,7 +1,6 @@
 ---
 title: "Introduction to the Labs"
-author: "Emilio Dorigatti"
-date: 2021-10-19
+author: "Emanuel Sommer"
 output:
   beamer_presentation: default
 ---
@@ -15,9 +14,7 @@ knitr::opts_chunk$set(echo = FALSE)
  - Mix of theoretical and practical exercises
  - Not graded! Only final exam counts
  - Exercises and solutions for the previous week posted on Moodle on Tuesday morning
- - I will present questions for the week and solutions for the previous week on Friday
-    - Try to do the exercises on your own before that!
- - Second part of the lab for free form discussions or we end early if there are no topics
+ - We will discuss the solutions for the previous week.
  - Lab sessions exist to discuss and ask questions
     - Attend not to fall behind the schedule
 
@@ -38,19 +35,9 @@ knitr::opts_chunk$set(echo = FALSE)
    - github.com/jjallaire/deep-learning-with-r-notebooks
    - github.com/fchollet/deep-learning-with-python-notebooks
  - Handouts both in in R and Python
-   - I will present the solutions in R, but you are free to use and ask questions about the Python version
+   - I will present the solutions in either R or Python depending on the topic, but you are free to use and ask questions about the other version
  - Purpose:
    1. Learn to use a popular Deep Learning Framework
       - For R we will use Keras/Tensorflow
       - For Python we will use PyTorch
    2. Get a feeling for how neural networks behave
-
-## Our software stack (R)
-
- 1. Keras for R
- 2. Keras for Python
- 3. Tensorflow (Python bindings)
- 4. Tensorflow (C++)
-      - CPU computations: BLAS (C/Fotran)
-      - GPU computations: cuDNN (C)
-      - TPU computations: Private Google library

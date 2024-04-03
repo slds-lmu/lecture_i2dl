@@ -25,7 +25,7 @@ HW_BEGIN_TAG = '#!TAG HWBEGIN'
 HW_END_TAG = '#!TAG HWEND'
 MSG_TAG = '#!MSG'
 
-MAX_WORKERS = 1
+MAX_WORKERS = 4
 
 
 def main():
@@ -185,7 +185,7 @@ def convert_ipynb_to_pdf(file_list: List[Path]) -> List[Path]:
     :return: Paths to the obtained pdfs.
     """
     pdf_list = _apply_multiproc(_convert_ipynb_to_pdf_worker, file_list, MAX_WORKERS)
-
+    print("PDFs created")
     # Clean up unnecessary LaTex and auxiliary files.
     all_parent_dirs = set([file.parent for file in file_list])
     for parent_dir in all_parent_dirs:

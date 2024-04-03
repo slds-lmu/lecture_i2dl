@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -13,10 +13,11 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 01
+# Lab 1
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
+> Kudos to the former contributors to/creators of the lab materials Emilio Dorigatti and Tobias Weber.
 
 Welcome to the very first lab, in which we will have fun with logistic regression.
 
@@ -35,8 +36,8 @@ set_matplotlib_formats('png', 'pdf')
 <!-- #region pycharm={"name": "#%% md\n"} -->
 ## Exercise 1
 
-Suppose you have five input points, $\textbf{x}_1=|0,0|^T$, $\textbf{x}_2=|1,0|^T$,
-$\textbf{x}_3=|0,-1|^T$, $\textbf{x}_4=|-1,0|^T$ and $\textbf{x}_5=|0,1|^T$, and
+Suppose you have five input points, $\textbf{x}_1=(0,0)^\top$, $\textbf{x}_2=(1,0)^\top$,
+$\textbf{x}_3=(0,-1)^\top$, $\textbf{x}_4=(-1,0)^\top$ and $\textbf{x}_5=(0,1)^\top$, and
 the corresponding classes are $y_1=y_2=y_3=0$ and $y_4=y_5=1$:
 <!-- #endregion -->
 
@@ -49,14 +50,25 @@ x = torch.tensor([
     [0, 1]
 ])
 y = torch.tensor([0, 0, 0, 1, 1])
-labs = ['x1', 'x2', 'x3', 'x4', 'x5']
+labs = ['$x_1$', '$x_2$', '$x_3$', '$x_4$', '$x_5$']
 ```
 
 ```python pycharm={"name": "#%%\n"}
-plt.scatter(x[:, 0], x[:, 1], c=y)
-for i, lab in enumerate(labs):
-    plt.annotate(lab, (x[i, 0], x[i, 1]))
-plt.show()
+def plot_scatter(x: torch.tensor, y: torch.tensor, labs: torch.tensor) -> None:
+    """Utility function to plot a scatter plot of the data"""
+    # copy the input tensors to avoid modifying the original ones
+    x = x.clone().detach().numpy()
+    y = y.clone().detach().numpy()
+    plt.scatter(x[:, 0], x[:, 1], c=y)
+    for i, lab in enumerate(labs):
+        plt.annotate(
+            lab, (x[i, 0], x[i, 1]), size=16,
+            xytext=(2, 2), textcoords='offset points'
+        )
+    plt.show()
+    plt.close()
+
+plot_scatter(x, y, labs)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -77,7 +89,7 @@ We add a first column of ones, which is used for the 'bias'.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-x = torch.cat([torch.ones(5, 1), x], dim=1)
+x_design = torch.cat([torch.ones(5, 1), x], dim=1)
 ```
 
 ```python pycharm={"name": "#%%\n"}
@@ -113,11 +125,12 @@ def sigmoid(x: Tensor) -> Tensor:
 #!TAG HWEND
 
 # Calculate predictions
-scores = sigmoid(x @ a)
+scores = sigmoid(x_design @ a)
 
 # Let's investigate the obtained scores.
 def print_scores(target: Tensor, scores: Tensor) -> None:
-    [print('{}\t{}\t{:.2e}'.format('x' + str(i), int(t), float(s)))
+    print('\tTarget\tScore')
+    [print('{}\t{}\t{:.3f}'.format('x' + str(i), int(t), float(s)))
      for i, (t, s) in enumerate(zip(target, scores), start=1)]
 
 print_scores(y, scores)
@@ -140,10 +153,7 @@ y = torch.tensor([0, 1, 1, 0, 0])
 ```
 
 ```python pycharm={"name": "#%%\n"}
-plt.scatter(x[:, 1], x[:, 2], c=y)
-for i, lab in enumerate(labs):
-    plt.annotate(lab, (x[i, 1], x[i, 2]))
-plt.show()
+plot_scatter(x, y, labs)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -177,7 +187,7 @@ b2 = (
 
 b = torch.tensor([b0, b1, b2], dtype=torch.float)
 
-print_scores(y, sigmoid(x @ b))
+print_scores(y, sigmoid(x_design @ b))
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -193,10 +203,7 @@ y = torch.tensor([1, 0, 0, 0, 0])
 ```
 
 ```python pycharm={"name": "#%%\n"}
-plt.scatter(x[:, 1], x[:, 2], c=y, label=y)
-for i, lab in enumerate(labs):
-    plt.annotate(lab, (x[i, 1], x[i, 2]))
-plt.show()
+plot_scatter(x, y, labs)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -225,8 +232,12 @@ In graphical form:
 x_axis = [0, 0, 1]
 y_axis = [0, 1, 0]
 plt.scatter(x_axis, y_axis, c=[1, 0, 0])
-for i, lab in enumerate(['x1', 'x2 = x3', 'x4 = x5']):
-    plt.annotate(lab, (x_axis[i], y_axis[i]))
+for i, lab in enumerate(['$x_1$', '$x_2 = x_3$', '$x_4 = x_5$']):
+    plt.annotate(
+        lab, (x_axis[i], y_axis[i]), size=16,
+        xytext=(2, 2), textcoords='offset points',
+    )
+
 plt.show()
 ```
 
@@ -279,8 +290,8 @@ This big classifier can be summarized as follows:
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-z1 = sigmoid(x @ a)
-z2 = sigmoid(x @ b)
+z1 = sigmoid(x_design @ a)
+z2 = sigmoid(x_design @ b)
 
 print_scores(y, sigmoid(g0 + g1 * z1 + g2 * z2))
 ```
