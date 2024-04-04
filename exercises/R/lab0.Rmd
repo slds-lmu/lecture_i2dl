@@ -1,13 +1,49 @@
 ---
-title: "Introduction to the Labs"
-author: "Emanuel Sommer"
 output:
-  beamer_presentation: default
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    seal: false
 ---
+class: left, middle, inverse, hide-logo
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+# Here the slides theme (TUM blue) is set and the fonts 
+# feel free to change them
+library(xaringanthemer)
+style_mono_accent(
+  base_color = "#00883A",
+  header_font_google = google_font("Josefin Sans"),
+  text_font_google   = google_font("Montserrat", "300", "300i"),
+  code_font_google   = google_font("Fira Mono")
+)
+```
+
+## Introduction to the Labs
+
+### Deep Learning (SS24)
+
+<center>
+<br><br><br>
+<img src="LMU_Logo_Schwarz.png" width="200">
+<br>
+<br>
+Emanuel Sommer, `r Sys.Date()`
+<br>
+Data Science Group @ Department of Statistics
+<br>
+Ludwig-Maximilians-Universität München
+</center>
+
+---
 
 ## Labs
 
@@ -17,6 +53,8 @@ knitr::opts_chunk$set(echo = FALSE)
  - We will discuss the solutions for the previous week.
  - Lab sessions exist to discuss and ask questions
     - Attend not to fall behind the schedule
+
+---
 
 ## Theory-oriented Exercises
 
@@ -29,11 +67,11 @@ knitr::opts_chunk$set(echo = FALSE)
    2. Get practical experience in implementing ML algorithms
    3. Get ready for the exam
 
+---
+
 ## Practice-oriented Exercises
 
  - Play with neural networks
-   - github.com/jjallaire/deep-learning-with-r-notebooks
-   - github.com/fchollet/deep-learning-with-python-notebooks
  - Handouts both in in R and Python
    - I will present the solutions in either R or Python depending on the topic, but you are free to use and ask questions about the other version
  - Purpose:
@@ -41,3 +79,11 @@ knitr::opts_chunk$set(echo = FALSE)
       - For R we will use Keras/Tensorflow
       - For Python we will use PyTorch
    2. Get a feeling for how neural networks behave
+
+---
+## Before we start
+<br><br>
+
+.center[
+<img src="https://media.giphy.com/media/JyM7eFec1gnSJwkY66/giphy.gif" width="300" height="300" align="middle"/>
+]
