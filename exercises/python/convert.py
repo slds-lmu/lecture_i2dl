@@ -15,6 +15,7 @@ import subprocess
 from typing import List, Tuple, Callable
 
 from tqdm import tqdm
+import os
 
 TEMPLATE_ROOT = 'templates'
 QUESTION_ROOT = 'questions'
@@ -205,10 +206,17 @@ def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
     # A workaround is to convert to .tex and compile it manually with pdflatex
     p = subprocess.run(['jupyter', 'nbconvert', '--to', 'latex', file_path],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    p = subprocess.run(['pdflatex', '-output-directory', file_path.parent,
-                        str(file_path).replace('.ipynb', '.tex')],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    debug = False
+    if not debug:
+        p = subprocess.run(['pdflatex', '-output-directory', file_path.parent,
+                            str(file_path).replace('.ipynb', '.tex')],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        # for debugging purposes
+        os.system((
+            f'pdflatex -output-directory {file_path.parent} '
+            f'{str(file_path).replace(".ipynb", ".tex")}'
+        ))
 
     try:
         p.check_returncode()
