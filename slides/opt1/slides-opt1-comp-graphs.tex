@@ -10,6 +10,10 @@
   \item Computational graphs
 }
 
+\newenvironment{rightbrace}
+  {\left.\begin{aligned}}
+  {\end{aligned}\right\rbrace}
+
 \title{Deep Learning}
 \date{}
 
@@ -124,6 +128,8 @@ To compute $\nabla_\xv z$, we apply the chain rule % to the computational graph 
   \end{itemize}
 \end{frame}
 
+
+
 \begin{frame} {Computational Graph: Neural Net}
   \begin{figure}
       \centering
@@ -146,6 +152,125 @@ To compute $\nabla_\xv z$, we apply the chain rule % to the computational graph 
 %            \frac {\partial z}{\partial x_2} \\
 %          \end{bmatrix}$
 % \end{frame}
+
+% ------------------------------------------------------------------------------
+
+\begin{vbframe}{Differentiation with graphs}
+
+\small
+Computational graphs are much more than a means of visualization -- they make 
+complex computations feasible in an \textbf{automated} manner.
+\vfill
+
+Let's use a graph to calculate derivatives step by step for a very simple 
+example. We compute an expression $e$ from 
+two inputs $a$ and $b$:
+$$e = (a + b) \cdot (b + 1)$$
+
+\vfill
+
+\begin{minipage}[c]{0.55\textwidth}
+  \raggedright \small
+  \begin{itemize}
+    \item We can translate this into a graph.
+    \item Inputs and elementary 
+    operations \\($+$, $\cdot$, \dots) are assigned to \textbf{nodes}.
+    \item Each node's output is propagated to the subsequent nodes:
+    \begin{equation*}
+      \begin{rightbrace}
+          c &= a + b ~~ \\
+          d &= b + 1
+      \end{rightbrace}
+      ~~ e = c \cdot d
+    \end{equation*}
+  \end{itemize}
+\end{minipage}%
+\begin{minipage}{0.05\textwidth}
+\phantom{foo}
+\end{minipage}%
+\begin{minipage}[c]{0.4\textwidth}
+  \includegraphics[width=\textwidth]{figure_man/compgraph_example_1}
+  
+  \tiny{\url{https://colah.github.io/posts/2015-08-Backprop/}}
+\end{minipage}
+
+\begin{itemize} 
+  \item For $a = 2$ and $b = 1$ the graph evaluates to $e = 6$.
+\end{itemize}
+
+\framebreak
+\normalsize
+
+\begin{itemize} 
+  \item Just like forward evaluation, we can employ graphs to go 
+  \textbf{backwards}, i.e., take \textbf{partial derivatives}
+  w.r.t. to inputs.
+  \item Since graphs are nothing but compositions of elementary operations 
+  with trivial derivatives, we can do this via \textbf{chain rule}.
+  \item Two simple rules hold: we multiply derivatives along edges and sum 
+  over all paths connecting an input to the output.
+  \item However, we might quickly run into a \textbf{combinatorial explosion}:
+  
+  \includegraphics[width=0.8\textwidth]{figure_man/compgraph_example_3}
+  
+  \framebreak 
+  
+  \item The trick is to exploit the commutativity of the chain rule.
+  \begin{itemize} 
+    % \small
+    \item We can also go from right to left without changing the result.
+    \item Taking a closer look, we see that the different partial derivatives 
+    share multiplicative components.
+    \item in 
+    this \textbf{reverse-mode differentiation}.
+  \end{itemize}
+\end{itemize}
+
+
+\framebreak
+
+\begin{itemize}
+  \footnotesize
+  \item Recall that we need first-order derivatives for gradient descent.
+  \item We use the chain rule again to compute the respective impacts of $a$ and 
+  $b$ on $e$:
+\end{itemize}
+
+\vspace{0.3cm}
+
+\begin{minipage}{0.45\textwidth}
+  \begin{itemize}
+    \scriptsize
+    \item $\nabla_a e = \underbrace{\textcolor{blue}{\pd{e}{c}}}_{d = 2} \cdot 
+    \underbrace{\pd{c}{a}}_{1} = 2$
+    \item $\nabla_b e = \underbrace{\pd{e}{d}}_{c = 3} \cdot 
+    \underbrace{\pd{d}{b}}_{1} + \underbrace{\textcolor{blue}{\pd{e}{c}}}_{d = 2} 
+    \cdot \underbrace{\pd{c}{b}}_{1} = 5$
+  \end{itemize}
+\end{minipage}%
+\begin{minipage}{0.05\textwidth}
+\phantom{foo}
+\end{minipage}%
+\begin{minipage}{0.5\textwidth}
+\includegraphics[width=\textwidth]{figure_man/compgraph_example_2}
+\end{minipage}
+
+\vspace{0.3cm}
+
+\begin{itemize} 
+  \footnotesize
+  \item The same calculations we have done with pen and paper on the left side 
+  can be outsourced to computational graphs.
+  \item By assembling modules of basic computations (think of elementary 
+  operations such as sums, logarithms etc.), graphs are able to 
+  calculate derivatives for \textbf{arbitrarily complex} function compositions.
+  \item Also note how the chain rule exploits the \textcolor{blue}{reuse} of
+  components, so they need to be computed only once.
+\end{itemize}
+
+\end{vbframe}
+
+% ------------------------------------------------------------------------------
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
