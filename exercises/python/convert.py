@@ -26,7 +26,7 @@ HW_BEGIN_TAG = '#!TAG HWBEGIN'
 HW_END_TAG = '#!TAG HWEND'
 MSG_TAG = '#!MSG'
 
-MAX_WORKERS = 4
+MAX_WORKERS = 1
 
 
 def main():

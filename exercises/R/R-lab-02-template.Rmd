@@ -1,14 +1,13 @@
 ---
 title: "Lab 2"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2021-10-26
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Exercise 1
 Consider a neural network with one hidden layer with threshold activation function (i.e., $\tau(x)=\mathbf{1}[x>0]$) and one output neuron with no activation function. Prove that such a neural network cannot _exactly_ separate the cyan ($y=1$) and white ($y=0$) areas in Figure 1.
@@ -70,7 +69,9 @@ bowtie = data.frame(x=c(-1, -1, 0, 1, 1, 0, -1), y=c(1, -1, 0, -1, 1, 0, 1))
 ggplot(bowtie, aes(x=x, y=y)) +
   geom_polygon(fill='#b3cde3') +
   xlim(-2, 2) +
-  ylim(-2, 2)
+  ylim(-2, 2) + 
+  labs(x = latex2exp::TeX('$x_1$'), y = latex2exp::TeX('$x_2$')) +
+  theme_minimal()
 ```
 
 Let us create a dataset containing points on a grid to test the network:
@@ -95,7 +96,9 @@ ggplot(bowtie, aes(x = x, y = y)) +
   geom_line(data = data.frame(x = c(-1, -1), y = c(-1.5, 1.5))) +
   geom_line(data = data.frame(x = c(1, 1), y = c(-1.5, 1.5))) +
   xlim(-2, 2) +
-  ylim(-2, 2)
+  ylim(-2, 2) +
+  labs(x = latex2exp::TeX('$x_1$'), y = latex2exp::TeX('$x_2$')) +
+  theme_minimal()
 ```
 
 The following functions visualizes the decision boundary of a neuron with sigmoid activation, $y=\sigma(a+bx_1+cx_2)$. You can use it to help you find the right values for the weights.
@@ -104,7 +107,7 @@ The following functions visualizes the decision boundary of a neuron with sigmoi
 library(scales)
 
 plot_grid = function(predictions) {
-  # plots the predicted value for each point on the grid;
+  # plots the predicted value for each point on the grid
   # the predictions should have one column and
   # the same number of rows (10,201) as the data
   df = cbind(as.data.frame(data), y = predictions)
@@ -119,7 +122,9 @@ plot_grid = function(predictions) {
     geom_line(aes(x = c(-1.25, 1.25), y = c(1.25, -1.25)), inherit.aes = F) +
     geom_line(aes(x = c(-1.25, 1.25), y = c(-1.25, 1.25)), inherit.aes = F) +
     geom_line(aes(x = c(-1, -1), y = c(-1.5, 1.5)), inherit.aes = F) +
-    geom_line(aes(x = c(1, 1), y = c(-1.5, 1.5)), inherit.aes = F)
+    geom_line(aes(x = c(1, 1), y = c(-1.5, 1.5)), inherit.aes = F) +
+    labs(x = latex2exp::TeX('$x_1$'), y = latex2exp::TeX('$x_2$')) +
+    theme_minimal()
 }
 
 activation = function(x) {
@@ -133,11 +138,11 @@ plot_decision_boundary_first_hidden = function(a, b, c) {
     #!hwbegin TODO compute the output of the neuron with input weights\n# given by a, b and c on each point of the grid
     activation(data %*% c(a, b, c))
     #!hwend
-  );
-  plot_grid(neuron_output);
+  )
+  plot_grid(neuron_output)
 }
 
-plot_decision_boundary_first_hidden(1, -2, 1)
+plot_decision_boundary_first_hidden(0.5, -2, 1)
 ```
 
 For convenience, we group the parameters of the four neurons into a matrix with three rows and five columns (one is for the bias), so that their output can be computed in a single matrix multiplication. Each column contains the weights of a different neuron. The first column contains a "fake" hidden neuron for the bias, whose value is always one. Note that the first row of the weight matrix is connected to the bias of the previous layer.
@@ -157,7 +162,7 @@ weights1 = matrix(c(
   #!hwbegin TODO find the coefficients for the fourth neuron
   0, 1, 1
   #!hwend
-), ncol = 5);
+), ncol = 5)
 
 dim(weights1)
 ```
@@ -166,10 +171,10 @@ Let us plot the predictions of the four neurons:
 
 ```{r}
 # make sure that the decision boundary of the neurons corresponds to the four lines
-plot_decision_boundary_first_hidden(weights1[1, 2], weights1[2, 2], weights1[3, 2]);
-plot_decision_boundary_first_hidden(weights1[1, 3], weights1[2, 3], weights1[3, 3]);
-plot_decision_boundary_first_hidden(weights1[1, 4], weights1[2, 4], weights1[3, 4]);
-plot_decision_boundary_first_hidden(weights1[1, 5], weights1[2, 5], weights1[3, 5]);
+plot_decision_boundary_first_hidden(weights1[1, 2], weights1[2, 2], weights1[3, 2])
+plot_decision_boundary_first_hidden(weights1[1, 3], weights1[2, 3], weights1[3, 3])
+plot_decision_boundary_first_hidden(weights1[1, 4], weights1[2, 4], weights1[3, 4])
+plot_decision_boundary_first_hidden(weights1[1, 5], weights1[2, 5], weights1[3, 5])
 ```
 
 And this is the first hidden layer of the network. Let us compute its predictions for each point of the grid:
@@ -190,6 +195,7 @@ ncol(hidden1) == 5
 # and that the values are between zero and one
 range(hidden1)
 ```
+
 ### Second hidden layer
 The second hidden layer is composed of two neurons, each activating for inputs inside one of the two triangles that make up our figure. These two neurons are connected to the four neurons of the previous layer, thus each of them has five parameters.
 
@@ -201,11 +207,11 @@ plot_decision_boundary_second_hidden = function(a, b, c, d, e) {
     #!hwbegin TODO compute the output of the neuron
     activation(hidden1 %*% c(a, b, c, d, e))
     #!hwend
-  );
-  plot_grid(neuron_output);
+  )
+  plot_grid(neuron_output)
 }
 
-plot_decision_boundary_second_hidden(-2, 3, -1, -3, 1);
+plot_decision_boundary_second_hidden(-2, 3, -1, -3, 1)
 ```
 
 Now, as before, find the coefficients for the two neurons and put them into a matrix with five rows and three columns. You can use the previous function to help you find these weights.
@@ -230,10 +236,10 @@ The predictions:
 ```{r}
 plot_decision_boundary_second_hidden(
   weights2[1, 2], weights2[2, 2], weights2[3, 2], weights2[4, 2], weights2[5, 2]
-);
+)
 plot_decision_boundary_second_hidden(
   weights2[1, 3], weights2[2, 3], weights2[3, 3], weights2[4, 3], weights2[5, 3]
-);
+)
 ```
 
 ```{r}
@@ -265,8 +271,8 @@ plot_decision_boundary_output = function(a, b, c) {
     #!hwbegin TODO compute the output of the neuron
     hidden2 %*% c(a, b, c)
     #!hwend
-  );
-  plot_grid(neuron_output);
+  )
+  plot_grid(neuron_output)
 }
 ```
 
@@ -286,7 +292,7 @@ dim(weights3)
 The output of the neural network is:
 
 ```{r}
-plot_decision_boundary_output(weights3[1, 1], weights3[2, 1], weights3[3, 1]);
+plot_decision_boundary_output(weights3[1, 1], weights3[2, 1], weights3[3, 1])
 ```
 
 
@@ -321,7 +327,7 @@ Consider a neuron with incoming weights $\textbf{w}=w_1,\ldots,w_n$ bias $b$, an
 ### Solution
  1. The output of the neuron is $z'=\tanh(\textbf{w}'^T\textbf{x}+b')=\tanh(-\textbf{w}^T\textbf{x}-b)$. Since $\tanh(x)=-\tanh(-x)$, we have $z'=-\tanh(\textbf{w}^T\textbf{x}+b)=-z$. Since $v'_i=-v_i$, we have that $v'_iz'=(-v_i)\cdot(-z)=v_iz$. Therefore, no change to $c_i$ is necessary.
  2. We first prove that $\sigma(x)=1-\sigma(-x)$:
- 
+    
     \begin{align*}
     \sigma(x)-1+\sigma(-x)
     &=\frac{1}{1+e^{-x}}-1+\frac{1}{1+e^x} \\
@@ -329,6 +335,6 @@ Consider a neuron with incoming weights $\textbf{w}=w_1,\ldots,w_n$ bias $b$, an
     &=\frac{1+e^x-1-e^x-e^{-x}-e^0+1+e^{-x}}{(1+e^{-x})(1+e^{x})} \\
     &=0
     \end{align*}
-
-    We can follow the same idea as the previous question, and set $\textbf{w}'=-\textbf{w}$, $v_i'=-v_i$ and $b'=-b$. Then, we have $z'=\sigma(\textbf{w}'^T\textbf{x}+b')=\sigma(-\textbf{w}^T\textbf{x}-b')=1-\sigma(\textbf{w}^T\textbf{x}+b)=1-z$. Since $v'_i=-v_i$, the contribution of this neuron to the neurons of the next layer is $v'_iz'=-v_i(1-z)=-v_i+v_iz$, therefore we can set $c_i'=c_i+v_i$.
+  
+    We can follow the same idea as the previous question, and set $\textbf{w}'=-\textbf{w}$, $v_i'=-v_i$ and $b'=-b$. Then, we have         $z'=\sigma(\textbf{w}'^T\textbf{x}+b')=\sigma(-\textbf{w}^T\textbf{x}-b')=1-\sigma(\textbf{w}^T\textbf{x}+b)=1-z$. Since $v'_i=-v_i$, the contribution of this neuron to the neurons of the next layer is $v'_iz'=-v_i(1-z)=-v_i+v_iz$, therefore we can set $c_i'=c_i+v_i$.
 <!--#!solutionend-->

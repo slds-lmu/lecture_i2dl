@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -15,7 +15,7 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 2
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Imports
 <!-- #endregion -->
@@ -132,7 +132,7 @@ Let us create a dataset containing points on a grid to test the network:
 ```python pycharm={"name": "#%%\n"}
 # Build a grid of equally-spaced points, plus a column for the bias
 grid_range = torch.linspace(-2, 2, 50)
-grid_x, grid_y = torch.meshgrid(grid_range, grid_range)
+grid_x, grid_y = torch.meshgrid(grid_range, grid_range, indexing='ij')
 data = torch.stack([torch.ones(50**2), grid_x.flatten(), grid_y.flatten()]).T
 
 print(data.shape)
@@ -188,7 +188,7 @@ def plot_decision_boundary_first_hidden(a: int, b: int, c: int) -> None:
     )
     plot_decision_boundary(grid_x, grid_y, neuron_output)
 
-plot_decision_boundary_first_hidden(1, -2, 1)
+plot_decision_boundary_first_hidden(-1, -3, 1)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -321,11 +321,11 @@ weights_2 = torch.tensor([
     [1, 0, 0, 0, 0],   # bias neuron connected to the bias of the inputs
     #!TAG HWBEGIN
     #!MSG TODO find the coefficients for the first neuron.
-    [-5, 2, 0, 2, 2],
+    [-2, 1, 0, 1, 1],
     #!TAG HWEND
     #!TAG HWBEGIN
     #!MSG TODO find the coefficients for the second neuron.
-    [-1, 0, 2, -2, -2],
+    [-1, 1, 1, -1, -1],
     #!TAG HWEND
 ], dtype=torch.float).T
 # Note: The weight matrix is transposed in the end. (3 x 5 --> 5 x 3)
