@@ -48,9 +48,9 @@ Ludwig-Maximilians-Universität München
 ## Labs
 
  - Mix of theoretical and practical exercises
- - Not graded! Only final exam counts
- - Exercises and solutions for the previous week posted on Moodle on Tuesday morning
- - We will discuss the solutions for the previous week.
+ - Not graded! Only the final exam counts
+ - Exercises and solutions for the previous week posted on Moodle on Tuesdays
+ - We will discuss the solutions of the previous week
  - Lab sessions exist to discuss and ask questions
     - Attend not to fall behind the schedule
 
@@ -72,8 +72,9 @@ Ludwig-Maximilians-Universität München
 ## Practice-oriented Exercises
 
  - Play with neural networks
- - Handouts both in in R and Python
+ - Question and solutions are provided both in R & Python
    - I will present the solutions in either R or Python depending on the topic, but you are free to use and ask questions about the other version
+   - I will indicate which version I will present on Moodle
  - Purpose:
    1. Learn to use a popular Deep Learning Framework
       - For R we will use Keras/Tensorflow
