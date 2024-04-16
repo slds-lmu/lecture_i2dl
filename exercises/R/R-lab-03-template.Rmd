@@ -1,12 +1,6 @@
 ---
 title: "Lab 3"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2020-11-09
-papersize: a4
-header-includes:
-  - \usepackage{bbold}
-  - \usepackage{tikz}
 ---
 
 
@@ -14,10 +8,12 @@ header-includes:
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the third lab. The first exercise is an implementation of gradient descent on a bivariate function. The second exercise is about computing derivatives of the weights of a neural network, and the third exercise combines the previous two.
 
 ## Exercise 1
+
 This exercise is about gradient descent. We will use the function $f(x_1, x_2)=(x_1-6)^2+x_2^2-x_1x_2$ as a running example:
 
  1. Use pen and paper to do three iterations of gradient descent:
@@ -30,13 +26,13 @@ This exercise is about gradient descent. We will use the function $f(x_1, x_2)=(
 
 
 ```{r}
-func.value = function(x) {
+func_value = function(x) {
   #!hwbegin TODO compute the value of f at x
   (x[1] - 6)^2+x[2]^2-x[1]*x[2]
   #!hwend
 }
 
-func.gradient = function(x) {
+func_gradient = function(x) {
   c(
     #!hwbegin TODO compute the gradienf of f at x
     2*x[1]-x[2]-12,
@@ -45,25 +41,29 @@ func.gradient = function(x) {
   )
 }
 
-func.value(c(6, 6))
-func.gradient(c(6, 6))
+func_value(c(6, 6))
+func_gradient(c(6, 6))
 ```
 
 Does it match what you computed?
 
 
 ```{r}
-gradient_descent_optimizer = function(x0, func, grad, max_steps, alpha) {
-  # x0 is the initial point
-  # func computes the value of the function at a given point
-  # grad computes the gradient of the function at a given point
-  # max_steps is the maximum number of gradient descent steps
-  # alpha is the learning rate
 
+#' Gradient descent optimizer
+#' 
+#' @param x0 initial point
+#' @param func function to compute the value of the function at a given point
+#' @param grad function to compute the gradient of the function at a given point
+#' @param max_steps maximum number of gradient descent steps
+#' @param alpha learning rate
+#' 
+#' @return the point where the optimizer stopped
+gradient_descent_optimizer = function(x0, func, grad, max_steps, alpha) {
   #!hwbegin TODO use a for loop to do gradient descent
   x = x0
   v = func(x0)
-  for(i in 1:max_steps) {
+  for (i in 1:max_steps) {
     x = x - alpha * grad(x)
     vnew = func(x)
     if(v - vnew < 1e-4) {
@@ -75,7 +75,7 @@ gradient_descent_optimizer = function(x0, func, grad, max_steps, alpha) {
   #!hwend
 }
 
-gradient_descent_optimizer(c(6, 6), func.value, func.gradient, 10, 0.1)
+gradient_descent_optimizer(c(6, 6), func_value, func_gradient, 10, 0.1)
 ```
 
 Play a bit with the starting point and learning rate to get a feel for its behavior; how close can you get to the minimum?
@@ -86,24 +86,24 @@ Play a bit with the starting point and learning rate to get a feel for its behav
 The gradient of $f$ is:
 
 $$
-\nabla_{\textbf{x}}f(\textbf{x})=\left\vert\begin{matrix}
+\nabla_{\textbf{x}}f(\textbf{x})=\left(\begin{matrix}
 \partial f/\partial x_1 \\
 \partial f/\partial x_2 \\
-\end{matrix}\right\vert=\left\vert\begin{matrix}
+\end{matrix}\right)=\left(\begin{matrix}
 2(x_1-6)-x_2 \\
 2x_2-x_1 \\
-\end{matrix}\right\vert
+\end{matrix}\right)
 $$
 
-For $\textbf{x}=|6,6|^T$ we have $f(\textbf{x})=0$ and $\nabla_{\textbf{x}}f(\textbf{x})=|-6,6|^T$.
+For $\textbf{x}=(6,6)^\top$ we have $f(\textbf{x})=0$ and $\nabla_{\textbf{x}}f(\textbf{x})=(-6,6)^\top$.
 
 Let $\textbf{x}^{(t)}$ denote the point at the $t$-th iteration. Then:
 
 | $t$ | $\textbf{x}^{(t)}$ | $f(\textbf{x}^{(t)})$ | $\nabla_{\textbf{x}}f(\textbf{x})$ | $\textbf{x}^{(t+1)}$ |
 |-|-|-|-|-|
-| 1 | $|6,6|$ | $0$ | $|-6,6|$ | $|6,6|-(1/2)\cdot|-6,6|=|9,3|$ |
-| 2 | $|9,3|$ | $-9$ | $|3,-3|$ | $|9,3|-(1/3)\cdot|3,-3|=|8,4|$ |
-| 3 | $|8,4|$ | $-12$ | $|0,0|$ | $|8,4|-(1/4)\cdot|0,0|=|8,4|$ |
+| 1 | $(6,6)^\top$ | $0$ | $(-6,6)^\top$ | $(6,6)^\top-0.5\cdot(-6,6)^\top=(9,3)^\top$ |
+| 2 | $(9,3)^\top$ | $-9$ | $(3,-3)^\top$ | $(9,3)^\top-(1/3)\cdot(3,-3)^\top=(8,4)^\top$ |
+| 3 | $(8,4)^\top$ | $-12$ | $(0,0)^\top$ | $(8,4)^\top-(1/4)\cdot(0,0)^\top=(8,4)^\top$ |
 
 Where all vectors are intended to be vertical. As the gradient at the last point is zero, nothing will change if we continue to apply this procedure.
 
@@ -111,34 +111,11 @@ Where all vectors are intended to be vertical. As the gradient at the last point
 
 ## Exercise 2
 
-This exercise is about computing gradients with the chain rule, with pen and paper. We will work with a neural network with a single hidden layer with two neurons and an output layer with one neuron (see Figure \ref{fig:ex2net}).
+This exercise is about computing gradients with the chain rule, with pen and paper. We will work with a neural network with a single hidden layer with two neurons and an output layer with one neuron (see the Figure below).
 
 \begin{figure}
 \centering
-\begin{tikzpicture}
-\node[draw, circle] (b1) at (1, 4) {$1$ };
-\node[draw, circle] (x1) at (0, 2) {$x_1$ };
-\node[draw, circle] (x2) at (0, 0) { $x_2$ };
-\node[draw, circle] (b2) at (3, 4) { $1$ };
-\node[draw, circle] (z1) at (2, 2) { $z_1$ };
-\node[draw, circle] (z2) at (2, 0) { $z_2$ };
-\node[draw, circle] (y) at (4, 1) { $f$ };
-
-\draw[->] (b1) -- (z1) node [near start,above,sloped] { $b_1$ };
-\draw[->] (b1) -- (z2) node [near start,below,sloped] { $b_2$ };
-
-\draw[->] (x1) -- (z1) node [near start,above,sloped] { $w_{11}$ };
-\draw[->] (x1) -- (z2) node [near start,above,sloped] { $w_{12}$ };
-
-\draw[->] (x2) -- (z1) node [near start,above,sloped] { $w_{21}$ };
-\draw[->] (x2) -- (z2) node [near start,above,sloped] { $w_{22}$ };
-
-\draw[->] (b2) -- (y) node [midway,above,sloped] { $c$ };
-\draw[->] (z1) -- (y) node [midway,above,sloped] { $u_1$ };
-\draw[->] (z2) -- (y) node [midway,above,sloped] { $u_2$ };
-\end{tikzpicture}
-\caption{Neural network used in Exercise 2.}
-\label{fig:ex2net}
+\includegraphics[width=0.5\textwidth]{lab3f1.png}
 \end{figure}
 
 The neurons in the hidden layer use the $\tanh$ activation, while the output neuron uses the sigmoid. The loss used in binary classification is the _binary cross-entropy_:
@@ -172,6 +149,7 @@ You will notice that there are lots of redundancies. We will see how to improve 
 ### Solution
 
 #### Question 1
+
 \begin{align*}
 \frac{\partial\mathcal{L}(y,  f_{out})}{\partial f_{out}}
 &=\frac{\partial}{\partial f_{out}}\bigg(-y\log f_{out}-(1-y)\log(1- f_{out})\bigg)\\
@@ -350,9 +328,11 @@ Now that we know how to do gradient descent and how to compute the derivatives o
 First, let's define the dataset:
 
 ```{r}
-data.x1 = c(0, 1, 0, -1, 0);
-data.x2 = c(0, 0, -1, 0, 1);
-data.y = c(1, 0, 0, 0, 0);
+data_x1 = c(0, 1, 0, -1, 0);
+data_x2 = c(0, 0, -1, 0, 1)
+data_y = c(1, 0, 0, 0, 0)
+# set the seed for reproducibility
+set.seed(2)
 ```
 
 Next, a function to compute the output of the network:
@@ -364,16 +344,21 @@ sigmoid = function(x) {
   #!hwend
 }
 
-nnet.predict = function(params) {
+nnet_predict = function(params) {
   # params is a vector, we first unpack for clarity
-  b1 = params[1]; b2 = params[2];
-  w11 = params[3]; w12 = params[4];
-  w21 = params[5]; w22 = params[6];
-  c = params[7]; u1 = params[8]; u2 = params[9];
+  b1 = params[1] 
+  b2 = params[2]
+  w11 = params[3] 
+  w12 = params[4]
+  w21 = params[5]
+  w22 = params[6]
+  c = params[7]
+  u1 = params[8]
+  u2 = params[9]
 
   #!hwbegin TODO compute and return the output of the network
-  z1 = tanh(b1 + data.x1 * w11 + data.x2 * w21)
-  z2 = tanh(b2 + data.x1 * w12 + data.x2 * w22)
+  z1 = tanh(b1 + data_x1 * w11 + data_x2 * w21)
+  z2 = tanh(b2 + data_x1 * w12 + data_x2 * w22)
   f = sigmoid(c + u1 * z1 + u2 * z2)
   f
   #!hwend
@@ -381,45 +366,50 @@ nnet.predict = function(params) {
 
 # this should return the predictions for the five points in the datasets
 params = rnorm(9)
-nnet.predict(params)
+nnet_predict(params)
 ```
 
 Since gradient descent is done on the loss function, we need a function to compute it:
 
 ```{r}
-nnet.loss = function(params) {
+nnet_loss = function(params) {
   #!hwbegin TODO compute the predictions and return the average loss
-  preds = nnet.predict(params)
-  -mean(data.y * log(preds + 1e-15) + (1 - data.y) * log(1 - preds + 1e-15))
+  preds = nnet_predict(params)
+  -mean(data_y * log(preds + 1e-15) + (1 - data_y) * log(1 - preds + 1e-15))
   #!hwend
 }
 
-nnet.loss(params)
+nnet_loss(params)
 ```
 
 Now, we need to compute the gradient of each parameter:
 
 ```{r}
-nnet.gradient = function(params) {
+nnet_gradient = function(params) {
   # params is a vector, we first unpack for clarity
-  b1 = params[1]; b2 = params[2];
-  w11 = params[3]; w12 = params[4];
-  w21 = params[5]; w22 = params[6];
-  c = params[7]; u1 = params[8]; u2 = params[9];
+  b1 = params[1]
+  b2 = params[2]
+  w11 = params[3]
+  w12 = params[4]
+  w21 = params[5]
+  w22 = params[6]
+  c = params[7]
+  u1 = params[8]
+  u2 = params[9]
 
   #!hwbegin TODO compute all the partial derivatives
   # first, we perform the forward pass
-  z1in = b1 + data.x1 * w11 + data.x2 * w21
+  z1in = b1 + data_x1 * w11 + data_x2 * w21
   z1out = tanh(z1in)
 
-  z2in = b2 + data.x1 * w12 + data.x2 * w22
+  z2in = b2 + data_x1 * w12 + data_x2 * w22
   z2out = tanh(z2in)
 
   fin = c + u1 * z1out + u2 * z2out
   fout = sigmoid(fin)
 
   # now we start back-propagation through the loss and the output neuron
-  dL_dfout = -data.y / (fout + 1e-15) + (1 - data.y) / (1 - fout + 1e-15)
+  dL_dfout = -data_y / (fout + 1e-15) + (1 - data_y) / (1 - fout + 1e-15)
   dfout_dfin = sigmoid(fin) * (1 - sigmoid(fin))
 
   # compute the gradients for the parameters of the output layer
@@ -443,11 +433,11 @@ nnet.gradient = function(params) {
   dL_db1 = mean(dL_dfout * dfout_dfin * dfin_dz1out * dz1out_dz1in * dz1in_db1)
   dL_db2 = mean(dL_dfout * dfout_dfin * dfin_dz2out * dz2out_dz2in * dz2in_db2)
 
-  dz1in_dw11 = dz2in_dw12 = data.x1
+  dz1in_dw11 = dz2in_dw12 = data_x1
   dL_dw11 = mean(dL_dfout * dfout_dfin * dfin_dz1out * dz1out_dz1in * dz1in_dw11)
   dL_dw12 = mean(dL_dfout * dfout_dfin * dfin_dz2out * dz2out_dz2in * dz2in_dw12)
 
-  dz1in_dw21 = dz2in_dw22 = data.x2
+  dz1in_dw21 = dz2in_dw22 = data_x2
   dL_dw21 = mean(dL_dfout * dfout_dfin * dfin_dz1out * dz1out_dz1in * dz1in_dw21)
   dL_dw22 = mean(dL_dfout * dfout_dfin * dfin_dz2out * dz2out_dz2in * dz2in_dw22)
   #!hwend
@@ -461,32 +451,32 @@ nnet.gradient = function(params) {
   )
 }
 
-nnet.gradient(params)
+nnet_gradient(params)
 ```
 
 Finite differences are a useful way to check that the gradients are computed correctly:
 
 ```{r}
 # first, compute the analytical gradient of the parameters
-gradient = nnet.gradient(params);
+gradient = nnet_gradient(params)
 
 eps = 1e-9
 for(i in 1:9) {
   # compute loss when subtracting eps to parameter i
-  neg_params = c(params);
-  neg_params[i] = neg_params[i] - eps;
-  neg_value = nnet.loss(neg_params);
+  neg_params = c(params)
+  neg_params[i] = neg_params[i] - eps
+  neg_value = nnet_loss(neg_params)
 
   # compute loss when adding eps to parameter i
-  pos_params = c(params);
-  pos_params[i] = pos_params[i] + eps;
-  pos_value = nnet.loss(pos_params);
+  pos_params = c(params)
+  pos_params[i] = pos_params[i] + eps
+  pos_value = nnet_loss(pos_params)
 
   # compute the "empirical" gradient of parameter i
-  fdiff_gradient = mean((pos_value - neg_value) / (2 * eps));
+  fdiff_gradient = mean((pos_value - neg_value) / (2 * eps))
 
   # error if difference is too large
-  stopifnot(abs(gradient[i] - fdiff_gradient) < 1e-5);
+  stopifnot(abs(gradient[i] - fdiff_gradient) < 1e-5)
 }
 
 print("Gradients are correct!")
@@ -502,9 +492,9 @@ best_params = NULL
 for(i in 1:10) {
   params = rnorm(9, sd = 1)
   optimized_params = gradient_descent_optimizer(
-    params, nnet.loss, nnet.gradient, max_steps = 100, alpha = 1
+    params, nnet_loss, nnet_gradient, max_steps = 100, alpha = 1
   )
-  final_loss = nnet.loss(optimized_params)
+  final_loss = nnet_loss(optimized_params)
   cat("Loss", final_loss, ifelse(final_loss < 0.1, "*", ""), "\n")
 
   if(final_loss < min_loss) {
@@ -513,6 +503,7 @@ for(i in 1:10) {
   }
 }
 ```
+
 We can use the function in the previous lab to visualize the decision boundary of the best network:
 
 ```{r}
@@ -525,11 +516,11 @@ data = as.matrix(expand.grid(
   x2 = seq(-2, 2, 1 / 25)
 ))
 
-data.x1 = data[,2]
-data.x2 = data[,3]
+data_x1 = data[,2]
+data_x2 = data[,3]
 
 plot_grid = function(predictions) {
-  # plots the predicted value for each point on the grid;
+  # plots the predicted value for each point on the grid
   # the predictions should have one column and
   # the same number of rows (10,201) as the data
   df = cbind(as.data.frame(data), y = predictions)
@@ -541,14 +532,16 @@ plot_grid = function(predictions) {
     scale_fill_gradient2(low = muted("blue", 70), mid = "white",
                         high = muted("red", 70), limits = c(0, 1),
                         midpoint = 0.5) +
-    geom_point(aes(x=c(0, 1, 0, -1, 0), y=c(0, 0, -1, 0, 1)))
+    geom_point(aes(x=c(0, 1, 0, -1, 0), y=c(0, 0, -1, 0, 1))) +
+    labs(x = latex2exp::TeX('$x_1$'), y = latex2exp::TeX('$x_2$')) +
+    theme_minimal()
 }
 
-plot_grid(nnet.predict(best_params))
+plot_grid(nnet_predict(best_params))
 ```
 
 Also try to visualize the decision boundary of network with random parameters:
 
 ```{r}
-plot_grid(nnet.predict(rnorm(9, sd=5)))
+plot_grid(nnet_predict(rnorm(9, sd=5)))
 ```
