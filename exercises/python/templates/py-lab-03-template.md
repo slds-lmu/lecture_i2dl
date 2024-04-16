@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -14,7 +14,7 @@ jupyter:
 
 # Lab 3
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Imports
 
@@ -48,7 +48,6 @@ $f(x_1, x_2)=(x_1-6)^2+x_2^2-x_1x_2$ as a running example:
      - For simplicity, we use a constant learning rate.
      - Can you find a way to prematurely stop the optimization when you are close to the
     optimum?
-     -
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
@@ -153,7 +152,7 @@ class GradientDescentOptimizer:
         # Dummy value for initial loop.
         y_old = torch.tensor([float('inf')])
 
-        for i in range(self.max_steps):
+        for _ in range(self.max_steps):
             # Set gradients of x to None
             x_cp.grad = None
 
@@ -196,33 +195,33 @@ How close can you get to the minimum?
 The gradient of $f$ is:
 
 \begin{equation}
-    \nabla_{\textbf{x}}f(\textbf{x})=\left\vert\begin{matrix}
+    \nabla_{\textbf{x}}f(\textbf{x})=\left(\begin{matrix}
     \partial f/\partial x_1 \\
     \partial f/\partial x_2 \\
-    \end{matrix}\right\vert=\left\vert\begin{matrix}
+    \end{matrix}\right)=\left(\begin{matrix}
     2(x_1-6)-x_2 \\
     2x_2-x_1 \\
-\end{matrix}\right\vert
+\end{matrix}\right)
 \end{equation}
 
 
-For $\textbf{x}=|6,6|^T$ we have $f(\textbf{x})=0$ and $\nabla_{\textbf{x}}f(\textbf{x})=|-6,6|^T$.
+For $\textbf{x}=(6,6)^{\top}$ we have $f(\textbf{x})=0$ and $\nabla_{\textbf{x}}f(\textbf{x})=(-6,6)^{\top}$.
 
 Let $\textbf{x}^{(t)}$ denote the point at the $t$-th iteration. Then:
 
 | $t$ | $\textbf{x}^{(t)}$ | $f(\textbf{x}^{(t)})$ | $\nabla_{\textbf{x}}f(\textbf{x})$ |
 | --- | --- | --- | --- |
-| 1 | $\mid 6,6 \mid$ | $0$ | $\mid-6,6\mid$ |
-| 2 | $\mid 9,3\mid$ | $-9$ | $\mid3,-3\mid$ |
-| 3 | $\mid8,4\mid$ | $-12$ | $\mid0,0\mid$  |
+| 1 | $( 6,6)^{\top}$ | $0$   | $(-6,6)^{\top}$ |
+| 2 | $( 9,3)^{\top}$ | $-9$  | $(3,-3)^{\top}$ |
+| 3 | $(8,4)^{\top}$ | $-12$ | $(0,0)^{\top}$  |
 
 <!-- #endregion -->
 
-1. $ x^{(2)} = | 6,6|-(1/2) * |-6,6| = |9,3|$
-2. $ x^{(3)} = | 9,3|-(1/3) * |3,-3|=|8,4|$
-3. $ x^{(4)} = | 8,4|-(1/4) * |0,0|=|8,4|$
+1. $x^{(2)} = (6,6)^{\top}-(1/2) * (-6,6)^{\top} = (9,3)^{\top}$
+2. $x^{(3)} = (9,3)^{\top}-(1/3) * (3,-3)^{\top}=(8,4)^{\top}$
+3. $x^{(4)} = (8,4)^{\top}-(1/4) * (0,0)^{\top}=(8,4)^{\top}$
 
-Where all vectors are intended to be vertical. As the gradient at the last point is
+As the gradient at the last point is
 zero, nothing will change if we continue to apply this procedure.
 
 #!TAG HWEND
@@ -274,6 +273,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 ### Solution
 
 #### Question 1
+
 \begin{align*}
 \frac{\partial\mathcal{L}(y,  f_{out})}{\partial f_{out}}
 &=\frac{\partial}{\partial f_{out}}\bigg(y\log f_{out}+(1-y)\log(1- f_{out})\bigg)\\
@@ -281,6 +281,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 \end{align*}
 
 #### Question 2
+
 \begin{align*}
 \frac{\partial f_{out}}{\partial f_{in}}
 &=\frac{\partial}{\partial f_{in}} \frac{1}{1+e^{- f_{in}}} \\
@@ -289,6 +290,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 \end{align*}
 
 #### Question 3
+
 \begin{align*}
 \frac{\partial}{\partial x} \frac{1}{1+e^{-x}}
 &=\frac{e^{-x}}{(1+e^{-x})^2} \\
@@ -298,6 +300,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 \end{align*}
 
 #### Question 4
+
 \begin{align*}
 \frac{\partial}{\partial x}\tanh(x)
 &=\frac{\partial}{\partial x}\frac{e^x-e^{-x}}{e^x+e^{-x}} \\
@@ -389,6 +392,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 \end{align*}
 
 #### Question 14
+
 \begin{align*}
 \frac{\partial\mathcal{L}(y,  f_{out})}{\partial b_2}
 &=\frac{\partial\mathcal{L}(y,  f_{out})}{\partial f_{out}}
@@ -404,6 +408,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 \end{align*}
 
 #### Question 15
+
 \begin{align*}
 \frac{\partial\mathcal{L}(y,  f_{out})}{\partial w_{12}}
 &=\frac{\partial\mathcal{L}(y,  f_{out})}{\partial f_{out}}
@@ -419,6 +424,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 \end{align*}
 
 #### Question 16
+
 \begin{align*}
 \frac{\partial\mathcal{L}(y,  f_{out})}{\partial x_1}
 &=\frac{\partial\mathcal{L}(y,  f_{out})}{\partial f_{out}}
@@ -494,6 +500,7 @@ def predict(x: Tensor, b1: float, b2: float,
 # need to enter every single entry.
 params = torch.randn(9)
 predictions = predict(x, *params)
+print(predictions)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -521,10 +528,12 @@ Now, we need to compute the gradient of each parameter:
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 
-def get_gradients(x: Tensor, target: Tensor,
-            b1: float, b2: float,
-            w11: float, w12: float, w21: float, w22: float,
-            c: float, u1: float, u2:float) -> Tensor:
+def get_gradients(
+        x: Tensor, target: Tensor,
+        b1: float, b2: float,
+        w11: float, w12: float, w21: float, w22: float,
+        c: float, u1: float, u2:float
+    ) -> Tensor:
     # First, we perform the forward pass.
     z1in = b1 + x[:, 0] * w11 + x[:, 1] * w21
     z1out = torch.tanh(z1in)
@@ -664,15 +673,12 @@ def plot_decision_boundary(
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-
 grid_range = torch.linspace(-2, 2, 50)
-grid_x, grid_y = torch.meshgrid(grid_range, grid_range)
+grid_x, grid_y = torch.meshgrid(grid_range, grid_range, indexing='ij')
 grid_data = torch.stack([grid_x.flatten(), grid_y.flatten()]).T
 pred = predict(grid_data, *best_params)
 
 plot_decision_boundary(x, y, grid_x, grid_y, pred)
-
-
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->

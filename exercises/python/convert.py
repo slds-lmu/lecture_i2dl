@@ -206,7 +206,7 @@ def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
     # A workaround is to convert to .tex and compile it manually with pdflatex
     p = subprocess.run(['jupyter', 'nbconvert', '--to', 'latex', file_path],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    debug = False
+    debug = True
     if not debug:
         p = subprocess.run(['pdflatex', '-output-directory', file_path.parent,
                             str(file_path).replace('.ipynb', '.tex')],

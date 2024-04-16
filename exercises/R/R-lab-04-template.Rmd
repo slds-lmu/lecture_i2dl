@@ -1,8 +1,6 @@
 ---
 title: "Lab 4"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2020-11-09
 papersize: a4
 header-includes:
   - \usepackage{bbold}
@@ -11,6 +9,8 @@ header-includes:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the fourth lab. In this lab, we will derive the backpropagation equations, code the training procedure, and test it on our beloved dataset with five points.
 
