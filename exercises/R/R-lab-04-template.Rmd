@@ -34,7 +34,7 @@ Derive the back-propagation algorithm for a network with arbitrary architecture.
 
 \item Use vectorized operations (i.e., operations with vectors and matrices) to compute the gradients with respect to a single sample.
 
-\item Extend the vectorized operations to handle data in batches, and show that:
+\item [Optional] Extend the vectorized operations to handle data in batches, and show that:
 \begin{align}
 \Delta^{(L)}&=\nabla_{\textbf{Z}^{(L)}_{out}}\mathcal{L}(\textbf{Y},\textbf{Z}^{(L)}_{out})\odot{\sigma^\prime}^{(L)}(\textbf{Z}^{(L)}_{in}) \\
 \nabla_{\textbf{W}^{(\ell)}}\mathcal{L}(\textbf{Y},\textbf{Z}^{(\ell)}_{out})&={\textbf{Z}^{(\ell-1)}_{out}}^T \cdot\Delta^{(\ell)} \\
@@ -214,7 +214,7 @@ Finally, the deltas for the previous layer:
 
 Which follows because the sum in Eq. \ref{eq:deltas} is the dot-product of the $i$-th row of $\textbf{W}^{(\ell)}$ with $\delta^{(\ell)}$. Doing this separately for each row results in the matrix-vector multiplication $\textbf{W}^{(\ell)}\cdot\delta^{(\ell)}$.
 
-#### Question 3
+#### Question 3 [Optional]
 
 We now extend these formulas to handle batched data. Vectors become matrices where each row contains the vector for the corresponding sample in the batch:
 
@@ -304,7 +304,7 @@ mse = function(ytrue, ypred) { mean((ytrue - ypred)^2) }
 mse_derivative = function(ytrue, ypred) { 2 * (ypred - ytrue) / length(ytrue) }
 
 
-nnet.new = function(layer_sizes) {
+nnet_new = function(layer_sizes) {
   # all information about the network is stored in a list
   nnet = list(
     weights = list(),
@@ -343,17 +343,17 @@ nnet.new = function(layer_sizes) {
   nnet
 }
 
-nnet = nnet.new(c(2, 5, 3, 1))
+nnet = nnet_new(c(2, 5, 3, 1))
 ```
 
 Let us now write the forward pass:
 
 ```{r}
-nnet.predict = function(nnet, data.x) {
-  # data.x is a matrix with samples on rows
+nnet_predict = function(nnet, data_x) {
+  # data_x is a matrix with samples on rows
   #!hwbegin TODO perform the forward pass and return the predictions
   n_layers = length(nnet$weights)
-  zout = data.x
+  zout = data_x
   for(l in 1:n_layers) {
     zin = t(t(zout %*% nnet$weights[[l]]) + nnet$biases[[l]])
     zout = nnet$activations[[l]](zin)
@@ -383,25 +383,27 @@ plot_grid = function(predictions) {
     scale_fill_gradient2(low = muted("blue", 70), mid = "white",
                         high = muted("red", 70), limits = c(0, 1),
                         midpoint = 0.5) +
-    geom_point(aes(x=c(0, 1, 0, -1, 0), y=c(0, 0, -1, 0, 1)))
+    geom_point(aes(x=c(0, 1, 0, -1, 0), y=c(0, 0, -1, 0, 1))) +
+    labs(x = latex2exp::TeX('$x_1$'), y = latex2exp::TeX('$x_2$')) +
+    theme_minimal()
 }
 
 # run this a few times to see what different random networks predict
-nnet = nnet.new(c(2, 5, 3, 1))
-plot_grid(nnet.predict(nnet, grid))
+nnet = nnet_new(c(2, 5, 3, 1))
+plot_grid(nnet_predict(nnet, grid))
 ```
 
 Now, we code backpropagation to compute the gradients. Use the vectorized formulas in Equations 5-8 to make your code much faster.
 
 ```{r}
-nnet.gradients = function(nnet, x, y) {
-  # x is be a matrix with samples on rows
+nnet_gradients = function(nnet, x, y) {
+  # x is a matrix with samples on rows
   # y is a vector with the labels
 
   n_layers = length(nnet$weights)
   activations = list(x)
   pre_activations = list(x)
-  #!hwbegin TODO perform the forward pass, storing all activations
+  #!hwbegin TODO perform the forward pass, storing all (pre-)activations
   for(l in 1:n_layers) {
     zin = t(t(activations[[l]] %*% nnet$weights[[l]]) + nnet$biases[[l]])
     zout = nnet$activations[[l]](zin)
@@ -445,18 +447,18 @@ nnet.gradients = function(nnet, x, y) {
   )
 }
 
-data.x = matrix(c(
+data_x = matrix(c(
   0, 1, 0, -1, 0,
   0, 0, -1, 0, 1
 ), ncol = 2)
-data.y = c(1, 0, 0, 0, 0)
-nnet.gradients(nnet, data.x, data.y)
+data_y = c(1, 0, 0, 0, 0)
+nnet_gradients(nnet, data_x, data_y)
 ```
 
 We now need to implement gradient descent:
 
 ```{r}
-nnet.gradient_descent_step = function(nnet, gradients, learning_rate) {
+nnet_gradient_descent_step = function(nnet, gradients, learning_rate) {
   #!hwbegin TODO perform one step of gradient descent,\n# modifying the parameters of the network
   for(l in 1:length(nnet$weights)) {
     nnet$weights[[l]] = (
@@ -472,13 +474,13 @@ nnet.gradient_descent_step = function(nnet, gradients, learning_rate) {
 }
 
 
-nnet.train = function(nnet, x, y, n_epochs, learning_rate) {
+nnet_train = function(nnet, x, y, n_epochs, learning_rate) {
   losses = list()
 
   #!hwbegin TODO iterate over the dataset for the given number of epochs and\n# modify the weights at each epoch.\n# use all the data to compute the gradients
   for(e in 1:n_epochs) {
-    gradients = nnet.gradients(nnet, x, y)
-    nnet = nnet.gradient_descent_step(nnet, gradients, learning_rate)
+    gradients = nnet_gradients(nnet, x, y)
+    nnet = nnet_gradient_descent_step(nnet, gradients, learning_rate)
     losses[[length(losses) + 1]] = gradients$loss
   }
   #!hwend
@@ -493,15 +495,15 @@ nnet.train = function(nnet, x, y, n_epochs, learning_rate) {
 Finally, let us train the network on the small dataset:
 
 ```{r}
-data.x = matrix(c(
+data_x = matrix(c(
   0, 1, 0, -1, 0,
   0, 0, -1, 0, 1
 ), ncol = 2)
-data.y = c(1, 0, 0, 0, 0)
+data_y = c(1, 0, 0, 0, 0)
 
-nnet = nnet.new(c(2, 5, 3, 1))
-result = nnet.train(nnet, data.x, data.y, 2500, 0.25)
-nnet.predict(result$nnet, data.x)
+nnet = nnet_new(c(2, 5, 3, 1))
+result = nnet_train(nnet, data_x, data_y, 2500, 0.25)
+nnet_predict(result$nnet, data_x)
 ```
 By plotting the loss after each parameter update, we can be sure that the network converged:
 
@@ -511,7 +513,7 @@ plot(result$losses)
 And the decision boundary of the network is:
 
 ```{r}
-plot_grid(nnet.predict(result$nnet, grid))
+plot_grid(nnet_predict(result$nnet, grid))
 ```
 
 Try to train a few randomly initialized network to discover different decision boundaries. Try to modify the learning rate and see how it affects the convergence speed. Finally, try different ways to initialize the weights and note how the trainability of the network is affected.
