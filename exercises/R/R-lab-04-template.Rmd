@@ -2,8 +2,6 @@
 title: "Lab 4"
 output: pdf_document
 papersize: a4
-header-includes:
-  - \usepackage{bbold}
 ---
 
 ```{r setup, include=FALSE}
@@ -34,7 +32,7 @@ Derive the back-propagation algorithm for a network with arbitrary architecture.
 
 \item Use vectorized operations (i.e., operations with vectors and matrices) to compute the gradients with respect to a single sample.
 
-\item [Optional] Extend the vectorized operations to handle data in batches, and show that:
+\item $[$Optional$]$ Extend the vectorized operations to handle data in batches, and show that:
 \begin{align}
 \Delta^{(L)}&=\nabla_{\textbf{Z}^{(L)}_{out}}\mathcal{L}(\textbf{Y},\textbf{Z}^{(L)}_{out})\odot{\sigma^\prime}^{(L)}(\textbf{Z}^{(L)}_{in}) \\
 \nabla_{\textbf{W}^{(\ell)}}\mathcal{L}(\textbf{Y},\textbf{Z}^{(\ell)}_{out})&={\textbf{Z}^{(\ell-1)}_{out}}^T \cdot\Delta^{(\ell)} \\
@@ -508,7 +506,10 @@ nnet_predict(result$nnet, data_x)
 By plotting the loss after each parameter update, we can be sure that the network converged:
 
 ```{r}
-plot(result$losses)
+ggplot(data.frame(loss = result$losses), aes(x = 1:length(loss), y = loss)) +
+  geom_line() +
+  labs(x = "Epoch", y = "Loss") +
+  theme_minimal()
 ```
 And the decision boundary of the network is:
 

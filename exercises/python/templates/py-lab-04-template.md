@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,7 +15,7 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 4
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the fourth lab. In this lab, we will derive the backpropagation equations, 
 code the training procedure, and test it on our beloved dataset with five points.
@@ -63,7 +63,7 @@ You might find the results of the previous lab a useful reference, as well as ch
 2. Use vectorized operations (i.e., operations with vectors and matrices) to compute
 the gradients with respect to a single sample.
 
-3. Extend the vectorized operations to handle data in batches, and show that:
+3. (Optional) Extend the vectorized operations to handle data in batches, and show that:
 
 \begin{align}
 \Delta^{(L)}&=\nabla_{\textbf{Z}^{(L)}_{out}}\mathcal{L}(\textbf{Y},\textbf{Z}^{(L)}_{out})\odot{\sigma^\prime}^{(L)}(\textbf{Z}^{(L)}_{in}) \\
@@ -73,7 +73,7 @@ the gradients with respect to a single sample.
 \end{align}
 
 where $\Delta^{(\ell)}$, $\textbf{Y}$ and $\textbf{Z}^{(\ell)}_{out}$ are matrices whose $i$-th row contain the respective vectors $\delta$, $\textbf{y}$ and $\textbf{z}^{(\ell)}_{\cdot,out}$ for the $i$-th sample in the batch, and $\odot$ is the element-wise product.
-\end{enumerate}
+
 
 #!TAG HWBEGIN
 
@@ -250,7 +250,7 @@ Finally, the deltas for the previous layer:
 
 Which follows because the sum in Eq. 4 is the dot-product of the $i$-th row of $\textbf{W}^{(\ell)}$ with $\delta^{(\ell)}$. Doing this separately for each row results in the matrix-vector multiplication $\textbf{W}^{(\ell)}\cdot\delta^{(\ell)}$.
 
-#### Question 3
+#### Question 3 (Optional)
 
 We now extend these formulas to handle batched data. Vectors become matrices where each row contains the vector for the corresponding sample in the batch:
 
@@ -568,13 +568,15 @@ previous exercises for the randomly initialized network:
 
 def plot_decision_boundary(x: Tensor, y: Tensor, net: NeuralNetwork) -> None:
     grid_range = torch.linspace(-2, 2, 50)
-    grid_x, grid_y = torch.meshgrid(grid_range, grid_range)
+    grid_x, grid_y = torch.meshgrid(grid_range, grid_range, indexing='ij')
     grid_data = torch.stack([grid_x.flatten(), grid_y.flatten()]).T
 
     predictions = net.forward(grid_data)
 
     plt.contourf(grid_x, grid_y, predictions.view(grid_x.shape))
-    plt.scatter(x[:, 0], x[:, 1], c=y, cmap='jet')
+    plt.scatter(x[0, 0], x[0, 1], c='red', label='1')
+    plt.scatter(x[1:, 0], x[1:, 1], c='black', label='0')
+    plt.legend()
     plt.show()
 
 plot_decision_boundary(x, y, network)
@@ -592,7 +594,8 @@ def train(
         y: Tensor,
         net: NeuralNetwork,
         epochs: int,
-        lr: float
+        lr: float,
+        verbose: int = 1,
 ) -> Tuple[NeuralNetwork, Tensor]:
     """
     Train a neural network.
@@ -601,6 +604,7 @@ def train(
     :param net: Neural network to train.
     :param epochs: Number of training epochs.
     :param lr: Learning rate for gradient descent.
+    :param verbose: Verbosity level. (number of epochs to print loss for)
     :return: Trained network and losses over course of training.
     """
 
@@ -621,12 +625,13 @@ def train(
         # Apply gradients.
         net.apply_gradients(learning_rate=lr)
 
-        print('EPOCH: \t {:5} \t LOSS: \t {:.5f}'.format(ep, float(loss)), end='\r')
+        if verbose > 0 and ep % verbose == 0:
+            print('Epoch {}: Loss: {}'.format(ep, loss))
 
     #!TAG HWEND
     return net, torch.stack(losses)
 
-network, losses = train(x, y, network, 2500, 0.25)
+network, losses = train(x, y, network, 2500, 0.25, verbose=500)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
