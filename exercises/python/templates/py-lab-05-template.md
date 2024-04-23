@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,13 +15,14 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 5
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the fifth lab. We will first implement a simple scalar automatic
 differentiation engine to compute partial derivatives for us,
 then do a theoretical exercise about L2 regularization.
 
 ## Imports
+
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
@@ -44,10 +45,9 @@ so that you only need to define how to perform the forward pass in your code.
 Under the hood, the framework constructs a computational graph based on the operations
 you used. For example, consider the node:
 
-\begin{equation}
+$$
 4xy+e^{-y}
-\label{eq:ex}
-\end{equation}
+$$
 
 It can be translated into a graph that looks like this:
 
@@ -63,7 +63,7 @@ supplementary read.
 The naming of the classes responds to:
 
  - `Sum` for Addition $x+y$
- - `Sub'` for Subtraction $x-y$
+ - `Sub` for Subtraction $x-y$
  - `Mul` for Product $x\cdot y$
  - `Div` for Division $x / y$
  - `Exp` for Exponentiation $e^x$
@@ -179,7 +179,7 @@ that is easier to understand. For example, the expression $x+2y$ should be conve
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-Which can be printed easily using `join`, resulting in `( x + ( 2 * y ) )`.
+Which can be printed easily using `" ".join(<list>)`, resulting in `( x + ( 2 * y ) )`.
 
 Such a function should be _recursive_. This means that when simplifying a complicated
 expression it will call itself on each constituting piece of that expression, and
@@ -248,7 +248,7 @@ class Sum(BinaryOperation):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return '({} + {})'.format(self.x, self.y)
+        return f'({self.x} + {self.y})'
         #!TAG HWEND
 
 
@@ -256,7 +256,7 @@ class Sub(BinaryOperation):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return '({} - {})'.format(self.x, self.y)
+        return f'({self.x} - {self.y})'
         #!TAG HWEND
 
 
@@ -264,7 +264,7 @@ class Mul(BinaryOperation):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return '({} * {})'.format(self.x, self.y)
+        return f'{self.x} * {self.y}'
         #!TAG HWEND
 
 
@@ -272,7 +272,7 @@ class Div(BinaryOperation):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return '({} / {})'.format(self.x, self.y)
+        return f'{self.x} / {self.y}'
         #!TAG HWEND
 
 
@@ -285,7 +285,7 @@ class Exp(Function):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return 'exp({})'.format(self.x)
+        return f'exp({self.x})'
         #!TAG HWEND
 
 
@@ -293,7 +293,7 @@ class Log(Function):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return 'log({})'.format(self.x)
+        return f'log({self.x})'
         #!TAG HWEND
 
 
@@ -301,7 +301,7 @@ class TanH(Function):
     def __str__(self) -> str:
         #!TAG HWBEGIN
         #!MSG Formulate an expression to print the operation recursively.
-        return 'tanh({})'.format(self.x)
+        return f'tanh({self.x})'
         #!TAG HWEND
 ```
 
@@ -483,7 +483,7 @@ z = Sum(
     ))
 )
 
-print(z.eval())
+print(round(z.eval(), 4))
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -491,7 +491,7 @@ The result that we expect is, of course:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-print(4 * 2 * 3 + math.exp(-3))
+print(round(4 * 2 * 3 + math.exp(-3), 4))
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -680,7 +680,7 @@ class TanH(Function):
 
     def differentiate(self, var: str) -> BaseNode:
         #!TAG HWBEGIN
-        #!MSG TODO differentiate log(x). (Hint: Chain rule)
+        #!MSG TODO differentiate tanh(x). (Hint: Chain rule)
         return Mul(
             x=Sub(
                 x=Const(1),
@@ -1438,7 +1438,7 @@ This exercise should improve your understanding of weight decay (or L2 regulariz
   1. Consider a quadratic error function $E(\textbf{w})=E_0+\textbf{b}^T\textbf{w}+1/2\cdot\textbf{w}^T\textbf{H}\textbf{w}$ and its regularized counterpart $E'(\textbf{w})=E(\textbf{w})+\tau/2 \cdot\textbf{w}^T\textbf{w}$, and let $\textbf{w}^*$ and $\tilde{\textbf{w}}$ be the minimizers of $E$ and $E'$ respectively. We want to find a node to express $\tilde{\textbf{w}}$ as a function of $\textbf{w}^*$, i.e. find the displacement introduced by weight decay.
 
       - Find the gradients of $E$ and $E'$. Note that, at the global minimum,
-     we have $\nabla E(\textbf{w}^*)=\nabla E'(\hat{\textbf{w}})=0$.
+     we have $\nabla E(\textbf{w}^*)=\nabla E'(\tilde{\textbf{w}})=0$.
       - In the equality above, express $\textbf{w}^*$ and $\tilde{\textbf{w}}$ as a
      linear combination of the eigenvectors of $\textbf{H}$.
       - Through algebraic manipulation, obtain $\tilde{\textbf{w}}_i$ as a function
@@ -1525,7 +1525,7 @@ when each term inside the sum is zero, i.e.
 \Longleftrightarrow \beta_i=\frac{\lambda_i}{\lambda_i+\tau}\alpha_i
 \end{equation}
 
-Now, by replacing this into the expression for $\hat{\textbf{w}}$, we get:
+Now, by replacing this into the expression for $\tilde{\textbf{w}}$, we get:
 
 \begin{equation}
 \tilde{\textbf{w}}=\beta^T\textbf{u}=\sum_i\beta_i\textbf{u}_i=\sum_i\frac{\lambda_i}{\lambda_i+\tau}\alpha_i\textbf{u}_i
