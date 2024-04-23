@@ -1,20 +1,13 @@
 ---
 title: "Lab 5"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2020-11-16
-papersize: a4
-header-includes:
-  - \usepackage{bbold}
-  - \usepackage{tikz}
-  - \usepackage[utf8]{inputenc}
-  - \usetikzlibrary{snakes,arrows,shapes}
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the fifth lab. We will first implement a simple scalar automatic differentiation engine to compute partial derivatives for us, then do a theoretical exercise about L2 regularization.
 
@@ -29,31 +22,7 @@ Modern deep learning frameworks compute gradients automatically, so that you onl
 
 It can be translated into a graph that looks like this:
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[>=latex',line join=bevel,]
-  \node (a) at (27.0bp,234.0bp) [minimum size=1.25cm,draw,circle] {$4$};
-  \node (e) at (99.0bp,162.0bp) [minimum size=1.25cm,draw,circle] {$\times$};
-  \node (b) at (99.0bp,234.0bp) [minimum size=1.25cm,draw,circle] {$x$};
-  \node (c) at (171.0bp,234.0bp) [minimum size=1.25cm,draw,circle] {$y$};
-  \node (f) at (225.0bp,162.0bp) [minimum size=1.25cm,draw,circle] {$\times$};
-  \node (g) at (153.0bp,90.0bp) [minimum size=1.25cm,draw,circle] {$\times$};
-  \node (d) at (243.0bp,234.0bp) [minimum size=1.25cm,draw,circle] {$-1$};
-  \node (h) at (225.0bp,90.0bp) [minimum size=1.25cm,draw,circle] {$\exp(\cdot)$};
-  \node (i) at (189.0bp,18.0bp) [minimum size=1.25cm,draw,circle] {$+$};
-  \draw [->] (a) ..controls (51.75bp,208.94bp) and (65.524bp,195.55bp)  .. (e);
-  \draw [->] (b) ..controls (99.0bp,207.98bp) and (99.0bp,198.71bp)  .. (e);
-  \draw [->] (c) ..controls (189.98bp,208.4bp) and (198.94bp,196.79bp)  .. (f);
-  \draw [->] (c) ..controls (165.76bp,191.67bp) and (160.13bp,147.21bp)  .. (g);
-  \draw [->] (d) ..controls (236.61bp,208.14bp) and (234.14bp,198.54bp)  .. (f);
-  \draw [->] (e) ..controls (117.98bp,136.4bp) and (126.94bp,124.79bp)  .. (g);
-  \draw [->] (f) ..controls (225.0bp,135.98bp) and (225.0bp,126.71bp)  .. (h);
-  \draw [->] (g) ..controls (165.71bp,64.283bp) and (171.15bp,53.714bp)  .. (i);
-  \draw [->] (h) ..controls (212.29bp,64.283bp) and (206.85bp,53.714bp)  .. (i);
-\end{tikzpicture}
-\caption{Computational graph representing Eq. \ref{eq:ex}.}
-\label{fig:cg}
-\end{figure}
+![](../lab5f1.png)
 
 
 Where we have "leaf" nodes at the top for variables and constants, and "internal" nodes for operations. To make things simpler, in this exercise we will only work with scalar operations and scalar variables, but what we are going to create could, in principle, be extended to work with vectors and matrices. Section 6 of chapter 5 of the _Mathematics for Machine Learning_ book (https://mml-book.github.io/) is a good supplementary read.
@@ -72,35 +41,35 @@ We first define some utility functions to easily create nodes:
 
 ```{r eval = TRUE}
 # node representing a constant
-n.const = function(value) list(op = "const", value = value)
+n_const = function(value) list(op = "const", value = value)
 
 # node representing a variable
-n.var = function(name) list(op = "var", name = name)
+n_var = function(name) list(op = "var", name = name)
 
 # nodes for binary operations
-n.sum = function(x, y) list(op = "sum", x = x, y = y)
-n.sub = function(x, y) list(op = "sub", x = x, y = y)
-n.mul = function(x, y) list(op = "mul", x = x, y = y)
-n.div = function(x, y) list(op = "div", x = x, y = y)
+n_sum = function(x, y) list(op = "sum", x = x, y = y)
+n_sub = function(x, y) list(op = "sub", x = x, y = y)
+n_mul = function(x, y) list(op = "mul", x = x, y = y)
+n_div = function(x, y) list(op = "div", x = x, y = y)
 
 # nodes for functions
-n.exp = function(x) list(op = "exp", x = x)
-n.log = function(x) list(op = "log", x = x)
-n.tanh = function(x) list(op = "tanh", x = x)
+n_exp = function(x) list(op = "exp", x = x)
+n_log = function(x) list(op = "log", x = x)
+n_tanh = function(x) list(op = "tanh", x = x)
 
 # now define the graph computing Eq. 1 and show in Fig. 1
-x = n.var("x")
-y = n.var("y")
+x = n_var("x")
+y = n_var("y")
 
-z = n.sum(
-  n.mul(
-     n.mul(
-        n.const(4),
+z = n_sum(
+  n_mul(
+     n_mul(
+        n_const(4),
         x),
      y),
-  n.exp(
-     n.mul(
-        n.const(-1),
+  n_exp(
+     n_mul(
+        n_const(-1),
         y)))
 
 z
@@ -148,10 +117,10 @@ factorial = function(n) {
 factorial(4)
 ```
 
-In a similar way, the function `to.string` below should call itself to "stringify" the operands on an operation, then merge these representations into a single string for the whole operation. This basic skeleton of recursively navigating the computational graph will be used throughout the exercise.
+In a similar way, the function `to_string` below should call itself to "stringify" the operands on an operation, then merge these representations into a single string for the whole operation. This basic skeleton of recursively navigating the computational graph will be used throughout the exercise.
 
 ```{r}
-to.string = function(node) {
+to_string = function(node) {
   # return a vector of strings representing each parts of the node
 
   if(node$op == "const") {
@@ -169,14 +138,14 @@ to.string = function(node) {
     )[[node$op]]
 
     string_x = (
-      #!hwbegin TODO use the function `to.string` to find the string\n# representation of the left part
-      to.string(node$x)
+      #!hwbegin TODO use the function `to_string` to find the string\n# representation of the left part
+      to_string(node$x)
       #!hwend
     )
 
     string_y = (
-      #!hwbegin TODO use the function `to.string` to find the string\n#  representation of the right part
-      to.string(node$y)
+      #!hwbegin TODO use the function `to_string` to find the string\n#  representation of the right part
+      to_string(node$y)
       #!hwend
     )
 
@@ -191,7 +160,7 @@ to.string = function(node) {
   else if(node$op %in% c("tanh", "exp", "log")) {
     c(
       #!hwbegin TODO return the string representation of the function name\n# and its argument
-      node$op, "(", to.string(node$x), ")"
+      node$op, "(", to_string(node$x), ")"
       #!hwend
     )
   }
@@ -201,7 +170,7 @@ to.string = function(node) {
 }
 
 print.node = function(node) {
-  cat(to.string(node), "\n")
+  cat(to_string(node), "\n")
 }
 
 print.node(z)
@@ -210,7 +179,7 @@ print.node(z)
 This is much simpler to read!
 
 ### Computing the value of an expression
-We can now write a function to compute the value of an expression given values for the variables. This function should be recursive too, like `to.string` above.
+We can now write a function to compute the value of an expression given values for the variables. This function should be recursive too, like `to_string` above.
 
 ```{r}
 compute = function(node, var_values) {
@@ -301,51 +270,51 @@ differentiate = function(node, variable) {
   # differentiate the given expression with respect to the given variable
   #
   # VERY IMPORTANT: this function returns a graph, which can only contain nodes.
-  # Therefore, you must use the functions n.const, n.sum, etc., instead of normal
+  # Therefore, you must use the functions n_const, n_sum, etc., instead of normal
   # numbers and operations.
 
   if(node$op == "const") {
     # derivative of a constant is always zero
-    n.const(0)
+    n_const(0)
   }
   else if(node$op == "var") {
     if(node$name == variable) {
       # derivative is one if we are differentiating with respect to this variable
-      n.const(1)
+      n_const(1)
     }
     else {
       # or zero if we are differentiating with respect to a different variable
-      n.const(0)
+      n_const(0)
     }
   }
   # call the right function depending on what type of node we are processing
   else if(node$op == "sum") {
-    differentiate.sum(node, variable)
+    differentiate_sum(node, variable)
   }
   else if(node$op == "sub") {
-    differentiate.sub(node, variable)
+    differentiate_sub(node, variable)
   }
   else if(node$op == "mul") {
-    differentiate.mul(node, variable)
+    differentiate_mul(node, variable)
   }
   else if(node$op == "div") {
-    differentiate.div(node, variable)
+    differentiate_div(node, variable)
   }
   else if(node$op == "tanh") {
-    differentiate.tanh(node, variable)
+    differentiate_tanh(node, variable)
   }
   else if(node$op == "exp") {
-    differentiate.exp(node, variable)
+    differentiate_exp(node, variable)
   }
   else if(node$op == "log") {
-    differentiate.log(node, variable)
+    differentiate_log(node, variable)
   }
   else {
     stop(c("unknown node: ", node$op))
   }
 }
 
-differentiate.sum = function(node, variable) {
+differentiate_sum = function(node, variable) {
   diff_x = (
     #!hwbegin TODO differentiate the left part
     differentiate(node$x, variable)
@@ -361,72 +330,72 @@ differentiate.sum = function(node, variable) {
   #
   # note that we are returning a new graph node that connects the two
   # graphs representing the derivatives of the left and right parts
-  n.sum(diff_x, diff_y)
+  n_sum(diff_x, diff_y)
 }
 
-differentiate.sub = function(node, variable) {
+differentiate_sub = function(node, variable) {
   #!hwbegin TODO differentiate the subtraction x - y
-  n.sub(
+  n_sub(
      differentiate(node$x, variable),
      differentiate(node$y, variable))
   #!hwend
 }
 
-differentiate.mul = function(node, variable) {
+differentiate_mul = function(node, variable) {
   #!hwbegin TODO differentiate the product x * y
-  n.sum(
-    n.mul(differentiate(node$x, variable), node$y),
-    n.mul(node$x, differentiate(node$y, variable))
+  n_sum(
+    n_mul(differentiate(node$x, variable), node$y),
+    n_mul(node$x, differentiate(node$y, variable))
   )
   #!hwend
 }
 
-differentiate.div = function(node, variable) {
+differentiate_div = function(node, variable) {
   #!hwbegin TODO differentiate the quotient x / y
   # we differentiate only once and re-use this part of the graph
   dy = differentiate(node$y, variable)
 
-  n.div(
-    n.sub(
-       n.mul(
+  n_div(
+    n_sub(
+       n_mul(
           differentiate(node$x, variable),
           node$y),
-       n.mul(
+       n_mul(
           node$x,
           dy)),
-    n.mul(
+    n_mul(
        node$y,
        node$y))
   #!hwend
 }
 
-differentiate.tanh = function(node, variable) {
+differentiate_tanh = function(node, variable) {
   #!hwbegin TODO differentiate tanh(x)
   # (1 - tanh(x)^2) * differentiate(x)
-  tx = n.tanh(node$x)
-  n.mul(
-    n.sub(
-       n.const(1),
-       n.mul(
+  tx = n_tanh(node$x)
+  n_mul(
+    n_sub(
+       n_const(1),
+       n_mul(
           tx,
           tx)),
     differentiate(node$x, variable))
   #!hwend
 }
 
-differentiate.exp = function(node, variable) {
+differentiate_exp = function(node, variable) {
   #!hwbegin TODO differentiate exp(x)
-  n.mul(
-     n.exp(node$x),
+  n_mul(
+     n_exp(node$x),
      differentiate(node$x, variable))
   #!hwend
 }
 
 
-differentiate.log = function(node, variable) {
+differentiate_log = function(node, variable) {
   #!hwbegin TODO differentiate log(x)
   # (1 / x) * differentiate(x)
-   n.div(
+   n_div(
       differentiate(node$x, variable),
       node$x)
   #!hwend
@@ -476,32 +445,32 @@ simplify = function(node) {
   }
   # call the right function depending on what type of node we are processing
   else if(node$op == "sum") {
-    simplify.sum(node)
+    simplify_sum(node)
   }
   else if(node$op == "sub") {
-    simplify.sub(node)
+    simplify_sub(node)
   }
   else if(node$op == "mul") {
-    simplify.mul(node)
+    simplify_mul(node)
   }
   else if(node$op == "div") {
-    simplify.div(node)
+    simplify_div(node)
   }
   else if(node$op == "tanh") {
-    simplify.tanh(node)
+    simplify_tanh(node)
   }
   else if(node$op == "exp") {
-    simplify.exp(node)
+    simplify_exp(node)
   }
   else if(node$op == "log") {
-    simplify.log(node)
+    simplify_log(node)
   }
   else {
     stop(c("unknown node: ", node$op))
   }
 }
 
-simplify.sum = function(node) {
+simplify_sum = function(node) {
   simple_x = (
     #!hwbegin TODO simplify the left part
     simplify(node$x)
@@ -523,22 +492,22 @@ simplify.sum = function(node) {
   }
   else if(simple_x$op == "const" && simple_y$op == "const") {
     # if both arguments are constants we can perform the sum immediately
-    n.const(simple_x$value + simple_y$value)
+    n_const(simple_x$value + simple_y$value)
   }
   else {
     # cannot simplify further; return a new sum node with the simplified operands
-    n.sum(simple_x, simple_y)
+    n_sum(simple_x, simple_y)
   }
 }
 
-simplify.sub = function(node) {
+simplify_sub = function(node) {
   #!hwbegin TODO simplify x - y
   sx = simplify(node$x)
   sy = simplify(node$y)
 
   if(is.zero(sx)) {
     # 0 - y = -1 * y
-    n.mul(n.const(-1), sy)
+    n_mul(n_const(-1), sy)
   }
   else if(is.zero(sy)) {
     # x - 0 = 0
@@ -550,19 +519,19 @@ simplify.sub = function(node) {
   }
   else {
     # cannot simplify further
-    n.sub(sx, sy)
+    n_sub(sx, sy)
   }
   #!hwend
 }
 
-simplify.mul = function(node) {
+simplify_mul = function(node) {
   #!hwbegin TODO simplify x * y
   sx = simplify(node$x)
   sy = simplify(node$y)
 
   if(is.zero(sx) || is.zero(sy)) {
     # 0 * y = x * 0 = 0
-    n.const(0)
+    n_const(0)
   }
   else if(is.one(sx)) {
     # 1 * y = y
@@ -574,23 +543,23 @@ simplify.mul = function(node) {
   }
   else if(sx$op == "const" && sy$op == "const") {
     # perform the operation if possible
-    n.const(sx$value * sy$value)
+    n_const(sx$value * sy$value)
   }
   else {
     # cannot simplify further
-    n.mul(sx, sy)
+    n_mul(sx, sy)
   }
   #!hwend
 }
 
-simplify.div = function(node) {
+simplify_div = function(node) {
   #!hwbegin TODO simplify x / y
   sx = simplify(node$x)
   sy = simplify(node$y)
 
   if(is.zero(sx)) {
     # 0 / y = 0 (even when y = 0)
-    n.const(0)
+    n_const(0)
   }
   else if(is.zero(sy)) {
     # cannot do x / 0
@@ -602,52 +571,52 @@ simplify.div = function(node) {
   }
   else if(sx$op == "const" && sy$op == "const") {
     # perform the operation if possible
-    n.const(sx$value / sy$value)
+    n_const(sx$value / sy$value)
   }
   else {
     # cannot simplify further
-    n.div(sx, sy)
+    n_div(sx, sy)
   }
   #!hwend
 }
 
-simplify.tanh = function(node) {
+simplify_tanh = function(node) {
   #!hwbegin TODO simplify tanh(x)
   sx = simplify(node$x)
   if(is.zero(sx)) {
     # tanh(0) = 0
-    n.const(0)
+    n_const(0)
   }
   else if(sx$op == "const") {
     # perform the operation if possible
-    n.const(tanh(sx$value))
+    n_const(tanh(sx$value))
   }
   else {
     # cannot simplify further
-    n.tanh(sx)
+    n_tanh(sx)
   }
   #!hwend
 }
 
-simplify.exp = function(node) {
+simplify_exp = function(node) {
   #!hwbegin TODO simplify exp(x)
   sx = simplify(node$x)
   if(is.zero(sx)) {
     # exp(0) = 1
-    n.const(1)
+    n_const(1)
   }
   else if(sx$op == "const") {
     # perform the operation if possible
-    n.const(exp(sx$value))
+    n_const(exp(sx$value))
   }
   else {
     # cannot simplify further
-    n.exp(sx)
+    n_exp(sx)
   }
   #!hwend
 }
 
-simplify.log = function(node) {
+simplify_log = function(node) {
   #!hwbegin TODO simplify log(x)
   sx = simplify(node$x)
   if(sx$op == "const" && sx$value <= 0) {
@@ -656,11 +625,11 @@ simplify.log = function(node) {
   }
   else if(sx$op == "const") {
     # perform the operation if possible
-    n.const(log(sx$value))
+    n_const(log(sx$value))
   }
   else {
     # cannot simplify further
-    n.log(sx)
+    n_log(sx)
   }
   #!hwend
 }
@@ -682,48 +651,26 @@ simplify(differentiate(differentiate(z, "x"), "y"))
 
 Let us now define a computational graph that performs the forward pass of a simple network, and use the functions above to compute the gradients of the parameters. We will use the same network we used in the third lab, reproduced below, and, as usual, we will test the code on the five points dataset. Since the functions we have written so far only work with scalar values, we will perform stochastic gradient descent using one sample at a time.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\node[draw,circle] (b1) at (1, 4) {$1$ };
-\node[draw,circle] (x1) at (0, 2) {$x_1$ };
-\node[draw,circle] (x2) at (0, 0) { $x_2$ };
-\node[draw,circle] (b2) at (3, 4) { $1$ };
-\node[draw,circle] (z1) at (2, 2) { $z_1$ };
-\node[draw,circle] (z2) at (2, 0) { $z_2$ };
-\node[draw,circle] (y) at (4, 1) { $f$ };
-\draw[->] (b1) -- (z1) node [near start,above,sloped] { $b_1$ };
-\draw[->] (b1) -- (z2) node [near start,below,sloped] { $b_2$ };
-\draw[->] (x1) -- (z1) node [near start,above,sloped] { $w_{11}$ };
-\draw[->] (x1) -- (z2) node [near start,above,sloped] { $w_{12}$ };
-\draw[->] (x2) -- (z1) node [near start,above,sloped] { $w_{21}$ };
-\draw[->] (x2) -- (z2) node [near start,above,sloped] { $w_{22}$ };
-\draw[->] (b2) -- (y) node [midway,above,sloped] { $c$ };
-\draw[->] (z1) -- (y) node [midway,above,sloped] { $u_1$ };
-\draw[->] (z2) -- (y) node [midway,above,sloped] { $u_2$ };
-\end{tikzpicture}
-\caption{Structure of the neural network.}
-\label{fig:ex1net}
-\end{figure}
+![](../lab3f1.png)
 
 ```{r}
 # the two input nodes
-x1 = n.var("x1")
-x2 = n.var("x2")
+x1 = n_var("x1")
+x2 = n_var("x2")
 
 # parameters for the first hidden neuron
-b1 = n.var("b1")
-w11 = n.var("w11")
-w21 = n.var("w21")
+b1 = n_var("b1")
+w11 = n_var("w11")
+w21 = n_var("w21")
 
 # compute the output of the first hidden neuron
-z1in = n.sum(
+z1in = n_sum(
     b1,
-    n.sum(
-       n.mul(x1, w11),
-       n.mul(x2, w21)))
+    n_sum(
+       n_mul(x1, w11),
+       n_mul(x2, w21)))
 
-z1out = n.tanh(z1in)
+z1out = n_tanh(z1in)
 
 print.node(z1out)
 ```
@@ -732,47 +679,47 @@ Now, complete the remaining part of the network:
 
 ```{r}
 #!hwbegin TODO define the parameters of the second hidden neuron
-b2 = n.var("b2")
-w12 = n.var("w12")
-w22 = n.var("w22")
+b2 = n_var("b2")
+w12 = n_var("w12")
+w22 = n_var("w22")
 #!hwend
 
 z2out = (
   #!hwbegin TODO compute the output of the second hidden neuron
-  n.tanh(
-    n.sum(
+  n_tanh(
+    n_sum(
       b2,
-      n.sum(
-         n.mul(x1, w12),
-         n.mul(x2, w22))))
+      n_sum(
+         n_mul(x1, w12),
+         n_mul(x2, w22))))
   #!hwend
 )
 
 #!hwbegin TODO define the parameters of the output neuron
-c = n.var("c")
-u1 = n.var("u1")
-u2 = n.var("u2")
+c = n_var("c")
+u1 = n_var("u1")
+u2 = n_var("u2")
 #!hwend
 
 fin = (
   #!hwbegin TODO compute the input to the sigmoid (called logits)
-  n.sum(
+  n_sum(
     c,
-    n.sum(
-      n.mul(z1out, u1),
-      n.mul(z2out, u2)))
+    n_sum(
+      n_mul(z1out, u1),
+      n_mul(z2out, u2)))
   #!hwend
 )
 
 fout = (
   #!hwbegin TODO compute the output of the network: sigmoid(fin)
-  n.div(
-     n.const(1),
-     n.sum(
-        n.const(1),
-        n.exp(
-           n.mul(
-              n.const(-1),
+  n_div(
+     n_const(1),
+     n_sum(
+        n_const(1),
+        n_exp(
+           n_mul(
+              n_const(-1),
               fin))))
   #!hwend
 )
@@ -823,22 +770,22 @@ y\cdot\log\left(1+e^{-f_{in}}\right)
 
 ```{r}
 # this variable contains the label for the sample the network is predicting
-y = n.var("y")
+y = n_var("y")
 
 loss = (
   #!hwbegin TODO compute the binary cross entropy loss with the logits (Eq. 3, right)
-  n.sum(
-     n.sub(
+  n_sum(
+     n_sub(
         fin,
-        n.mul(
+        n_mul(
            fin,
            y)),
-     n.log(
-        n.sum(
-           n.const(1),
-           n.exp(
-              n.mul(
-                 n.const(-1),
+     n_log(
+        n_sum(
+           n_const(1),
+           n_exp(
+              n_mul(
+                 n_const(-1),
                  fin)))))
   #!hwend
 )
@@ -915,7 +862,11 @@ for(e in 0:250) {
 }
 
 stopifnot(mean(unlist(tail(losses))) < 0.05) # convergence check (sometimes fails)
-plot(1:length(losses), losses)
+library(ggplot2)
+ggplot(data.frame(loss = unlist(losses), datapoint = as.factor(rep(1:5, 251))), aes(x = 1:length(losses), y = loss, color = datapoint)) +
+  geom_line() +
+  labs(x = "Iteration", y = "Loss", color = "Datapoint") +
+  theme_minimal()
 ```
 
 You can clearly see how the loss of each individual training sample evolves over time. This also explains the "saddle" you might have noticed in the loss curve from the previous lab.
