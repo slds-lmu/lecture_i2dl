@@ -362,7 +362,7 @@ computations in the lecture and in the next lab. Luckily, modern deep learning s
 
 \begin{align*}
 \frac{\partial z_{2,out}}{\partial z_{2,in}}
-&=\frac{\partial}{\partial z_{2,in}}\sigma(z_{2,in})\\
+&=\frac{\partial}{\partial z_{2,in}}tanh(z_{2,in})\\
 &=1-\tanh(z_{2,in})^2
 \end{align*}
 
