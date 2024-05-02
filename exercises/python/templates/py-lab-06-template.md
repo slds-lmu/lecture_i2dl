@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,12 +15,12 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 6
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the sixth lab.
 
 In this lab, we will finally use PyTorch as a deep learning framework.
-We will see what are the signs of overfitting, and how to avoid it using regularization.
+We will see what are the signs of overfitting, and how to avoid them using regularization.
 Then, we will analyze convergence of gradient descent on quadratic
 surfaces, and apply the intuition we gain on a practical example,
 comparing gradient descent with and without momentum.
@@ -29,19 +29,18 @@ comparing gradient descent with and without momentum.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-from collections import Counter
 from operator import itemgetter
 import random
 import string
-from typing import Union, List, Tuple, Dict
+from typing import Union, Tuple
 
 import torch
 from torch import nn, Tensor
 from torch.optim import RMSprop, Adam
 from torch.utils.data import DataLoader, Dataset
-from torchtext.datasets import IMDB
 import matplotlib.pyplot as plt
 from matplotlib_inline.backend_inline import set_matplotlib_formats
+from keras.datasets import imdb
 
 set_matplotlib_formats('png', 'pdf')
 ```
@@ -63,36 +62,27 @@ then choose "GPU" as hardware accelerator.
 ### Loading and preparing the dataset
 
 The dataset that we will be working with is the IMDB dataset,
-which is included in PyTorch (or more precisely in `torchtext`).
+which is included in Keras.
 It contains 50,000 reviews that are highly polarized,
 that is, they are unambiguously either 'positive' or 'negative'.
 When the data is loaded, the training and test sets will contain 25,000 reviews each.
 In both sets, half of the reviews are positive and half are negative.
 <!-- #endregion -->
 
-```python pycharm={"name": "#%%\n"}
-train_iterator, test_iterator = IMDB();
-```
-
 <!-- #region pycharm={"name": "#%% md\n"} -->
-The `IMDB` object returns two iterators, which allows to iterate over the data.
-However, for us it is more convenient to just have everything directly, so we load
-the whole dataset into a list.
+The `imdb` object returns two tuples with the train and test inputs and targets. For convenience we convert the arrays into lists. The `num_words` argument leads to only the 10k most frequently used words are used. This restricts our vocabulary, the restriction is however sensible as we will see further down below.
+Also we use the dictionary to map from the BOW (Link BOW here TBD) that is accessible through the method `.get_word_index()`. Also we reverse it as python has no built in functionality for bidirectional dictionaries.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-train_x: List = []
-train_y: List = []
-test_x: List = []
-test_y: List = []
+(train_x, train_y), (test_x, test_y) = imdb.load_data(num_words=10000)
+train_x = [train_x[i] for i in range(len(train_x))]
+train_y = [train_y[i] for i in range(len(train_y))]
+test_x = [test_x[i] for i in range(len(test_x))]
+test_y = [test_y[i] for i in range(len(test_y))]
 
-for label, line in train_iterator:
-    train_x.append(line)
-    train_y.append(label)
-
-for label, line in test_iterator:
-    test_x.append(line)
-    test_y.append(label)
+word2enc = imdb.get_word_index()
+enc2word = {v: k for k, v in word2enc.items()}
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -104,96 +94,11 @@ print(train_x[random.randint(0, len(train_x) - 1)])
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-This looks nice but this is not a good representation for neural network training.
-Thus, we apply some preprocessing in the next steps:
-
-1. Tokenization.
-2. Count-vectorization.
-3. Convert to "bag of words" vectors.
-4. Convert string labels to binary.
-5. Create a PyTorch dataset.
-
-We start with removing punctuation and isolating single words. This is a very basic
-approach for tokenization.
+This is obviously just the numeric encoding of the sentences. To get something that is in fact readable we need to use the `enc2word` mapping.
 <!-- #endregion -->
 
-```python pycharm={"name": "#%%\n"}
-def tokenize(data_list: List[str]) -> List[List[str]]:
-    """
-    Tokenize a list of strings.
-
-    :param data_list: A list of strings.
-    :return: A list where each entry is a list including the tokenized elements.
-    """
-    token_list: List[List[str]] = []
-    for data_string in data_list:
-        # Remove punctuation.
-        data_string = data_string.translate(str.maketrans('', '', string.punctuation))
-        # Split by space.
-        token_list.append(data_string.split())
-    return token_list
-
-train_x = tokenize(train_x)
-test_x = tokenize(test_x)
-
-print(train_x[0])
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-Next, we will count all the words and rank them based on their occurrence.
-For example, if "film" is the second most word, it will be encoded as `2`.
-This process is also called count-vectorization. We also need to save mappings, so that
-we can translate between this and the text representation.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-class CountVectorizer:
-    def __init__(self):
-        self.vec_to_str_map: Dict[int, str] = {}
-        self.str_to_vec_map: Dict[str, int] = {}
-
-    def fit(self, token_list: List[str]) -> None:
-        # The `Counter` object from the `collections` library gives us efficient counting
-        # in large lists out of box.
-        cnt = Counter(token_list)
-        sorted_cnt = sorted(cnt.items(), key=lambda item: item[1], reverse=True)
-        sorted_words = [key for key, val in sorted_cnt]
-
-        # Python does not know a bidirectional mapping by default.
-        # We trick a bit by simply creating two dicts, but note that this is inefficient.
-        self.str_to_vec_map = {sorted_words[i]: i + 1 for i in range(len(sorted_words))}
-        self.vec_to_str_map = {i + 1: sorted_words[i] for i in range(len(sorted_words))}
-
-    def transform_to_vec(self, token_list: List[str]) -> List[int]:
-        return [self.str_to_vec_map.get(word) for word in token_list]
-
-    def transform_to_str(self, token_list: List[int]) -> List[str]:
-        return [self.vec_to_str_map.get(rank) for rank in token_list]
-
-train_words = [word for word_list in train_x for word in word_list]
-test_words = [word for word_list in test_x for word in word_list]
-
-count_vectorizer = CountVectorizer()
-counter = count_vectorizer.fit(train_words)
-
-train_x = [count_vectorizer.transform_to_vec(word_list) for word_list in train_x]
-test_x = [count_vectorizer.transform_to_vec(word_list) for word_list in test_x]
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-A sentence is now a list of integers:
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-print(train_x[0])
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-We can convert it back using the fitted `CountVectorizer`:
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-print(count_vectorizer.transform_to_str(train_x[0]))
+```python
+print(" ".join([enc2word[enc] for enc in train_x[random.randint(0, len(train_x) - 1)]]))
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -208,7 +113,7 @@ We only keep the 10,000 most common words, which will be the size of the input v
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 
-def get_index_vector(sequence: List[int], size: int = 10000) -> List[int]:
+def get_index_vector(sequence: list[int], size: int = 10000) -> list[int]:
     #!TAG HWBEGIN
     #!MSG TODO: Encode each sequence to a binary vector as described above.
     #!MSG For now we rely on plain python, thus a "binary vector" is only a list of ints.
@@ -228,17 +133,6 @@ test_x = [get_index_vector(count_vector) for count_vector in test_x]
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-Lastly we need to convert the labels to a fitting format as well.
-As we only have a binary outcome, our label will be 1 for positive and
-0 for negative reviews.
-<!-- #endregion -->
-
-```python pycharm={"name": "#%%\n"}
-train_y = [1 if label == 'pos' else 0 for label in train_y]
-test_y = [1 if label == 'pos' else 0 for label in test_y]
-```
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
 We now have everything ready to built a Pytorch `Dataset` object,
 which is recommended for the training process.
 
@@ -251,7 +145,7 @@ In this setting device is set to `cuda` if a GPU is
 available, otherwise we'll just use the cpu.
 
 Pushing the whole dataset to GPU is often not a possibility due to memory constraints,
-but in this exercise the samll vectorized IMDB data will only consume around 3GB VRAM.
+but in this exercise the small vectorized IMDB data will only consume around 3GB VRAM.
 We could also save memory by reducing the size of the input vector or using sparse tensors.
 <!-- #endregion -->
 
@@ -260,7 +154,7 @@ We could also save memory by reducing the size of the input vector or using spar
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class IMDBDataset(Dataset):
-    def __init__(self, data: Union[List, Tuple], labels: List, device: torch.device):
+    def __init__(self, data: Union[list, Tuple], labels: list, device: torch.device):
         self.data = torch.tensor(data, dtype=torch.float, device=device)
         self.labels = torch.tensor(labels, dtype=torch.float, device=device)
 
@@ -295,6 +189,7 @@ The new training set should contain only the remaining 15,000 samples.
 #!TAG SKIPQUESTEXEC
 # Get random indices for training and validation split
 shuffled_indices = list(range(len(train_x)))
+random.seed(42)
 random.shuffle(shuffled_indices)
 
 train_idxs = shuffled_indices[:15000]
@@ -455,10 +350,10 @@ def train(
     val_dataset: Dataset,
     batch_size: int,
     epochs: int
-) -> Dict:
+) -> dict:
 
     # Define a dict with room for metrics that will be populated during training.
-    metrics: Dict = {
+    metrics: dict = {
         'train_loss': [],
         'train_acc': [],
         'val_loss': [],
@@ -494,6 +389,7 @@ def train(
             optimizer.zero_grad()
             # Backpropagate the error
             batch_loss.backward()
+        
             # Apply gradients
             optimizer.step()
             #!TAG HWEND
@@ -569,10 +465,10 @@ We can utilize the `metrics` that are returned from our `train` method.
 #!TAG SKIPQUESTEXEC
 
 def get_training_progress_plot(
-        train_losses: List[float],
-        train_accs: List[float],
-        val_losses: List[float],
-        val_accs: List[float],
+        train_losses: list[float],
+        train_accs: list[float],
+        val_losses: list[float],
+        val_accs: list[float],
 ) -> None:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 2))
 
@@ -580,6 +476,7 @@ def get_training_progress_plot(
     ax1.plot(train_losses, label='Train Loss')
     ax1.plot(val_losses, label='Val Loss')
     ax1.legend()
+    #ax1.set_yscale('log')
 
     ax2.set_title('Accuracy')
     ax2.plot(train_accs, label='Train Accuracy')
@@ -606,10 +503,10 @@ Let's evaluate the performance of the model on the test set:
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 
-def evaluate(model: nn.Module, test_dataset: Dataset, batch_size: int = 512) -> Dict:
-    batch_losses: List = []
-    predictions: List = []
-    targets: List = []
+def evaluate(model: nn.Module, test_dataset: Dataset, batch_size: int = 512) -> dict:
+    batch_losses: list = []
+    predictions: list = []
+    targets: list = []
 
     for x, y in DataLoader(test_dataset, batch_size):
         #!TAG HWBEGIN
@@ -660,7 +557,8 @@ Now play around with the code by adding and deleting layers, changing the hidden
 Here's what you should take away from this example:
 
  - You usually need to do quite a bit of preprocessing on your raw data in order to be
-able to feed it -- as tensors -- into a neural network.
+able to feed it -- as tensors -- into a neural network. Encoding the words as BOW vectors
+is only the tip of the iceberg.
  - Stacks of dense layers with `ReLU` activations can solve a wide range of problems
 (including sentiment classification), and you'll likely use them frequently.
  - As they get better on their training data, neural networks eventually start
@@ -777,8 +675,8 @@ Let's compare the losses over the course of training.
 #!TAG SKIPQUESTEXEC
 
 def compare_losses_plot(
-        first_losses: List[float],
-        second_losses: List[float],
+        first_losses: list[float],
+        second_losses: list[float],
         first_loss_label: str,
         second_loss_label: str
 ) -> None:
@@ -861,7 +759,7 @@ compare_losses_plot(
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 The bigger network starts overfitting almost right away, after just one epoch
-and overfits much more severely. Its validation loss is also more noisy.
+and overfits severely. Its validation loss is also very noisy.
 
 Let's plot the training losses:
 <!-- #endregion -->
@@ -937,7 +835,7 @@ At test time, all units are used with their activations scaled down by the dropo
 to account for the fact that all neurons were used for the prediction.
 Normally, dropout is not applied to the inputs.
 
-In Keras, dropout is implemented as its own separate layer (`Dropout`) that takes as
+In torch, dropout is implemented as its own separate layer (`Dropout`) that takes as
 input the probability to _drop_ units. To apply dropout to a layer, place a `Dropout` after
 it while stacking layers. The dropout will be ignored if the model is in `eval` mode.
 Luckily, we already set the correct modes for training and evaluation in our `train`
@@ -1014,10 +912,10 @@ def train(
     epochs: int,
     early_stopping: bool = False,
     patience: int = 2,
-) -> Dict:
+) -> dict:
 
     # Define a dict with room for metrics that will be populated during training.
-    metrics: Dict = {
+    metrics: dict = {
         'train_loss': [],
         'train_acc': [],
         'val_loss': [],
@@ -1193,7 +1091,7 @@ Then, use this gradient to perform one step of gradient descent, i.e. compute
 \textbf{x}^\prime=\textbf{x}-\eta\nabla_{\textbf{x}}E
 \end{equation}
 
-And show that
+And show that it can be reexpressed using 
 
 \begin{equation}
 \alpha^\prime_i=(1-\eta\lambda_i)\alpha_i
@@ -1236,10 +1134,10 @@ squares of the coordinates, $E$ is positive everywhere but at $x_1=x_2=0$, where
 The matrix $\textbf{H}$ is
 
 \begin{equation}
-\textbf{H}=\begin{vmatrix}
+\textbf{H}=\begin{pmatrix}
 \lambda_1 & 0 \\
 0 & \lambda_2
-\end{vmatrix}
+\end{pmatrix}
 \end{equation}
 So that
 
@@ -1257,13 +1155,13 @@ are $\lambda_1$ and $\lambda_2$. To find the corresponding eigenvectors,
 solve $\textbf{Hx}=\lambda_1\textbf{x}$, which gives:
 
 \begin{equation}
-\begin{vmatrix}
+\begin{pmatrix}
 \lambda_1x_1 \\
 \lambda_2x_2
-\end{vmatrix}=\begin{vmatrix}
+\end{pmatrix}=\begin{pmatrix}
 \lambda_1x_1 \\
 \lambda_1x_2
-\end{vmatrix}
+\end{pmatrix}
 \end{equation}
 Note that $\lambda_2x_2=\lambda_1x_2$ is satisfied for $x_2=0$, while 
 $\lambda_1x_1=\lambda_1x_1$ is true for every $x_1$. We can choose $x_1=1$ and 
@@ -1273,10 +1171,10 @@ $x_2=1$ for $\textbf{u}_2$.
 The gradient of $E$ is
 
 \begin{equation}
-\nabla_{\textbf{x}} E=\begin{vmatrix} \
+\nabla_{\textbf{x}} E=\begin{pmatrix} \
 \lambda_1x_1 \\
 \lambda_2x_2
-\end{vmatrix}=\sum_i\lambda_i\alpha_i\textbf{u}_i
+\end{pmatrix}=\sum_i\lambda_i\alpha_i\textbf{u}_i
 \end{equation}
 
 Performing one step of gradient descent gives
@@ -1376,7 +1274,7 @@ visited during the process:
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 def do_gradient_descent(x: Tensor, func_obj: Function, max_steps: int, lr: float) -> Tensor:
-    path: List = [x.clone()]
+    path: list = [x.clone()]
     for _ in range(max_steps):
         #!TAG HWBEGIN
         #!MSG TODO: Modify `x` performing one step of gradient descent
@@ -1395,7 +1293,7 @@ And a function that plots several traces together, so that we can compare them:
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-def plot_histories(histories: List[Tensor], labels: List[str]) -> None:
+def plot_histories(histories: list[Tensor], labels: list[str]) -> None:
     for history, label in zip(histories, labels):
         plt.plot(history[:, 0], history[:, 1], label=label)
     plt.legend()
@@ -1456,7 +1354,7 @@ Finally, modify the optimizer to use momentum, and verify that convergence becom
 #!TAG SKIPQUESTEXEC
 def do_momentum_gd(
         x: Tensor, func_obj: Function, max_steps: int, lr: float, momentum: float) -> Tensor:
-    path: List = [x.clone()]
+    path: list = [x.clone()]
     velocity = torch.zeros(x.shape)
     for _ in range(max_steps):
         #!TAG HWBEGIN
