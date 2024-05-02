@@ -1,26 +1,25 @@
 ---
 title: "Lab 6"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2020-11-23
-papersize: a4
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+
 Welcome to the sixth lab.
 
-In this lab, we will learn how to use Keras, a very popular and easy-to-use framework for deep learning. We will see what are the signs of overfitting, and how to avoid it using regularization. Then, we will analyze convergence of gradient descent on quadratic surfaces, and apply the intuition we gain on a practical example, comparing gradient descent with and without momentum.
+In this lab, we will learn how to use `Keras`, a very popular and easy-to-use framework for deep learning. We will see what are the signs of overfitting, and how to avoid it using regularization. Then, we will analyze convergence of gradient descent on quadratic surfaces, and apply the intuition we gain on a practical example, comparing gradient descent with and without momentum.
 
 ## Exercise 1
 
 In this exercise, we will learn the basic usage of Keras, a popular deep learning library.
 
-You can find help on the "R interface to Keras" webpage: https://keras.rstudio.com/, and through the integrated help system of RStudio. Use it to learn about the Keras functions we will be using!
+You can find help on the "R interface to Keras" webpage: https://keras.posit.co/, and through the integrated help system of RStudio. Use it to learn about the Keras functions we will be using!
 
-The networks that we will use are small enough that they can run on your personal computer, but, if you need a GPU, you can try the R Kernel for Jupyter on Google Colab (click [here](https://colab.research.google.com/github/IRkernel/IRkernel/blob/master/example-notebooks/Demo.ipynb)). At the beginning of your session, get a GPU by clicking on "Runtime", then "Change runtime type", then choose "GPU" as hardware accelerator. Then, install Keras for R using `install.packages` before loading it with `library(keras)`.
+The networks that we will use are small enough that they can run on your personal computer, but, if you need a GPU, you can try the R Kernel for Jupyter on Google Colab (click [here](https://colab.research.google.com/github/IRkernel/IRkernel/blob/master/example-notebooks/Demo.ipynb)). At the beginning of your session, get a GPU by clicking on "Runtime", then "Change runtime type", then choose "GPU" as hardware accelerator. Then, install Keras for R using `install.packages` before loading it with `library(keras3)`. Note that the old `keras` package is deprecated and should not be used.
 
 
 ### Installation
@@ -29,13 +28,15 @@ Since Keras is a Python library, installing Keras in R is not as straightforward
 
 ```{r eval = FALSE}
 if(FALSE) {
-install.packages("keras")
-library(keras)
+install.packages("keras3")
+library(keras3)
 install_keras(
   method = "conda",
   tensorflow = "cpu"  # Change to "gpu" if you have a discrete GPU and want to use it
 )
 }
+# Use a conda environment called if you have one or do above
+reticulate::use_condaenv("retic")
 # If prompted to install conda, say yes.
 ```
 
@@ -50,16 +51,16 @@ Each review is represented as a sequence of integers, where each integer corresp
 First, load the Keras package:
 
 ```{r}
-library(keras)
+library(keras3)
 ```
 
 Then, load the dataset:
 
-```{r}
+```{r, message=FALSE}
 # The argument num_words = 10000 specifies that we only keep the top
 # 10,000 most frequently occuring words in the (training) data (just
 # for convenience)
-imdb <- dataset_imdb(num_words = 10000)
+imdb <- keras3::dataset_imdb(num_words = 10000)
 c(c(train_data, train_labels), c(test_data, test_labels)) %<-% imdb
 ```
 
@@ -125,17 +126,17 @@ Keras has two main APIs for building neural nets: Sequential and Functional, and
 Models are created with [`keras_model_sequential`](https://keras.rstudio.com/reference/keras_model_sequential.html), and dense layers with [`layer_dense`](https://keras.rstudio.com/reference/layer_dense.html). Please read the documentation to know what parameters are accepted by these functions.
 
 ```{r}
-model <- keras_model_sequential() %>%
+model <- keras_model_sequential(input_shape = 10000) |>
   layer_dense(
     #!hwbegin TODO parameters for the first layer: 16 units and relu activation.\n# Mind the `input_shape` parameter!
-    units = 16, activation = "relu", input_shape = c(10000)
+    units = 16, activation = "relu"
     #!hwend
-  ) %>%
+  ) |>
   layer_dense(
     #!hwbegin TODO parameters for the second layer: again, 16 units and relu activation.
     units = 16, activation = "relu"
     #!hwend
-  ) %>%
+  ) |>
   layer_dense(
     #!hwbegin TODO parameters for the output layer: a single unit with simoid activation
     units = 1, activation = "sigmoid"
@@ -153,7 +154,7 @@ So, we've built our model. Before we can train the network, however, we must spe
 To do this, we call the [`compile`](https://keras.rstudio.com/reference/compile.keras.engine.training.Model.html) function. The arguments passed to compile can be string, such as `"rmsprop"`, or the corresponding function instance, e.g. `optimizer_rmsprop`, which is included in the Keras package. The same works for [losses](https://keras.rstudio.com/reference/loss_mean_squared_error.html) and [metrics](https://keras.rstudio.com/reference/metric_binary_accuracy.html).
 
 ```{r}
-model %>% compile(
+model |> compile(
   #!hwbegin TODO use the 'rmsprop' optimizer, the appropriate loss for binary classification,\n# and the monitor the accuracy via the 'metrics' parameter
   optimizer = "rmsprop",
   loss = "binary_crossentropy",
@@ -181,7 +182,7 @@ partial_y_train <- train_labels[-val_indices]
 We wish to train the network for 20 epochs with batches of size 512. Do not forget to specify a separate validation set to evaluate the network at the end of every epoch. Check the parameters on the documentation for [`fit`](https://keras.rstudio.com/reference/fit.keras.engine.training.Model.html).
 
 ```{r}
-history <- model %>% fit(
+history <- model |> fit(
   #!hwbegin TODO add the parameters
   partial_x_train,
   partial_y_train,
@@ -214,7 +215,7 @@ As expected, the training loss decreases with each epoch (and training accuracy 
 Let's evaluate the performance of the model on the test set by calling the [`evaluate`](https://keras.rstudio.com/reference/evaluate.keras.engine.training.Model.html) function:
 
 ```{r}
-results = model %>% evaluate(
+results = model |> evaluate(
   #!hwbegin TODO pass the test data to `evaluate`
   x_test, test_labels, verbose=0
   #!hwend
@@ -232,8 +233,8 @@ Our simple model does reasonably well. It achieves an accuracy of approximately 
 ### Predict
 Finally, to generate the likelihood of the reviews being positive, we call the [`predict`](https://keras.rstudio.com/reference/predict.keras.engine.training.Model.html) function:
 
-```{r}
-model %>% predict(
+```{r pred}
+model |> predict(
   #!hwbegin TODO pass the first ten test reviews
   x_test[1:10,]
   #!hwend
@@ -270,12 +271,12 @@ In order to get a feel for the overfitting behaviour of neural networks, we will
 
 Create the first model with two hidden layers, each with 16 units and relu activation.
 
-```{r}
+```{r orig}
 original_model = (
   #!hwbegin TODO create the network according to the specifications above
-  keras_model_sequential() %>%
-    layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>%
-    layer_dense(units = 16, activation = "relu") %>%
+  keras_model_sequential(input_shape = 10000) |>
+    layer_dense(units = 16, activation = "relu") |>
+    layer_dense(units = 16, activation = "relu") |>
     layer_dense(units = 1, activation = "sigmoid")
   #!hwend
 )
@@ -292,12 +293,12 @@ compile(
 
 Our second model will be similar to the first but it will be much smaller; reduce the number of neurons in the hidden layers from 16 to 4, and keep everything else unchanged.
 
-```{r}
+```{r smaller}
 smaller_model = (
   #!hwbegin TODO create a smaller model according to the specifications above
-  keras_model_sequential() %>%
-    layer_dense(units = 4, activation = "relu", input_shape = c(10000)) %>%
-    layer_dense(units = 4, activation = "relu") %>%
+  keras_model_sequential(input_shape = 10000) |>
+    layer_dense(units = 4, activation = "relu") |>
+    layer_dense(units = 4, activation = "relu") |>
     layer_dense(units = 1, activation = "sigmoid")
   #!hwend
 )
@@ -353,10 +354,12 @@ plot_training_losses = function(losses) {
   loss_names = names(losses)
   losses = as.data.frame(losses)
   losses$epoch = seq_len(nrow(losses))
-  losses %>%
-    gather(model, loss, loss_names[[1]], loss_names[[2]]) %>%
+  losses |>
+    gather(model, loss, loss_names[[1]], loss_names[[2]]) |>
     ggplot(aes(x = epoch, y = loss, colour = model)) +
-    geom_point()
+    geom_point() +
+    geom_line() +
+    theme_minimal()
 }
 
 plot_training_losses(list(
@@ -373,9 +376,9 @@ Now we build a third neural network that is even bigger than the original networ
 ```{r}
 bigger_model = (
   #!hwbegin TODO build a network with 512 units in the two hidden layers
-  keras_model_sequential() %>%
-    layer_dense(512, activation = "relu", input_shape = c(10000)) %>%
-    layer_dense(512, activation = "relu") %>%
+  keras_model_sequential(input_shape = 10000) |>
+    layer_dense(512, activation = "relu") |>
+    layer_dense(512, activation = "relu") |>
     layer_dense(1, activation = "sigmoid")
   #!hwend
 )
@@ -438,11 +441,11 @@ Modify the original model and add weight decay with coefficient 0.001 to both hi
 ```{r}
 l2_model = (
   #!hwbegin TODO modify the original model to have L2 regularization with coefficient 0.001
-  keras_model_sequential() %>%
-    layer_dense(units = 16, activation = "relu", input_shape = c(10000),
-                kernel_regularizer = regularizer_l2(0.001)) %>%
+  keras_model_sequential(input_shape = 10000) |>
     layer_dense(units = 16, activation = "relu",
-                kernel_regularizer = regularizer_l2(0.001)) %>%
+                kernel_regularizer = regularizer_l2(0.001)) |>
+    layer_dense(units = 16, activation = "relu",
+                kernel_regularizer = regularizer_l2(0.001)) |>
     layer_dense(units = 1, activation = "sigmoid")
   #!hwend
 )
@@ -492,11 +495,11 @@ In Keras, dropout is implemented as its own separate layer: [`layer_dropout`](ht
 ```{r}
 dpt_model = (
   #!hwbegin TODO create a copy of the original model using dropout with probability 0.5
-  keras_model_sequential() %>%
-    layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>%
-    layer_dropout(0.5) %>%
-    layer_dense(units = 16, activation = "relu") %>%
-    layer_dropout(0.5) %>%
+  keras_model_sequential(input_shape = 10000) |>
+    layer_dense(units = 16, activation = "relu") |>
+    layer_dropout(0.5) |>
+    layer_dense(units = 16, activation = "relu") |>
+    layer_dropout(0.5) |>
     layer_dense(units = 1, activation = "sigmoid")
   #!hwend
 )
@@ -550,11 +553,11 @@ We will now re-train the dropout-regularized model, and make use of [`callback_e
 
 ```{r}
 dpt_model_early = (
-  keras_model_sequential() %>%
-    layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>%
-    layer_dropout(0.5) %>%
-    layer_dense(units = 16, activation = "relu") %>%
-    layer_dropout(0.5) %>%
+  keras_model_sequential(input_shape = 10000) |>
+    layer_dense(units = 16, activation = "relu") |>
+    layer_dropout(0.5) |>
+    layer_dense(units = 16, activation = "relu") |>
+    layer_dropout(0.5) |>
     layer_dense(units = 1, activation = "sigmoid")
 )
 
@@ -582,7 +585,7 @@ dpt_model_early_hist = fit(
 
 And the comparison:
 
-```{r}
+```{r, warning=FALSE}
 # pad to the same length with NA's
 pad = length(dpt_model_hist$metrics$val_loss)-length(dpt_model_early_hist$metrics$val_loss)
 plot_training_losses(list(
@@ -595,7 +598,7 @@ As you can see, the early stopping callback worked, and the model was trained fo
 
 ```{r}
 #!hwbegin TODO compute and print the loss on the test samples
-dpt_model_early %>% evaluate(x_test, test_labels, verbose = 0)
+dpt_model_early |> evaluate(x_test, test_labels, verbose = 0)
 #!hwend
 ```
 
@@ -660,10 +663,10 @@ Since both $\lambda_1$ and $\lambda_2$ are positive, and are multiplied with the
 The matrix $\textbf{H}$ is
 
 $$
-\textbf{H}=\begin{vmatrix}
+\textbf{H}=\begin{pmatrix}
 \lambda_1 & 0 \\
 0 & \lambda_2
-\end{vmatrix}
+\end{pmatrix}
 $$
 So that
 
@@ -678,23 +681,24 @@ E
 To find the eigenvalues, solve $\text{det}(\textbf{H}-\beta_i\textbf{I})=0$, i.e. $(\lambda_1-\beta_1)(\lambda_2-\beta_2)=0$, which shows that the eigenvalues are $\lambda_1$ and $\lambda_2$. To find the corresponding eigenvectors, solve $\textbf{Hx}=\lambda_1\textbf{x}$, which gives:
 
 $$
-\begin{vmatrix}
+\begin{pmatrix}
 \lambda_1x_1 \\
 \lambda_2x_2
-\end{vmatrix}=\begin{vmatrix}
+\end{pmatrix}=\begin{pmatrix}
 \lambda_1x_1 \\
 \lambda_1x_2
-\end{vmatrix}
+\end{pmatrix}
 $$
+
 Note that $\lambda_2x_2=\lambda_1x_2$ is satisfied for $x_2=0$, while $\lambda_1x_1=\lambda_1x_1$ is true for every $x_1$. We can choose $x_1=1$ and $x_2=0$ for the first eigenvector $\textbf{u}_i$. A similar reasoning gives $x_1=0$ and $x_2=1$ for $\textbf{u}_2$.
 
 The gradient of $E$ is
 
 $$
-\nabla_{\textbf{x}} E=\begin{vmatrix} \
+\nabla_{\textbf{x}} E=\begin{pmatrix} \
 \lambda_1x_1 \\
 \lambda_2x_2
-\end{vmatrix}=\sum_i\lambda_i\alpha_i\textbf{u}_i
+\end{pmatrix}=\sum_i\lambda_i\alpha_i\textbf{u}_i
 $$
 
 Performing one step of gradient descent gives
@@ -774,7 +778,9 @@ contours = make_contours(lambda1 = 1, lambda2 = 10)
 
 library(ggplot2)
 ggplot(contours) +
-  geom_contour(aes(x, y, z=z))
+  geom_contour(aes(x, y, z = z, color = after_stat(level))) +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
 We now create a vanilla gradient descent optimizer that returns all points visited during the process:
@@ -805,8 +811,21 @@ plot_histories = function(histories) {
   }))
 
   ggplot() +
-    geom_contour(aes(contours$x, contours$y, z = contours$z)) +
-    geom_line(aes(histories$x, histories$y, colour = histories$name))
+    geom_contour(
+      aes(
+        contours$x, 
+        contours$y,
+        z = contours$z,
+      ),
+      color = "#000000",
+      alpha = 0.5
+    ) +
+    scale_color_brewer(palette = "Set1", direction = -1) +
+    geom_line(aes(histories$x, histories$y, 
+                  color = histories$name, linetype = histories$name)) +
+    labs(x = "", y = "", color = "", linetype = "") +
+    theme_minimal() 
+    
 }
 
 plot_histories(list(
