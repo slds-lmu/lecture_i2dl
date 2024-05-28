@@ -834,7 +834,7 @@ plot_histories(list(
 ))
 ```
 
-Now, recall from the previous exercise that the learning rate cannot be larger than $2\lambda_{\text{min}}/\lambda_{\text{max}}$. Compute this upper bound for the example here, use it to optimize the error starting from $\textbf{x}=|4,4|^T$, and plot the resulting trajectory. What can you notice? Try to slightly reduce it and increase it, and verify that when it is larger than the upper bound, the procedure diverges.
+Now, recall from the previous exercise that the learning rate cannot be larger than $2\lambda_{\text{min}}/\lambda_{\text{max}}$. Compute this upper bound for the example here, use it to optimize the error starting from $\textbf{x}=(4,4)^T$, and plot the resulting trajectory. What can you notice? Try to slightly reduce it and increase it, and verify that when it is larger than the upper bound, the procedure diverges.
 
 ```{r}
 max_learning_rate = (
