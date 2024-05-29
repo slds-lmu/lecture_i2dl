@@ -1,27 +1,24 @@
 ---
 title: "Lab 7"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2020-11-30
-papersize: a4
 header-includes:
-  - \usepackage{bbold}
-  - \usepackage{tikz}
   - \usepackage[utf8]{inputenc}
-  - \usetikzlibrary{snakes,arrows,shapes}
+  - \usepackage{amssymb}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the seventh lab, which is focused on convolutions and convolutional neural networks. The first exercise shows how to train CNNs with Keras, while the second exercise is about implementing convolutions for black-and-white images. The third exercise is about computing the gradients of the convolution operator.
 
 ## Exercise 1
 In this exercise, we will learn how to build CNNs in Keras to classify images.
 
-CNNs are a special type of neural network inspired by the structure of the visual cortex in animals. They can be applied to a wide range of tasks such as image recognition, time-series analysis, sentence classification, etc. Two key features that differentiate CNNs from fully connected nets are:
+CNNs are a special type of neural network inspired by the structure of the visual cortex in animals. They can be applied to a wide 
+range of tasks such as image recognition, time-series analysis, sentence classification, etc. Two key features that differentiate CNNs from fully connected nets are:
 
  1. Local connections: Each neuron in a convolutional layer is only connected to a subset of the neurons in the previous layer.
  2. Shared weights: Each convolutional layer consists of multiple filters and each filter consists of multiple neurons. All the neurons in a given filter share the same weights but each of these neurons is connected to a different subset of the neurons in the previous layer.
@@ -32,7 +29,7 @@ CNNs consistently outperform all other models in machine vision tasks such as im
 We will be working with is the MNIST dataset (included in Keras). It consists of 28x28 pixels, grayscale images of hand-written digits and their associated labels (0 to 9). The training set contains 60,000 images and the test set contains 10,000. Let's load the data:
 
 ```{r}
-library(keras)
+library(keras3)
 
 mnist = dataset_mnist()
 
@@ -51,15 +48,15 @@ The images are encoded as 3D arrays of integers from 0 to 255, and the labels ar
 ### Build the network
 A CNN typically consists of a series of convolutional and pooling layers followed by a few fully-connected layers. The convolutional layers detect important visual patterns in the input, and the fully-connected layers then classify the input based on the activations in the final convolutional/pooling layer. Each convolutional layer consists of multiple filters. When the CNN is trained, each filter in a layer specializes in identifying patterns in the image that downstream layers can use.
 
-To create a convolutional layer in Keras, call the [`layer_conv_2d`](https://keras.rstudio.com/reference/layer_conv_2d.html) function, and specify the the number of filters in the layer (`filters` parameter), the size of the filters (`kernel_size` parameter), and the activation function to use (`activation` parameter).
+To create a convolutional layer in Keras, call the [`layer_conv_2d`](https://keras.posit.co/reference/index.html) function, and specify the the number of filters in the layer (`filters` parameter), the size of the filters (`kernel_size` parameter), and the activation function to use (`activation` parameter).
 
-Pooling layers are used to downsample intermediate feature maps in the CNN. Keras has multiple options for pooling layers, but today we will only use [`layer_max_pooling_2d`](https://keras.rstudio.com/reference/layer_max_pooling_2d.html) which takes a `pool_size` argument for the size of the pooling window.
+Pooling layers are used to downsample intermediate feature maps in the CNN. Keras has multiple options for pooling layers, but today we will only use [`layer_max_pooling_2d`](https://keras.posit.co/reference/index.html) which takes a `pool_size` argument for the size of the pooling window.
 
 ```{r}
-model = keras_model_sequential() %>%
+model = keras_model_sequential(input_shape = c(28, 28, 1)) %>%
   layer_conv_2d(
-    #!hwbegin TODO use 32 filters of size 3x3 and relu activation.\n# Don't forget the `input_shape` parameter
-    32, c(3, 3), activation = "relu", input_shape = c(28, 28, 1)
+    #!hwbegin TODO use 32 filters of size 3x3 and relu activation.
+    32, c(3, 3), activation = "relu"
     #!hwend
   ) %>%
   layer_max_pooling_2d(
@@ -95,11 +92,20 @@ model = keras_model_sequential() %>%
   )
 ```
 
-Let's take a look at what we've built so far:
+Let's take a look at what we've built so far by calling the `summary` function on the model:
 
-```{r}
+```{r, eval=FALSE}
+#!hwbegin TODO call the summary function on the model
 summary(model)
+#!hwend
 ```
+
+<!--#!solutionbegin-->
+The output of the `summary` function looks somewhat like this: (The prints contain non standard Unicode characters, so the output does not render natively to PDF with `tinytex`)
+
+![](../lab7-model_summary.png)
+<!--#!solutionend-->
+
 
 You can see that the output of every `layer_conv_2d` and `layer_max_pooling_2d` is a 3D tensor of shape `(height, width, channels)`. For example, the output of the first layer is a tensor of shape `(26, 26, 32)`. Note that the width and height dimensions shrink as you go deeper in the network. The number of channels is controlled by the `filters` parameter of the convolutional layers. Also, as you can see, the `(3, 3, 64)` outputs are flattened into vectors of shape $576=3\cdot 3\cdot 64$ before going through two dense layers.
 
@@ -158,18 +164,19 @@ The accuracy of our model on MNIST is quite good!
 ## Exercise 2
 In this exercise we are going to implement convolution on images, without worrying about stride and padding, and test it with the Sobel filter. There are two Sobel filters: $G_x$ detects horizontal edges and $G_y$ detects vertical edges.
 
+
 \begin{equation}
-G_x=\begin{vmatrix}
+G_x=\begin{pmatrix}
 -1 & -2 & -1 \\
 0 & 0 & 0 \\
 1 & 2 & 1
-\end{vmatrix}
+\end{pmatrix}
 \qquad
-G_y=\begin{vmatrix}
+G_y=\begin{pmatrix}
 -1 & 0 & 1 \\
 -2 & 0 & 2 \\
 -1 & 0 & 1
-\end{vmatrix}={G_x}^T
+\end{pmatrix}={G_x}^T
 \end{equation}
 
 Can you explain why and how these filters work?
@@ -180,17 +187,26 @@ In order to get the image $E$ with the edges, we convolve $G_x$ and $G_y$ with t
 E=\sqrt{(G_x*I)^2+(G_y*I)^2}
 \end{equation}
 
-As a reference, this is the result we want to obtain:
+First we'll load the example image and display it:
 
 ```{r}
 library(OpenImageR)
 
 # we only keep the first channel, as the image is already black and white
-img = readImage("~/Pictures/einstein.jpg")[,,1]
+download.file(
+  "https://upload.wikimedia.org/wikipedia/en/8/86/Einstein_tongue.jpg",
+  'einstein.jpg', 
+  mode = 'wb'
+)
+img = readImage('einstein.jpg')
+print(range(img))
 
-# NB: you can resize the image to speed up subsequent operations
-# img = resizeImage(img, floor(ncol(img) / 4), floor(nrow(img) / 4))
+plot(as.raster(img))
+```
 
+As a reference, this is the result we want to obtain:
+
+```{r}
 # define the two filters
 sobel_x = matrix(c(-1, 0, 1, -2, 0, 2, -1, 0, 1), nrow = 3)
 sobel_y = matrix(c(-1, -2, -1, 0, 0, 0, 1, 2, 1), nrow = 3)
@@ -209,7 +225,8 @@ apply_sobel <- function(conv_fn) {
 
 
 result = apply_sobel(convolution)
-grid::grid.raster(result)
+# plot the result
+plot(as.raster(result))
 ```
 
 We now implement our version of convolutions. For an input matrix $\textbf{X}$ of size $r(\textbf{X})\times c(\textbf{X})$ and a kernel $\textbf{K}$ of size $r(\textbf{K})\times c(\textbf{K})$, the result of the convolution is $\textbf{Y}=\textbf{K}*\textbf{X}$ with $r(\textbf{Y})=r(\textbf{X})-r(\textbf{K})+1$, $c(\textbf{Y})=c(\textbf{X})-c(\textbf{K})+1$, and elements:
@@ -259,7 +276,7 @@ our_conv <- function(image, kernel) {
 }
 
 our_result = apply_sobel(our_conv)
-grid::grid.raster(our_result)
+plot(as.raster(our_result))
 ```
 
 If you did everything correctly, this image should match the image above.
@@ -322,33 +339,7 @@ The loss is a generic function of every $y_{ij}$, therefore by the chain rule we
 
 The element of the kernel is fixed (because $k$ and $l$ are given), and each $y_{ij}$ is influenced only once by $k_{kl}$. This means that we have to find which element of $\textbf{X}$ is $\partial y_{ij}/\partial k_{kl}$. In the image below, $\textbf{X}$ is a vector of $c(\textbf{X})=6$ elements, and $\textbf{Y}$ was obtained with a kernel of size $c(\textbf{K})=3$, which result in $c(\textbf{Y})=4$. The arrows indicate which elements of $\textbf{X}$ were used to compute which element of $\textbf{Y}$, and the red arrows highlight the third element of the kernel, i.e. $k_3$.
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[>=latex',line join=bevel,]
-\node (x1) at (27.0bp,90.0bp) [draw,ellipse] {$x_1$};
-  \node (y1) at (99.0bp,18.0bp) [draw,ellipse] {$y_1$};
-  \node (x2) at (99.0bp,90.0bp) [draw,ellipse] {$x_2$};
-  \node (y2) at (171.0bp,18.0bp) [draw,ellipse] {$y_2$};
-  \node (x3) at (171.0bp,90.0bp) [draw,ellipse] {$x_3$};
-  \node (y3) at (243.0bp,18.0bp) [draw,ellipse] {$y_3$};
-  \node (x4) at (243.0bp,90.0bp) [draw,ellipse] {$x_4$};
-  \node (y4) at (315.0bp,18.0bp) [draw,ellipse] {$y_4$};
-  \node (x5) at (315.0bp,90.0bp) [draw,ellipse] {$x_5$};
-  \node (x6) at (387.0bp,90.0bp) [draw,ellipse] {$x_6$};
-  \draw [->] (x1) ..controls (51.75bp,64.938bp) and (65.524bp,51.546bp)  .. (y1);
-  \draw [->] (x2) ..controls (99.0bp,63.983bp) and (99.0bp,54.712bp)  .. (y1);
-  \draw [->] (x2) ..controls (123.75bp,64.938bp) and (137.52bp,51.546bp)  .. (y2);
-  \draw [red,->] (x3) ..controls (146.25bp,64.938bp) and (132.48bp,51.546bp)  .. (y1);
-  \draw [->] (x3) ..controls (171.0bp,63.983bp) and (171.0bp,54.712bp)  .. (y2);
-  \draw [->] (x3) ..controls (195.75bp,64.938bp) and (209.52bp,51.546bp)  .. (y3);
-  \draw [red,->] (x4) ..controls (218.25bp,64.938bp) and (204.48bp,51.546bp)  .. (y2);
-  \draw [->] (x4) ..controls (243.0bp,63.983bp) and (243.0bp,54.712bp)  .. (y3);
-  \draw [->] (x4) ..controls (267.75bp,64.938bp) and (281.52bp,51.546bp)  .. (y4);
-  \draw [red,->] (x5) ..controls (290.25bp,64.938bp) and (276.48bp,51.546bp)  .. (y3);
-  \draw [->] (x5) ..controls (315.0bp,63.983bp) and (315.0bp,54.712bp)  .. (y4);
-  \draw [red,->] (x6) ..controls (362.25bp,64.938bp) and (348.48bp,51.546bp)  .. (y4);
-\end{tikzpicture}
-\end{figure}
+![](../07-lab-conv-k1.png)
 
 We can see that $\partial y_i/\partial k_3=x_{i+3-1}$, e.g. $\partial y_2/\partial k_3=x_{4}$, so that:
 
@@ -379,39 +370,7 @@ U_l &= \min(c(\textbf{K}), j)
 Going back to the example in one dimension, we now highlight the influence of a fixed element of the input, such as $x_3$:
 
 
-\begin{figure}
-\centering
-\begin{tikzpicture}[>=latex',line join=bevel,]
-\node (x1) at (27.0bp,90.0bp) [draw,ellipse] {$x_1$};
-  \node (y1) at (99.0bp,18.0bp) [draw,ellipse] {$y_1$};
-  \node (x2) at (99.0bp,90.0bp) [draw,ellipse] {$x_2$};
-  \node (y2) at (171.0bp,18.0bp) [draw,ellipse] {$y_2$};
-  \node (x3) at (171.0bp,90.0bp) [draw,ellipse] {$x_3$};
-  \node (y3) at (243.0bp,18.0bp) [draw,ellipse] {$y_3$};
-  \node (x4) at (243.0bp,90.0bp) [draw,ellipse] {$x_4$};
-  \node (y4) at (315.0bp,18.0bp) [draw,ellipse] {$y_4$};
-  \node (x5) at (315.0bp,90.0bp) [draw,ellipse] {$x_5$};
-  \node (x6) at (387.0bp,90.0bp) [draw,ellipse] {$x_6$};
-  \draw [->] (x1) ..controls (51.75bp,64.938bp) and (65.524bp,51.546bp)  .. (y1);
-  \draw [->] (x2) ..controls (99.0bp,63.983bp) and (99.0bp,54.712bp)  .. (y1);
-  \draw [->] (x2) ..controls (123.75bp,64.938bp) and (137.52bp,51.546bp)  .. (y2);
-  \draw [red,->] (x3) ..controls (146.25bp,64.938bp) and (132.48bp,51.546bp)  .. (y1);
-  \definecolor{strokecol}{rgb}{0.0,0.0,0.0};
-  \pgfsetstrokecolor{strokecol}
-  \draw (147.43bp,67.334bp) node {$k_3$};
-  \draw [red,->] (x3) ..controls (171.0bp,63.983bp) and (171.0bp,54.712bp)  .. (y2);
-  \draw (180.0bp,64.197bp) node {$k_2$};
-  \draw [red,->] (x3) ..controls (195.75bp,64.938bp) and (209.52bp,51.546bp)  .. (y3);
-  \draw (194.57bp,67.334bp) node {$k_1$};
-  \draw [->] (x4) ..controls (218.25bp,64.938bp) and (204.48bp,51.546bp)  .. (y2);
-  \draw [->] (x4) ..controls (243.0bp,63.983bp) and (243.0bp,54.712bp)  .. (y3);
-  \draw [->] (x4) ..controls (267.75bp,64.938bp) and (281.52bp,51.546bp)  .. (y4);
-  \draw [->] (x5) ..controls (290.25bp,64.938bp) and (276.48bp,51.546bp)  .. (y3);
-  \draw [->] (x5) ..controls (315.0bp,63.983bp) and (315.0bp,54.712bp)  .. (y4);
-  \draw [->] (x6) ..controls (362.25bp,64.938bp) and (348.48bp,51.546bp)  .. (y4);
-\end{tikzpicture}
-\end{figure}
-
+![](../07-lab-conv-x3.png)
 
 We also annotated which element of the kernel is used in every edge.
 
@@ -518,7 +477,7 @@ Now, can you guess what image _maximizes_ the loss we just defined? We can find 
 ```{r}
 maxim = matrix(runif(81), nrow = 9)
 
-losses = lapply(1:250, function(i) {
+losses = lapply(1:500, function(i) {
   #!hwbegin TODO convolve `sobel_x` with `maxim` and compute the loss
   conv = our_conv(maxim, sobel_x)
   loss = sum(conv^2)
@@ -532,8 +491,15 @@ losses = lapply(1:250, function(i) {
   loss
 })
 
-plot(1:length(losses), losses)
-grid::grid.raster(
-  (maxim - min(maxim)) / (max(maxim) - min(maxim)),
-  interpolate = FALSE)
+plot(1:length(losses), losses, type = "l")
+```
+
+```{r}
+# empty plot first
+plot(as.raster(matrix(0, nrow = 9, ncol = 9)))
+grid::grid.raster((
+  maxim - min(maxim)
+) / (
+  max(maxim) - min(maxim)
+), interpolate = FALSE)
 ```

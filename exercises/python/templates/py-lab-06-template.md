@@ -42,7 +42,7 @@ import matplotlib.pyplot as plt
 from matplotlib_inline.backend_inline import set_matplotlib_formats
 from keras.datasets import imdb
 
-set_matplotlib_formats('png', 'pdf')
+set_matplotlib_formats('png', 'pdf');
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -98,7 +98,7 @@ This is obviously just the numeric encoding of the sentences. To get something t
 <!-- #endregion -->
 
 ```python
-print(" ".join([enc2word[enc] for enc in train_x[random.randint(0, len(train_x) - 1)]]))
+print(" ".join([enc2word[enc+3] for enc in train_x[random.randint(0, len(train_x) - 1)]]))
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
@@ -1248,7 +1248,7 @@ class Function:
 
     def plot(self, show: bool = False):
         grid_range = torch.linspace(-5, 5, 50)
-        grid_x, grid_y = torch.meshgrid(grid_range, grid_range)
+        grid_x, grid_y = torch.meshgrid(grid_range, grid_range, indexing='ij')
         grid_data = torch.stack([grid_x.flatten(), grid_y.flatten()]).T
         plt.contour(grid_x, grid_y, self(grid_data).view(grid_x.shape))
         if show:
@@ -1299,7 +1299,7 @@ def plot_histories(histories: list[Tensor], labels: list[str]) -> None:
     plt.legend()
 
 quad_function.plot()
-plot_histories([hist_slow, hist_fast], ['fast', 'slow'])
+plot_histories([hist_slow, hist_fast], ['slow', 'fast'])
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->

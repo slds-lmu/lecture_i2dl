@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,11 +15,10 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 7
 
-**Authors**: Emilio Dorigatti, Tobias Weber
-
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 Welcome to the seventh lab, which is focused on convolutions and convolutional neural
-networks. The first exercise shows how to train CNNs with Keras, while the second
+networks. The first exercise shows how to train CNNs with Pytorch, while the second
 exercise is about implementing convolutions for black-and-white images.
 The third exercise is about computing the gradients of the convolution operator.
 
@@ -352,17 +351,17 @@ about stride and padding, and test it with the Sobel filter. There are two Sobel
 $G_x$ detects horizontal edges and $G_y$ detects vertical edges.
 
 \begin{equation}
-G_x=\begin{vmatrix}
+G_x=\begin{pmatrix}
 -1 & 0 & 1 \\
 -2 & 0 & 2 \\
 -1 & 0 & 1
-\end{vmatrix}
+\end{pmatrix}
 \qquad
-G_y=\begin{vmatrix}
+G_y=\begin{pmatrix}
 -1 & -2 & -1 \\
 0 & 0 & 0 \\
 1 & 2 & 1
-\end{vmatrix}={G_x}^T
+\end{pmatrix}={G_x}^T
 \end{equation}
 
 Can you explain why and how these filters work?
@@ -416,7 +415,7 @@ def apply_sobel(img: Tensor) -> Tensor:
         [1, 2, 1]],
         dtype=torch.float)
 
-    # We can use the functional API of torch to perform convolution manually
+    # We can use the functional API of torch to perform the convolution manually
     conv_x = F.conv2d(img.unsqueeze(0).unsqueeze(0), sobel_x.view(1, 1, 3, 3))
     conv_y = F.conv2d(img.unsqueeze(0).unsqueeze(0), sobel_y.view(1, 1, 3, 3))
 
