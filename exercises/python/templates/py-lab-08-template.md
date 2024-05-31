@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -15,7 +15,7 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 8
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Imports
 <!-- #endregion -->
@@ -27,7 +27,7 @@ import urllib.request
 from functools import reduce, partial
 from math import ceil
 from pathlib import Path
-from typing import List, Optional, Callable, Tuple, Dict
+from typing import Optional, Callable
 
 import matplotlib.pyplot as plt
 import torch
@@ -39,6 +39,7 @@ from torch.utils.data import DataLoader, Dataset
 from torchsummary import summary
 from torchvision import transforms
 from torchvision.models import vgg16
+import torchvision as tv
 
 set_matplotlib_formats('png', 'pdf')
 ```
@@ -148,7 +149,7 @@ val_labels = [class_to_num_mapping[label] for label in val_labels]
 
 class DogBreedDataset(Dataset):
     def __init__(self,
-                 keys: List[str],
+                 keys: list[str],
                  labels: [int],
                  img_root: Optional[Path] = None,
                  transform: Optional[Callable] = None
@@ -156,8 +157,8 @@ class DogBreedDataset(Dataset):
         """
         Initialize a dog breed dataset.
 
-        :param keys: List of identifiers for the images.
-        :param labels: List of labels for the identifiers.
+        :param keys: list of identifiers for the images.
+        :param labels: list of labels for the identifiers.
         :param img_root: Path pointing to the image directory.
         :param transform: Transformation to apply on loaded image.
         """
@@ -176,10 +177,10 @@ class DogBreedDataset(Dataset):
         return len(self.keys)
 
     @property
-    def shape(self) -> Tuple:
+    def shape(self) -> tuple:
         return self[0][0].shape
 
-    def __getitem__(self, idx: int) -> Tuple[Tensor, Tensor]:
+    def __getitem__(self, idx: int) -> tuple[Tensor, Tensor]:
         key = self.keys[idx]
         img = (
             #!TAG HWBEGIN
@@ -398,9 +399,9 @@ As usual, let's define an optimizer, loss function, dataloaders and training loo
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 
-epochs = 10
-batch_size = 32
-num_workers = 16
+epochs = 5 # if you use a GPU rather use more epochs (e.g. 25 or more)
+batch_size = 16 # if you use a GPU rather use a batch size of 32
+num_workers = 4 # set a higher number if you have more cores available
 
 loss = (
     #!TAG HWBEGIN
@@ -437,10 +438,10 @@ def train(
         train_loader: DataLoader,
         val_loader: DataLoader,
         epochs: int
-) -> Dict:
+) -> dict:
     # Intermediate results during training will be saved here.
     # This allows plotting the training progress afterwards.
-    metrics: Dict = {
+    metrics: dict = {
         'train_loss': [],
         'train_acc': [],
         'val_loss': [],
@@ -526,10 +527,10 @@ We recycle the plotting function of lab 6 to plot the training progress:
 #!TAG SKIPQUESTEXEC
 
 def get_training_progress_plot(
-        train_losses: List[float],
-        train_accs: List[float],
-        val_losses: List[float],
-        val_accs: List[float],
+        train_losses: list[float],
+        train_accs: list[float],
+        val_losses: list[float],
+        val_accs: list[float],
 ) -> None:
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 2))
 
@@ -550,6 +551,12 @@ get_training_progress_plot(
     metrics['val_acc'],
 )
 ```
+
+#!TAG HWBEGIN
+
+The solution only dislplays very few epochs but the training won't accellerate much after that. As such this model won't be able to learn the data well even with considerably longer training.
+
+#!TAG HWEND
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 ## Using a pretrained network
@@ -577,7 +584,7 @@ After obtaining VGG16, our plan is to:
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
 
-vgg_body = vgg16(pretrained=True, progress=False).features.to(device)
+vgg_body = vgg16(weights=tv.models.VGG16_Weights.DEFAULT, progress=False).features.to(device)
 vgg_head = nn.Sequential(
     #!TAG HWBEGIN
     #!MSG TODO: Add avg. pooling, two linear layers with 512 neurons and ReLU
@@ -619,13 +626,12 @@ val_dataset.transform.transforms.append(normalize_transform)
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 In the next step, we modify our train function to implement the desired behaviour.
-We train only the head for 10 epochs and then allow optimization of everything.
 
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-epochs = 25
+epochs = 10 # if you use a GPU rather use more epochs (e.g. 25 or more)
 
 def train(
         head: nn.Module,
@@ -635,10 +641,10 @@ def train(
         train_loader: DataLoader,
         val_loader: DataLoader,
         epochs: int
-) -> Dict:
+) -> dict:
     # Intermediate results during training will be saved here.
     # This allows plotting the training progress afterwards.
-    metrics: Dict = {
+    metrics: dict = {
         'train_loss': [],
         'train_acc': [],
         'val_loss': [],
@@ -761,7 +767,7 @@ the elements in $\textbf{z}_\ell$ that affect a generic element in $\textbf{z}_L
 Note that this region can contain gaps, i.e. neurons that do not affect the output of
 the neuron in layer $L$, if they are in between neurons that do affect it.
 
-Show that $r_{\ell-1}$ can be computed from $r_\ell$ as follows:
+**(a)** Show that $r_{\ell-1}$ can be computed from $r_\ell$ as follows:
 
 \begin{equation}
 r_{\ell-1}=s_\ell\cdot r_\ell+k_\ell-s_\ell
@@ -780,17 +786,20 @@ r_0=\sum_{\ell=1}^L\left(
 
 with the base case being $r_L=1$.
 
-Compute the receptive field size of the pre-trained VGG16 architecture we used above,
+**(b)** Compute the receptive field size of the pre-trained VGG16 architecture we used above,
 right before the global average pooling layer.
 
-Now suppose to have a dilation of $d_\ell\geq 1$ at every layer. What is the new formula
+**(c)** Now suppose to have a dilation of $d_\ell\geq 1$ at every layer. What is the new formula
 for $r_0$?
 
-What is the most effective way to increase the size of the receptive field of a neural
+**(d)** What is the most effective way to increase the size of the receptive field of a neural
 network?
 
 #!TAG HWBEGIN
 #### Solution
+
+**(a)**
+
 Start with $k_\ell=1$. Every neuron in $r_\ell$, has a receptive field of 1, and we need
 to add $s_\ell-1$ for the gap left between adjacent neurons, resulting in $r_{\ell-1}=r_\ell+(r_\ell-1)(s_\ell-1)=r_\ell s_\ell-s_\ell+1$. If $k_\ell>1$ and odd, we need to add $(k_\ell-1)/2$ at both sides of the receptive field, resulting in
 
@@ -849,7 +858,7 @@ Now using $i=\ell=L$, and remembering that $r_L=1$, we find that:
 r_0=\sum_{j=1}^{L}\left((k_j-1)\prod_{k=1}^{j-1} s_k \right)+1
 \end{equation}
 
-The pre-trained VGG16 has five blocks composed by two (first two blocks) or three
+**(b)** The pre-trained VGG16 has five blocks composed by two (first two blocks) or three
 (last three blocks) convolutions with kernel size 3 and stride 1 followed by a
 max pooling of kernel size 2 with stride 2. We can easily apply the recursive formula:
 <!-- #endregion -->
@@ -858,7 +867,7 @@ max pooling of kernel size 2 with stride 2. We can easily apply the recursive fo
 strides = [1,1,2, 1,1,2, 1,1,1,2, 1,1,1,2, 1,1,1,2]
 kernels = [3,3,2, 3,3,2, 3,3,3,2, 3,3,3,2, 3,3,3,2]
 
-def calc_receptive_field(r: int, l: int, kernels: List[int], strides: List[int]) -> int:
+def calc_receptive_field(r: int, l: int, kernels: list[int], strides: list[int]) -> int:
     return strides[l] * r + kernels[l] - strides[l]
 
 func = partial(calc_receptive_field, kernels=kernels, strides=strides)
@@ -866,7 +875,7 @@ print(reduce(func, range(len(strides))))
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-Dilation can be seen as further gaps between the elements of every filter, so that a 
+**(c)** Dilation can be seen as further gaps between the elements of every filter, so that a 
 dilation of $d_j\geq 1$ leaves $d_j-1$ gaps between elements of the filter. For example,
  a dilation of 2 means that a filter of size 3 will cover 5 elements in total, a 
  dilation of 3 results in 7 elements, and so on. With this insight, we can replace 
@@ -876,7 +885,7 @@ dilation of $d_j\geq 1$ leaves $d_j-1$ gaps between elements of the filter. For 
 r_0=\sum_{j=1}^{L}\left((k_jd_j-d_j)\prod_{k=1}^j s_k \right)+1
 \end{equation}
 
-According to the formula, the best way to increase the size of the receptive field of a 
+**(d)** According to the formula, the best way to increase the size of the receptive field of a 
 network is to increase striding, because strides of successive layers get multiplied 
 together. Note, however, that high strides means that, in practice, there will be large
 gaps in the receptive field, with many neurons not actually contributing to the neurons
