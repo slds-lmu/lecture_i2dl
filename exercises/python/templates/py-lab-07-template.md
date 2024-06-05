@@ -232,7 +232,7 @@ tensor, which returns the index with the largest score.
 #!TAG SKIPQUESTEXEC
 
 # Set some constants
-epochs = 5
+epochs = 1
 batch_size = 64
 num_workers = 4
 
@@ -248,7 +248,7 @@ loss = (
 optimizer = (
     #!TAG HWBEGIN
     #!MSG Define the RMSprop optimizer with the model parameters.
-    RMSprop(model.parameters())
+    RMSprop(model.parameters(), weight_decay=1e-5, lr=1e-3)
     #!TAG HWEND
 )
 
@@ -312,7 +312,7 @@ After we trained the model, we evaluate it on the test dataset.
 # We can choose a much larger batch size,
 # as we don't need to compute any gradients and only do inference.
 test_loader = DataLoader(
-    dataset=train_dataset,
+    dataset=test_dataset,
     batch_size=1024,
     num_workers=4,
 )
@@ -320,7 +320,7 @@ test_loader = DataLoader(
 total_loss = 0
 num_correct = 0
 
-for batch_idx, (x, y) in enumerate(train_loader):
+for batch_idx, (x, y) in enumerate(test_loader):
     # Push tensors to device
     x = x.to(device)
     y = y.to(device)
@@ -338,7 +338,7 @@ for batch_idx, (x, y) in enumerate(train_loader):
     num_correct += int(torch.sum(torch.argmax(y_hat, dim=1) == y))
 
 print('EVALUATION LOSS:\t{:.3f}\tEVALUATION: ACCURACY:\t{:.3f}'
-          .format(total_loss / len(train_dataset), num_correct / len(train_dataset),
+          .format(total_loss / len(test_dataset), num_correct / len(test_dataset),
                   end='\r'))
 ```
 
@@ -380,7 +380,7 @@ Let's load an example image:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-url = 'https://upload.wikimedia.org/wikipedia/en/8/86/Einstein_tongue.jpg'
+url = 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Albert_Einstein_sticks_his_tongue_1951.jpg'
 response = requests.get(url)
 img_raw = Image.open(BytesIO(response.content))
 
@@ -393,7 +393,13 @@ We will further use this image as a tensor and drop the channel dimension.
 
 ```python pycharm={"name": "#%%\n"}
 img = ToTensor()(img_raw)[0]
+# downscale the image from torch.Size([1789, 1514]) to torch.Size([170, 150])
+img = F.interpolate(img.unsqueeze(0).unsqueeze(0), size=(170, 150), mode='bilinear').squeeze()
 print(img.shape)
+display_img = img
+plt.imshow(display_img, cmap='gray')
+plt.axis('off')
+plt.show()
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
