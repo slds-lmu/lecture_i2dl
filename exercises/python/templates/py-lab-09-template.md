@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.5
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,7 +15,7 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 9
 
-**Authors**: Emilio Dorigatti, Hüseyin Anil Gündüz, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 In the first part of the lab, we will analytically derive the backpropagation equations for a simple RNN.
 Then, in the second part, we will implement forward and backward propagation functions for a simple RNN-model,
@@ -45,9 +45,9 @@ set_matplotlib_formats('png', 'pdf')
 In this part, we derive the backpropagation equations for a simple RNN from forward propagation equations. For simplicity, we will focus on a single input sequence $\textbf{x}^{[1]},\ldots,\textbf{x}^{[\tau]}$. The forward pass in a RNN with hyperbolic tangent activation at time $t$ is given by:
 \begin{align}
 \textbf{h}^{[t]} &= \tanh {(\textbf{W} \textbf{h}^{[t-1]} + \textbf{U} \textbf{x}^{[t]} + \textbf{b})} \\
-\textbf{y}^{[t]} &= \textbf{V}\textbf{h}^{[t]}+\textbf{c}
+\hat{\textbf{y}}^{[t]} &= \textbf{V}\textbf{h}^{[t]}+\textbf{c}
 \end{align}
-where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,$\textbf{V}$ and $\textbf{W}$, respectively, for input-to-hidden, hidden-to-output and hidden-to-hidden connections. As we will use RNN for a regression problem in the of the exercise, we do not use an activation function in order to compute the output $\textbf{y}^{[t]}$ (at time $t$).
+where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,$\textbf{V}$ and $\textbf{W}$, respectively, for input-to-hidden, hidden-to-output and hidden-to-hidden connections. As we will use RNN for a regression problem in the of the exercise, we do not use an activation function in order to compute the output $\hat{\textbf{y}}^{[t]}$ (at time $t$).
 
 The loss is defined as:
 \begin{equation}
@@ -57,30 +57,31 @@ The loss is defined as:
 Show that:
 \begin{align}
 \nabla_{\textbf{h} ^{[\tau]}} \mathcal{L}
-&= \textbf{V}^{T} (\nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}) \\
+&= \textbf{V}^{T} (\nabla_{\hat{\textbf{y}} ^{[\tau]}}\mathcal{L}) \\
 \nabla_{\textbf{h} ^{[t]}}  \mathcal{L}
-&= \textbf{W}^{T} \text{diag}\bigg(1-\big(\textbf{h}^{[t+1]}\big)^{^2} \bigg)(\nabla_{\textbf{h}{^{[t+1]}}}{{L}}) + \textbf{V}^{T} (\nabla_{\textbf{y} ^{[t]}}\mathcal{L}) \\
+&= \textbf{W}^{T} \text{diag}\bigg(1-\big(\textbf{h}^{[t+1]}\big)^{^2} \bigg)(\nabla_{\textbf{h}{^{[t+1]}}}{{L}}) + \textbf{V}^{T} (\nabla_{\hat{\textbf{y}} ^{[t]}}\mathcal{L}) \\
 \nabla_\textbf{c}  \mathcal{L}
-&= \sum_{t=1}^{\tau}\nabla_{\textbf{y}{^{[t]}}}{{\mathcal{L}}} \\
+&= \sum_{t=1}^{\tau}\nabla_{\hat{\textbf{y}}{^{[t]}}}{{\mathcal{L}}} \\
 \nabla_\textbf{b}  \mathcal{L}
 &= \sum_{t=1}^{\tau} \text{diag}\bigg(1-\big(\textbf{h}^{[t]}\big)^{2} \bigg) \nabla_{\textbf{h}^{[t]}}\mathcal{L} \\
 \nabla_\textbf{V}  \mathcal{L}
-&=\sum_{t=1}^{\tau}(\nabla_{\textbf{y}{^{[t]}}}{\mathcal{L}})  \textbf{h}^{{[t]}^{T}} \\
+&=\sum_{t=1}^{\tau}(\nabla_{\hat{\textbf{y}}{^{[t]}}}{\mathcal{L}})  \textbf{h}^{{[t]}^{T}} \\
 \nabla_\textbf{W}  \mathcal{L}
 &=\sum_{t=1}^{\tau} \text{diag}\bigg(1-\big(\textbf{h}^{[t]}\big)^{2} \bigg)\ (\nabla_{\textbf{h}{^{[t]}}}{{\mathcal{L}}}) \textbf{h}^{{[t-1]}^{T}} \\
 \nabla_\textbf{U}  \mathcal{L}
 &= \sum_{t=1}^{\tau} \text{diag}\bigg(1-\big(\textbf{h}^{[t]}\big)^{2} \bigg)(\nabla_{\textbf{h}{^{[t]}}}{{\mathcal{L}}}) \textbf{x}^{{[t]}^{T}}
 \end{align}
 
-Hint 1 (chain rule for vector calculus): given a vector $\textbf{x}\in\mathbb{R}^n$ and two functions $f:\mathbb{R}^n\rightarrow\mathbb{R}^m$ and $g:\mathbb{R}^m\rightarrow\mathbb{R}$, call the outputs $\textbf{y}=f(\textbf{x})$ and $z=g(\textbf{y})=g(f(\textbf{x}))$, then the following holds:
+Hint 1 (chain rule for vector calculus): given a vector $\textbf{x}\in\mathbb{R}^n$ and two functions $f:\mathbb{R}^n\rightarrow\mathbb{R}^m$ and $g:\mathbb{R}^m\rightarrow\mathbb{R}$, call the outputs $\hat{\textbf{y}}=f(\textbf{x})$ and $z=g(\hat{\textbf{y}})=g(f(\textbf{x}))$, then the following holds:
+
 \begin{equation}
 \nabla_{\textbf{x}} z
 =
-\nabla_{\textbf{x}}\textbf{y}
+\nabla_{\textbf{x}}\hat{\textbf{y}}
 \cdot
-\nabla_{\textbf{y}} z
+\nabla_{\hat{\textbf{y}}} z
 \end{equation}
-where $\nabla_{\textbf{y}} z\in\mathbb{R}^m$ and $\nabla_{\textbf{x}}\textbf{y}\in\mathbb{R}^n\times\mathbb{R}^m$.
+where $\nabla_{\hat{\textbf{y}}} z\in\mathbb{R}^m$ and $\nabla_{\textbf{x}}\hat{\textbf{y}}\in\mathbb{R}^n\times\mathbb{R}^m$.
 
 Hint 2: draw a computational graph representing the computation performed by the RNN unrolled over time, then use this graph to compute the gradients: multiply gradients via the chain rule when traversing edges, and sum the gradients obtained along each path from the loss to the item you are differentiating against.
 
@@ -92,38 +93,44 @@ Hint 2: draw a computational graph representing the computation performed by the
 The figure shows a simplified computational graph for three steps of a RNN. Biases omitted for simplicity.
 
 There is only one path connecting $\textbf{h}^{[\tau]}$ to the loss:
+
 \begin{equation}
 \nabla_{\textbf{h}^{[\tau]}} \mathcal{L}
-= \nabla_{\textbf{h}^{[\tau]}}  \textbf{y}^{[\tau]} \cdot \nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}
-= \textbf{V}^{T}\cdot \nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}
-\label{eq:11}
+= \nabla_{\textbf{h}^{[\tau]}}  \hat{\textbf{y}}^{[\tau]} \cdot \nabla_{\hat{\textbf{y}} ^{[\tau]}}\mathcal{L}
+= \textbf{V}^{T}\cdot \nabla_{\hat{\textbf{y}} ^{[\tau]}}\mathcal{L}
 \end{equation}
+
 while every other hidden activation influences the loss via its associated output and the following hidden activation, thus:
+
 \begin{equation}
 \nabla_{\textbf{h}^{[t]}} \mathcal{L}
-= \nabla_{\textbf{h}^{[t]}} \textbf{y}^{[t]} \cdot \nabla_{\textbf{y} ^{[t]}}\mathcal{L}
+= \nabla_{\textbf{h}^{[t]}} \hat{\textbf{y}}^{[t]} \cdot \nabla_{\hat{\textbf{y}} ^{[t]}}\mathcal{L}
 + \nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]} \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
 \end{equation}
-The first term is analogous to Eq. 11, while to find $\nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]}$ we need to apply the chain rule again:
+
+The first term is analogous to above, while to find $\nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]}$ we need to apply the chain rule again:
 \begin{equation}
 \nabla_{\textbf{h}^{[t]}} \textbf{h}^{[t+1]}
 =\nabla_{\textbf{h}^{[t]}} \tanh\left(\textbf{W} \textbf{h}^{[t]} + \textbf{U} \textbf{x}^{[t+1]} + \textbf{b}\right)
-=\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)
+=\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t+1]}}^2\right)
 \end{equation}
+
 Therefore,
+
 \begin{equation}
 \nabla_{\textbf{h}^{[t]}} \mathcal{L}
-= \textbf{V}^{T} \cdot \nabla_{\textbf{y} ^{[t]}}\mathcal{L}
-+\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right) \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
+= \textbf{V}^{T} \cdot \nabla_{\hat{\textbf{y}} ^{[t]}}\mathcal{L}
++\textbf{W}^T\cdot\text{diag}\left(1-{\textbf{h}^{[t+1]}}^2\right) \cdot \nabla_{\textbf{h}^{[t+1]}} \mathcal{L}
 \end{equation}
+
 where we do not expand $\nabla_{\textbf{h}^{[t+1]}} \mathcal{L}$ further as that is carried over during backpropagation (it corresponds to the $\delta$ in lab 4).
 
-We now compute the gradients with respect to the parameters of the network, starting with the easy biases. $\textbf{c}$ is used to compute $\textbf{y}^{[t]}$ for every $t$, thus:
+We now compute the gradients with respect to the parameters of the network, starting with the easy biases. $\textbf{c}$ is used to compute $\hat{\textbf{y}}^{[t]}$ for every $t$, thus:
 \begin{equation}
 \nabla_\textbf{c} \mathcal{L}
 =\sum_{t=1}^\tau
-\nabla_{\textbf{c}}\textbf{y}^{[t]}\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L}
-=\sum_{t=1}^\tau\nabla_{\textbf{y}^{[t]}}\mathcal{L}
+\nabla_{\textbf{c}}\hat{\textbf{y}}^{[t]}\cdot\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L}
+=\sum_{t=1}^\tau\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L}
 \end{equation}
 Similarly, $\textbf{b}$ is used to compute $\textbf{h}^{[t]}$, therefore:
 \begin{equation}
@@ -139,9 +146,9 @@ Moving on to the three weight matrices, we have:
 \begin{equation}
 \nabla_\textbf{V} \mathcal{L}
 =\sum_{t=1}^\tau
-\nabla_{\textbf{V}^{[t]}} \textbf{y}^{[t]}\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L}
+\nabla_{\textbf{V}^{[t]}} \hat{\textbf{y}}^{[t]}\cdot\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L}
 \end{equation}
-where we use $\nabla_{\textbf{V}^{[t]}} \textbf{y}^{[t]}$ to denote the gradient of $\textbf{y}^{[t]}$ with respect to $\textbf{V}$ *without* backpropagating, i.e., the contribution of $\textbf{V}$ only at time $t$. In other words, you can think of $\textbf{V}^{[1]},\ldots,\textbf{V}^{[t]}$ as dummy variables that all equal $\textbf{V}$. Note that we must now deal with tensors: let $\textbf{V}^{[t]}\in\mathbb{R}^{n\times m}$, then $\nabla_{\textbf{V}^{[t]}} \textbf{y}^{[t]}\in\mathbb{R}^{n\times m\times n}$, so that, since $\nabla_{\textbf{y}^{[t]}}\mathcal{L}\in\mathbb{R}^{n}$, $\nabla_\textbf{V} \mathcal{L}\in\mathbb{R}^{n\times m}$ (the last dimension disappears due to the dot products, just like normal matrix multiplication). Let's analyze each item of the final gradient:
+where we use $\nabla_{\textbf{V}^{[t]}} \hat{\textbf{y}}^{[t]}$ to denote the gradient of $\hat{\textbf{y}}^{[t]}$ with respect to $\textbf{V}$ *without* backpropagating, i.e., the contribution of $\textbf{V}$ only at time $t$. In other words, you can think of $\textbf{V}^{[1]},\ldots,\textbf{V}^{[t]}$ as dummy variables that all equal $\textbf{V}$. Note that we must now deal with tensors: let $\textbf{V}^{[t]}\in\mathbb{R}^{n\times m}$, then $\nabla_{\textbf{V}^{[t]}} \hat{\textbf{y}}^{[t]}\in\mathbb{R}^{n\times m\times n}$, so that, since $\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L}\in\mathbb{R}^{n}$, $\nabla_\textbf{V} \mathcal{L}\in\mathbb{R}^{n\times m}$ (the last dimension disappears due to the dot products, just like normal matrix multiplication). Let's analyze each item of the final gradient:
 \begin{align}
 \left(\nabla_V \mathcal{L}\right)_{ij}
 &=\frac{\partial}{\partial\textbf{V}_{ij}}\mathcal{L} \\
@@ -156,7 +163,7 @@ h^{[t]}_j
 \end{align}
 Therefore, via the outer product:
 \begin{equation}
-\nabla_\textbf{V} \mathcal{L}=\sum_{t=1}^{\tau}\nabla_{\textbf{y}^{[t]}}\mathcal{L}\cdot {\textbf{h}^{[t]}}^T
+\nabla_\textbf{V} \mathcal{L}=\sum_{t=1}^{\tau}\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L}\cdot {\textbf{h}^{[t]}}^T
 \end{equation}
 A faster way of reaching the same result is via:
 \begin{equation}
@@ -185,7 +192,7 @@ therefore:
 \nabla_{\textbf{W}}\mathcal{L}
 =\sum_{t=1}^{\tau} \sum_{i=1}^{n} \nabla_{\textbf{W}}h_i^{[t]}\cdot \nabla_{h_i^{[t]}}\mathcal{L}
 =\sum_{t=1}^{\tau}
-\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L} \cdot{\textbf{h}^{[t-1]}}^T
+\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)\cdot\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L} \cdot{\textbf{h}^{[t-1]}}^T
 \end{equation}
 
 Finally, in a similar way,
@@ -194,7 +201,7 @@ Finally, in a similar way,
 =\sum_{t=1}^{\tau} \nabla_{\textbf{U}}\textbf{h}^{[t]}\cdot \nabla_{\textbf{h}^{[t]}}\mathcal{L}
 =\sum_{t=1}^{\tau} \sum_{i=1}^{n} \nabla_{\textbf{U}}h_i^{[t]}\cdot \nabla_{h_i^{[t]}}\mathcal{L}
 =\sum_{t=1}^{\tau}
-\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)\cdot\nabla_{\textbf{y}^{[t]}}\mathcal{L} \cdot{\textbf{x}^{[t]}}^T
+\text{diag}\left(1-{\textbf{h}^{[t]}}^2\right)\cdot\nabla_{\hat{\textbf{y}}^{[t]}}\mathcal{L} \cdot{\textbf{x}^{[t]}}^T
 \end{equation}
 #!TAG HWEND
 <!-- #endregion -->
@@ -202,7 +209,7 @@ Finally, in a similar way,
 <!-- #region pycharm={"name": "#%% md\n"} -->
 
 ## Exercise 2
-In the second exercise, we are going to be estimating only the temperature value of the next hour from the given past 24 hours of weather-related information.
+In the next exercise, we are going to be estimating only the temperature value of the next hour from the given past 24 hours of weather-related information.
 Thus we will not be computing any intermediate output from the RNN and only one scalar value at the final step. Additionally, we will use mean square error as a loss function.
 
 Given this information, show that:
@@ -264,22 +271,22 @@ The dataset includes the features described in the table below.
 We download the dataset from github and print out the first rows and the dimensions of file.
 We will use DEWP, TEMP, PRES, cbwd, Iws, Is, Ir features as input and not the pollution, since pm2.5 contains some NA values we do not want to deal with.
 
-\begin{tabular}{r|l|l}
-Column number & Column name & Column description               \\ \hline
-1             & No          & Row number                       \\
-2             & year        & Year                             \\
-3             & month       & Month                            \\
-4             & day         & Day                              \\
-5             & hour        & Hour                             \\
-6             & pm2.5       & Pollution in PM2.5 concentration \\
-7             & DEWP        & Dew Point                        \\
-8             & TEMP        & Temperature                      \\
-9             & PRES        & Pressure                         \\
-10            & cbwd        & Combined wind direction          \\
-11            & Iws         & Cumulated wind speed             \\
-12            & Is          & Cumulated hours of snow          \\
-13            & Ir          & Cumulated hours of rain          \\
-\end{tabular}
+| Column number | Column name | Column description               |
+|---------------|-------------|----------------------------------|
+| 1             | No          | Row number                       |
+| 2             | year        | Year                             |
+| 3             | month       | Month                            |
+| 4             | day         | Day                              |
+| 5             | hour        | Hour                             |
+| 6             | pm2.5       | Pollution in PM2.5 concentration |
+| 7             | DEWP        | Dew Point                        |
+| 8             | TEMP        | Temperature                      |
+| 9             | PRES        | Pressure                         |
+| 10            | cbwd        | Combined wind direction          |
+| 11            | Iws         | Cumulated wind speed             |
+| 12            | Is          | Cumulated hours of snow          |
+| 13            | Ir          | Cumulated hours of rain          |
+
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
@@ -460,7 +467,8 @@ class RNN:
     def __call__(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         return self.forward(x)
 
-    # We now define functions computing the gradient for each parameter of the network separately, starting from the hidden states:
+    # We now define functions computing the gradient for each parameter of the 
+    # network separately, starting from the hidden states:
 
     def _compute_grad_h(self, y_true: Tensor, y_pred: Tensor, hidden: Tensor) -> Tensor:
         """Compute the gradient w.r.t. h"""
@@ -479,7 +487,7 @@ class RNN:
         for i in reversed(range(len(hidden) - 1)):
             #!TAG HWBEGIN
             #!MSG TODO: Compute the gradient of the i-th hidden state
-            grad_h[i] += self.w.T @ torch.diag(1 - hidden[i + 1]**2) @ grad_h[i + 1]
+            grad_h[i] += self.w.transpose(0, 1) @ torch.diag(1 - hidden[i + 1]**2) @ grad_h[i + 1]
             #!TAG HWEND
 
         return grad_h
@@ -693,16 +701,18 @@ for i in range(len(data_test) - 24):
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-
-plt.scatter(ys, y_hats)
+# transform the ys and y_hats to original scale
+ys = torch.tensor(ys) * stds[1] + means[1]
+y_hats = torch.tensor(y_hats) * stds[1] + means[1]
+plt.scatter(ys, y_hats, alpha=0.2)
 plt.axline((1, 1), slope=1, c='black')
+# plot should be square
+plt.gca().set_aspect('equal', adjustable='box')
+plt.xlabel('True temperature')
+plt.ylabel('Predicted temperature')
 plt.show()
 ```
 
-<!-- #region pycharm={"name": "#%% md\n"} -->
+```python
 
-<!-- #endregion -->
-
-<!-- #region pycharm={"name": "#%% md\n"} -->
-
-<!-- #endregion -->
+```
