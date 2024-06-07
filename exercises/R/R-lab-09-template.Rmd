@@ -1,18 +1,13 @@
 ---
 title: "Lab 9"
 output: pdf_document
-author: Emilio Dorigatti, Hüseyin Anil Gündüz
-date: 2022-01-11
-papersize: a4
-header-includes:
-  - \usepackage{bbold}
-  - \usepackage{tikz}
-  - \usetikzlibrary{snakes,arrows,shapes}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 In the first part of the lab, we will analytically derive the backpropagation equations for a simple RNN. Then, in the second part, we will implement forward and backward propagation functions for a simple RNN-model, and train to  predict the future temperature based on past weather metrics.
 
@@ -25,9 +20,11 @@ In this part, we derive the backpropagation equations for a simple RNN from forw
 where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,$\textbf{V}$ and $\textbf{W}$, respectively, for input-to-hidden, hidden-to-output and hidden-to-hidden connections. As we will use RNN for a regression problem in the of the exercise, we do not use an activation function in order to compute the output $\textbf{y}^{[t]}$ (at time $t$).
 
 The loss is defined as:
+
 \begin{equation}
-\mathcal{L}=\sum_{t=1}^{\tau}\mathcal{L}\left(\textbf{y}^{[t]}, \hat{\textbf{y}}^{[t]}\right)
+\mathcal{L}=\sum_{t=1}^{\tau}\mathcal{L}\left(\textbf{y}^{[t]}, \textbf{y}_{\text{true}}{[t]}\right)
 \end{equation}
+
 
 Show that:
 \begin{align}
@@ -63,69 +60,7 @@ Hint 2: draw a computational graph representing the computation performed by the
 
 ### Solution
 
-\begin{figure}
-\centering\begin{tikzpicture}[>=latex',line join=bevel,]
-%%
-\begin{scope}
-  \pgfsetstrokecolor{black}
-  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
-  \pgfsetstrokecolor{strokecol}
-  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
-  \pgfsetfillcolor{fillcol}
-  \filldraw (0.0bp,0.0bp) -- (0.0bp,187.0bp) -- (206.0bp,187.0bp) -- (206.0bp,0.0bp) -- cycle;
-\end{scope}
-\begin{scope}
-  \pgfsetstrokecolor{black}
-  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
-  \pgfsetstrokecolor{strokecol}
-  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
-  \pgfsetfillcolor{fillcol}
-  \filldraw (0.0bp,0.0bp) -- (0.0bp,187.0bp) -- (206.0bp,187.0bp) -- (206.0bp,0.0bp) -- cycle;
-\end{scope}
-\begin{scope}
-  \pgfsetstrokecolor{black}
-  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
-  \pgfsetstrokecolor{strokecol}
-  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
-  \pgfsetfillcolor{fillcol}
-  \filldraw (0.0bp,0.0bp) -- (0.0bp,187.0bp) -- (206.0bp,187.0bp) -- (206.0bp,0.0bp) -- cycle;
-\end{scope}
-  \node (x1) at (15.0bp,170.5bp) [draw,ellipse] {$\mathbf{x}^{[1]}$};
-  \node (h1) at (15.0bp,115.5bp) [draw,ellipse] {$\mathbf{h}^{[1]}$};
-  \node (y1) at (15.0bp,44.5bp) [draw,ellipse] {$\mathbf{y}^{[1]}$};
-  \node (L) at (103.0bp,9.5bp) [draw,ellipse] {$\mathcal{L}$};
-  \node (x2) at (103.0bp,177.5bp) [draw,ellipse] {$\mathbf{x}^{[2]}$};
-  \node (h2) at (103.0bp,122.5bp) [draw,ellipse] {$\mathbf{h}^{[2]}$};
-  \node (y2) at (103.0bp,65.5bp) [draw,ellipse] {$\mathbf{y}^{[2]}$};
-  \node (x3) at (191.0bp,170.5bp) [draw,ellipse] {$\mathbf{x}^{[3]}$};
-  \node (h3) at (191.0bp,115.5bp) [draw,ellipse] {$\mathbf{h}^{[3]}$};
-  \node (y3) at (191.0bp,51.5bp) [draw,ellipse] {$\mathbf{y}^{[3]}$};
-  \draw [->] (x1) ..controls (15.0bp,153.89bp) and (15.0bp,144.25bp)  .. (h1);
-  \definecolor{strokecol}{rgb}{0.0,0.0,0.0};
-  \pgfsetstrokecolor{strokecol}
-  \draw (3.0bp,143.25bp) node {$\mathbf{U}$};
-  \draw [->] (h1) ..controls (15.0bp,94.854bp) and (15.0bp,78.682bp)  .. (y1);
-  \draw (3.0bp,80.5bp) node {$\mathbf{V}$};
-  \draw [->] (h1) ..controls (43.1bp,117.71bp) and (62.398bp,119.28bp)  .. (h2);
-  \draw (59.0bp,128.5bp) node {$\mathbf{W}$};
-  \draw [->] (y1) ..controls (42.952bp,33.531bp) and (67.468bp,23.554bp)  .. (L);
-  \draw [->] (x2) ..controls (103.0bp,160.89bp) and (103.0bp,151.25bp)  .. (h2);
-  \draw (91.0bp,150.25bp) node {$\mathbf{U}$};
-  \draw [->] (h2) ..controls (103.0bp,105.38bp) and (103.0bp,95.746bp)  .. (y2);
-  \draw (91.0bp,94.5bp) node {$\mathbf{V}$};
-  \draw [->] (h2) ..controls (131.1bp,120.29bp) and (150.4bp,118.72bp)  .. (h3);
-  \draw (147.0bp,128.5bp) node {$\mathbf{W}$};
-  \draw [->] (y2) ..controls (103.0bp,47.19bp) and (103.0bp,37.749bp)  .. (L);
-  \draw [->] (x3) ..controls (191.0bp,153.89bp) and (191.0bp,144.25bp)  .. (h3);
-  \draw (179.0bp,143.25bp) node {$\mathbf{U}$};
-  \draw [->] (h3) ..controls (191.0bp,96.593bp) and (191.0bp,83.722bp)  .. (y3);
-  \draw (179.0bp,84.0bp) node {$\mathbf{V}$};
-  \draw [->] (y3) ..controls (163.56bp,38.589bp) and (138.16bp,26.183bp)  .. (L);
-%
-\end{tikzpicture}
-\caption{A simplified computational graph for three steps of a RNN. Biases omitted for simplicity.}
-\label{fig:cg}
-\end{figure}
+![](09-lab-comp-graph.png)
 
 The computational graph is shown in Figure \ref{fig:cg}. There is only one path connecting $\textbf{h}^{[\tau]}$ to the loss:
 \begin{equation}
@@ -634,7 +569,12 @@ train_rnn <- function(steps, U, V, W, b, c) {
 }
 
 hh <- train_rnn(500, U, V, W, b, c)
-plot(hh$losses)
+library(ggplot2)
+ggplot(data.frame(loss=hh$losses), aes(x=1:length(loss), y=loss)) +
+  geom_line() + 
+  labs(x="Training step", y="Loss") +
+  theme_minimal()
+
 ```
 
 If you did everything correctly, the loss should have converged to below 0.05:
@@ -661,7 +601,21 @@ for(i in 1:(nrow(data_test_scaled) - 24)) {
 }
 
 
-scatter.smooth(y_trues, y_preds)
+# rescale the predictions
+y_trues <- y_trues * stds[2] + means[2]
+y_preds <- y_preds * stds[2] + means[2]
+
+data.frame(y_trues=y_trues, y_preds=y_preds) |>
+  ggplot(aes(x=y_trues, y=y_preds)) +
+  geom_point(alpha = 0.1) +
+  geom_abline(intercept = 0, slope = 1, color="magenta", linewidth = 1.5) +
+  labs(x="True Temp.", y="Predicted Temp.") +
+  coord_equal() +
+  theme_minimal()
+
+
+
+
 ```
 
 Neat predictions!
