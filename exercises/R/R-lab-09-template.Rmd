@@ -17,7 +17,7 @@ In this part, we derive the backpropagation equations for a simple RNN from forw
 \textbf{h}^{[t]} &= \tanh {(\textbf{W} \textbf{h}^{[t-1]} + \textbf{U} \textbf{x}^{[t]} + \textbf{b})} \\
 \textbf{y}^{[t]} &= \textbf{V}\textbf{h}^{[t]}+\textbf{c}
 \end{align}
-where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,$\textbf{V}$ and $\textbf{W}$, respectively, for input-to-hidden, hidden-to-output and hidden-to-hidden connections. As we will use RNN for a regression problem in the of the exercise, we do not use an activation function in order to compute the output $\textbf{y}^{[t]}$ (at time $t$).
+where the parameters are the bias vectors $\textbf{b}$ and $\textbf{c}$ along with the weight matrices $\textbf{U}$,$\textbf{V}$ and $\textbf{W}$, respectively, for input-to-hidden, hidden-to-output and hidden-to-hidden connections. As we will use the RNN for a regression problem in the below exercise, we do not use an activation function in order to compute the output $\textbf{y}^{[t]}$ (at time $t$).
 
 The loss is defined as:
 
@@ -62,7 +62,7 @@ Hint 2: draw a computational graph representing the computation performed by the
 
 ![](09-lab-comp-graph.png)
 
-The computational graph is shown in Figure \ref{fig:cg}. There is only one path connecting $\textbf{h}^{[\tau]}$ to the loss:
+The computational graph is shown in the above figure. There is only one path connecting $\textbf{h}^{[\tau]}$ to the loss:
 \begin{equation}
 \nabla_{\textbf{h}^{[\tau]}} \mathcal{L}
 = \nabla_{\textbf{h}^{[\tau]}}  \textbf{y}^{[\tau]} \cdot \nabla_{\textbf{y} ^{[\tau]}}\mathcal{L}
