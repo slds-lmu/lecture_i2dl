@@ -250,8 +250,6 @@ model |> compile(
   optimizer = "adam",
   metrics=c("accuracy")
 )
-
-model
 ```
 ### Training and validation
 
