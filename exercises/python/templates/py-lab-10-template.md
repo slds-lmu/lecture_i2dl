@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.5
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,7 +15,7 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 10
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Imports
 <!-- #endregion -->
@@ -25,6 +25,7 @@ import string
 from collections import Counter
 from math import ceil
 from typing import List, Optional, Tuple, Dict
+import random
 
 import matplotlib.pyplot as plt
 import torch
@@ -33,7 +34,7 @@ from torch import nn, Tensor
 from torch.nn.utils.rnn import pad_sequence
 from torch.optim import Adam, Optimizer
 from torch.utils.data import DataLoader, Dataset
-from torchtext.datasets import IMDB
+from keras.datasets import imdb
 from torchvision.datasets import MNIST
 from torchvision.utils import make_grid
 
@@ -59,84 +60,21 @@ use the full length reviews and all words!
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-train_iterator, test_iterator = IMDB();
+(train_x, train_y), (test_x, test_y) = imdb.load_data(num_words=10000)
+train_x = [train_x[i] for i in range(len(train_x))]
+train_y = [train_y[i] for i in range(len(train_y))]
+test_x = [test_x[i] for i in range(len(test_x))]
+test_y = [test_y[i] for i in range(len(test_y))]
+
+word2enc = imdb.get_word_index()
+enc2word = {v: k for k, v in word2enc.items()}
 ```
 
-```python pycharm={"name": "#%%\n"}
-# Feed iterator to list
-train_x = []
-train_y = []
-test_x = []
-test_y = []
-
-for label, line in train_iterator:
-    train_x.append(line)
-    train_y.append(label)
-
-for label, line in test_iterator:
-    test_x.append(line)
-    test_y.append(label)
-
-```
-
-```python pycharm={"name": "#%%\n"}
-# Tokenize sentences.
-
-def tokenize(data_list: List[str]) -> List[List[str]]:
-    """
-    Tokenize a list of strings.
-
-    :param data_list: A list of strings.
-    :return: A list where each entry is a list including the tokenized elements.
-    """
-    token_list: List[List[str]] = []
-    for data_string in data_list:
-        # Remove punctuation.
-        data_string = data_string.translate(str.maketrans('', '', string.punctuation))
-        # Split by space.
-        token_list.append(data_string.split())
-    return token_list
-
-
-train_x = tokenize(train_x)
-test_x = tokenize(test_x)
-
-```
-
-```python pycharm={"name": "#%%\n"}
-# Count-vectorize sentences.
-class CountVectorizer:
-    def __init__(self):
-        self.vec_to_str_map: Dict[int, str] = {}
-        self.str_to_vec_map: Dict[str, int] = {}
-
-    def fit(self, token_list: List[str]) -> None:
-        # The `Counter` object from the `collections` library gives us efficient counting
-        # in large lists out of box.
-        cnt = Counter(token_list)
-        sorted_cnt = sorted(cnt.items(), key=lambda item: item[1], reverse=True)
-        sorted_words = [key for key, val in sorted_cnt]
-
-        # Python does not know a bidirectional mapping by default.
-        # We trick a bit by simply creating two dicts, but note that this is inefficient.
-        self.str_to_vec_map = {sorted_words[i]: i + 1 for i in range(len(sorted_words))}
-        self.vec_to_str_map = {i + 1: sorted_words[i] for i in range(len(sorted_words))}
-
-    def transform_to_vec(self, token_list: List[str]) -> List[int]:
-        return [self.str_to_vec_map.get(word) for word in token_list]
-
-    def transform_to_str(self, token_list: List[int]) -> List[str]:
-        return [self.vec_to_str_map.get(rank) for rank in token_list]
-
-
-train_words = [word for word_list in train_x for word in word_list]
-test_words = [word for word_list in test_x for word in word_list]
-
-count_vectorizer = CountVectorizer()
-counter = count_vectorizer.fit(train_words)
-
-train_x = [count_vectorizer.transform_to_vec(word_list) for word_list in train_x]
-test_x = [count_vectorizer.transform_to_vec(word_list) for word_list in test_x]
+```python
+test_id = random.randint(0, len(train_x) - 1)
+print(f"Sentiment: {'Positive' if train_y[test_id] == 1 else 'Negative'}")
+print("Review:")
+print(" ".join([enc2word[enc+3] for enc in train_x[test_id]]))
 ```
 
 ```python pycharm={"name": "#%%\n"}
@@ -166,14 +104,8 @@ train_x = [filter_word_ranks(word_list) for word_list in train_x]
 test_x = [filter_word_ranks(word_list) for word_list in test_x]
 ```
 
-```python pycharm={"name": "#%%\n"}
-# Encode labels to binary targets
-train_y = [1 if label == 'pos' else 0 for label in train_y]
-test_y = [1 if label == 'pos' else 0 for label in test_y]
-```
-
 <!-- #region pycharm={"name": "#%% md\n"} -->
-Now, each review is a vector of numbers, each corresponding to a different word:
+Now, each review is a list of numbers, each corresponding to a different word:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
@@ -320,6 +252,8 @@ class LSTMModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x: Tensor) -> Tensor:
+        #!TAG HWBEGIN
+        #!MSG TODO: Implement the forward pass.
         # The output needs to be reshaped or otherwise we have a dimension too much.
         x = self.embedding(x).squeeze(2)
 
@@ -331,7 +265,7 @@ class LSTMModel(nn.Module):
         # We need to extract the last hidden state
         y_score = self.fc(hidden[-1])
         y_hat = self.sigmoid(y_score).squeeze(-1)
-
+        #!TAG HWEND
         return y_hat
 ```
 
@@ -403,13 +337,12 @@ def train(
         ################################################################################
 
         for batch_idx, (x, y) in enumerate(test_loader):
-
-            with torch.no_grad():
-                #!TAG HWBEGIN
-                #!MSG TODO: Do a forward pass and get the batch loss
+            #!TAG HWBEGIN
+            #!MSG TODO: Do a forward pass and get the batch loss
+            with torch.no_grad(): 
                 y_hat = model(x)
                 batch_loss = loss(y_hat, y)
-                #!TAG HWEND
+            #!TAG HWEND
 
             if batch_idx % 50 == 0:
                 print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
@@ -515,7 +448,7 @@ The model seems to be learning more easily than the simple baseline we created t
 which had an accuracy of 85-88% on the test data.
 Let it train for longer and tune the
 architecture above to reach as high accuracy as possible! (note that evaluating on the
-same data that you used for early stopping is cheating).
+same data that you used for early stopping is cheating). Can you detect other problems we discussed in the previous labs?
 
 
 ## Exercise 2
@@ -952,7 +885,6 @@ metrics = train(model, loss, optimizer, train_dataset, test_dataset, epochs, bat
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-
 get_training_progress_plot(
     metrics['train_loss'],
     metrics['train_acc'],
@@ -962,5 +894,27 @@ get_training_progress_plot(
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-It is amazing what we achieved with such a small (for the standard of deep learning) model and dataset!
+It is amazing what we achieved with such a small (for the standard of deep learning) model and dataset! Lets indulge in some more examples on the test set!
 <!-- #endregion -->
+
+```python
+#!TAG SKIPQUESTEXEC
+
+# look at some predictions
+def plot_prediction(model: nn.Module, dataset: Dataset, idx: int) -> None:
+    sample = dataset[idx]
+    num_1 = sample['num_1'].unsqueeze(0).to(device)
+    num_2 = sample['num_2'].unsqueeze(0).to(device)
+    y = sample['label'].unsqueeze(0).to(device)
+
+    y_hat = model(num_1, num_2)
+    y_hat = torch.argmax(y_hat, dim=1).squeeze(0)
+
+    print('Prediction:', ''.join([str(int(i)) for i in y_hat]))
+    print('Label:', ''.join([str(int(i)) for i in y.squeeze(0)]))
+
+    plot_digits(num_1.squeeze(0), num_2.squeeze(0))
+
+plot_prediction(model, test_dataset, int(torch.randint(len(test_dataset), (1, ))))
+plot_prediction(model, test_dataset, int(torch.randint(len(test_dataset), (1, ))))
+```

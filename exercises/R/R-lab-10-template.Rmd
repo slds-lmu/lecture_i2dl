@@ -1,15 +1,15 @@
 ---
 title: "Lab 10"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2022-01-18
-papersize: a4
 ---
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+
 
 ## Exercise 1
 
@@ -18,7 +18,7 @@ In this exercise, we are going to revise the sentiment classifier for IMDB revie
 The first step is to load the data. For brevity, we only use the 10000 most common words and consider reviews shorter than 251 words, but if you can use a GPU then feel free to use all reviews and all words!
 
 ```{r}
-library(keras)
+library(keras3)
 imdb <- dataset_imdb(num_words = 10000, maxlen=250)
 c(c(x_train, y_train), c(x_test, y_test)) %<-% imdb
 ```
@@ -51,22 +51,23 @@ Next, we define our sequential model. The first layer is an _embedding_ layer th
 Note the parameter `mask_zero`: this indicates that zeros in the input sequences are used for padding (verify that this is the case!). Internally, this is used by the RNN to ignore padding tokens, preventing them from contributing to the gradients (read more in the user guide, [link](https://keras.io/guides/understanding_masking_and_padding/)!).
 
 ```{r}
-model <- keras_model_sequential() %>%
-  layer_embedding(input_dim = 10001, output_dim = 64, mask_zero = TRUE) %>%
-  layer_lstm(units = 32) %>%
+model <- keras_model_sequential() |>
+  layer_embedding(input_dim = 10001, output_dim = 64, mask_zero = TRUE) |>
+  layer_lstm(units = 32) |>
   layer_dense(1, activation = "sigmoid")
 
-model %>% compile(
+model |> compile(
   optimizer = "rmsprop",
   loss = "binary_crossentropy",
   metrics = c("accuracy")
 )
 
-summary(model)
+# the summary will only display the shapes after being built.
+# summary(model)
 ```
 
 ```{r}
-hist = model %>% fit(
+hist = model |> fit(
   x_train,
   y_train,
   batch_size = 32,
@@ -90,8 +91,6 @@ In doing this, we will learn how to use Keras's functional API to create models 
 We are now going to create a synthetic dataset using images from MNIST.
 
 ```{r}
-library(keras)
-
 mnist = dataset_mnist()
 
 x_train = mnist$train$x / 255
@@ -177,50 +176,63 @@ in_shape = c(
   #!hwend
 )
 
-first_number_input <- layer_input(shape = in_shape)
-second_number_input <- layer_input(shape = in_shape)
+first_number_input <- keras_input(shape = in_shape)
+second_number_input <- keras_input(shape = in_shape)
 ```
 
 The network will use the same convolutional encoder for all digits in both numbers. Let us first define this encoder as its own model, a normal CNN:
 
 ```{r}
-digit_encoder <- keras_model_sequential() %>%
+digit_encoder <- keras_model_sequential() |>
   #!hwbegin TODO add some convolutional and pooling layers as you see fit
-  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = "relu") %>%
-  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
-  layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") %>%
-  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
-  layer_conv_2d(filters = 128, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = "relu") |>
+  layer_max_pooling_2d(pool_size = c(2, 2)) |>
+  layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") |>
+  layer_max_pooling_2d(pool_size = c(2, 2)) |>
+  layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") |>
   #!hwend
   layer_global_average_pooling_2d()
 ```
 
-This CNN will transform each digit from a tensor of shape (28, 28, 1) to a vector of size, for example, 64. In order to apply this encoder to all digits of a number, we need to use a special layer called `time_distributed` (read its [documentation](https://keras.rstudio.com/reference/time_distributed.html)!). This is how it is used:
+This CNN will transform each digit from a tensor of shape (28, 28, 1) to a vector of size, for example, 128. In order to apply this encoder to all digits of a number, we loop over the digits and apply the encoder to each one:
 
 ```{r}
-first_number_input %>% time_distributed(digit_encoder)
+first_number_encoded <- list()
+for(i in 1:max_len) {
+  # Notice that we use pythonic indexing here, so we need to subtract 1 from i
+  #!hwbegin TODO apply the encoder to the i-th digit of the first number
+  first_number_encoded[[i]] <- digit_encoder(first_number_input[, i - 1])
+  #!hwend
+}
+second_number_encoded <- list()
+for(i in 1:max_len) {
+  #!hwbegin TODO apply the encoder to the i-th digit of the second number
+  second_number_encoded[[i]] <- digit_encoder(second_number_input[, i - 1])
+  #!hwend
+}
 ```
 
 The input of this sequence of transformations has shape (3, 28, 28, 1) while its output has shape (3, 64). This is because each (28, 28, 1) slice is processed by the CNN into a vector with 64 elements.
 
-After we apply the CNN to both numbers, we need to "merge" the two sequence of vectors. There are several options here, here we choose to concatenate the two vectors in each time-step to produce a single vector of size 128:
+After we apply the CNN to both numbers, we need to "merge" the two sequence of vectors. There are several options here, here we choose to concatenate the two digit vectors in each time-step to produce a single vector of size 128:
 
 ```{r}
-encoded_numbers <- layer_concatenate(list(
-  #!hwbegin TODO apply the encoder to both input numbers
-  first_number_input %>% time_distributed(digit_encoder),
-  second_number_input %>% time_distributed(digit_encoder)
+encoded_numbers <- layer_concatenate(
+  #!hwbegin TODO concatenat and reshape appropriately
+  layer_concatenate(inputs = first_number_encoded) |> layer_reshape(target_shape = c(3, 64)),
+  layer_concatenate(inputs = second_number_encoded) |> layer_reshape(target_shape = c(3, 64)),
+  axis = 3
   #!hwend
-))
+)
 ```
 
-This will result in a tensor of shape (3, 128). Let's feed this into a bidirectional LSTM, followed by a dense layer with to perform the final classification for each digit of the result. In order to do so, you may find the `bidirectional` layer useful (documentation [here](https://keras.rstudio.com/reference/bidirectional.html)). Also be mindful of returning all hidden states from the LSTM, not only the last one. Refer again to the [documentation](https://keras.rstudio.com/reference/layer_lstm.html).
+This will result in a tensor of shape (3, 128). Let's feed this into a bidirectional LSTM, followed by a dense layer with to perform the final classification for each digit of the result. In order to do so, you may find the `bidirectional` layer useful. Also be mindful of returning all hidden states from the LSTM, not only the last one. Refer again to the documentation.
 
 ```{r}
-model_output <- encoded_numbers %>%
+model_output <- encoded_numbers |>
   #!hwbegin create the final classifier
-  layer_dropout(0.5) %>%
-  bidirectional(layer_lstm(units = 64, return_sequences = TRUE)) %>%
+  layer_dropout(0.5) |>
+  bidirectional(layer_lstm(units = 64, return_sequences = TRUE)) |>
   layer_dense(10, "softmax")
   #!hwend
 ```
@@ -233,7 +245,7 @@ model <- keras_model(
   outputs = model_output
 )
 
-model %>% compile(
+model |> compile(
   loss = "categorical_crossentropy",
   optimizer = "adam",
   metrics=c("accuracy")
@@ -246,18 +258,18 @@ model
 Finally, let's train this model on the synthetic dataset we created earlier. Since the model has two inputs, we must pass a `list` with two elements to `fit`:
 
 ```{r}
-hist <- model %>% fit(
+hist <- model |> fit(
   list(train_set$x1, train_set$x2),
   train_set$y,
   #!hwbegin TODO insert appropriate parameters for fitting
   validation_split = 0.2,
   epochs = 20,
   batch_size = 32,
-  verbose = 0
+  verbose = 0 # try out 1 for nice progress bars + visuals
   #!hwend
 )
 
 plot(hist)
 ```
 
-It is amazing what we achieved with such a small (for the standard of deep learning) model and dataset!
+It is amazing what we achieved with such a small (for the standard of deep learning) model and dataset! If you are curious look at some difficult examples to get a feeling where the model still struggles.
