@@ -1,14 +1,13 @@
 ---
 title: "Lab 11"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2022-01-25
-papersize: a4
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Exercise 1
 In this exercise we will get acquainted with the KL divergence for normal distributions. First, let $p(x)=\mathcal{N}(\mu_1,\sigma_1^2)$ and $q(x)=\mathcal{N}(\mu_2,\sigma_2^2)$ and show that
@@ -127,7 +126,7 @@ In this exercise we are going to implement variational autoencoders (VAEs) on th
 As usual, we start by loading and pre-processing the dataset.
 
 ```{r}
-library(keras)
+library(keras3)
 
 mnist = dataset_mnist()
 x_train = mnist$train$x / 255
@@ -138,106 +137,60 @@ dim(x_train) <- c(nrow(x_train), input_size)
 
 In a VAE, the encoder outpus mean and variance of a multivariate Gaussian distribution of the latent codes. Nothing prevents you from using a more complicated distribution in the same framework, but this is the usual choice. The expected log likelihood is then approximated by decoding a single sample from this distribution. Moreover, since we need the model to be differentiable end-to-end, sampling from the latent codes is re-formulated via the reparametrization trick.
 
-Keras does not provide a layer that can perform this sampling operation, but it can be easily extended to include such a layer. This involves creating a R6 that implements these three methods:
+Keras does not provide a layer that can perform this sampling operation, but it can be easily extended to include such a layer. This involves creating a `Layer` class that implements these main three methods:
 
  1. `build(input_shape)`: in this method, you create the parameters necessary for the layer to operate.
  2. `call(x)`: this method contains the computational logic of the layer, and computes the output from the input `x` of the previous layer.
- 3. `compute_output_shape(input_shape)`: this computes the size of the output.
+ 3. `initialize(<arguments>)`: this initializes the layer with the arguments passed to the constructor.
 
-In practice, these functions operate with Tensorflow variables, although it is not immediately clear; `build` creates them, and `call` creates the part of the computational graph responsible to compute the output.
-
-Finally, you have to provide a function that is used to instantiate the layer, similar to `layer_dense`, `layer_conv_2d`, etc.
+In practice, these functions operate with Tensorflow variables, although it is not immediately clear; `build` creates them, and `call` creates the part of the computational graph responsible to compute the output. A look at the [documentation](https://keras3.posit.co/articles/making_new_layers_and_models_via_subclassing.html#the-layer-class-the-combination-of-state-weights-and-some-computation) is advised.
 
 For example, here is how to implement a normal dense layer:
 
 
 ```{r}
-OurDense <- R6::R6Class(
-  "OurDense",
+our_dense <- Layer("OurDense",
+  initialize = function(activation, units = 32, ...) {
+    self$units <- as.integer(units)
+    self$activation <- activation
+    super$initialize(...)
+  },
+  
+  build = function(input_shape) {
+    self$w <- self$add_weight(
+      shape = shape(tail(input_shape, 1), self$units),
+      initializer = "random_normal",
+      trainable = TRUE
+    )
+    self$b <- self$add_weight(
+      shape = shape(self$units),
+      initializer = "zeros",
+      trainable = TRUE
+    )
+  },
 
-  inherit = KerasLayer,
-
-  public = list(
-    # these variables contain the attributes of this layer
-    units = NULL,
-    activation = NULL,
-    weights = NULL,
-    bias = NULL,
-
-    # this function receives the parameters for the layer
-    # and saves them in the variables above. in order to access
-    # these variables, you must always use "self$" before their name
-    initialize = function(units, activation) {
-      self$units = units
-      self$activation = activation
-    },
-
-    # this function creates the weight matrix and the bias vector.
-    # keras conveniently provides an utility function to do so, `add_weight`,
-    # which can accept other parameters, such as regularizers, etc.
-    build = function(input_shape) {
-      self$weights <- self$add_weight(
-        name = 'weights',
-        shape = list(input_shape[[2]], self$units),
-        initializer = initializer_glorot_normal(),
-      )
-
-      self$bias <- self$add_weight(
-        name = 'bias',
-        shape = list(self$units),
-        initializer = initializer_constant(),
-      )
-    },
-
-    # this function computes the output from the input.
-    # Keras provides functions to do this through the so-called
-    # "backend", which is just a wrapper around Tensorflow.
-    # functions in this backend all start with "k_".
-    # you can also directly use the functions in Tensorflow.
-    call = function(x, mask = NULL) {
-      self$activation(k_dot(x, self$weights) + self$bias)
-    },
-
-    # this function computes the output shape
-    compute_output_shape = function(input_shape) {
-      list(input_shape[[1]], self$units)
-    }
-  )
+  call = function(inputs) {
+    self$activation(op_matmul(inputs, self$w) + self$b)
+  }
 )
-
-# define layer wrapper function. the parameter `object` refers to the previous layer,
-# while the other parameters are defined by the user.
-# here you have to gather all parameters that are needed for the `initialize` method in
-# the class above, as well as the input shape.
-layer_our_dense <- function(object, units, activation, input_shape = NULL) {
-
-  # `create_layer` function is provided by keras, we pass the layer class, the previous
-  # object in the network, and a list of parameters to create the layer.
-  create_layer(OurDense, object, list(
-    units = as.integer(units),  # do not forget
-    activation = activation,
-    input_shape = input_shape
-  ))
-}
 ```
 
 Now we can use this as any other Keras layer:
 
 ```{r}
-model <- keras_model_sequential() %>%
-  layer_our_dense(units = 32, activation = activation_relu,
-                  input_shape = tf$TensorShape(as.integer(784))) %>%
-  layer_our_dense(units = 10, activation = activation_softmax)
+model <- keras_model_sequential(input_shape = tf$TensorShape(as.integer(784))) |>
+  our_dense(units = 32, activation = activation_relu) |>
+  our_dense(units = 10, activation = activation_softmax)
 
-model %>% compile(
+model |> compile(
   loss = 'categorical_crossentropy',
   optimizer = 'adam',
   metrics = c('accuracy')
 )
 
-model %>% fit(
+model |> fit(
   x_train, y_train,
-  epochs = 2
+  epochs = 4
 )
 ```
 
@@ -250,73 +203,59 @@ Let us start from the custom layer.
 # this parameter re-weighs the KL divergence
 # later it will be clear why it is needed
 # this is actually a tensorflow variable
-kl_weight = k_variable(1.0)
+kl_weight = tf$Variable(1.0)
 
-SamplingLayer <- R6::R6Class("SamplingLayer",
+layer_sampling <- Layer("SamplingLayer",
+  initialize = function() {
+    super$initialize()
+  },
+  build = function(input_shape) {},
 
-  inherit = KerasLayer,
+  call = function(x, mask = NULL) {
+    # here `x` is a list of two matrices,
+    # the mean and log variance of the latent codes.
+    # (samples are on rows and latent dimensions on columns)
+    mu = x[[1]]
+    log_var = x[[2]]
 
-  public = list(
-    # we do not need any parameters for this layer
-    initialize = function() { },
-
-    build = function(input_shape) { },
-
-    call = function(x, mask = NULL) {
-      # here `x` is a list of two matrices,
-      # the mean and log variance of the latent codes.
-      # (samples are on rows and latent dimensions on columns)
-      mu = x[[1]]
-      log_var = x[[2]]
-
-      kl_loss = (
-        #!hwbegin TODO compute the KL divergence according to equation 2\n# some useful functions are k_sum, k_exp and k_square
-        -k_mean(k_sum(1 + log_var - k_square(mu) - k_exp(log_var), axis=-1)) / 2
-        #!hwend
-      )
-
-      self$add_loss(
-        kl_weight * kl_loss / 784  # scale the KL to a magnitude comparable to the MSE
-      )
-
-      # generate the random noise
-      eps = k_random_normal(k_shape(mu))
-
-      #!hwbegin TODO compute the latent code using the reparametrization trick
-      mu + eps * k_exp(log_var / 2)
+    kl_loss = (
+      #!hwbegin TODO compute the KL divergence according to equation 2\n# some useful functions are k_sum, k_exp and k_square
+      -op_mean(op_sum(1 + log_var - op_square(mu) - op_exp(log_var), axis=-1)) / 2
       #!hwend
-    },
+    )
 
-    compute_output_shape = function(input_shape) {
-      # `input_shape` is a list of lists, i.e.
-      # list(list(batch_size, mean_size), list(batch_size, std_size))
-      list(input_shape[[1]])
-    }
-  )
+    self$add_loss(
+      kl_weight * kl_loss / 784  # scale the KL to a magnitude comparable to the MSE
+    )
+
+    # generate the random noise
+    eps = random_normal(op_shape(mu))
+
+    #!hwbegin TODO compute the latent code using the reparametrization trick
+    mu + eps * op_exp(log_var / 2)
+    #!hwend
+  },
 )
-
-layer_sampling <- function(object) {
-  create_layer(SamplingLayer, object, list())
-}
 ```
 
-This encoder has two hidden layers of size 256 and 64. The output of the latter is connected to two separate layers that will predict mean and (the logarithm of the) standard deviation of the latent code for the input samples. We now connect these two layers to the sampling layer we implemented above, and add a few more dense layers to reconstruct the example.
+This encoder has a hidden layer of size 512. The output of the latter is connected to two separate layers that will predict mean and (the logarithm of the) standard deviation of the latent code for the input samples. We now connect these two layers to the sampling layer we implemented above, and add a few more dense layers to reconstruct the example.
 
 We now create the model, starting from the encoder.
 
 ```{r}
-latent_dim = 32
-hidden_dim = 512
-sample_dim = 784
+latent_dim = 32L
+hidden_dim = 512L
+sample_dim = 784L
 
-input  = layer_input(shape = list(sample_dim))
+input  = keras_input(shape = list(sample_dim))
 
 # common encoder layers
-ll = input %>% layer_our_dense(hidden_dim, activation_relu)
+encoder <- our_dense(units = hidden_dim, activation = activation_relu)
+ll = input |> encoder()
 
 # separate heads for mean and standard deviation
-latent_mean = ll %>% layer_our_dense(latent_dim, activation_linear)
-latent_log_std = ll %>% layer_our_dense(latent_dim, activation_linear)
+latent_mean = ll |> our_dense(units = latent_dim, activation = activation_linear)
+latent_log_std = ll |> our_dense(units = latent_dim, activation = activation_linear)
 ```
 
 This encoder has two hidden layers of size 256 and 64. The output of the latter is connected to two separate layers that will predict mean and (the logarithm of the) standard deviation of the latent code for the input samples. We now connect these two layers to the sampling layer we implemented above, and add a few more dense layers to reconstruct the example.
@@ -326,9 +265,9 @@ This encoder has two hidden layers of size 256 and 64. The output of the latter 
 latent_code = layer_sampling(list(latent_mean, latent_log_std))
 
 # decoder layers
-output = latent_code %>%
-  layer_our_dense(hidden_dim, activation_relu) %>%
-  layer_our_dense(sample_dim, activation_linear)
+output = latent_code |>
+  our_dense(units = hidden_dim, activation = activation_relu) |>
+  our_dense(units = sample_dim, activation = activation_linear)
 ```
 
 We can create a Keras model with arbitrarily complicated topologies by appropriately connecting layers, as we just did. We only need to tell Keras which layers are input layers and which are output. Although we did not do it here, we can also have several input layers and/or several output layers, each with its own loss. This is useful when, for example, you want to create a network that takes as input an picture and a sound, and outputs the location of the objects in the picture that does that sound, along with a textual description of what is going on.
@@ -338,14 +277,14 @@ We now create, compile and fit the model as usual.
 ```{r}
 model = keras_model(input, output)
 
-model %>% compile(
+model |> compile(
   #!hwbegin TODO use the mean squared error loss and the adam optimizer
   loss = 'mse',
   optimizer = 'adam',
   #!hwend
 )
 
-model %>% fit(
+model |> fit(
   #!hwbegin TODO fit for two epochs on the training dataset
   x_train, x_train, epochs = 2
   #!hwend
@@ -355,12 +294,12 @@ model %>% fit(
 Let us check the reconstruction of a digit:
 
 ```{r}
-reconstruction = model %>% predict(x_train[2,,drop=FALSE])
+reconstruction = model |> predict(x_train[2,,drop=FALSE])
 reconstruction = pmin(1, pmax(reconstruction, 0))
 
 dim(reconstruction) <- c(28, 28)
 
-grid::grid.raster(reconstruction, interpolate = FALSE)
+plot(as.raster(reconstruction))
 ```
 
 It is already quite good. Now try to remove the division of the KL by 784, train again and visualize the result.
@@ -374,57 +313,50 @@ In order to implement this method, we need to change the variable `kl_weight` du
 Creating a custom callback is very similar to creating a custom layer (see the documentation [here](https://keras.rstudio.com/articles/training_callbacks.html)):
 
 ```{r}
-KlAnnealingCallback <- R6::R6Class("KlAnnealingCallback",
-  inherit = KerasCallback,
+KlAnnealingCallback <- Callback("KlAnnealingCallback",
+  initialize = function(epoch_start, duration_epochs, variable) {
+    self$epoch_start = epoch_start
+    self$duration_epochs = duration_epochs
+    self$variable = variable
+  },
 
-  public = list(
-    epoch_start = NULL,
-    duration_epochs = NULL,
-    variable = NULL,
+  # no kl at the beginning of training
+   on_train_begin = function(logs = list()) {
+    self$variable$assign(0.0)
+  },
 
-    initialize = function(epoch_start, duration_epochs, variable) {
-      self$epoch_start = epoch_start
-      self$duration_epochs = duration_epochs
-      self$variable = variable
-    },
-
-    # no kl at the beginning of training
-    on_train_begin = function(logs = list()) {
-      self$variable$assign(0.0)
-    },
-
-    # update the weight at the beginning of every epoch
-    on_epoch_begin = function(epoch, logs = list()) {
-      epoch = epoch + 1  # it starts from zero
-      if(epoch < self$epoch_start) {
-        message("epoch ", epoch, " is lower than starting epoch ", self$epoch_start)
-      }
-      else {
-        new_weight = (
-          #!hwbegin TODO linearly interpolate the new weight
-          pmin(1, (epoch - self$epoch_start) / self$duration_epochs)
-          #!hwend
-        )
-
-        self$variable$assign(new_weight)
-        message("kl weight is ", new_weight, " at epoch ", epoch)
-      }
+  # update the weight at the beginning of every epoch
+  on_epoch_begin = function(epoch, logs = list()) {
+    epoch = epoch + 1  # it starts from zero
+    if(epoch < self$epoch_start) {
+      message("epoch ", epoch, " is lower than starting epoch ", self$epoch_start)
     }
-))
+    else {
+      new_weight = (
+        #!hwbegin TODO linearly interpolate the new weight
+        pmin(1, (epoch - self$epoch_start) / self$duration_epochs)
+        #!hwend
+      )
+
+      self$variable$assign(new_weight)
+      message("kl weight is ", new_weight, " at epoch ", epoch)
+    }
+  }
+)
 
 #!hwbegin TODO create the VAE as before
-input  = layer_input(shape = list(sample_dim))
+input = keras_input(shape = list(sample_dim))
 
-ll = input %>% layer_dense(hidden_dim, activation_relu)
+ll = input |> our_dense(units = hidden_dim, activation = activation_relu)
 
-latent_mean = ll %>% layer_dense(latent_dim, activation_linear)
-latent_log_std = ll %>% layer_dense(latent_dim, activation_linear)
+latent_mean = ll |> our_dense(units = latent_dim, activation = activation_linear)
+latent_log_std = ll |> our_dense(units = latent_dim, activation = activation_linear)
 
 latent_code = layer_sampling(list(latent_mean, latent_log_std))
 
-output = latent_code %>%
-  layer_dense(hidden_dim, activation_relu) %>%
-  layer_dense(sample_dim, activation_linear)
+output = latent_code |>
+  our_dense(units = hidden_dim, activation = activation_relu) |>
+  our_dense(units = sample_dim, activation = activation_linear)
 #!hwend
 
 model = keras_model(input, output)
@@ -433,25 +365,25 @@ model = keras_model(input, output)
 # later we will use it for encoding samples
 encoder = keras_model(input, latent_code)
 
-model %>% compile(
+model |> compile(
   loss = 'mse',
   optimizer = 'adam',
 )
 
-model %>% fit(
+model |> fit(
   x_train, x_train, epochs = 20,
   callbacks = list(
-    KlAnnealingCallback$new(epoch_start = 4, duration_epochs = 8, variable = kl_weight)
+    KlAnnealingCallback(epoch_start = 4, duration_epochs = 8, variable = kl_weight)
   )
 )
 ```
 
 
 ```{r}
-reconstruction = model %>% predict(x_train[2,,drop=FALSE])
+reconstruction = model |> predict(x_train[2,,drop=FALSE])
 reconstruction = pmin(1, pmax(reconstruction, 0))
 
 dim(reconstruction) <- c(28, 28)
 
-grid::grid.raster(reconstruction, interpolate = FALSE)
+plot(as.raster(reconstruction))
 ```

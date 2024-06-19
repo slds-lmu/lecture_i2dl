@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.12.0
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3
     language: python
@@ -15,7 +15,7 @@ jupyter:
 <!-- #region pycharm={"name": "#%% md\n"} -->
 # Lab 11
 
-**Authors**: Emilio Dorigatti, Tobias Weber
+**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Imports
 <!-- #endregion -->
@@ -42,16 +42,18 @@ set_matplotlib_formats('png', 'pdf')
 ## Exercise 1
 
 In this exercise we will get acquainted with the KL divergence for normal distributions.
-First, let $p(x)=\mathcal{N}(\mu_1,\sigma_1^2)$ and $q(x)=\mathcal{N}(\mu_2,\sigma_2^2)$
+
+
+**(a)** First, let $p(x)=\mathcal{N}(\mu_1,\sigma_1^2)$ and $q(x)=\mathcal{N}(\mu_2,\sigma_2^2)$
 and show that
 
-\begin{equation}
+\begin{equation*}
 \text{KL}(q||p)
 = \mathbb{E}_{x\sim q}\left[\log\frac{q(x)}{p(x)}\right]
 =\log\frac{\sigma_1}{\sigma_2}+\frac{\sigma_2^2+(\mu_1-\mu_2)^2}{2\sigma_1^2} -\frac 1 2
-\end{equation}
+\end{equation*}
 
-Now, consider a variational autoencoder that takes a vector as input $\textbf{x}$ and
+**(b)** Now, consider a variational autoencoder that takes a vector as input $\textbf{x}$ and
 transforms it into a mean vector $\mu(\textbf{x})$ and a variance vector $\sigma(\textbf{x})^2$.
 From these, we derive the latent code $\textbf{z}\sim q(\textbf{z})=\mathcal{N}(\mu(\textbf{x}),\text{diag}(\sigma(\textbf{x})^2))$,
 i.e. a multivariate Gaussian in $d$ dimensions with a given mean vector and diagonal
@@ -60,9 +62,9 @@ multivariate Gaussian $p=\mathcal{N}(\textbf{0},\textbf{1})$.
 
 Now show that:
 
-\begin{equation}
+\begin{equation*}
 \text{KL}(q||p)= -\frac 1 2 \sum_{i=1}^d \left(1+\log\sigma_i(\textbf{x})^2-\sigma_i(\textbf{x})^2 - \mu_i(\textbf{x})^2 \right)
-\end{equation}
+\end{equation*}
 
 Hint: start by showing that $p$ and $q$ can be factorized into a product of independent
 Gaussian components, one for each dimension, then apply the formula for the KL
@@ -72,7 +74,8 @@ divergence for the univariate case.
 #!TAG HWBEGIN
 
 ### Solution
-We analyze each term separately:
+
+**(a)** We analyze each term separately:
 
 \begin{align}
 \mathbb{E}_{x\sim q}\left[\log q(x)\right]
@@ -104,7 +107,7 @@ Now taking the difference:
 &= \log\frac{\sigma_1}{\sigma_2}+\frac{\sigma_2^2+(\mu_1-\mu_2)^2}{2\sigma_1^2} -\frac 1 2
 \end{align}
 
-Moving to the second question, the expression for $p$ can be factorized as follows:
+**(b)** Moving to the second question, the expression for $p$ can be factorized as follows:
 
 \begin{align}
 q(\textbf{z})
