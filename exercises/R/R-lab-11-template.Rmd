@@ -10,6 +10,219 @@ knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 **Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Exercise 1
+
+In this exercise, we will implement a denoising autoencoder (DAE). We will use the MNIST dataset for this task. The autoencoder will be trained on noisy images and should be able to remove the noise from the images.
+
+```{r}
+library(tensorflow)
+cat("This code was tested on tensorflow version", tf$version$GIT_VERSION)
+```
+
+As usual, we start by loading and pre-processing the dataset.
+
+```{r}
+library(keras3)
+
+mnist = dataset_mnist()
+x_train = mnist$train$x / 255
+y_train = to_categorical(mnist$train$y)
+input_size = 28 * 28
+dim(x_train) <- c(nrow(x_train), input_size)
+```
+
+First let's look at some original images and their noisy versions with varying noise factors (NF).
+
+```{r}
+# Define noise factors
+noise_fcts <- c(0.0, 0.1, 0.5, 1.0)
+
+# Define the function to add Gaussian noise
+add_gaussian_noise <- function(x, noise_fct) {
+  #!hwbegin TODO add Gaussian noise to the input image and scale the noise by noise_fct
+  x_noisy <- x + noise_fct * rnorm(length(x), mean = 0, sd = 1)
+  #!hwend
+  x_noisy
+}
+# Create a list to hold plots
+plot_list <- list()
+
+# Generate plots
+library(ggplot2)
+library(patchwork)
+for (i in seq_along(noise_fcts)) {
+  noise_fct <- noise_fcts[i]
+  for (j in 1:length(x_train)) {
+    if (j > 5) {
+      break
+    }
+    x <- x_train[j,]
+    x_noisy <- add_gaussian_noise(x, noise_fct)
+    x_noisy <- matrix(x_noisy, nrow = 28, ncol = 28, byrow = T)
+    x_noisy <- x_noisy[,28:1]
+    
+    p <- ggplot(data = as.data.frame(as.table(x_noisy)), aes(Var1, Var2, fill = Freq)) +
+      geom_tile() +
+      scale_fill_gradient(low = "black", high = "white") +
+      theme_void() +
+      theme(legend.position = "none") +
+      ggtitle(paste("NF =", noise_fct)) +
+      coord_fixed()
+    
+    plot_list <- append(plot_list, list(p))
+  }
+}
+
+# Combine plots using patchwork
+combined_plot <- wrap_plots(plot_list, ncol = 5)
+
+# Display the combined plot
+print(combined_plot)
+
+```
+
+Let's first construct a fully connected autoencoder and train it.
+
+```{r}
+input <- keras_input(shape = list(input_size))
+encoder <- keras_model_sequential(input_shape = c(input_size)) |> 
+  layer_dense(units = 128, activation = 'relu') |>
+  layer_dense(units = 64, activation = 'relu')
+
+decoder = keras_model_sequential(input_shape = c(64)) |>
+  layer_dense(units = 128, activation = 'relu') |>
+  layer_dense(units = input_size, activation = 'sigmoid')
+
+output <- input |>
+  #!hwbegin TODO add a layer that adds Gaussian noise to the input to make it a denoising autoencoder
+  layer_gaussian_noise(stddev = 0.5) |>
+  #!hwend
+  encoder() |>
+  decoder()
+
+autoencoder <- keras_model(inputs = input, outputs = output)
+
+autoencoder |> compile(optimizer = 'adam', loss = 'mse')
+
+autoencoder |> fit(x_train, x_train, epochs = 10, batch_size = 256, shuffle = TRUE)
+```
+
+Now let's visualize some reconstructed images.
+
+```{r}
+# feed some images through the autoencoder and display the original and reconstructed images
+n_images <- 5
+original_images <- x_train[1:n_images,]
+reconstructed_images <- autoencoder |> predict(original_images)
+
+# visualize them with patchwork and ggplot2
+plot_list <- list()
+
+for (i in 1:n_images) {
+  original_image <- matrix(original_images[i,], nrow = 28, ncol = 28, byrow = T)
+  original_image <- original_image[,28:1]
+  reconstructed_image <- matrix(reconstructed_images[i,], nrow = 28, ncol = 28, byrow = T)
+  reconstructed_image <- reconstructed_image[,28:1]
+  
+  p1 <- ggplot(data = as.data.frame(as.table(original_image)), aes(Var1, Var2, fill = Freq)) +
+    geom_tile() +
+    scale_fill_gradient(low = "black", high = "white") +
+    theme_void() +
+    theme(legend.position = "none") +
+    ggtitle("Orig.") +
+    coord_fixed()
+  
+  p2 <- ggplot(data = as.data.frame(as.table(reconstructed_image)), aes(Var1, Var2, fill = Freq)) +
+    geom_tile() +
+    scale_fill_gradient(low = "black", high = "white") +
+    theme_void() +
+    theme(legend.position = "none") +
+    ggtitle("Rec.") +
+    coord_fixed()
+  
+  plot_list <- append(plot_list, list(p1 + p2))
+}
+
+combined_plot <- wrap_plots(plot_list, nrow = 5)
+print(combined_plot)
+```
+
+The reconstructions are pretty good. Let's try to be much more parameter efficient by using a convolutional autoencoder. Check out the parameter count of the fully connected DAE with the `summary()` function (218,192).
+
+```{r}
+input <- keras_input(shape = list(input_size))
+encoder <- keras_model_sequential(input_shape = c(input_size)) |>
+  layer_reshape(target_shape = c(28, 28, 1)) |>
+  layer_conv_2d(filters = 16, kernel_size = 3, activation = 'relu', padding = 'same') |>
+  layer_max_pooling_2d(pool_size = c(2, 2), padding = 'same') |>
+  layer_conv_2d(filters = 32, kernel_size = 3, activation = 'relu', padding = 'same') |>
+  layer_max_pooling_2d(pool_size = c(2, 2), padding = 'same') |>
+  layer_conv_2d(filters = 64, kernel_size = 3, activation = 'relu', padding = 'same') |>
+  layer_max_pooling_2d(pool_size = c(2, 2), padding = 'same')
+
+decoder <- keras_model_sequential(input_shape = c(4, 4, 64)) |>
+  layer_conv_2d_transpose(filters = 32, kernel_size = 2, activation = 'relu', padding = 'valid', strides = 2) |>
+  layer_conv_2d_transpose(filters = 16, kernel_size = 2, activation = 'relu', padding = 'valid', strides = 2) |>
+  layer_conv_2d_transpose(filters = 1, kernel_size = 2, activation = 'sigmoid', padding = 'valid', strides = 2) |>
+  layer_cropping_2d(cropping = 2) |>
+  layer_flatten()
+
+output <- input |> 
+  #!hwbegin TODO add a layer that adds Gaussian noise to the input to make it a denoising autoencoder
+  layer_gaussian_noise(stddev = 0.5) |>
+  #!hwend
+  encoder() |> 
+  decoder()
+
+conv_autoencoder <- keras_model(inputs = input, outputs = output)
+# print(summary(conv_autoencoder))
+
+conv_autoencoder |> compile(optimizer = 'adam', loss = 'mse')
+conv_autoencoder |> fit(x_train, x_train, epochs = 10, batch_size = 256, shuffle = TRUE)
+```
+
+Again, let's visualize some reconstructed images.
+
+```{r}
+# feed some images through the autoencoder and display the original and reconstructed images
+n_images <- 5
+original_images <- x_train[1:n_images,]
+reconstructed_images <- conv_autoencoder |> predict(original_images)
+
+# visualize them with patchwork and ggplot2
+plot_list <- list()
+
+for (i in 1:n_images) {
+  original_image <- matrix(original_images[i,], nrow = 28, ncol = 28, byrow = T)
+  original_image <- original_image[,28:1]
+  reconstructed_image <- matrix(reconstructed_images[i,], nrow = 28, ncol = 28, byrow = T)
+  reconstructed_image <- reconstructed_image[,28:1]
+  
+  p1 <- ggplot(data = as.data.frame(as.table(original_image)), aes(Var1, Var2, fill = Freq)) +
+    geom_tile() +
+    scale_fill_gradient(low = "black", high = "white") +
+    theme_void() +
+    theme(legend.position = "none") +
+    ggtitle("Orig.") +
+    coord_fixed()
+  
+  p2 <- ggplot(data = as.data.frame(as.table(reconstructed_image)), aes(Var1, Var2, fill = Freq)) +
+    geom_tile() +
+    scale_fill_gradient(low = "black", high = "white") +
+    theme_void() +
+    theme(legend.position = "none") +
+    ggtitle("Rec.") +
+    coord_fixed()
+  
+  plot_list <- append(plot_list, list(p1 + p2))
+}
+
+combined_plot <- wrap_plots(plot_list, nrow = 5)
+print(combined_plot)
+```
+The results are competitive with the fully connected autoencoder, but the convolutional autoencoder is much more parameter efficient (about 7 times less parameters)! As an exercise give a short explanation why the convolutional autoencoder is more parameter efficient than the fully connected autoencoder.
+
+
+## Exercise 2
 In this exercise we will get acquainted with the KL divergence for normal distributions. First, let $p(x)=\mathcal{N}(\mu_1,\sigma_1^2)$ and $q(x)=\mathcal{N}(\mu_2,\sigma_2^2)$ and show that
 
 \begin{equation}
@@ -113,29 +326,13 @@ We now plug these into the formula for the KL divergence to get:
 
 <!--#!solutionend-->
 
-## Exercise 2
-
-
-```{r}
-library(tensorflow)
-cat("This code was tested on tensorflow version", tf$version$GIT_VERSION)
-```
+## Exercise 3 (optional)
 
 In this exercise we are going to implement variational autoencoders (VAEs) on the MNIST dataset. In doing this, we will learn some advanced features of Keras that allow us to extend its capabilities beyond what is available out of the box. Specifically, we will see how to create custom layers that can be integrated seamlessly with the other components, and how to create custom callbacks that monitor and alter the training process.
 
-As usual, we start by loading and pre-processing the dataset.
+We have already loaded an preprocessed the data in exercise 1.
 
-```{r}
-library(keras3)
-
-mnist = dataset_mnist()
-x_train = mnist$train$x / 255
-y_train = to_categorical(mnist$train$y)
-input_size = 28 * 28
-dim(x_train) <- c(nrow(x_train), input_size)
-```
-
-In a VAE, the encoder outpus mean and variance of a multivariate Gaussian distribution of the latent codes. Nothing prevents you from using a more complicated distribution in the same framework, but this is the usual choice. The expected log likelihood is then approximated by decoding a single sample from this distribution. Moreover, since we need the model to be differentiable end-to-end, sampling from the latent codes is re-formulated via the reparametrization trick.
+In a VAE, the encoder outputs mean and variance of a multivariate Gaussian distribution of the latent codes. Nothing prevents you from using a more complicated distribution in the same framework, but this is the usual choice. The expected log likelihood is then approximated by decoding a single sample from this distribution. Moreover, since we need the model to be differentiable end-to-end, sampling from the latent codes is re-formulated via the reparametrization trick.
 
 Keras does not provide a layer that can perform this sampling operation, but it can be easily extended to include such a layer. This involves creating a `Layer` class that implements these main three methods:
 
