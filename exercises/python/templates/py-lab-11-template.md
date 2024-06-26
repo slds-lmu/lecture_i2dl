@@ -34,12 +34,254 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 from torchvision.utils import make_grid
+from torchsummary import summary
 
 set_matplotlib_formats('png', 'pdf')
 ```
 
+# Exercise 1
+
+In this exercise, we will implement a denoising autoencoder (DAE). We will use the MNIST dataset for this task. The autoencoder will be trained on noisy images and should be able to remove the noise from the images.
+
+```python
+train_x = MNIST(root='.data', download=True, transform=ToTensor())
+```
+
+Let's first construct a basic fully connected autoencoder.
+
+```python
+#!TAG SKIPQUESTEXEC
+
+class AE(nn.Module):
+    def __init__(self):
+        super(AE, self).__init__()
+        #!TAG HWBEGIN
+        #!MSG TODO: define self.encoder and self.decoder as fully connected neural networks with 2 hidden layers of 128 and 64 neurons respectively
+        #!MSG The encoder should take an input of size a flattened 28x28 image.
+        self.encoder = nn.Sequential(
+            nn.Linear(28*28, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU()
+        )
+        
+        self.decoder = nn.Sequential(
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Linear(128, 28*28),
+            nn.Sigmoid()
+        )
+        #!TAG HWEND
+
+    def forward(self, x):
+        #!TAG HWBEGIN
+        #!MSG TODO: implement the forward pass of the autoencoder
+        x = self.encoder(x)
+        x = self.decoder(x)
+        #!TAG HWEND
+        return x
+```
+
+Let's define the denoising autoencoder class which will add Gaussian noise to the input images before passing them through the autoencoder.
+
+```python
+#!TAG SKIPQUESTEXEC
+
+class DAE(nn.Module):
+    def __init__(self, autoencoder):
+        super(DAE, self).__init__()
+        self.autoencoder = autoencoder
+
+    def forward(self, x, noise_factor=0.5):
+        #!TAG HWBEGIN
+        #!MSG TODO: implement the forward pass of the denoising autoencoder
+        #!MSG Add Gaussian noise to the input x (torch.randn_like() might be useful) and scale the noise by noise_factor
+        #!MSG Then pass the noisy input through the autoencoder and return the reconstructed image
+        x_noisy = x + noise_factor * torch.randn_like(x)
+        x_recon = self.autoencoder(x_noisy)
+        #!TAG HWEND
+        return x_recon
+```
+
+First let's look at some original images and their noisy versions with varying noise factors.
+
+```python
+#!TAG SKIPQUESTEXEC
+
+# plot original and noisy images
+noise_fcts = [0.0, 0.1, 0.5, 1.0]
+fig, axs = plt.subplots(2, len(noise_fcts), figsize=(12, 4))
+for i, noise_fct in enumerate(noise_fcts):
+    for ax, x in zip(axs[:, i], train_x):
+        x = x[0]
+        #!TAG HWBEGIN
+        #!MSG TODO: add Gaussian noise to the image x and scale it by noise_fct
+        x_noisy = x + noise_fct * torch.randn_like(x)
+        #!TAG HWEND
+        ax.imshow(x_noisy.squeeze().numpy(), cmap='gray')
+    axs[0, i].set_title(f'Noise factor {noise_fct}')
+    axs[0, i].set_xticks([])
+    axs[0, i].set_yticks([])
+    axs[1, i].set_xticks([])
+    axs[1, i].set_yticks([])
+```
+
+Let's write a simple training loop to train the DAE on the MNIST dataset.
+
+```python
+#!TAG SKIPQUESTEXEC
+
+autoencoder = AE()
+dae = DAE(autoencoder)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+dae = dae.to(device)
+
+optimizer = torch.optim.Adam(dae.parameters(), lr=0.001)
+criterion = (
+    #!TAG HWBEGIN
+    #!MSG TODO: define the loss function (mean squared error loss)
+    nn.MSELoss()
+    #!TAG HWEND
+)
+for epoch in range(2):
+    for i, (images, _) in enumerate(train_x):
+        # flatten the images
+        #!TAG HWBEGIN
+        #!MSG TODO: flatten the images
+        images = images.view(-1, 28*28).to(device)
+        #!TAG HWEND
+        images_recon = dae(images, noise_factor=0.5)
+        loss = criterion(images_recon, images)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+```
+
+```python
+#!TAG SKIPQUESTEXEC
+
+summary(dae, (28*28,))
+```
+
+The loss decreased during training, which is a good sign. Let's now visualize the original images, noisy images, and the denoised images.
+
+```python
+#!TAG SKIPQUESTEXEC
+
+# plot original, noisy and reconstructed images
+
+fig, axs = plt.subplots(3, 3, figsize=(6, 6))
+for i, (images, _) in enumerate(train_x):
+    images = images.view(-1, 28*28).to(device)
+    noisy_imges = images + 0.5 * torch.randn_like(images)
+    recon_images = dae.autoencoder(images)
+    for ax, img in zip(axs[i, :], [images, noisy_imges, recon_images]):
+        ax.imshow(img.view(28, 28).cpu().detach().numpy(), cmap='gray')
+        ax.set_xticks([])
+        ax.set_yticks([])
+    if i == 2:
+        break
+```
+
+Let's try to be much more parameter efficient by using a convolutional autoencoder.
+
+```python
+#!TAG SKIPQUESTEXEC
+
+class CAE(nn.Module):
+    def __init__(self):
+        super(CAE, self).__init__()
+        #!TAG HWBEGIN
+        #!MSG TODO: define self.encoder and self.decoder as convolutional neural networks
+        #!MSG The encoder should have 3 convolutional layers with 16, 32, and 64 filters respectively
+        #!MSG Each convolutional layer should be followed by a ReLU activation function and a max pooling layer with a kernel size of 2
+        self.encoder = nn.Sequential(
+            nn.Conv2d(1,16,3,padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(16,32,3,padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(32,64,3,padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2)
+        )
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(64,32,3,stride=2),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32,16,2,stride=2),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16,1,2,stride=2),
+            nn.Sigmoid()
+        )
+        #!TAG HWEND
+
+    def forward(self, x):
+        #!TAG HWBEGIN
+        #!MSG TODO: implement the forward pass of the convolutional autoencoder
+        x = self.encoder(x)
+        x = self.decoder(x)
+        #!TAG HWEND
+        return x
+
+autoencoder = CAE()
+dae = DAE(autoencoder)
+
+dae = dae.to(device)
+
+optimizer = torch.optim.Adam(dae.parameters(), lr=0.001)
+
+# Define the loss function and the training loop
+
+criterion = (
+    #!TAG HWBEGIN
+    #!MSG TODO: define the loss function
+    nn.MSELoss()
+    #!TAG HWEND
+)
+
+for epoch in range(2):
+    for i, (images, _) in enumerate(train_x):
+        # note that we do not flatten the images here
+        images_recon = dae(images)
+        # flatten the images for the loss calculation
+        images = images.view(-1, 28*28).to(device)
+        images_recon = images_recon.view(-1, 28*28).to(device)
+        loss = criterion(images_recon, images)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')
+```
+
+```python
+#!TAG SKIPQUESTEXEC
+
+summary(dae, (1, 28, 28))
+```
+
+```python
+#!TAG SKIPQUESTEXEC
+# visualize original, noisy and reconstructed images
+fig, axs = plt.subplots(3, 3, figsize=(6, 6))
+for i, (images, _) in enumerate(train_x):
+    images = images.to(device)
+    noisy_imges = images + 0.5 * torch.randn_like(images)
+    recon_images = dae.autoencoder(images)
+    for ax, img in zip(axs[i, :], [images, noisy_imges, recon_images]):
+        ax.imshow(img.view(28, 28).cpu().detach().numpy(), cmap='gray')
+        ax.set_xticks([])
+        ax.set_yticks([])
+    if i == 2:
+        break
+```
+
+The results are competitive with the fully connected autoencoder, but the convolutional autoencoder is much more parameter efficient (about 7 times less parameters).
+
 <!-- #region pycharm={"name": "#%% md\n"} -->
-## Exercise 1
+## Exercise 2
 
 In this exercise we will get acquainted with the KL divergence for normal distributions.
 
@@ -160,14 +402,14 @@ We now plug these into the formula for the KL divergence to get:
 
 #!TAG HWEND
 
-## Exercise 2
+## Exercise 3 (optional)
 
 In this exercise we are going to implement variational autoencoders (VAEs) on the MNIST
 dataset.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-train_x = MNIST(root='.data', download=True, transform=ToTensor());
+train_x = MNIST(root='.data', download=True, transform=ToTensor())
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
