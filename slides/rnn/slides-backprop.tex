@@ -189,7 +189,7 @@
     $$ \vdots $$
     $$ \frac{d \mathbf{z}^{[2]}}{d\mathbf{z}^{[1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[1]} + \mathbf{W}^\top \xv^{[2]} + \mathbf{b})) \mathbf{V}^\top = \mathbf{D}^{[1]} \mathbf{V}^\top $$
     
-    $$ \frac{d L}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}} = \mathbf{D}^{[t-1]} \mathbf{D}^{[t-2]}   \text{ . . . } \mathbf{D}^{[1]} (\mathbf{V}^\top)^{t-1}$$
+    $$ \frac{d L}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \frac{d \mathbf{z}^{[t]}}{d \mathbf{z}^{[t-1]}} \dots \frac{d \mathbf{z}^{[2]}}{d \mathbf{z}^{[1]}} = \frac{d L}{d \mathbf{z}^{[t]}} \mathbf{D}^{[t-1]} \mathbf{D}^{[t-2]}   \text{ . . . } \mathbf{D}^{[1]} (\mathbf{V}^\top)^{t-1}$$
 %    $$ \frac{d \mathbf{z}^{[1]}}{d\mathbf{x}^{[1]}} = \text{diag}(\sigma' (\mathbf{V}^\top \mathbf{z}^{[0]} + \mathbf{W}^\top \xv^{[1]} + \mathbf{b})) \mathbf{W}^\top$$
     \item In general, for an arbitrary time-step $i<t$ in the past, $\frac{d\mathbf{z}^{[t]}}{d\mathbf{z}^{[i]}}$ will contain the term $(\mathbf{V}^\top)^{t-i}$ (this follows from the chain rule).
     \item Based on the largest eigenvalue of $\mathbf{V}^\top$, the presence of the term $(\mathbf{V}^\top)^{t-i}$ can either result in vanishing or exploding gradients.
@@ -199,26 +199,10 @@
     \item That happens simply because we propagate errors over very many stages backwards.
   \end{itemize}
   
-  \framebreak
-  \begin{figure}
-      \centering
-      \scalebox{0.8}{\includegraphics{figure/rnn_exploding.png}}
-      \caption{\footnotesize {Exploding gradients}}
-  \end{figure}
-
   \begin{itemize}
     \item Recall, that we can counteract exploding gradients by implementing gradient clipping.
     \item To avoid exploding gradients, we simply clip the norm of the gradient at some threshold $h$ (see chapter 4): $$\text{if  } ||\nabla W|| > \text h: \nabla W \leftarrow \frac{h}{||\nabla W||} \nabla W $$
   \end{itemize}
-
-\framebreak
-
-  \begin{figure}
-      \centering
-      \scalebox{0.8}{\includegraphics{figure/rnn_vanishing.png}}
-      \caption{\footnotesize {Vanishing gradients}}
-  \end{figure}
-
 
   \begin{itemize}
     \item Even for a stable RNN (gradients not exploding), there will be exponentially smaller weights for long-term interactions compared to short-term ones and a more sophisticated solution is needed for this vanishing gradient problem (discussed in the next chapters).

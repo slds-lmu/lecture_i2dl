@@ -327,7 +327,6 @@ Potential snippet from a loss surface of a deep neural network with many local m
     \tiny{Source: Goodfellow, Ch. 4}
     \end{figure}
      \item Current literature suspects that most local minima have low empirical risk.
-     \item Simple test: Norm of gradient should get close to zero.
 \end{itemize}
 \end{vbframe}
 
@@ -354,14 +353,6 @@ Potential snippet from a loss surface of a deep neural network with many local m
     \item For the coin flipping example, this means we are more likely to have heads $m$ times if we are at a critical point with low cost.
     \item That means in particular that local minima are much more likely to have low cost than high cost and critical points with high cost are far more likely to be saddle points.
     \item See Dauphin et al. (2014) for a more detailed investigation.
-    
-\framebreak
-    
-    \item \enquote{Saddle points are surrounded by high error plateaus that can dramatically slow down learning, and give the illusory impression of the existence of a local minimum} (Dauphin et al. (2014)).
-  \begin{figure}
-    \centering
-    \includegraphics[width=8.5cm]{figure/cost.png}
-  \end{figure}
   \end{itemize}
 \end{vbframe}
 

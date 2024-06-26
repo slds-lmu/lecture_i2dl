@@ -158,58 +158,6 @@ $$\tilde{\Wmat} = (\biasb, \Wmat_1, ..., \Wmat_p).$$
       \end{itemize}
   \end{itemize}
 \end{vbframe}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Single Hidden Layer Networks: Example}
-  \begin{itemize}
-    \item Weights (and biases) of the network.
-  \begin{figure}
-    \centering
-      \only<1>{\scalebox{1}{\includegraphics{figure/sinlay_one.png}}}
-      \only<2>{\scalebox{1}{\includegraphics{figure/sinlay_two.png}}}
-      \only<3>{\scalebox{1}{\includegraphics{figure/sinlay_three.png}}}
-      \only<4>{\scalebox{1}{\includegraphics{figure/sinlay_four.png}}}
-      \only<5>{\scalebox{1}{\includegraphics{figure/sinlay_five.png}}}
-      \only<6>{\scalebox{1}{\includegraphics{figure/sinlay_six.png}}}
-  \end{figure}
-  \begin{figure}
-    \centering
-  \end{figure}
-  \end{itemize}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame} {Single Hidden Layer Networks: Example}
-  
-  \small{Forward pass through the shallow neural network.}
-  \begin{figure}
-    \centering
-    \only<1>{\scalebox{1}{\includegraphics{figure/sinlay_seven.png}}}
-    \only<2>{\scalebox{1}{\includegraphics{figure/sinlay_eight.png}}}
-    \only<3>{\scalebox{1}{\includegraphics{figure/sinlay_nine.png}}}
-    \only<4>{\scalebox{1}{\includegraphics{figure/sinlay_ten.png}}}
-    \only<5>{\scalebox{1}{\includegraphics{figure/sinlay_eleven.png}}}
-    \only<6>{\scalebox{1}{\includegraphics{figure/sinlay_twelve.png}}}
-  \end{figure}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%\begin{frame} {Hidden Layer: Activation Function}
-%\begin{itemize}
-%\item It is important to note that if the hidden layer does not have a non-linear activation, the network can only learn linear decision boundaries.
-%\item For simplification purposes, we drop the bias terms in notation and let $\sigma = \text{id}$. Then:
-%    \begin{eqnarray*}
-%        \fx & = & \tau(\wtu^T \hidz) \\
-%         & = & \tau(\wtu^T \sigma(\Wmat^T \xv)) \\
-%         & = & \tau(\wtu^T\Wmat^T \xv) = \tau(\mathbf{v}^T \xv)
-%      \end{eqnarray*}
-%      where $ \mathbf{v} = \Wmat\wtu$. It can be seen that $\fx$ can only yield a linear decision boundary.
-%  \end{itemize}
-%\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 \endlecture
 \end{document}

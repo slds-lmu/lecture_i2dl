@@ -128,30 +128,69 @@
 
 \end{vbframe}
 
+\begin{vbframe}{Transformer Components}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{CNNs or RNNs?}
-
-\begin{frame} {CNNs or RNNs?}
+\textbf{In- and Output Embeddings}:
   \begin{itemize}
-    \item Historically, RNNs were the default for sequence processing tasks.
-    \item However, some families of CNNs (especially those based on Fully Convolutional Networks (FCNs)) \textit{can} be used to process variable-length sequences such as text or time-series data.
-    \item If a CNN doesn't contain any fully-connected layers, the total number of weights in the network is independent of the spatial dimensions of the input because of weight-sharing in the convolutional layers.
-    \item Recent research [Bai et al. , 2018] indicates that such convolutional architectures, so-called Temporal Convolutional Networks (TCNs), can outperform RNNs on a wide range of tasks.
-    \item A major advantage of TCNs is that the entire input sequence can be fed to the network at once (as opposed to sequentially).
-    % \item Surprisingly, the TCNs can model long-range dependencies in the inputs even better than recurrent architectures!
+  \item Each input (e.g., word or characters; referred to as token) in the input sequence is converted into a dense vector of fixed size.
+  \item Embeddings capture semantic information about the tokens.
+  \item In Transformers, input embeddings are combined with positional encodings to form the final input representations.
+  \item Output Embeddings: In the decoder, predicted tokens are also converted into embeddings.
   \end{itemize}
-\end{frame}
 
-\begin{frame} {CNNs or RNNs?}
-  \begin{figure}
-      \centering
-      \scalebox{1}{\includegraphics{plots/tcn2.png}}
-      \caption{A TCN (we have already seen this in the CNN lecture!) is simply a variant of the one-dimensional FCN which uses a special type of dilated convolutions called \textbf{causal dilated} convolutions (Roy, 2019).}
-  \end{figure}
-\end{frame}
+\framebreak
+
+\textbf{Self-Attention}:
+  \begin{itemize}
+    \item Different from (Cross-)Attention: Captures dependencies within a single sequence (cross-attention involves attending to a different sequence).
+    \item Mathematically, for input \( X \), self-attention is calculated as:
+        \[
+        \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
+        \]
+      where \( Q, K, V \) are the queries, keys, and values derived from \( X \).
+    \item For a given input sequence of embeddings \( X \):
+        \[
+        Q = XW_Q, \quad K = XW_K, \quad V = XW_V
+        \]
+      with learned weights \( W_Q, W_K, W_V \) that project the embeddings into different subspaces.
+  \end{itemize}
+  
+  
+\framebreak
+  
+  \textbf{Positional Encoding}:
+  \begin{itemize}
+    \item Used to incorporate information about the position of tokens since Transformers process the entire sequence simultaneously.
+    \item Computed using sine and cosine functions of different frequencies:
+        \[
+        PE(pos, 2i) = \sin\left(\frac{pos}{10000^{2i/d}}\right), 
+        \]
+        
+        \[
+        PE(pos, 2i+1) = \cos\left(\frac{pos}{10000^{2i/d}}\right)
+        \]
+     with \( pos \) being the position of the token, \( d \) the embedding dimensionality and \( i \) the dimension index.
+     \item These encodings are added to the embeddings element-wise.
+  \end{itemize}
+
+  \framebreak
+
+\textbf{Masked Multi-Head Attention}:
+  \begin{itemize}
+    \item Masking in the decoder: prevents positions from attending to subsequent positions, thereby leaking future values.
+    \item Multi-head attention allows the model to jointly attend to information from different representation subspaces.
+    \item For each head \( h \):
+        \[
+        \text{head}_h = \text{Attention}(Q^h, K^h, V^h)
+        \]
+    \item The outputs of all heads are concatenated and linearly transformed.
+  \end{itemize}
+  
+\end{vbframe}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %\begin{frame} {CNNs or RNNs?}

@@ -324,6 +324,26 @@ RNNs do not need to produce an output at each time step. Often only one output i
 
 }
 
+\section{Bidirectional RNNs}
+
+
+\begin{vbframe}{Bidirectional RNNs}
+  \begin{itemize}
+    \item A generalization of the simple RNN are bidirectional RNNs.
+    \item These allow us to process sequential data depending on both past and future inputs, e.g. an application predicting missing words, which probably depend on both preceding and following words.
+    \item One RNN processes inputs in the forward direction from $\mathbf{x}^{[1]}$ to $\mathbf{x}^{[T]}$ computing a sequence of hidden states $(\mathbf{z}^{[1]}, \dots, \mathbf{z}^{(T)})$, another RNN in the backward direction from $\mathbf{x}^{[T]}$ to $\mathbf{x}^{[1]}$ computing hidden states $(\mathbf{g}^{[T]}, \dots, \mathbf{g}^{[1]})$
+    \item Predictions are then based on both hidden states (e.g., by concatenating them).
+    \item With connections going back in time, the whole input sequence must be known in advance
+to train and infer from the model.
+    \item Bidirectional RNNs are often used for the encoding of a sequence in machine translation.
+  \end{itemize}
+\framebreak  
+\textbf{Computational graph of a bidirectional RNN:}
+  \begin{figure}
+    \includegraphics[width=4.5cm]{figure/bidirectional_rnn.png}
+    \caption{A bidirectional RNN consists of a forward RNN processing inputs from left to right and a backward RNN processing inputs backwards in time.}
+  \end{figure} 
+\end{vbframe}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
