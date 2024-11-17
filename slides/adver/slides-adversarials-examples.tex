@@ -1,0 +1,324 @@
+\input{../../style/preamble}
+\input{../../latex-math/basic-math}
+\input{../../latex-math/basic-ml}
+\input{../../latex-math/ml-nn}
+
+\title{Deep Learning}
+
+\date{}
+
+\begin{document}
+\newcommand{\titlefigure}{plots/dog.png}
+%modify picture
+\newcommand{\learninggoals}{
+  \item Adversarial robustness
+  \item Adversarial examples
+  \item Targeted attacks
+  %\item Principal component analysis
+}
+
+\lecturechapter{Adversarial Examples}
+\lecture{I2DL}
+
+
+\newcommand{\Dsubtrain}{\mathcal{D}_{\text{subtrain}}}
+\newcommand{\Dval}{\mathcal{D}_{\text{val}}}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Adversarial Robustness}
+    \begin{itemize}
+        \item It is critical to examine if a trained neural net is robust and reliable. 
+        \item \textbf{Adversarial robustness} of a model means that a model is robust to (test time) perturbations of its inputs. 
+        \item \textbf{Adversarial machine learning} studies techniques which attempt  to fool machine learning models through malicious input.
+        \item To make a model more robust, we can train our model on adversarially perturbed examples, called \textbf{adversarial examples}, derived from the training set.  
+        \item This chapter summarizes  high-level ideas in adversarial robustness with a particular emphasis on adversarial examples.
+        \item For a deeper dive, \href{https://adversarial-ml-tutorial.org/}{\beamergotobutton{click here.}}
+    \end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Adversarial Examples}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ \begin{frame} {Adversarial Examples}
+   \begin{itemize}
+     \item An adversarial example is an input to a model that is deliberately designed to "fool" the model into misclassifying it.
+     \item The test error of a model is only an indicator of how well the model performs with respect to samples from the data-generating distribution.
+     \item The performance of the same model can be drastically different on samples from a completely different distribution (on the same input space).
+      \item It is possible to make changes to an image that makes a pretrained CNN (for example) output a completely different predicted class even though the change is imperceptible to the human eye.
+     \item These examples suggest that even models that have very good test set performance do not have a deep understanding of the underlying concepts that determine the correct output label.
+     \end{itemize}
+    \end{frame}
+    
+  \begin{frame} {Adversarial Examples}
+    \begin{itemize}
+      \item Adversarial examples are \textit{not} unique to deep neural nets. Many other models (such as logistic regression) are also susceptible to them.
+      \item They pose serious security concerns in many areas.
+      \item Example: Fooling autonomous cars into thinking that a stop sign is a 45 km/h sign.
+      \item Example: Evading law enforcement by fooling facial recognition systems into misidentifying individuals.
+   \end{itemize}
+ \end{frame}
+ 
+ \begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+       \captionsetup{font=footnotesize,labelfont=footnotesize, labelfont = bf}
+      \scalebox{1}{\includegraphics{plots/dog.png}}
+      \caption{\footnotesize The difference between the left and the right golden retriever is imperceptible to humans.
+      The last image was classified as a plane by ResNet50 with more than 99\% confidence. 
+      The only difference between the left and right image are small pixel perturbations, shown in the second picture (Prevost, 2018).}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+       \captionsetup{font=footnotesize,labelfont=footnotesize, labelfont = bf}
+      \scalebox{1}{\includegraphics{plots/glasses.png}}
+      %\tiny{\\Credit: Sharif et al. (2016)}
+      \caption{\footnotesize A CNN misidentified each person in the top row (with the funky looking "adversarial" glasses) as the one in the corresponding position in the bottom row. The generated images do often contain some features of the target class (Sharif et al., 2016).}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+       \captionsetup{font=footnotesize,labelfont=footnotesize, labelfont = bf}
+      \scalebox{0.8}{\includegraphics{plots/easyfooled.png}}
+      %\tiny{\\Credit: Nguyen et al.}
+      \caption{\footnotesize All 8 images above are unrecognizable to humans but are misclassified by a CNN with higher than 99\% confidence.  The CNN was trained by Krizhevsky et al. on the ImageNet dataset and consists of five convolutional layers, some of which are followed by max-pooling layers,and three fully-connected layers with a final softmax (Nguyen et al., 2015).}
+  \end{figure}
+\end{frame}
+
+\begin{frame} {Adversarial Examples}
+  \begin{figure}
+    \centering
+      \scalebox{0.8}{\includegraphics{plots/adv_speech.png}}
+      %\tiny{\\Credit: Carlini et al}
+      \caption{\footnotesize  It is possible to add a small perturbation to any waveform in order to fool a speech-to-text neural network into transcribing it as any desired target phrase (Carlini et al.). 
+      %(This was not generated using FGSM.)
+      }
+  \end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Creation of Adversarial Examples}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{vbframe} {Creation of Adversarial Examples}
+  \begin{itemize}
+  \item In the examples earlier, we saw that adversarial examples can seem recognizable to humans or seem like random noise/patterns.
+  \item In the following, given a datapoint $\xv$, we want to create an adversarial example $\tilde{\xv}$ that is very similar to $\xv$. 
+    %\item The Fast Gradient Sign Method (FGSM) is a very simple way to generate adversarial examples.
+    \item Specifically, our goal is to find an input $\tilde{\xv}$ close to the datapoint $\xv$ such that a pretrained model (which accurately classifies $\xv$), ends up misclassifying $\tilde{\xv}$. 
+    % even though $\tilde{\xv}$ is visually indistinguishable from $\xv$ to human beings.
+    \item When we train a neural network, we typically want to optimize the parameter $\thetab$, so that we minimize the loss. 
+    \item By contrast, to find an adversarial example $\tilde{\xv}$ that is in the vicinity of $\xv$, we want to optimize the \textit{input} to \textit{maximize} the loss.    \framebreak
+    \item To ensure that $\tilde{\xv}$ is close to $\xv$, we optimize over the perturbation of $\xv$, denoted as $\deltab$, and define an feasible set of perturbations $\Delta$. 
+    \begin{equation*}
+        \argmax_{\deltab \in \Delta} L(y, \fh(\xv + \deltab| \thetab))
+    \end{equation*}
+    \item A common perturbation set is $\mathcal{B}^{\infty}_{\epsilon}$ which is the $\epsilon$-ball measured by $\ell_{\infty} = \|\cdot\|_{\infty}$
+    \begin{equation*}
+        \Delta = \mathcal{B}^{\infty}_{\epsilon}(\deltab) = \{\deltab: ||\deltab||_{\infty} \le \epsilon\} \text{ with } ||\deltab||_{\infty} = \max_i|\delta_i|
+    \end{equation*}
+    It allows each component of the perturbation $\deltab$ to lie between  $-\epsilon$ and $+ \epsilon$.
+    \item In general, $\Delta$ can also depend on the input datapoint $\xv$, denoted as $\Delta(\xv)$.
+  \end{itemize}
+\end{vbframe}
+
+\begin{frame} {Example: ResNet50}
+  \begin{figure}
+    \centering
+      \scalebox{1}{\includegraphics{plots/pig.png}}
+     %\tiny{\\Credit: Kolter \& Madry}
+     \vspace{-0.2cm}
+      \caption{Adversarial example for one datapoint of the ImageNet dataset and pre-trained ResNet50. By adding an imperceptibly small perturbation to the original image,  an image was created that looks identical to our original image, but is misclassified (Kolter \& Madry, 2019).}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Targeted Attacks}
+    \begin{itemize}
+        \item It is also possible to generate adversarial examples classified virtually as any desired class. This is known as a \textbf{targeted attack}.
+        \item The only difference is that, instead of trying to just maximize the loss of the correct class, we maximize the loss of the correct class while also minimizing the loss of a target class $y_{target}$.
+        \begin{equation*}
+             \argmax_{\deltab \in \Delta} ( L(y, \fh(\xv + \deltab| \thetab)) - L(y_{target}, \fh(\xv + \deltab| \thetab)) )
+        \end{equation*}
+    \end{itemize}
+\end{frame}
+% \begin{frame} {Other forms}
+% In practice, adversarial examples of images can be generated not only by making small modifications to the input pixels, but also using spatial transformations.
+%         \begin{figure}
+%    \captionsetup{font=footnotesize,labelfont=footnotesize, labelfont = bf}
+%     \centering
+%       \scalebox{0.6}{\includegraphics{plots/adversarials_forms.png}}
+%      \tiny{\\Credit: Brown (2018)}
+%   \end{figure}
+% \end{frame}
+  
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %\section{Adversarial Examples : A closer look (Optional)}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% %\begin{vbframe} {Adversarial Examples and Linearity}
+% %  \begin{itemize}
+% %    \item Goodfellow et al. (2014) showed that linear behaviour of models in high dimensional spaces is the reason for the presence of such adversarial examples.
+% %    \item Neural networks are built from "mostly" linear building blocks. In the case of ReLU activations, the mapping from the input image to the output logits (the inputs to the softmax) is a piece-wise linear function.
+% %    \item The value of a linear function changes rapidly if it has many inputs. Specifically, if each input is modified by $\epsilon$, a linear function with weights $\mathbf{w}$ can change by as much as $\epsilon \lVert \mathbf{w} \rVert_1$, which can be very large if $\mathbf{w}$ is high-dimensional.
+% %    \item There is a tradeoff between using models that are easy to train due to their linearity and models that can use non-linear effects to become robust to adversarial perturbations. 
+% %  \end{itemize}
+% %\end{vbframe}
+% %
+% %\begin{frame} {Adversarial Examples and Linearity}
+% %  \begin{figure}
+% %    \centering
+% %      \scalebox{0.9}{\includegraphics{plots/linear_logit.png}}
+% %      \tiny{\\Credit: Goodfellow}
+% %  \end{figure}
+% %  \footnotesize{The figure shows the result of moving along a single direction (not necessarily axis-aligned) in the input space of a CNN. We begin with an image of an automobile (somewhere in the end of the fifth row) and move an $\epsilon$ amount in this direction (negative $\epsilon$ = opposite direction.). The images in the top half are the result of moving in the "negative $\epsilon$" direction and those in the bottom half are the result of moving in the "positive $\epsilon$" direction.}
+% %\end{frame}
+% %
+% %\begin{frame} {Adversarial Examples and Linearity}
+% %  \begin{figure}
+% %    \centering
+% %      \scalebox{0.9}{\includegraphics{plots/linear_logit.png}}
+% %      \tiny{\\Credit: Goodfellow}
+% %  \end{figure}
+% %  \footnotesize{The figure on the right shows the logits (the inputs to the softmax) for each value of $\epsilon$. Each curve is a logit for a specific class. As we move away from the image of the automobile in either direction, the logits for the 'frog' class become extremely high and the images are misclassified by the CNN. The logits for the 'automobile' class are (relatively) high only in the middle of the plot and the CNN correctly classifies these images (yellow boxes on the left).}
+% %\end{frame}
+% %
+% %
+% %\begin{frame} {Adversarial Subspaces}
+% %  \begin{figure}
+% %    \center
+% %      \includegraphics[width = 6.5cm]{plots/adv_cross.png}
+% %      \tiny{\\Credit: Goodfellow\vspace{0.5cm}}
+% %  \end{figure}
+% %  \only<1>{\footnotesize Each square above represents a 2-dimensional cross section of the input space where the center corresponds to a test example (different squares = different test examples). Moving up or down in a given square indicates moving in a random direction that is orthogonal to the direction of the FGSM. White pixels indicate that the classifier outputs the correct label for the corresponding points and the colored pixels indicate that the classifier misclassifies the corresponding points (different colours = different incorrect classes).}
+% %  \only<2>{The FGSM method identifies a direction such that moving along \textit{any} direction whose unit vector has a large (positive) dot product with the "FGSM vector" results in an adversarial example. Therefore, adversarial examples live in \textbf{linear subspaces} of the input space.}
+% %\end{frame}
+% %
+% %\begin{frame} {Adversarial Subspaces}
+% %  \begin{figure}
+% %    \centering
+% %      \scalebox{1}{\includegraphics{plots/rand_cross.png}}
+% %      \tiny{\\Credit:Goodfellow}
+% %  \end{figure}
+% %    For a given test example, moving in \textit{completely} random directions (within the $\epsilon$-ball) is unlikely to result in adversarial examples.
+% %
+% %\end{frame}
+% %
+% %\begin{frame} {Performance w.r.t. Uniform Distribution}
+% %  \begin{figure}
+% %    \centering
+% %      \includegraphics[width = 4cm]{plots/wrong_everywhere.png}
+% %      \caption{\footnotesize Each square above corresponds to Gaussian noise that was run through a Cifar-10 classifier.}
+% %  \end{figure}
+% %  \small
+% %      \only<1>{\small{Instead of measuring the performance of a classifier with respect to the data-generating distribution, if we measure it with respect to a uniform distribution over the whole input space, these classifiers are \textbf{wrong almost everywhere.}}}
+% %      \only<2>{For all the inputs in the pink boxes, the classifier was reasonably confident (in terms of the softmax values) that the image contained something rather than nothing.}
+% %      \only<3>{ For the inputs in the yellow boxes, just one step of FGSM was sufficient to convince the model that it was looking at an airplane, specifically.}
+% %\end{frame}
+% %
+% %
+% %
+% %\begin{frame} {Adversarial Examples: Outlook}
+% %  \begin{itemize}
+% %    \item The FGSM method that we have looked at is only one of \textit{many} different algorithms for generating adversarial examples.
+% %    \item Athalye et al. (2017) 3-D printed a turtle that fooled the network into classifying it as a rifle from most angles.
+% %    \begin{figure}
+% %    \centering
+% %      \scalebox{1}{\includegraphics{plots/turtle.png}}
+% %      \tiny{\\Credit: Athalye}
+% %  \end{figure}
+% %\end{itemize}
+% %\end{frame}
+% %
+% %\begin{frame} {Adversarial Examples: Outlook}
+% %  \begin{itemize}
+% %    \item Papernot (2016) discusses ways to fool a classifier even if the model (that is, the network structure and the weights) is unknown. Such methods are called \textbf{black-box methods}.
+% %    \item The library CleverHans can be used to both generate robust adversarial examples and build effective defences against adversarial attacks.
+% %  \end{itemize}
+% %\end{frame}
+% 
+% 
+% 
+% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{References}
+\begin{vbframe}
+\frametitle{References}
+\footnotesize{
+\begin{thebibliography}{99}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Kolter and Madry (2019)]{1} Zico Kolter and Aleksander Madry (2019)
+\newblock Adversarial Robustness - Theory and Practice
+\newblock \emph{\url{https://adversarial-ml-tutorial.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Goodfellow et al., 2016]{1} Ian Goodfellow, Yoshua Bengio and Aaron Courville (2016)
+\newblock Deep Learning
+\newblock \emph{\url{http://www.deeplearningbook.org/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Goodfellow, 2017]{1} Ian Goodfellow (2017)
+\newblock Lecture 16 | Adversarial Examples and Adversarial Training
+\newblock \emph{\url{https://www.youtube.com/watch?v=CIfsB_EYsVI}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Goodfellow et al., 2017]{1}  Ian Goodfellow, Nicolas Papernot, Sandy Huang, Rocky Duan, Pieter Abbeel, Jack Clark (2017)
+\newblock Attacking Machine Learning with Adversarial Examples
+\newblock \emph{\url{https://openai.com/blog/adversarial-example-research/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Hastie et al., 2009]{2} Trevoe Hastie, Robert Tibshirani and Jerome Friedman (2009)
+% \newblock The Elements of Statistical Learning
+% \newblock \emph{\url{https://statweb.stanford.edu/\%7Etibs/ElemStatLearn/}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Nguyen et al., 2015]{1} Anh Nguyen, Jason Yosinski and Jeff Clune (2015)
+\newblock Deep Neural Networks are Easily Fooled: High Confidence Predictions for Unrecognizable Images
+\newblock \emph{\url{https://arxiv.org/abs/1412.1897}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Krizhevsky et al., 2012]{1} Alex Krizhevsky, Ilya Sutskever and Geoffrey E. Hinto (2012)
+\newblock ImageNet Classification with Deep Convolutional Neural Networks. NIPS. 
+\newblock \emph{\url{https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \bibitem[Hinton et al., 2012]{3} Geoffrey E Hinton, Nitish Srivastava, Alex Krizhevsky Ilya Sutskever and Ruslan Salakhutdinov (2012)
+% \newblock Improving neural networks by preventing co-adaptation of feature detectors
+% \newblock \emph{\url{http://arxiv.org/abs/1207.0580}}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Maxence Prevost (2018)]{1} Maxence Prevost (2018)
+\newblock Adversarial ResNet50 
+\newblock \emph{\url{http://arxiv.org/abs/1207.0580}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Sharif et al. (2016)]{1} Mahmood Sharif, Sruti  Bhagavatula and Lujo Bauer (2016)
+\newblock Accessorize to a Crime: Real and Stealthy Attacks onState-of-the-Art Face Recognition. Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security.
+\newblock \emph{\url{https://dl.acm.org/doi/10.1145/2976749.2978392}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Goodfellow et al., 2014]{5} Goodfellow, Shlens (2014)
+\newblock Explaining and Harnessing Adversarial Examples
+\newblock \emph{\url{https://github.com/maxpv/maxpv.github.io/blob/master/notebooks/Adversarial_ResNet50.ipynb}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Papernot et al., 2016]{5} Papernot , McDaniel, Goodfellow, Jha, Celik, Swamy (2016)
+\newblock Practical Black-Box Attacks against Machine Learning
+\newblock \emph{\url{https://arxiv.org/abs/1602.02697}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Athalye et al., 2017]{5} Athalye , Engstrom, Ilyas, Kwok (2017)
+\newblock Synthesizing Robust Adversarial Examples
+\newblock \emph{\url{https://arxiv.org/abs/1707.07397}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibitem[Brown et al., 2018]{1} Tom B. Brown and Catherine Olsson, Research Engineers, Google Brain Team (2018)
+\newblock 
+Introducing the Unrestricted Adversarial Examples Challenge 
+\newblock \emph{\url{https://ai.googleblog.com/2018/09/introducing-unrestricted-adversarial.html}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{thebibliography}
+}
+\end{vbframe}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endlecture
+\end{document}
