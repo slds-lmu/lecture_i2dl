@@ -923,9 +923,12 @@ plot_prediction(model, test_dataset, int(torch.randint(len(test_dataset), (1, ))
 
 In this exercise, we are going to focus on the concept of self-attention. Generally speaking, self-attention allows the model to capture dependencies within a single sequence, weighting the importance of the individual sequence elements/token relative to each other. To do so the classical self-attention mechanism consists of three trainable weight matrices $W_q^{d \times d_q}$, $W_k^{d \times d_k}$, $W_v^{d \times d_v}$ with $d_k = d_q$. In addition, we usually also have an input matrix $X^{n \times d}$ where each row represents one token/element of this input. This can e.g. be an embedding vector per token but also a vector representation obtained from other network components. 
 
+
+
+
 <!-- #region -->
 a\) To actually understand the mechanism behind self-attention we want to calculate one iteration of the self-attention procedure. Let’s assume we have the input sentence “Alice visits Bob”. The corresponding embedding vectors per token are $x^{(1)} = (2, 1, 0)$, $x^{(2)} = (0, 0, 1)$, $x^{(3)} = (0, 2, 0)$. The weight matrices are 
-$W_q = \begin{pmatrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{pmatrix}, W_k = \begin{pmatrix} 1 & 0  \\ 0 & 1 \\ 1 & 3 \end{pmatrix}, W_v = \begin{pmatrix} 4 & 2  \\ 6 & 5 \\ 3 & 2\end{pmatrix}$
+$W_q = \left(\begin{matrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{matrix}\right), W_k = \left(\begin{matrix} 1 & 0  \\ 0 & 1 \\ 1 & 3 \end{matrix}\right), W_v = \left(\begin{matrix} 4 & 2  \\ 6 & 5 \\ 3 & 2\end{matrix}\right)$
 
 1. Compute $Q = XW_q, K= XW_k$ and $V= XW_v$. 
 2. Compute the attention weights $A = softmax(\frac{QK^T}{\sqrt(d_k)})$
@@ -939,25 +942,25 @@ $W_q = \begin{pmatrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{pmatrix}, W_k = \begin{pmat
 #!TAG HWBEGIN
 
 1.
-    $Q = X W_q = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{pmatrix}
-    \begin{bmatrix} 0 & 2 \\ 1 & 0 \\ 3 & 1 \end{bmatrix}
-    = \begin{bmatrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{bmatrix} \\$
+$Q = X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    \left(\begin{matrix} 0 & 2 \\ 1 & 0 \\ 3 & 1 \end{matrix}\right)
+    = \left(\begin{matrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{matrix}\right)$
 
-    $K = X W_k = \begin{bmatrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{bmatrix}
-    \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 3 \end{bmatrix}
-    = \begin{bmatrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{bmatrix} \\$
+$K = X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    \left(\begin{matrix} 1 & 0 \\ 0 & 1 \\ 1 & 3 \end{matrix}\right)
+    = \left(\begin{matrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{matrix}\right) \\$
 
-    $V = X W_v = \begin{bmatrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{bmatrix}
-    \begin{bmatrix} 4 & 2 \\ 6 & 5 \\ 3 & 2 \end{bmatrix}
-    = \begin{bmatrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{bmatrix}$
+$V = X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    \left(\begin{matrix} 4 & 2 \\ 6 & 5 \\ 3 & 2 \end{matrix}\right)
+    = \left(\begin{matrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{matrix}\right)$
 
 2. 
     $ A= \text{softmax} \left( \frac{QK^T}{\sqrt{2}} \right) =
-    \begin{bmatrix}
+    \left(\begin{matrix}
     0.007 & 0.965 & 0.028 \\ 
     0.657 & 0.324 & 0.019 \\ 
     0.768 & 0.187 & 0.045 
-    \end{bmatrix} $
+    \end{matrix}\right) $
 
     1. $n \times n$
     2.  - Vector-wise similarity/closeness between the elements in Q and V. 
@@ -965,14 +968,16 @@ $W_q = \begin{pmatrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{pmatrix}, W_k = \begin{pmat
         - This is also why we project into the different spaces. If $Q=K$ exactly (i.e., no learned projection), then the dot product $QK^T$ would usually produce mostly high values along the diagonal and smaller values else where. Softmax on this would then result in an almost one-hot attention matrix (where each token attends mostly to itself). Applying this to $V$ would then mean each word is weighted mostly by itself, so the attention mechanism would not change the representation in a meaningful way.
 3. 
     $ Attention(K, Q, V) = A V =
-    \begin{bmatrix}
+    \left(\begin{matrix}
     3.33 & 2.27 \\ 
     10.40 & 6.75 \\ 
     11.86 & 7.74 
-    \end{bmatrix} \\ $
+    \end{matrix}\right) \\ $
 
     1. $n \times d_v$ 
     2. The attention mechanism computes a weighted sum of the value vectors, where the attention weights determine the contribution of each token. Thus, each output representation incorporates the most relevant contextual information provided by the other tokens based on their importance in the given context.
 
 #!TAG HWEND
 <!-- #endregion -->
+
+b\) Now, we also want to include out attention framework into our model from exercise 1. To do, we firstly have t
