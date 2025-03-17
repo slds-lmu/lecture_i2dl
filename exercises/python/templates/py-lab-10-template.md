@@ -928,7 +928,7 @@ In this exercise, we are going to focus on the concept of self-attention. Genera
 
 <!-- #region -->
 a\) To actually understand the mechanism behind self-attention we want to calculate one iteration of the self-attention procedure. Let’s assume we have the input sentence “Alice visits Bob”. The corresponding embedding vectors per token are $x^{(1)} = (2, 1, 0)$, $x^{(2)} = (0, 0, 1)$, $x^{(3)} = (0, 2, 0)$. The weight matrices are 
-$W_q = \left(\begin{matrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{matrix}\right), W_k = \left(\begin{matrix} 1 & 0  \\ 0 & 1 \\ 1 & 3 \end{matrix}\right), W_v = \left(\begin{matrix} 4 & 2  \\ 6 & 5 \\ 3 & 2\end{matrix}\right)$
+\begin{equation}W_q = \left(\begin{matrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{matrix}\right), W_k = \left(\begin{matrix} 1 & 0  \\ 0 & 1 \\ 1 & 3 \end{matrix}\right), W_v = \left(\begin{matrix} 4 & 2  \\ 6 & 5 \\ 3 & 2\end{matrix}\right)\end{equation}
 
 1. Compute $Q = XW_q, K= XW_k$ and $V= XW_v$. 
 2. Compute the attention weights $A = softmax(\frac{QK^T}{\sqrt(d_k)})$
@@ -942,37 +942,37 @@ $W_q = \left(\begin{matrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{matrix}\right), W_k = 
 #!TAG HWBEGIN
 
 1.
-$Q = X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    \begin{equation} Q = X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 0 & 2 \\ 1 & 0 \\ 3 & 1 \end{matrix}\right)
-    = \left(\begin{matrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{matrix}\right)$
+    = \left(\begin{matrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{matrix}\right) \end{equation}
 
-$K = X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+\begin{equation} K = X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 1 & 0 \\ 0 & 1 \\ 1 & 3 \end{matrix}\right)
-    = \left(\begin{matrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{matrix}\right) \\$
+    = \left(\begin{matrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{matrix}\right) \end{equation}
 
-$V = X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+\begin{equation} V = X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 4 & 2 \\ 6 & 5 \\ 3 & 2 \end{matrix}\right)
-    = \left(\begin{matrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{matrix}\right)$
+    = \left(\begin{matrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{matrix}\right) \end{equation}
 
 2. 
-    $ A= \text{softmax} \left( \frac{QK^T}{\sqrt{2}} \right) =
+    \begin{equation} A= \text{softmax} \left( \frac{QK^T}{\sqrt{2}} \right) =
     \left(\begin{matrix}
     0.007 & 0.965 & 0.028 \\ 
     0.657 & 0.324 & 0.019 \\ 
     0.768 & 0.187 & 0.045 
-    \end{matrix}\right) $
+    \end{matrix}\right) \end{equation}
 
     1. $n \times n$
     2.  - Vector-wise similarity/closeness between the elements in Q and V. 
         - Intuitively: Ideally, answers the question “Per word (embedding) q, how much does an respective element from v relate to q for the given context. How much does v help us to understand what q is about.” 
         - This is also why we project into the different spaces. If $Q=K$ exactly (i.e., no learned projection), then the dot product $QK^T$ would usually produce mostly high values along the diagonal and smaller values else where. Softmax on this would then result in an almost one-hot attention matrix (where each token attends mostly to itself). Applying this to $V$ would then mean each word is weighted mostly by itself, so the attention mechanism would not change the representation in a meaningful way.
 3. 
-    $ Attention(K, Q, V) = A V =
+    \begin{equation} Attention(K, Q, V) = A V =
     \left(\begin{matrix}
     3.33 & 2.27 \\ 
     10.40 & 6.75 \\ 
     11.86 & 7.74 
-    \end{matrix}\right) \\ $
+    \end{matrix}\right) \end{equation}
 
     1. $n \times d_v$ 
     2. The attention mechanism computes a weighted sum of the value vectors, where the attention weights determine the contribution of each token. Thus, each output representation incorporates the most relevant contextual information provided by the other tokens based on their importance in the given context.
