@@ -7,7 +7,7 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.16.7
   kernelspec:
-    display_name: Python 3
+    display_name: .venv
     language: python
     name: python3
 ---
@@ -921,14 +921,11 @@ plot_prediction(model, test_dataset, int(torch.randint(len(test_dataset), (1, ))
 
 ## Exercise 3
 
-In this exercise, we are going to focus on the concept of self-attention. Generally speaking, self-attention allows the model to capture dependencies within a single sequence, weighting the importance of the individual sequence elements/token relative to each other. To do so the classical self-attention mechanism consists of three trainable weight matrices $W_q^{d \times d_q}$, $W_k^{d \times d_k}$, $W_v^{d \times d_v}$ with $d_k = d_q$. In addition, we usually also have an input matrix $X^{n \times d}$ where each row represents one token/element of this input. This can e.g. be an embedding vector per token but also a vector representation obtained from other network components. 
+In this exercise, we are going to focus on the concept of self-attention. Generally speaking, self-attention allows the model to capture dependencies within a single sequence, weighting the importance of the individual sequence elements/token relative to each other. To do so the classical self-attention mechanism consists of three trainable weight matrices $W_q^{d \times d_q}$, $W_k^{d \times d_k}$, $W_v^{d \times d_v}$ with $d_k = d_q$. In addition, we usually also have an input matrix $X^{N \times d}$ where each row represents one token/element of this input. This can e.g. be an embedding vector per token but also a vector representation obtained from other network components. 
 
+To actually understand the mechanism behind self-attention we want to calculate one iteration of the self-attention procedure. Let us assume we have the input sentence: Alice visits Bob. The corresponding embedding vectors per token are $x^{(1)} = (2, 1, 0)$, $x^{(2)} = (0, 0, 1)$, $x^{(3)} = (0, 2, 0)$. The weight matrices are 
+\begin{equation}W_q = \left(\begin{matrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{matrix}\right), W_k = \left(\begin{matrix} 1 & 0  \\ 0 & 1 \\ 1 & 3 \end{matrix}\right), W_v = \left(\begin{matrix} 4 & 2  \\ 6 & 5 \\ 3 & 2\end{matrix}\right) \end{equation}
 
-
-
-<!-- #region -->
-a\) To actually understand the mechanism behind self-attention we want to calculate one iteration of the self-attention procedure. Let’s assume we have the input sentence “Alice visits Bob”. The corresponding embedding vectors per token are $x^{(1)} = (2, 1, 0)$, $x^{(2)} = (0, 0, 1)$, $x^{(3)} = (0, 2, 0)$. The weight matrices are 
-\begin{equation}W_q = \left(\begin{matrix} 0 & 2  \\ 1 & 0 \\ 3 & 1 \end{matrix}\right), W_k = \left(\begin{matrix} 1 & 0  \\ 0 & 1 \\ 1 & 3 \end{matrix}\right), W_v = \left(\begin{matrix} 4 & 2  \\ 6 & 5 \\ 3 & 2\end{matrix}\right)\end{equation}
 
 1. Compute $Q = XW_q, K= XW_k$ and $V= XW_v$. 
 2. Compute the attention weights $A = softmax(\frac{QK^T}{\sqrt(d_k)})$
@@ -938,19 +935,20 @@ a\) To actually understand the mechanism behind self-attention we want to calcul
     1. What are the dimensions of $Attention(K, Q, V)$? 
     2. How can we interpret this operation?
 
-
 #!TAG HWBEGIN
 
-1.
+1.  
     \begin{equation} Q = X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 0 & 2 \\ 1 & 0 \\ 3 & 1 \end{matrix}\right)
     = \left(\begin{matrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{matrix}\right) \end{equation}
 
-\begin{equation} K = X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+
+    \begin{equation} K = X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 1 & 0 \\ 0 & 1 \\ 1 & 3 \end{matrix}\right)
     = \left(\begin{matrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{matrix}\right) \end{equation}
 
-\begin{equation} V = X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+
+    \begin{equation} V = X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 4 & 2 \\ 6 & 5 \\ 3 & 2 \end{matrix}\right)
     = \left(\begin{matrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{matrix}\right) \end{equation}
 
@@ -962,9 +960,9 @@ a\) To actually understand the mechanism behind self-attention we want to calcul
     0.768 & 0.187 & 0.045 
     \end{matrix}\right) \end{equation}
 
-    1. $n \times n$
+    1. $N \times N$
     2.  - Vector-wise similarity/closeness between the elements in Q and V. 
-        - Intuitively: Ideally, answers the question “Per word (embedding) q, how much does an respective element from v relate to q for the given context. How much does v help us to understand what q is about.” 
+        - Intuitively: Ideally, answers the question: Per word (embedding) q, how much does an respective element from v relate to q for the given context. How much does v help us to understand what q is about? 
         - This is also why we project into the different spaces. If $Q=K$ exactly (i.e., no learned projection), then the dot product $QK^T$ would usually produce mostly high values along the diagonal and smaller values else where. Softmax on this would then result in an almost one-hot attention matrix (where each token attends mostly to itself). Applying this to $V$ would then mean each word is weighted mostly by itself, so the attention mechanism would not change the representation in a meaningful way.
 3. 
     \begin{equation} Attention(K, Q, V) = A V =
@@ -974,10 +972,301 @@ a\) To actually understand the mechanism behind self-attention we want to calcul
     11.86 & 7.74 
     \end{matrix}\right) \end{equation}
 
-    1. $n \times d_v$ 
+    1. $N \times d_v$ 
     2. The attention mechanism computes a weighted sum of the value vectors, where the attention weights determine the contribution of each token. Thus, each output representation incorporates the most relevant contextual information provided by the other tokens based on their importance in the given context.
+
+#!TAG HWEND
+
+<!-- #region -->
+One problem of the traditional self-attention mechansim, is the memory consumption of $\mathcal{O}(n^2)$, due to stroing the full $N \times N$ matrices. An approach that mitigates this bottleneck is FlashAttention. The core idea of FlashAttention is to divide the matrices $Q, K, V$ into blocks along the first dimension and perform the softmax operation block by block, s.t. you iterativley update the softmax-values of the previous blocks, with the values obtained for the current block. For example, let’s consider a specific query row $q_i \in \mathbb{R}^{1 \times d_k}$ from $Q$, and a blockwise decomposition of the key matrix $K$ into two blocks, $K^{(1)} \in \mathbb{R}^{b_1 \times d_k}$ and $K^{(2)} \in \mathbb{R}^{b_2 \times d_k}$, corresponding to the first and second chunks of the key matrix along the sequence dimension. The corresponding query-key dot products yield the two row vectors $\mathbf{a}_i^{(1)} = q_i {K^{(1)}}^\top$ and $\mathbf{a}_i^{(2)} = q_i {K^{(2)}}^\top$. In the end, we want to compute the softmax over the fully concatenated vector $\mathbf{a}_i = \left(\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}\right)$.
+
+FlashAttention uses softmax tiling, which for our vector $\mathbf{a_i}$ consists of the following steps: 
+1. Construct the softmax-formulation for each $\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}$ independently. In addition, we compute the respective maximum per vector so $m_1 = max(\mathbf{a}_i^{(1)})$ and $m_2 = max(\mathbf{a}_i^{(2)})$ and subtract that from the exponents in the respective softmax formulation:
+
+\begin{equation} 
+softmax(\mathbf{a}_i^{(1)}) = \frac{\mathbf{f(a_i^{(1)})}}{l_1}
+\end{equation}
+
+\begin{equation} 
+softmax(\mathbf{a}_i^{(2)}) = \frac{\mathbf{f(a_i^{(2)})}}{l_2}
+\end{equation}
+
+with $\mathbf{f(a_i^{(t)})} = \left( e^{a_{i,1}^{(t)} - m_t} \quad \dots \quad e^{a_{i,b_t}^{(t)} - m_t}\right)$ and $l_t = \sum_j e^{a_{i,j}^{(t)} - m_t}$
+
+2. Compute the global maximum across both vectors, so $m = max(m_1, m_2)$ and construct the normalizers $e^{m_1 - m}$, $e^{m_2 - m}$. Apply them to the softmax: 
+\begin{equation} 
+softmax(\mathbf{a}_i^{(1)}) = \frac{\mathbf{f(a_i^{(1)})} \cdot e^{m_1 - m}}{l_1 \cdot e^{m_1 - m}}
+\end{equation}
+
+\begin{equation} 
+softmax(\mathbf{a}_i^{(2)}) = \frac{\mathbf{f(a_i^{(2)})} \cdot e^{m_2 - m}}{l_2 \cdot e^{m_2 - m}}
+\end{equation}
+
+3. Construct the softmax for $\mathbf{a}_i$ via additivley combining the two individual softmax's: 
+\begin{equation} 
+softmax(\mathbf{a}_i) = \frac{\mathbf{f(a_i)}}{l}
+\end{equation}
+
+    with $\mathbf{f(a_i)} = \left (\mathbf{f(a_i^{(1)})} \cdot e^{m_1 - m}, \mathbf{f(a_i^{(2)})} \cdot e^{m_2 - m} \right)$ and $l = l_1 \cdot e^{m_1 - m} + l_2 \cdot e^{m_2 - m}$
+
+
+Now, show that the formulation in 3. acutally is equal to the vanilla softmax formulation directly computed for the complete $\mathbf{a_i}$
+\begin{equation} 
+softmax(\mathbf{a}_i) = \frac{\left(e^{a_{i,1}} \quad \dots \quad e^{a_{i,b}}\right)}{\sum_j e^{a_{i,j}}}
+\end{equation}
+
+Now, let's recap why this method is great for reducing the memory consumption and for increasing computational efficiency. The block-wise (and thus intermediate) attention scores never need to be fully stored. It is enough to store only the per-block partial results and running statistics (like the max and sum for softmax). In addition, computation within each block is fully parallelizable across queries and across the elements inside the block. Synchronization is only needed when combining the results across blocks, to correctly update the softmax normalization and the final output.
+
+
+#!TAG HWBEGIN
+
+Since 
+\begin{align*}
+\mathbf{f}(\mathbf{a}_i^{(1)}) \cdot e^{m_1 - m} 
+&= \left( e^{a_{i,j}^{(1)} - m_1} \cdot e^{m_1 - m} \right) 
+= \left( e^{a_{i,j}^{(1)} - m} \right) \\
+\mathbf{f}(\mathbf{a}_i^{(2)}) \cdot e^{m_2 - m} 
+&= \left( e^{a_{i,j}^{(2)} - m_2} \cdot e^{m_2 - m} \right) 
+= \left( e^{a_{i,j}^{(2)} - m} \right)
+\end{align*}
+
+So:
+\begin{align*}
+\mathbf{f}(\mathbf{a}_i) &= \left( e^{a_{i,1} - m}, \dots, e^{a_{i,b_1 + b_2} - m} \right) \\
+l &= \sum_{j=1}^{b_1 + b_2} e^{a_{i,j} - m}
+\end{align*}
+
+Multiplying numerator and denominator by $e^{m}$, we recover:
+\begin{align*}
+\text{softmax}(\mathbf{a}_i) = \frac{ \left( e^{a_{i,1}}, \dots, e^{a_{i,b_1 + b_2}} \right) }{ \sum_{j=1}^{b_1 + b_2} e^{a_{i,j}} }
+\end{align*}
+
+Therefore, the final expression is:
+\begin{align*}
+\text{softmax}(\mathbf{a}_i) = \frac{ \left( e^{a_{i,1}}, \dots, e^{a_{i,b_1 + b_2}} \right) }{ \sum_{j=1}^{b_1 + b_2} e^{a_{i,j}} }
+\end{align*}
+
+which is exactly the vanilla softmax.
+
 
 #!TAG HWEND
 <!-- #endregion -->
 
-b\) Now, we also want to include out attention framework into our model from exercise 1. To do, we firstly have t
+## Exercise 4
+
+Now, in the last exercise we want to apply the self attention concept to out model from exercise 1. Reusing both the data preprocessing functions and the training loop, we only have to update the model:
+
+```python
+#!TAG SKIPQUESTEXEC
+class AttentionModel(nn.Module):
+    def __init__(self):
+        # A class that inherits from nn.Module needs to call the constructor from the
+        # parent class
+        super().__init__()
+
+        self.embedding = nn.Embedding(
+            num_embeddings=10001,
+            embedding_dim=64,
+            padding_idx=0
+        )
+        self.attn = nn.MultiheadAttention(
+            #!TAG HWBEGIN
+            #!MSG TODO: Add a multi head attention with four attention heads.
+            # The embed_dim must match the embedding_dim from before!
+            embed_dim=64,     
+            num_heads=4,
+            batch_first=True
+            #!TAG HWEND
+        )
+
+        self.fc = nn.Linear(in_features=64, out_features=1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x: Tensor) -> Tensor:
+        #!TAG HWBEGIN
+        #!MSG TODO: Implement the forward pass.
+        # The output needs to be reshaped or otherwise we have a dimension too much.
+        x = self.embedding(x).squeeze(2)
+
+        # Self-attention (Q=K=V)
+        attn_out, _ = self.attn(x, x, x)  # shape: (batch_size, seq_len, embed_dim)
+
+        # You can either:
+        # - take the mean over time steps (standard practice),
+        # - or use the first token, or apply another pooling strategy.
+        pooled = attn_out.mean(dim=1)  # shape: (batch_size, embed_dim)
+
+        # We need to extract the last hidden state
+        y_score = self.fc(pooled)
+        y_hat = self.sigmoid(y_score).squeeze(-1)
+        #!TAG HWEND
+        return y_hat
+```
+
+Now let's simply reuse the training loop from exercise 1: 
+
+```python
+#!TAG SKIPQUESTEXEC
+
+def train(
+        model: nn.Module,
+        loss: nn.Module,
+        optimizer: Optimizer,
+        train_dataset: Dataset,
+        test_dataset: Dataset,
+        epochs: int,
+        batch_size: int
+) -> Dict:
+    metrics: Dict = {
+        'train_loss': [],
+        'train_acc': [],
+        'test_loss': [],
+        'test_acc': [],
+    }
+
+    num_train_batches = ceil(len(train_dataset) / batch_size)
+    num_test_batches = ceil(len(test_dataset) / batch_size)
+
+    train_loader = DataLoader(train_dataset, batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size)
+
+    for ep in range(1, epochs + 1):
+        total_loss = 0
+        num_correct = 0
+
+        ################################################################################
+        # TRAINING LOOP
+        ################################################################################
+
+        for batch_idx, (x, y) in enumerate(train_loader):
+
+            #!TAG HWBEGIN
+            #!MSG TODO: Add forward pass + batch loss, backpropagation and apply gradients
+            y_hat = model(x)
+            batch_loss = loss(y_hat, y)
+
+            optimizer.zero_grad()
+            batch_loss.backward()
+            optimizer.step()
+            #!TAG HWEND
+
+            if batch_idx % 10 == 0:
+                print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+                      .format(batch_idx, num_train_batches, float(batch_loss)),
+                      end='\r')
+
+            total_loss += float(batch_loss)
+            num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
+
+        ep_train_loss = total_loss / len(train_dataset)
+        ep_train_acc = num_correct / len(train_dataset)
+
+        total_loss = 0
+        num_correct = 0
+
+        ################################################################################
+        # TEST LOOP
+        ################################################################################
+
+        for batch_idx, (x, y) in enumerate(test_loader):
+            #!TAG HWBEGIN
+            #!MSG TODO: Do a forward pass and get the batch loss
+            with torch.no_grad(): 
+                y_hat = model(x)
+                batch_loss = loss(y_hat, y)
+            #!TAG HWEND
+
+            if batch_idx % 50 == 0:
+                print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+                      .format(batch_idx, num_test_batches, float(batch_loss)), end='\r')
+
+            total_loss += float(batch_loss)
+            num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
+
+        ep_test_loss = total_loss / len(test_dataset)
+        ep_test_acc = num_correct / len(test_dataset)
+
+        metrics['train_loss'].append(ep_train_loss)
+        metrics['train_acc'].append(ep_train_acc)
+        metrics['test_loss'].append(ep_test_loss)
+        metrics['test_acc'].append(ep_test_acc)
+
+        print('EPOCH:\t{:5}\tTRAIN LOSS:\t{:.3f}\tTRAIN ACCURACY:\t{:.3f}\tTEST LOSS:\t'
+              '{:.3f}\tTEST ACCURACY:\t{:.3f}'
+              .format(ep, ep_train_loss, ep_train_acc, ep_test_loss, ep_test_acc))
+    return metrics
+```
+
+```python
+#!TAG SKIPQUESTEXEC
+epochs = 10
+batch_size = 32
+
+model = (
+    #!TAG HWBEGIN
+    #!MSG Initialize the model and push it to your device.
+    AttentionModel().to(device)
+    #!TAG HWEND
+)
+
+optimizer = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define an optimizer.
+    Adam(model.parameters(), lr=5e-4)
+    #!TAG HWEND
+)
+
+loss = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define the matching loss function.
+    nn.BCELoss()
+    #!TAG HWEND
+)
+
+train_dataset = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define the train dataset.
+    IMDBDataset(train_x, train_y)
+    #!TAG HWEND
+)
+
+test_dataset = (
+    #!TAG HWBEGIN
+    #!MSG TODO: Define the train dataset.
+    IMDBDataset(test_x, test_y)
+    #!TAG HWEND
+)
+
+metrics = train(model, loss, optimizer, train_dataset, test_dataset, epochs, batch_size)
+```
+
+```python
+#!TAG SKIPQUESTEXEC
+
+def get_training_progress_plot(
+        train_losses: List[float],
+        train_accs: List[float],
+        val_losses: List[float],
+        val_accs: List[float],
+) -> None:
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 2))
+
+    ax1.set_title('Loss')
+    ax1.plot(train_losses, label='Train Loss')
+    ax1.plot(val_losses, label='Test Loss')
+    ax1.legend()
+
+    ax2.set_title('Accuracy')
+    ax2.plot(train_accs, label='Train Accuracy')
+    ax2.plot(val_accs, label='Test Accuracy')
+    ax2.set_ylim(0, 1)
+    ax2.legend()
+
+
+get_training_progress_plot(
+    metrics['train_loss'],
+    metrics['train_acc'],
+    metrics['test_loss'],
+    metrics['test_acc'],
+)
+```
