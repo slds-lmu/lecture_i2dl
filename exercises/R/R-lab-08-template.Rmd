@@ -1,14 +1,12 @@
 ---
-title: "Lab 8"
+title: "Deep Learning Lab 7 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
 
 ## Exercise 1
 NB: it is impractical to do this exercise on your laptop, even if you have a GPU. You are advised to work on [Google Colab](https://colab.research.google.com/github/IRkernel/IRkernel/blob/master/example-notebooks/Demo.ipynb).

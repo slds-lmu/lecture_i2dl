@@ -1,5 +1,6 @@
 ---
-title: "Lab 4"
+title: "Deep Learning Lab 3 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 papersize: a4
 ---
@@ -8,9 +9,7 @@ papersize: a4
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the fourth lab. In this lab, we will derive the backpropagation equations, code the training procedure, and test it on our beloved dataset with five points.
+Welcome to the third lab. In this lab, we will derive the backpropagation equations, code the training procedure, and test it on our beloved dataset with five points.
 
 ## Exercise 1
 Consider a neural network with $L$ layers and a loss function $\mathcal{L}(\textbf{y},\textbf{z}^{(L)}_{\cdot,out})$. Call the output of the $i$-th unit of the $\ell$-th layer $\textbf{z}^{(\ell)}_{i,out}=\sigma^{(\ell)}(\textbf{z}^{(\ell)}_{i,in})$ with $\textbf{z}^{(\ell)}_{i,in}=\sum_j\textbf{W}^{(\ell)}_{ji}\textbf{z}^{(\ell-1)}_{j,out}+\textbf{b}^{(\ell)}_{i}$ its pre-activation output. Finally, consider $\delta^{(\ell)}_i=\partial\mathcal{L}(\textbf{y},\textbf{z}^{(L)}_{\cdot,out})/\partial\mathbf{z}^{(\ell)}_{i,in}$ the gradient of the loss with respect to the pre-activation outputs of layer $\ell$.

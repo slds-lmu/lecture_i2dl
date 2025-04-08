@@ -1,5 +1,6 @@
 ---
-title: "Lab 7"
+title: "Deep Learning Lab 6 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 header-includes:
   - \usepackage[utf8]{inputenc}
@@ -10,9 +11,7 @@ header-includes:
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the seventh lab, which is focused on convolutions and convolutional neural networks. The first exercise shows how to train CNNs with Keras, while the second exercise is about implementing convolutions for black-and-white images. The third exercise is about computing the gradients of the convolution operator.
+Welcome to the sixth lab, which is focused on convolutions and convolutional neural networks. The first exercise shows how to train CNNs with Keras, while the second exercise is about implementing convolutions for black-and-white images. The third exercise is about computing the gradients of the convolution operator.
 
 ## Exercise 1
 In this exercise, we will learn how to build CNNs in Keras to classify images.
@@ -192,12 +191,7 @@ First we'll load the example image and display it:
 ```{r}
 library(OpenImageR)
 
-# we only keep the first channel, as the image is already black and white
-download.file(
-  "https://upload.wikimedia.org/wikipedia/en/8/86/Einstein_tongue.jpg",
-  'einstein.jpg', 
-  mode = 'wb'
-)
+# get the image from moodle
 img = readImage('einstein.jpg')
 print(range(img))
 

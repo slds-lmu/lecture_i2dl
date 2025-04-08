@@ -1,5 +1,6 @@
 ---
-title: "Lab 6"
+title: "Deep Learning Lab 5 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
@@ -7,9 +8,7 @@ output: pdf_document
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the sixth lab.
+Welcome to the fifth lab.
 
 In this lab, we will learn how to use `Keras`, a very popular and easy-to-use framework for deep learning. We will see what are the signs of overfitting, and how to avoid it using regularization. Then, we will analyze convergence of gradient descent on quadratic surfaces, and apply the intuition we gain on a practical example, comparing gradient descent with and without momentum.
 

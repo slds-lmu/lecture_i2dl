@@ -1,5 +1,6 @@
 ---
-title: "Lab 5"
+title: "Deep Learning Lab 4 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
@@ -7,9 +8,7 @@ output: pdf_document
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the fifth lab. We will first implement a simple scalar automatic differentiation engine to compute partial derivatives for us, then do a theoretical exercise about L2 regularization.
+Welcome to the fourth lab. We will first implement a simple scalar automatic differentiation engine to compute partial derivatives for us, then do a theoretical exercise about L2 regularization.
 
 ## Exercise 1
 

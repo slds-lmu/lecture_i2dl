@@ -1,5 +1,6 @@
 ---
-title: "Lab 3"
+title: "Deep Learning Lab 2 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
@@ -8,9 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the third lab. The first exercise is an implementation of gradient descent on a bivariate function. The second exercise is about computing derivatives of the weights of a neural network, and the third exercise combines the previous two.
+Welcome to the second lab. The first exercise is an implementation of gradient descent on a bivariate function. The second exercise is about computing derivatives of the weights of a neural network, and the third exercise combines the previous two.
 
 ## Exercise 1
 

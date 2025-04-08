@@ -1,5 +1,6 @@
 ---
-title: "Lab 1"
+title: "Deep Learning Lab 0 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
@@ -7,8 +8,6 @@ output: pdf_document
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
 
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 > Kudos to the former contributors to/creators of the lab materials Emilio Dorigatti and Tobias Weber.
 

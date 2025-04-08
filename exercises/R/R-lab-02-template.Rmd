@@ -1,13 +1,12 @@
 ---
-title: "Lab 2"
+title: "Deep Learning Lab 1 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 ## Exercise 1
 Consider a neural network with one hidden layer with threshold activation function (i.e., $\tau(x)=\mathbf{1}[x>0]$) and one output neuron with no activation function. Prove that such a neural network cannot _exactly_ separate the cyan ($y=1$) and white ($y=0$) areas in Figure 1.
@@ -60,7 +59,7 @@ Blum, Edward K., and Leong Kwan Li. 1991. “Approximation Theory and Feedforwar
 
 ## Exercise 2
 
-In this exercise, we are going to create a neural network with two hidden layers and threshold activation that can correctly separate the cyan region from the rest in the plot below. We will do this by composing linear classifiers just like we did in the previous lab.
+In this exercise, we are going to create a neural network with two hidden layers and threshold activation that can correctly separate the cyan region from the rest in the plot below. We will do this by composing linear classifiers.
 
 ```{r eval=TRUE, echo=FALSE}
 library(ggplot2)

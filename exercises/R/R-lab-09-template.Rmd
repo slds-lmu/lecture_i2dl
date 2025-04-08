@@ -1,13 +1,12 @@
 ---
-title: "Lab 9"
+title: "Deep Learning Lab 8 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
 
 In the first part of the lab, we will analytically derive the backpropagation equations for a simple RNN. Then, in the second part, we will implement forward and backward propagation functions for a simple RNN-model, and train to  predict the future temperature based on past weather metrics.
 

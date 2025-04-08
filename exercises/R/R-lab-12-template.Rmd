@@ -1,14 +1,16 @@
 ---
-title: "Lab 12"
+title: "Deep Learning Lab 11 | Summer Term 2025"
+author: "Emanuel Sommer, Prof. Dr. David Rügamer"
 output: pdf_document
-author: Emilio Dorigatti
-date: 2021-02-05
 papersize: a4
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+# This lab is currently not in use
+
 
 ## Exercise 1
 
