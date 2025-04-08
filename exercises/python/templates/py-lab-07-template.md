@@ -378,9 +378,7 @@ Let's load an example image:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
-url = 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Albert_Einstein_sticks_his_tongue_1951.jpg'
-response = requests.get(url)
-img_raw = Image.open(BytesIO(response.content))
+img_raw = Image.open('einstein.jpg')
 
 img_raw
 ```
