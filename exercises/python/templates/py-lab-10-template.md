@@ -13,9 +13,7 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 10
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+# Lab 9
 
 ## Imports
 <!-- #endregion -->

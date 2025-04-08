@@ -13,9 +13,7 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 8
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+# Lab 7
 
 ## Imports
 <!-- #endregion -->
@@ -46,7 +44,8 @@ set_matplotlib_formats('png', 'pdf')
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 ## Exercise 1
-NB: it is impractical to do this exercise on your laptop, even if you have a GPU.
+
+Note: it is impractical to do this exercise on your laptop, even if you have a GPU.
 You are advised to work on
 [Google Colab](https://colab.research.google.com).
 

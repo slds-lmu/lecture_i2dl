@@ -13,9 +13,7 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 9
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+# Lab 8
 
 In the first part of the lab, we will analytically derive the backpropagation equations for a simple RNN.
 Then, in the second part, we will implement forward and backward propagation functions for a simple RNN-model,

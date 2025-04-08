@@ -13,13 +13,11 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 6
+# Lab 5
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+Welcome to the fifth lab.
 
-Welcome to the sixth lab.
-
-In this lab, we will finally use PyTorch as a deep learning framework.
+In this lab, we will finally use PyTorch as a deep learning framework (I personally also really appreciate JAX - check it out!).
 We will see what are the signs of overfitting, and how to avoid them using regularization.
 Then, we will analyze convergence of gradient descent on quadratic
 surfaces, and apply the intuition we gain on a practical example,

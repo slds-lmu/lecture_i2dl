@@ -16,6 +16,7 @@ from typing import List, Tuple, Callable
 
 from tqdm import tqdm
 import os
+import json
 
 TEMPLATE_ROOT = 'templates'
 QUESTION_ROOT = 'questions'
@@ -206,16 +207,61 @@ def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
     # A workaround is to convert to .tex and compile it manually with pdflatex
     p = subprocess.run(['jupyter', 'nbconvert', '--to', 'latex', file_path],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+    # Extract the first heading from the notebook
+    title = None
+    try:
+        with open(file_path, 'r') as f:
+            notebook = json.load(f)
+        
+        # Look for the first markdown cell with a heading
+        for cell in notebook.get('cells', []):
+            if cell.get('cell_type') == 'markdown':
+                source = ''.join(cell.get('source', []))
+                # Look for a header that starts with # Lab
+                match = re.search(r'# +Lab +\d+', source)
+                if match:
+                    title = match.group(0).strip("# ")
+                    break
+        title = f"Deep Learning {title} | Summer Term 2025"
+    except Exception as e:
+        print(f"Error extracting title: {e}")
+    
+    # If title was found, update the LaTeX file
+    tex_file = str(file_path).replace('.ipynb', '.tex')
+    if title:
+        try:
+            with open(tex_file, 'r') as f:
+                tex_content = f.read()
+            
+            # Replace the title in the LaTeX file
+            tex_content = re.sub(
+                r'\\title\{.*?\}',
+                rf'\\title{{{title}}}',
+                tex_content
+            )
+            lecturers = "Emanuel Sommer, Prof. Dr. David Rügamer"
+            tex_content = re.sub(
+                r'(\\title\{.*?\})',
+                rf'\1\n\\author{{{lecturers}}}',
+                tex_content
+            )
+            
+            with open(tex_file, 'w') as f:
+                f.write(tex_content)
+        except Exception as e:
+            print(f"Error updating title in LaTeX: {e}")
+
     debug = True
     if not debug:
         p = subprocess.run(['pdflatex', '-output-directory', file_path.parent,
-                            str(file_path).replace('.ipynb', '.tex')],
+                            tex_file],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
         # for debugging purposes
         os.system((
             f'pdflatex -output-directory {file_path.parent} '
-            f'{str(file_path).replace(".ipynb", ".tex")}'
+            f'{tex_file}'
         ))
 
     try:

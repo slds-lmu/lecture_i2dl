@@ -13,9 +13,7 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 1
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+# Lab 0
 
 > Kudos to the former contributors to/creators of the lab materials Emilio Dorigatti and Tobias Weber.
 

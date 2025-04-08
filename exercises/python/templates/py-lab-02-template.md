@@ -13,9 +13,12 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 2
+# Lab 1
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+> Kudos to the former contributors to/creators of the lab materials Emilio Dorigatti and Tobias Weber.
+
+Welcome to the very first lab, in which we will start off with simple MLPs.
+
 
 ## Imports
 <!-- #endregion -->
@@ -109,8 +112,7 @@ Blum, Edward K., and Leong Kwan Li. 1991.
 
 In this exercise, we are going to create a neural network with two hidden layers and
 threshold activation that can correctly separate the cyan region from the rest in the
-plot below. We will do this by composing linear classifiers just like we did in the
-previous lab.
+plot below. We will do this by composing linear classifiers.
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}

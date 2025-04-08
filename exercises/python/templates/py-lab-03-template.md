@@ -12,9 +12,7 @@ jupyter:
     name: python3
 ---
 
-# Lab 3
-
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
+# Lab 2
 
 ## Imports
 
@@ -31,7 +29,7 @@ set_matplotlib_formats('png', 'pdf')
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-Welcome to the third lab. The first exercise is an implementation of gradient descent
+Welcome to the second lab. The first exercise is an implementation of gradient descent
 on a bivariate function. The second exercise is about computing derivatives of the
 weights of a neural network, and the third exercise combines the previous two.
 

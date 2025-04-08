@@ -13,11 +13,9 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 7
+# Lab 6
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the seventh lab, which is focused on convolutions and convolutional neural
+Welcome to the sixth lab, which is focused on convolutions and convolutional neural
 networks. The first exercise shows how to train CNNs with Pytorch, while the second
 exercise is about implementing convolutions for black-and-white images.
 The third exercise is about computing the gradients of the convolution operator.

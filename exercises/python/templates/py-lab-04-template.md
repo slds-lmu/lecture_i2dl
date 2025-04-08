@@ -13,11 +13,9 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 4
+# Lab 3
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the fourth lab. In this lab, we will derive the backpropagation equations, 
+Welcome to the third lab. In this lab, we will derive the backpropagation equations, 
 code the training procedure, and test it on our beloved dataset with five points.
 
 ## Imports

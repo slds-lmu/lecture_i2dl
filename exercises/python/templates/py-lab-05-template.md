@@ -13,11 +13,9 @@ jupyter:
 ---
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-# Lab 5
+# Lab 4
 
-**Lecture**: Deep Learning (Prof. Dr. David Rügamer, Emanuel Sommer)
-
-Welcome to the fifth lab. We will first implement a simple scalar automatic
+Welcome to the fourth lab. We will first implement a simple scalar automatic
 differentiation engine to compute partial derivatives for us,
 then do a theoretical exercise about L2 regularization.
 
