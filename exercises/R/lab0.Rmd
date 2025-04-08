@@ -29,18 +29,19 @@ style_mono_accent(
 
 ## Introduction to the Labs
 
-### Deep Learning (SS24)
+### Deep Learning (SS25)
 
 <center>
 <br><br><br>
-<img src="LMU_Logo_Schwarz.png" width="200">
 <br>
+Emanuel Sommer
 <br>
-Emanuel Sommer, `r Sys.Date()`
-<br>
-Data Science Group @ Department of Statistics
+MUNIQ.AI lab @ Department of Statistics
 <br>
 Ludwig-Maximilians-Universität München
+<br><br>
+<img src="muniq.png" width="200">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="LMU_Logo_Weiss.png" width="200">
+
 </center>
 
 ---
@@ -49,8 +50,8 @@ Ludwig-Maximilians-Universität München
 
  - Mix of theoretical and practical exercises
  - Not graded! Only the final exam counts
- - Exercises and solutions for the previous week posted on Moodle on Tuesdays
- - We will discuss the solutions of the previous week
+ - Exercises and solutions for the previous week posted on Moodle on Thursdays
+ - We will discuss the solutions of the previous week. I expect you to **come prepared**!
  - Lab sessions exist to discuss and ask questions
     - Attend not to fall behind the schedule
 
