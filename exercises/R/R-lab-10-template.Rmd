@@ -330,7 +330,7 @@ To actually understand the mechanism behind self-attention we want to calculate 
 `<!--#!solutionend-->`
 
 
-One problem of the traditional self-attention mechanism is the memory consumption of $\mathcal{O}(n^2)$, due to stroing the full $N \times N$ matrices. An approach that mitigates this bottleneck is FlashAttention. The core idea of FlashAttention is to divide the matrices $Q, K, V$ into blocks along the first dimension and perform the softmax operation block by block, s.t. you iterativley update the softmax-values of the previous blocks, with the values obtained for the current block. For example, let’s consider a specific query row $q_i \in \mathbb{R}^{1 \times d_k}$ from $Q$, and a blockwise decomposition of the key matrix $K$ into two blocks, $K^{(1)} \in \mathbb{R}^{b_1 \times d_k}$ and $K^{(2)} \in \mathbb{R}^{b_2 \times d_k}$, corresponding to the first and second chunks of the key matrix along the sequence dimension. The corresponding query-key dot products yield the two row vectors $\mathbf{a}_i^{(1)} = q_i {K^{(1)}}^\top$ and $\mathbf{a}_i^{(2)} = q_i {K^{(2)}}^\top$. In the end, we want to compute the softmax over the fully concatenated vector $\mathbf{a}_i = \left(\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}\right)$.
+One problem of the traditional self-attention mechanism is the memory consumption of $\mathcal{O}(n^2)$, due to storing the full $N \times N$ matrix. An approach that mitigates this bottleneck is FlashAttention. The core idea of FlashAttention is to divide the matrices $Q, K, V$ into blocks along the first dimension and perform the softmax operation block by block, s.t. you iterativley update the softmax-values of the previous blocks, with the values obtained for the current block. For example, let’s consider a specific query row $q_i \in \mathbb{R}^{1 \times d_k}$ from $Q$, and a blockwise decomposition of the key matrix $K$ into two blocks, $K^{(1)} \in \mathbb{R}^{b_1 \times d_k}$ and $K^{(2)} \in \mathbb{R}^{b_2 \times d_k}$, corresponding to the first and second chunks of the key matrix along the sequence dimension. The corresponding query-key dot products yield the two row vectors $\mathbf{a}_i^{(1)} = q_i {K^{(1)}}^\top$ and $\mathbf{a}_i^{(2)} = q_i {K^{(2)}}^\top$. In the end, we want to compute the softmax over the fully concatenated vector $\mathbf{a}_i = \left(\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}\right)$.
 
 FlashAttention uses softmax tiling, which for our vector $\mathbf{a_i}$ consists of the following steps: 
 1. Construct the softmax-formulation for each $\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}$ independently. In addition, we compute the respective maximum per vector so $m_1 = max(\mathbf{a}_i^{(1)})$ and $m_2 = max(\mathbf{a}_i^{(2)})$ and subtract that from the exponents in the respective softmax formulation:
@@ -362,7 +362,7 @@ softmax(\mathbf{a}_i) = \frac{\mathbf{f(a_i)}}{l}
     with $\mathbf{f(a_i)} = \left (\mathbf{f(a_i^{(1)})} \cdot e^{m_1 - m}, \mathbf{f(a_i^{(2)})} \cdot e^{m_2 - m} \right)$ and $l = l_1 \cdot e^{m_1 - m} + l_2 \cdot e^{m_2 - m}$
 
 
-Now, show that the formulation in 3. acutally is equal to the vanilla softmax formulation directly computed for the complete $\mathbf{a_i}$
+Now, show that the formulation in 3. actually is equal to the vanilla softmax formulation directly computed for the complete $\mathbf{a_i}$
 \begin{equation} 
 softmax(\mathbf{a}_i) = \frac{\left(e^{a_{i,1}} \quad \dots \quad e^{a_{i,b}}\right)}{\sum_j e^{a_{i,j}}}
 \end{equation}
@@ -401,11 +401,6 @@ which is exactly the vanilla softmax.
 Now, in the last exercise we want to apply the self attention concept to out model from exercise 1. Reusing both the data preprocessing functions and the training loop, we only have to update the model:
 
 ```{r}
-model <- keras_model_sequential() |>
-  layer_embedding(input_dim = 10001, output_dim = 64, mask_zero = TRUE) |>
-  layer_lstm(units = 32) |>
-  layer_dense(1, activation = "sigmoid")
-
 input <- layer_input(shape = c(NULL), dtype = "int32")
 
 model <- keras_model_sequential |>
