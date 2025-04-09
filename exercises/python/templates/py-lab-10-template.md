@@ -316,10 +316,10 @@ def train(
             optimizer.step()
             #!TAG HWEND
 
-            if batch_idx % 10 == 0:
-                print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_train_batches, float(batch_loss)),
-                      end='\r')
+            # if batch_idx % 10 == 0:
+            #     print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+            #           .format(batch_idx, num_train_batches, float(batch_loss)),
+            #           end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
@@ -342,9 +342,9 @@ def train(
                 batch_loss = loss(y_hat, y)
             #!TAG HWEND
 
-            if batch_idx % 50 == 0:
-                print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_test_batches, float(batch_loss)), end='\r')
+            # if batch_idx % 50 == 0:
+            #     print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+            #           .format(batch_idx, num_test_batches, float(batch_loss)), end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
@@ -926,14 +926,16 @@ To actually understand the mechanism behind self-attention we want to calculate 
 
 
 1. Compute $Q = XW_q, K= XW_k$ and $V= XW_v$. 
-2. Compute the attention weights $A = softmax(\frac{QK^T}{\sqrt(d_k)})$
+2. Compute the attention weights $A = \text{softmax}(\frac{QK^T}{\sqrt(d_k)})$
     1. What is the dimension of $A$? 
     2. What does the multiplication of $Q$ and $K$ actually mean? How can we interpret the values of A? 
-3. Compute the attention outputs $Attention(K, Q, V) = AV$
-    1. What are the dimensions of $Attention(K, Q, V)$? 
+3. Compute the attention outputs $\text{Attention}(K, Q, V) = AV$
+    1. What are the dimensions of $\text{Attention}(K, Q, V)$? 
     2. How can we interpret this operation?
 
 #!TAG HWBEGIN
+
+\textbf{Solution:}
 
 1.  
     \begin{equation} Q = X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
@@ -963,7 +965,7 @@ To actually understand the mechanism behind self-attention we want to calculate 
         - Intuitively: Ideally, answers the question: Per word (embedding) q, how much does an respective element from v relate to q for the given context. How much does v help us to understand what q is about? 
         - This is also why we project into the different spaces. If $Q=K$ exactly (i.e., no learned projection), then the dot product $QK^T$ would usually produce mostly high values along the diagonal and smaller values else where. Softmax on this would then result in an almost one-hot attention matrix (where each token attends mostly to itself). Applying this to $V$ would then mean each word is weighted mostly by itself, so the attention mechanism would not change the representation in a meaningful way.
 3. 
-    \begin{equation} Attention(K, Q, V) = A V =
+    \begin{equation} \text{Attention}(K, Q, V) = A V =
     \left(\begin{matrix}
     3.33 & 2.27 \\ 
     10.40 & 6.75 \\ 
@@ -976,47 +978,47 @@ To actually understand the mechanism behind self-attention we want to calculate 
 #!TAG HWEND
 
 <!-- #region -->
-One problem of the traditional self-attention mechansim, is the memory consumption of $\mathcal{O}(n^2)$, due to stroing the full $N \times N$ matrices. An approach that mitigates this bottleneck is FlashAttention. The core idea of FlashAttention is to divide the matrices $Q, K, V$ into blocks along the first dimension and perform the softmax operation block by block, s.t. you iterativley update the softmax-values of the previous blocks, with the values obtained for the current block. For example, let’s consider a specific query row $q_i \in \mathbb{R}^{1 \times d_k}$ from $Q$, and a blockwise decomposition of the key matrix $K$ into two blocks, $K^{(1)} \in \mathbb{R}^{b_1 \times d_k}$ and $K^{(2)} \in \mathbb{R}^{b_2 \times d_k}$, corresponding to the first and second chunks of the key matrix along the sequence dimension. The corresponding query-key dot products yield the two row vectors $\mathbf{a}_i^{(1)} = q_i {K^{(1)}}^\top$ and $\mathbf{a}_i^{(2)} = q_i {K^{(2)}}^\top$. In the end, we want to compute the softmax over the fully concatenated vector $\mathbf{a}_i = \left(\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}\right)$.
+One problem of the traditional self-attention mechansim, is the memory consumption of $\mathcal{O}(n^2)$, due to storing the full $N \times N$ matrix. An approach that mitigates this bottleneck is FlashAttention. The core idea of FlashAttention is to divide the matrices $Q, K, V$ into blocks along the first dimension and perform the softmax operation block by block, s.t. you iterativley update the softmax-values of the previous blocks, with the values obtained for the current block. For example, let’s consider a specific query row $q_i \in \mathbb{R}^{1 \times d_k}$ from $Q$, and a blockwise decomposition of the key matrix $K$ into two blocks, $K^{(1)} \in \mathbb{R}^{b_1 \times d_k}$ and $K^{(2)} \in \mathbb{R}^{b_2 \times d_k}$, corresponding to the first and second chunks of the key matrix along the sequence dimension. The corresponding query-key dot products yield the two row vectors $\mathbf{a}_i^{(1)} = q_i {K^{(1)}}^\top$ and $\mathbf{a}_i^{(2)} = q_i {K^{(2)}}^\top$. In the end, we want to compute the softmax over the fully concatenated vector $\mathbf{a}_i = \left(\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}\right)$.
 
-FlashAttention uses softmax tiling, which for our vector $\mathbf{a_i}$ consists of the following steps: 
+FlashAttention uses softmax tiling, which for our vector $\mathbf{a_i}$ consists of the following steps:
+
 1. Construct the softmax-formulation for each $\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}$ independently. In addition, we compute the respective maximum per vector so $m_1 = max(\mathbf{a}_i^{(1)})$ and $m_2 = max(\mathbf{a}_i^{(2)})$ and subtract that from the exponents in the respective softmax formulation:
 
 \begin{equation} 
-softmax(\mathbf{a}_i^{(1)}) = \frac{\mathbf{f(a_i^{(1)})}}{l_1}
+\text{softmax}(\mathbf{a}_i^{(1)}) = \frac{\mathbf{f(a_i^{(1)})}}{l_1}
 \end{equation}
 
 \begin{equation} 
-softmax(\mathbf{a}_i^{(2)}) = \frac{\mathbf{f(a_i^{(2)})}}{l_2}
+\text{softmax}(\mathbf{a}_i^{(2)}) = \frac{\mathbf{f(a_i^{(2)})}}{l_2}
 \end{equation}
 
 with $\mathbf{f(a_i^{(t)})} = \left( e^{a_{i,1}^{(t)} - m_t} \quad \dots \quad e^{a_{i,b_t}^{(t)} - m_t}\right)$ and $l_t = \sum_j e^{a_{i,j}^{(t)} - m_t}$
 
 2. Compute the global maximum across both vectors, so $m = max(m_1, m_2)$ and construct the normalizers $e^{m_1 - m}$, $e^{m_2 - m}$. Apply them to the softmax: 
 \begin{equation} 
-softmax(\mathbf{a}_i^{(1)}) = \frac{\mathbf{f(a_i^{(1)})} \cdot e^{m_1 - m}}{l_1 \cdot e^{m_1 - m}}
+\text{softmax}(\mathbf{a}_i^{(1)}) = \frac{\mathbf{f(a_i^{(1)})} \cdot e^{m_1 - m}}{l_1 \cdot e^{m_1 - m}}
 \end{equation}
 
 \begin{equation} 
-softmax(\mathbf{a}_i^{(2)}) = \frac{\mathbf{f(a_i^{(2)})} \cdot e^{m_2 - m}}{l_2 \cdot e^{m_2 - m}}
+\text{softmax}(\mathbf{a}_i^{(2)}) = \frac{\mathbf{f(a_i^{(2)})} \cdot e^{m_2 - m}}{l_2 \cdot e^{m_2 - m}}
 \end{equation}
 
 3. Construct the softmax for $\mathbf{a}_i$ via additivley combining the two individual softmax's: 
 \begin{equation} 
-softmax(\mathbf{a}_i) = \frac{\mathbf{f(a_i)}}{l}
+\text{softmax}(\mathbf{a}_i) = \frac{\mathbf{f(a_i)}}{l}
 \end{equation}
 
     with $\mathbf{f(a_i)} = \left (\mathbf{f(a_i^{(1)})} \cdot e^{m_1 - m}, \mathbf{f(a_i^{(2)})} \cdot e^{m_2 - m} \right)$ and $l = l_1 \cdot e^{m_1 - m} + l_2 \cdot e^{m_2 - m}$
 
 
-Now, show that the formulation in 3. acutally is equal to the vanilla softmax formulation directly computed for the complete $\mathbf{a_i}$
+Now, show that the formulation in 3. actually is equal to the vanilla softmax formulation directly computed for the complete $\mathbf{a_i}$
 \begin{equation} 
-softmax(\mathbf{a}_i) = \frac{\left(e^{a_{i,1}} \quad \dots \quad e^{a_{i,b}}\right)}{\sum_j e^{a_{i,j}}}
+\text{softmax}(\mathbf{a}_i) = \frac{\left(e^{a_{i,1}} \quad \dots \quad e^{a_{i,b}}\right)}{\sum_j e^{a_{i,j}}}
 \end{equation}
 
-Now, let's recap why this method is great for reducing the memory consumption and for increasing computational efficiency. The block-wise (and thus intermediate) attention scores never need to be fully stored. It is enough to store only the per-block partial results and running statistics (like the max and sum for softmax). In addition, computation within each block is fully parallelizable across queries and across the elements inside the block. Synchronization is only needed when combining the results across blocks, to correctly update the softmax normalization and the final output.
-
-
 #!TAG HWBEGIN
+
+\textbf{Solution:}
 
 Since 
 \begin{align*}
@@ -1050,9 +1052,11 @@ which is exactly the vanilla softmax.
 #!TAG HWEND
 <!-- #endregion -->
 
+Now, let's recap why this method is great for reducing the memory consumption and for increasing computational efficiency. The block-wise (and thus intermediate) attention scores never need to be fully stored. It is enough to store only the per-block partial results and running statistics (like the max and sum for softmax). In addition, computation within each block is fully parallelizable across queries and across the elements inside the block. Synchronization is only needed when combining the results across blocks, to correctly update the softmax normalization and the final output.
+
 ## Exercise 4
 
-Now, in the last exercise we want to apply the self attention concept to out model from exercise 1. Reusing both the data preprocessing functions and the training loop, we only have to update the model:
+Now, in the last exercise we want to apply the self attention concept to our model from exercise 1. Reusing both the data preprocessing functions and the training loop, we only have to update the model:
 
 ```python
 #!TAG SKIPQUESTEXEC
@@ -1148,10 +1152,10 @@ def train(
             optimizer.step()
             #!TAG HWEND
 
-            if batch_idx % 10 == 0:
-                print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_train_batches, float(batch_loss)),
-                      end='\r')
+            # if batch_idx % 200 == 0:
+            #     print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+            #           .format(batch_idx, num_train_batches, float(batch_loss)),
+            #           end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
@@ -1174,9 +1178,9 @@ def train(
                 batch_loss = loss(y_hat, y)
             #!TAG HWEND
 
-            if batch_idx % 50 == 0:
-                print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
-                      .format(batch_idx, num_test_batches, float(batch_loss)), end='\r')
+            # if batch_idx % 200 == 0:
+            #     print('TEST BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
+            #           .format(batch_idx, num_test_batches, float(batch_loss)), end='\r')
 
             total_loss += float(batch_loss)
             num_correct += int(torch.sum(torch.where(y_hat > 0.5, 1, 0) == y))
