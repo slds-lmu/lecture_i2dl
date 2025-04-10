@@ -18,28 +18,28 @@ The first step is to load the data. For brevity, we only use the 10000 most comm
 ```{r}
 library(keras3)
 imdb <- dataset_imdb(num_words = 10000, maxlen=250)
-c(c(x_train, y_train), c(x_test, y_test)) %<-% imdb
+c(c(x_train_imdb, y_train_imdb), c(x_test_imdb, y_test_imdb)) %<-% imdb
 ```
 
 
 Each review is a vector of numbers, each corresponding to a different word:
 
 ```{r}
-x_train[[5]]
+x_train_imdb[[5]]
 ```
 
 Even though RNNs can process sequences of arbitrary length, all sequences in the same batch must be of the same length, while sequences in different batches can have different length. In this case, however, we pad all sequences to the same length as this makes for much simpler code. Keras provides a function to do so for you called `pad_sequences` (read the documentation!).
 
 ```{r}
-x_train = (
+x_train_imdb = (
   #!hwbegin TODO pad the training reviews to the same length we used above
-  pad_sequences(x_train, 250)
+  pad_sequences(x_train_imdb, 250)
   #!hwend
 )
 
-x_test =(
+x_test_imdb =(
   #!hwbegin TODO pad the testing reviews to the same length we used above
-  pad_sequences(x_test, 250)
+  pad_sequences(x_test_imdb, 250)
   #!hwend
 )
 ```
@@ -66,12 +66,12 @@ model |> compile(
 
 ```{r}
 hist = model |> fit(
-  x_train,
-  y_train,
+  x_train_imdb,
+  y_train_imdb,
   batch_size = 32,
   epochs = 6,
   verbose = 0,
-  validation_data = list(x_test, y_test)
+  validation_data = list(x_test_imdb, y_test_imdb)
 )
 
 plot(hist)
@@ -286,21 +286,18 @@ To actually understand the mechanism behind self-attention we want to calculate 
     1. What are the dimensions of $\text{Attention}(K, Q, V)$? 
     2. How can we interpret this operation?
 
-`<!--#!solutionbegin-->`
+<!--#!solutionbegin-->
+
 1.  
-    \begin{equation} Q = X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    \begin{align} Q &= X W_q = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 0 & 2 \\ 1 & 0 \\ 3 & 1 \end{matrix}\right)
-    = \left(\begin{matrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{matrix}\right) \end{equation}
-
-
-    \begin{equation} K = X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    = \left(\begin{matrix} 1.0 & 4.0 \\ 3.0 & 1.0 \\ 2.0 & 0.0 \end{matrix}\right) \\
+    K &= X W_k = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 1 & 0 \\ 0 & 1 \\ 1 & 3 \end{matrix}\right)
-    = \left(\begin{matrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{matrix}\right) \end{equation}
-
-
-    \begin{equation} V = X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
+    = \left(\begin{matrix} 2.0 & 1.0 \\ 1.0 & 3.0 \\ 0.0 & 2.0 \end{matrix}\right) \\
+    V &= X W_v = \left(\begin{matrix} 2 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 2 & 0 \end{matrix}\right)
     \left(\begin{matrix} 4 & 2 \\ 6 & 5 \\ 3 & 2 \end{matrix}\right)
-    = \left(\begin{matrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{matrix}\right) \end{equation}
+    = \left(\begin{matrix} 14.0 & 9.0 \\ 3.0 & 2.0 \\ 12.0 & 10.0 \end{matrix}\right) \end{align}
 
 2. 
     \begin{equation} A= \text{softmax} \left( \frac{QK^T}{\sqrt{2}} \right) =
@@ -325,7 +322,8 @@ To actually understand the mechanism behind self-attention we want to calculate 
     1. $N \times d_v$ 
     2. The attention mechanism computes a weighted sum of the value vectors, where the attention weights determine the contribution of each token. Thus, each output representation incorporates the most relevant contextual information provided by the other tokens based on their importance in the given context.
 
-`<!--#!solutionend-->`
+
+<!--#!solutionend-->
 
 
 One problem of the traditional self-attention mechanism is the memory consumption of $\mathcal{O}(n^2)$, due to storing the full $N \times N$ matrix. An approach that mitigates this bottleneck is FlashAttention. The core idea of FlashAttention is to divide the matrices $Q, K, V$ into blocks along the first dimension and perform the softmax operation block by block, s.t. you iterativley update the softmax-values of the previous blocks, with the values obtained for the current block. For example, let’s consider a specific query row $q_i \in \mathbb{R}^{1 \times d_k}$ from $Q$, and a blockwise decomposition of the key matrix $K$ into two blocks, $K^{(1)} \in \mathbb{R}^{b_1 \times d_k}$ and $K^{(2)} \in \mathbb{R}^{b_2 \times d_k}$, corresponding to the first and second chunks of the key matrix along the sequence dimension. The corresponding query-key dot products yield the two row vectors $\mathbf{a}_i^{(1)} = q_i {K^{(1)}}^\top$ and $\mathbf{a}_i^{(2)} = q_i {K^{(2)}}^\top$. In the end, we want to compute the softmax over the fully concatenated vector $\mathbf{a}_i = \left(\mathbf{a}_i^{(1)}, \mathbf{a}_i^{(2)}\right)$.
@@ -366,7 +364,8 @@ Now, show that the formulation in 3. actually is equal to the vanilla softmax fo
 \text{softmax}(\mathbf{a}_i) = \frac{\left(e^{a_{i,1}} \quad \dots \quad e^{a_{i,b}}\right)}{\sum_j e^{a_{i,j}}}
 \end{equation}
 
-`<!--#!solutionbegin-->`
+<!--#!solutionbegin-->
+
 Since 
 \begin{align*}
 \mathbf{f}(\mathbf{a}_i^{(1)}) \cdot e^{m_1 - m} 
@@ -389,26 +388,45 @@ Multiplying numerator and denominator by $e^{m}$, we obtain the final expression
 \end{align*}
 
 which is exactly the vanilla softmax.
-`<!--#!solutionend-->`
 
-Now, let's recap why this method is great for reducing the memory consumption and for increasing computational efficiency. The block-wise (and thus intermediate) attention scores never need to be fully stored. It is enough to store only the per-block partial results and running statistics (like the max and sum for softmax). In addition, computation within each block is fully parallelizable across queries and across the elements inside the block. Synchronization is only needed when combining the results across blocks, to correctly update the softmax normalization and the final output.
+
+Finally, let's recap why this method is great for reducing the memory consumption and for increasing computational efficiency. The block-wise (and thus intermediate) attention scores never need to be fully stored. It is enough to store only the per-block partial results and running statistics (like the max and sum for softmax). In addition, computation within each block is fully parallelizable across queries and across the elements inside the block. Synchronization is only needed when combining the results across blocks, to correctly update the softmax normalization and the final output.
+
+<!--#!solutionend-->
 
 
 ## Exercise 4
 
 Now, in the last exercise we want to apply the self attention concept to our model from exercise 1. Reusing both the data preprocessing functions and the training loop, we only have to update the model:
-We want to use 4 attention heads, each with a dimension of 64. The input to the attention layer is the output of the embedding layer. The output of the attention layer is then averaged over the time dimension (the second one) and passed to a dense layer with a single output.
+We want to use 4 attention heads, each with a dimension of 64. The input to the attention layer is the output of the embedding layer. The output of the attention layer is then averaged over the time dimension and passed to a dense layer with a single output.
 
 ```{r}
-input <- layer_input(shape = c(NULL), dtype = "int32")
+# Define the input layer
+input <- layer_input(shape = list(250))
 
-model <- keras_model_sequential |>
-  layer_embedding(input_dim = 10001, output_dim = 64, mask_zero = TRUE) |>
-  #!hwbegin TODO Add the multi-head attention layer and the average pooling layer
-  layer_multi_head_attention(num_heads = 4, key_dim = 64)(query = embedding, key = embedding, value = embedding) |>
-  layer_lambda(f = function(x) k_mean(x, axis = 2)) |>
-  #!hwend
+# Embedding layer
+embedding <- input |>
+  layer_embedding(input_dim = c(10001), output_dim = 64, mask_zero = TRUE)
+
+# Multi-head attention layer
+#!hwbegin TODO add the multi-head attention layer.
+attention <- layer_multi_head_attention(
+  num_heads = 4,
+  key_dim = 64
+)(query = embedding, key = embedding, value = embedding)
+#!hwend
+
+#!hwbegin TODO add the global average pooling layer
+pooled <- attention |>
+  layer_global_average_pooling_1d()
+#!hwend
+
+# Dense output layer
+output <- pooled |>
   layer_dense(units = 1, activation = "sigmoid")
+
+# Create the model
+model <- keras_model(inputs = input, outputs = output)
 
 model |> compile(
   optimizer = "rmsprop",
@@ -422,12 +440,12 @@ model |> compile(
 
 ```{r}
 hist = model |> fit(
-  x_train,
-  y_train,
+  x_train_imdb,
+  y_train_imdb,
   batch_size = 32,
   epochs = 6,
   verbose = 0,
-  validation_data = list(x_test, y_test)
+  validation_data = list(x_test_imdb, y_test_imdb)
 )
 
 plot(hist)
