@@ -468,7 +468,7 @@ def train(
             optimizer.step()
             #!TAG HWEND
 
-            if batch_idx % 10 == 0:
+            if batch_idx % 100 == 0:
                 print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
                       .format(batch_idx, num_train_batches, float(batch_loss)), end='\r')
 
@@ -494,7 +494,7 @@ def train(
                 batch_loss = loss(y_hat, y)
                 #!TAG HWEND
 
-            if batch_idx % 10 == 0:
+            if batch_idx % 100 == 0:
                 print('VALIDATION BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
                       .format(batch_idx, num_val_batches, float(batch_loss)), end='\r')
 
@@ -515,11 +515,12 @@ def train(
                       end='\r'))
     return metrics
 
-metrics = train(model, loss, optimizer, train_loader, val_loader, epochs)
+# run below to train the model
+# metrics = train(model, loss, optimizer, train_loader, val_loader, epochs)
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
-We recycle the plotting function of lab 6 to plot the training progress:
+We recycle the plotting function of the previous labs to plot the training progress:
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}
@@ -543,17 +544,20 @@ def get_training_progress_plot(
     ax2.plot(val_accs, label='Val Accuracy')
     ax2.legend()
 
-get_training_progress_plot(
-    metrics['train_loss'],
-    metrics['train_acc'],
-    metrics['val_loss'],
-    metrics['val_acc'],
-)
+# run below to plot the training progress
+# get_training_progress_plot(
+#     metrics['train_loss'],
+#     metrics['train_acc'],
+#     metrics['val_loss'],
+#     metrics['val_acc'],
+# )
 ```
 
 #!TAG HWBEGIN
 
-The solution only dislplays very few epochs but the training won't accellerate much after that. As such this model won't be able to learn the data well even with considerably longer training.
+![py08-12.png](py08-12.png)
+
+The solution only displays very few epochs but the training won't accellerate much after that. As such this model won't be able to learn the data well even with considerably longer training.
 
 #!TAG HWEND
 
@@ -630,7 +634,7 @@ In the next step, we modify our train function to implement the desired behaviou
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-epochs = 10 # if you use a GPU rather use more epochs (e.g. 25 or more)
+epochs = 15 # if you use a GPU rather use more epochs (e.g. 25 or more)
 
 def train(
         head: nn.Module,
@@ -674,7 +678,7 @@ def train(
             batch_loss.backward()
             head_optimizer.step()
 
-            if batch_idx % 10 == 0:
+            if batch_idx % 100 == 0:
                 print('TRAINING BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
                       .format(batch_idx, num_train_batches, float(batch_loss)), end='\r')
 
@@ -700,7 +704,7 @@ def train(
                 batch_loss = loss(y_hat, y)
                 #!TAG HWEND
 
-            if batch_idx % 10 == 0:
+            if batch_idx % 100 == 0:
                 print('VALIDATION BATCH:\t({:5} / {:5})\tLOSS:\t{:.3f}'
                       .format(batch_idx, num_val_batches, float(batch_loss)), end='\r')
 
@@ -721,30 +725,39 @@ def train(
                       end='\r'))
     return metrics
 
-metrics = train(
-    head=vgg_head,
-    body=vgg_body,
-    head_optimizer=head_optimizer,
-    loss=loss,
-    train_loader=train_loader,
-    val_loader=val_loader,
-    epochs=epochs
-)
+# run below to train the model
+# metrics = train(
+#     head=vgg_head,
+#     body=vgg_body,
+#     head_optimizer=head_optimizer,
+#     loss=loss,
+#     train_loader=train_loader,
+#     val_loader=val_loader,
+#     epochs=epochs
+# )
 ```
 
 ```python pycharm={"name": "#%%\n"}
 #!TAG SKIPQUESTEXEC
-get_training_progress_plot(
-    metrics['train_loss'],
-    metrics['train_acc'],
-    metrics['val_loss'],
-    metrics['val_acc'],
-)
+# run below to plot the training progress
+# get_training_progress_plot(
+#     metrics['train_loss'],
+#     metrics['train_acc'],
+#     metrics['val_loss'],
+#     metrics['val_acc'],
+# )
 ```
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
+
+#!TAG HWBEGIN
+
+![py08-13.png](py08-13.png)
+
 As you can see, the results are much better now, and would keep improving if we had
 trained for longer.
+
+#!TAG HWEND
 
 
 ## Exercise 2
