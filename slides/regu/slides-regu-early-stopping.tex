@@ -48,13 +48,13 @@
     \hline
     Effective and simple & Periodical evaluation of validation error\\
     \hline
-    Applicable to almost any model without adjustment \note{of objective function, parameter space, training procedure} & Temporary copy of $\thetab$ (we have to save the whole model each time validation error improves) \\
+    Applicable to almost any model without adjustment \note{of objective function, parameter space, training procedure} & Temporary copy of $\thetav$ (we have to save the whole model each time validation error improves) \\
     \hline
     Combinable with other regularization methods & Less data for training $\rightarrow$ include $\mathcal{D}_{\text{val}}$ afterwards\\ \hline\hline
     \end{tabular}
   \end{table}
   \begin{itemize}
-    \item For simple case of LM with squared loss and GD optim initialized at $\thetab=0$: Early stopping has exact correspondence with $L2$ regularization/WD: %Relation between
+    \item For simple case of LM with squared loss and GD optim initialized at $\thetav=0$: Early stopping has exact correspondence with $L2$ regularization/WD: %Relation between
     optimal early-stopping iter $T_{\text{stop}}$ inversely proportional to  $\lambda$ scaled by step-size $\alpha$
     
  \end{itemize}
@@ -82,11 +82,11 @@ T_{\text{stop}} \approx \frac{1}{\alpha \lambda}
   \end{figure}
   
 \footnotesize 
-\textbf{Figure:} Effect of early stopping. \textit{Left:} The solid lines indicate contours of the square loss objective. Dashed line indicates trajectory taken by GD initialized at origin. Instead of reaching minimizer $\thetah$, ES results in trajectory stopping earlier at $\hat{\thetab}_{\text{ridge}}$. \textit{Right:} Effect of $L2$ regularization. Dashed circles indicate contours of $L2$ constraint which push minimizer of regularized cost closer to origin than minimizer of unregularized cost.
+\textbf{Figure:} Effect of early stopping. \textit{Left:} The solid lines indicate contours of the square loss objective. Dashed line indicates trajectory taken by GD initialized at origin. Instead of reaching minimizer $\thetah$, ES results in trajectory stopping earlier at $\hat{\thetav}_{\text{ridge}}$. \textit{Right:} Effect of $L2$ regularization. Dashed circles indicate contours of $L2$ constraint which push minimizer of regularized cost closer to origin than minimizer of unregularized cost.
 \end{vbframe}
 
 \begin{vbframe}{SGD Trajectory and $L2$}
-Solution paths for $L2$ regularized linear model closely matches SGD trajectory of unregularized LM initialized at $\thetab=0$
+Solution paths for $L2$ regularized linear model closely matches SGD trajectory of unregularized LM initialized at $\thetav=0$
 \lz
   \begin{figure}
     \centering

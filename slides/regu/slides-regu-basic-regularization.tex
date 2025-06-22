@@ -31,13 +31,13 @@
 \begin{vbframe}{Revision: Regularized Risk Minimization}
 \begin{itemize}
 \item The goal of regularized risk minimization is to penalize the complexity of the model to minimize the chances of overfitting.
-\item By adding a parameter norm penalty term \(J(\thetab)\) to the empirical risk $\risket$ we obtain a regularized cost function:
-$$\riskrt = \risket + \lambda \text{\(J(\thetab)\)}$$
+\item By adding a parameter norm penalty term \(J(\thetav)\) to the empirical risk $\risket$ we obtain a regularized cost function:
+$$\riskrt = \risket + \lambda \text{\(J(\thetav)\)}$$
 with hyperparamater $\lambda \in [0, \infty)$, that weights the penalty term, relative to the unconstrained objective function $\risket$.
 \item Therefore, instead of pure \textbf{empirical risk minimization}, we add a penalty
-for complex (read: large) parameters \(\thetab\).
+for complex (read: large) parameters \(\thetav\).
 \item Declaring $\lambda = 0$ obviously results in no penalization.
-\item We can choose between different parameter norm penalties \(J(\thetab)\).
+\item We can choose between different parameter norm penalties \(J(\thetav)\).
 \item In general, we do not penalize the bias.
 \end{itemize}
 \end{vbframe}
@@ -45,14 +45,14 @@ for complex (read: large) parameters \(\thetab\).
 
 \begin{vbframe}{L2-regularization / Weight decay}
 Let us optimize the L2-regularized risk of a model $\fxt$
-\[\min_{\thetab} \riskrt = \min_{\thetab} \risket + \frac{\lambda}{2} \|\thetab\|^2_2\]
+\[\min_{\thetav} \riskrt = \min_{\thetav} \risket + \frac{\lambda}{2} \|\thetav\|^2_2\]
 by gradient descent. The gradient is
-\[\nabla \riskrt = \nabla \risket + \lambda \thetab.\]
-We iteratively update $\thetab$ by step size \(\alpha\) times the
+\[\nabla \riskrt = \nabla \risket + \lambda \thetav.\]
+We iteratively update $\thetav$ by step size \(\alpha\) times the
 negative gradient
-\[\thetab^{[\text{t+1}]} = \thetab^{[\text{t}]} - \alpha \left(\nabla \risket + \lambda \thetab^{[\text{t}]}\right) =
-\thetab^{[\text{t}]} (1 - \alpha \lambda) - \alpha \nabla \risket\]
-$\to$ The term \(\lambda \thetab^{[t]}\) causes the parameter
+\[\thetav^{[\text{t+1}]} = \thetav^{[\text{t}]} - \alpha \left(\nabla \risket + \lambda \thetav^{[\text{t}]}\right) =
+\thetav^{[\text{t}]} (1 - \alpha \lambda) - \alpha \nabla \risket\]
+$\to$ The term \(\lambda \thetav^{[t]}\) causes the parameter
 (\textbf{weight}) to \textbf{decay} in proportion to its size (which gives rise to the name). 
 \end{vbframe}
 
@@ -60,11 +60,11 @@ $\to$ The term \(\lambda \thetab^{[t]}\) causes the parameter
 
 \begin{frame}{Equivalence to Constrained Optimization}
 Norm penalties can be interpreted as imposing a constraint on the weights. One can show that 
- $$\argmin_{\theta} \risket + \lambda \text{\(J(\thetab)\)}$$
+ $$\argmin_{\theta} \risket + \lambda \text{\(J(\thetav)\)}$$
  is equvilalent to
  \begin{align*}
- & \argmin_{\thetab}  \risket \\
-  &\text{subject to \;\;\;}  J(\thetab) \leq k
+ & \argmin_{\thetav}  \risket \\
+  &\text{subject to \;\;\;}  J(\thetav) \leq k
  \end{align*}
   for some value $k$ that depends on $\lambda$ the nature of 
  $\risket$ (Goodfellow et al., 2016)

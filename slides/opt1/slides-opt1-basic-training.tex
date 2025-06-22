@@ -33,7 +33,7 @@
 % \end{enumerate}
 % \lz
 
-% \textbf{Recall:} Loss is $L(y, f(\xv, \thetab))$, where $y$ is the true label and $f(\xv, \thetab)$ the prediction.
+% \textbf{Recall:} Loss is $L(y, f(\xv, \thetav))$, where $y$ is the true label and $f(\xv, \thetav)$ the prediction.
 % \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -44,7 +44,7 @@
 In ML we use \textbf{empirical risk minimization} to minimize prediction 
 losses over the training data
 $$\riske = \frac{1}{n} \sumin \Lxyit$$
-\item In DL, $\thetab$ represents the weights (and biases) of the NN. 
+\item In DL, $\thetav$ represents the weights (and biases) of the NN. 
 \item Often, L2 in regression:
 $$\Lxy = \frac{1}{2}(y - \fx)^2$$
 \item or cross-entropy for binary classification
@@ -59,24 +59,24 @@ $$\Lxy = - (y \log \fx + (1 - y) \log(1 - \fx))$$
   \begin{itemize}
     % \item Let $\risket: \R^d \to \R$ be a (differentiable) risk
     % \begin{footnotesize}
-    % In the context of deep learning, $\riske$ represents the empirical risk function and $\thetab$ represents the weights (and biases) of the network. For simplification, we assume $\bm{\theta} = (\theta_1, ..., \theta_m)$. 
+    % In the context of deep learning, $\riske$ represents the empirical risk function and $\thetav$ represents the weights (and biases) of the network. For simplification, we assume $\bm{\theta} = (\theta_1, ..., \theta_m)$. 
     % \end{footnotesize}
     % \item We want to minimize this function by gradient descent. 
     \item Neg. risk gradient points in the direction of the \textbf{steepest descent}
     $$
-    - \mathbf{g} = - \nabla \riske(\thetab) = - \left(\frac{\partial \riske}{\partial \theta_1}, \ldots, \frac{\partial \riske}{\partial \theta_d}\right)^\top
+    - \mathbf{g} = - \nabla \riske(\thetav) = - \left(\frac{\partial \riske}{\partial \theta_1}, \ldots, \frac{\partial \riske}{\partial \theta_d}\right)^\top
     $$ 
     % since $\nabla \riske$ always points in the direction of the steepest ascent.
 
   % \begin{itemize}
-    \item \enquote{Standing} at a point $\thetab^{[t]}$, we locally improve by:
+    \item \enquote{Standing} at a point $\thetav^{[t]}$, we locally improve by:
         % performing the following update: 
     $$
-      \thetab^{[t + 1 ]}  = \thetab^{[t]} - \alpha \mathbf{g},
+      \thetav^{[t + 1 ]}  = \thetav^{[t]} - \alpha \mathbf{g},
     $$
     % which implies (for sufficiently small $\alpha$),
     % $$
-    % \riske(\bm{\thetab}^{[t+1]}) \leq \riske(\bm{\thetab}^{[t]})
+    % \riske(\bm{\thetav}^{[t+1]}) \leq \riske(\bm{\thetav}^{[t]})
     % $$
     \item $\alpha$ is called \textbf{step size} or \textbf{learning rate}.
   \end{itemize}
@@ -105,9 +105,9 @@ $$\Lxy = - (y \log \fx + (1 - y) \log(1 - \fx))$$
     \begin{itemize}
       \item GD is a greedy algorithm: In every iteration, it makes locally optimal moves.
       \vspace*{2mm}
-      \item If $\riske(\thetab)$ is \textbf{convex} and \textbf{differentiable}, and its gradient is Lipschitz continuous, GD is guaranteed to converge to the global minimum (for small enough step-size).  
+      \item If $\riske(\thetav)$ is \textbf{convex} and \textbf{differentiable}, and its gradient is Lipschitz continuous, GD is guaranteed to converge to the global minimum (for small enough step-size).  
       \vspace*{2mm}
-    \item However, if $\riske(\thetab)$ has multiple local optima and/or saddle points, GD might only converge to a stationary point (other than the global optimum), depending on the starting point. 
+    \item However, if $\riske(\thetav)$ has multiple local optima and/or saddle points, GD might only converge to a stationary point (other than the global optimum), depending on the starting point. 
     \end{itemize}
     \end{small}
   \end{minipage}\hfill
@@ -172,7 +172,7 @@ However, it makes sense to adapt $\alpha$ in every iteration:
 \begin{figure}
 \includegraphics[width = 0.3\textwidth]{figure/stepsize_small.png} ~~~ 
 \includegraphics[width = 0.3\textwidth]{figure/stepsize_adaptive.png}
-\caption{Steps of gradient descent for $\riske(\thetab) = 10\,\theta_1^2 + 0.5\,\theta_2^2$. Left:  100 steps for with a fixed learning rate. Right:  40 steps with an adaptive learning rate (Tibshirani, 2019).}
+\caption{Steps of gradient descent for $\riske(\thetav) = 10\,\theta_1^2 + 0.5\,\theta_2^2$. Left:  100 steps for with a fixed learning rate. Right:  40 steps with an adaptive learning rate (Tibshirani, 2019).}
 \end{figure}
 \end{center}
 
@@ -192,14 +192,14 @@ However, it makes sense to adapt $\alpha$ in every iteration:
 %\begin{vbframe}{Weight updates with Backpropagation}
 %\begin{itemize}
 %\lz
-%\item To update each weight $w \in \thetab$ in the network, we need their gradients w.r.t. the empirical risk.
+%\item To update each weight $w \in \thetav$ in the network, we need their gradients w.r.t. the empirical risk.
 %\lz
 %\lz
 %\item Since weights are stacked in layers inside the network, we need to repeatedly apply the \enquote{chain rule of calculus}. This process is called \textbf{backpropagation}.
 %\lz
 %\lz
 %\item After obtaining the gradients, the weights can be updated by GD:
-%$$\thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetab^{[t]})\right)$$
+%$$\thetav^{[t + 1]} = \thetav^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetav^{[t]})\right)$$
 %\end{itemize}
 %\end{vbframe}
 
@@ -209,7 +209,7 @@ However, it makes sense to adapt $\alpha$ in every iteration:
 
 GD for ERM was: 
 $$
-  \thetab^{[t + 1]} = \thetab^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetab^{[t]})\right)
+  \thetav^{[t + 1]} = \thetav^{[t]} - \alpha \cdot \frac{1}{n} \cdot \sumin \nabla_\theta L\left(\yi, f(\xi ~|~ \thetav^{[t]})\right)
 $$
   \begin{itemize}
     \item Using the entire training set in GD to is called \textbf{batch} or \textbf{deterministic} or \textbf{offline training}. This can be computationally costly or impossible, if data does not fit into memory.
@@ -225,7 +225,7 @@ $$
     % batch gradient is costly (or even impossible, e.g., when data does not even fit into memory) to compute, particularly in DL, but it averages out all the noise from sub-sampling.
     % \item Minibatches are in between. The batch size decides upon the compromise
     % between speed and averaging (smoothing).
-    % \item In summary: SGD computes an unbiased estimate of the gradient by taking the average gradient over a minibatch (or one sample) to update the parameter $\thetab$ in this direction.
+    % \item In summary: SGD computes an unbiased estimate of the gradient by taking the average gradient over a minibatch (or one sample) to update the parameter $\thetav$ in this direction.
     % \item Optimization algorithms that use only a single example at a time are called \textbf{stochastic} or \textbf{online}. This can be used simply as a computational trick to deal with large data or to operate on real streams of online data in online learning.
 % Those methods are called \textbf{minibatch} or \textbf{stochastic}.
   \end{itemize}
@@ -238,7 +238,7 @@ $$
  \begin{figure}
  \begin{center}
     \scalebox{0.8}{\includegraphics{figure_man/SGD.png}}
- \caption{Left = GD, right = SGD. The black line is a smoothed $\thetab$ (Shalev-Shwartz \& Ben-David, 2022)}
+ \caption{Left = GD, right = SGD. The black line is a smoothed $\thetav$ (Shalev-Shwartz \& Ben-David, 2022)}
  \end{center}
  \end{figure}
 
@@ -267,15 +267,15 @@ $$
   \footnotesize
     \caption{Basic SGD pseudo code}
     \begin{algorithmic}[1]
-    \State Initialize parameter vector $\thetab^{[0]}$ 
+    \State Initialize parameter vector $\thetav^{[0]}$ 
     
     \State $t \leftarrow 0$
     \While{stopping criterion not met}
     \State Randomly shuffle data and partition into minibatches $J_1, ..., J_K$ of size $m$
       \For{$k\in\{1,...,K\}$} 
       \State $t \leftarrow t + 1$ 
-      \State Compute gradient estimate with $J_k$: $\hat{g}^{[t]} \leftarrow \frac{1}{m} \sum_{i \in J_k} \nabla_\theta L(\yi, f(\xi ~|~ \thetab^{[t-1]})) $
-      \State Apply update: $\thetab^{[t]} \leftarrow \thetab^{[t-1]} - \alpha \hat{g}^{[t]}$
+      \State Compute gradient estimate with $J_k$: $\hat{g}^{[t]} \leftarrow \frac{1}{m} \sum_{i \in J_k} \nabla_\theta L(\yi, f(\xi ~|~ \thetav^{[t-1]})) $
+      \State Apply update: $\thetav^{[t]} \leftarrow \thetav^{[t-1]} - \alpha \hat{g}^{[t]}$
       
       \EndFor
     
@@ -284,7 +284,7 @@ $$
     \end{algorithmic}
   \end{algorithm}
   % \begin{itemize}
-  %   \item Thus, what SGD basically does is computing an unbiased estimate of the gradient by taking the average gradients of a minibatch to update the parameter $\thetab$.
+  %   \item Thus, what SGD basically does is computing an unbiased estimate of the gradient by taking the average gradients of a minibatch to update the parameter $\thetav$.
   % \end{itemize}
   \begin{itemize}
     \item A full SGD pass over data is an \textbf{epoch}.

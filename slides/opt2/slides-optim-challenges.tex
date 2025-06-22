@@ -96,12 +96,12 @@ To understand better how the curvature of a function influences the outcome of a
 \framebreak 
 
 \begin{itemize}
-  \item At a stationary point $\thetab$, where the gradient is 0, we can examine the eigenvalues of the Hessian to determine whether the $\thetab$ is a local maximum, minimum or saddle point: 
+  \item At a stationary point $\thetav$, where the gradient is 0, we can examine the eigenvalues of the Hessian to determine whether the $\thetav$ is a local maximum, minimum or saddle point: 
   \vspace{-0.3cm}
   \begin{align*} 
-  \quad\forall i: \lambda_i > 0  \, (\Hess \text{ positive definite at $\thetab$}) &\quad\Rightarrow\quad \text{minimum at $\thetab$} \\
-  \quad\forall i: \lambda_i < 0 \, (\Hess \text{ negative definite at $\thetab$}) &\quad\Rightarrow\quad \text{maximum at $\thetab$}\\
-  \exists\, i: \lambda_i < 0 \land  \exists j: \lambda_j > 0  \,(\Hess \text{ indefinit at $\thetab$}) &\quad\Rightarrow\quad \mbox{saddle point at $\thetab$}
+  \quad\forall i: \lambda_i > 0  \, (\Hess \text{ positive definite at $\thetav$}) &\quad\Rightarrow\quad \text{minimum at $\thetav$} \\
+  \quad\forall i: \lambda_i < 0 \, (\Hess \text{ negative definite at $\thetav$}) &\quad\Rightarrow\quad \text{maximum at $\thetav$}\\
+  \exists\, i: \lambda_i < 0 \land  \exists j: \lambda_j > 0  \,(\Hess \text{ indefinit at $\thetav$}) &\quad\Rightarrow\quad \mbox{saddle point at $\thetav$}
   \end{align*}
 \end{itemize}
    \begin{figure}
@@ -138,11 +138,11 @@ What does it mean for gradient descent if the Hessian is ill-conditioned?
  \begin{itemize}
  \item Let us consider the second-order Taylor approximation as a local approximation of the of $\risk$ around a current point $\boldsymbol{\theta}^0$ (with gradient $\mathbf{g}$)
     \begin{equation*}
-    \risk(\boldsymbol{\theta}) \approx T_2f(\thetab, \boldsymbol{\theta}^0) := \risk(\boldsymbol{\theta}^0) + (\boldsymbol{\theta}-\boldsymbol{\theta}^0)^\top \mathbf{g} + \frac{1}{2}(\boldsymbol{\theta}-\boldsymbol{\theta}^0)^\top \!\Hess\, (\boldsymbol{\theta}-\boldsymbol{\theta}^0)
+    \risk(\boldsymbol{\theta}) \approx T_2f(\thetav, \boldsymbol{\theta}^0) := \risk(\boldsymbol{\theta}^0) + (\boldsymbol{\theta}-\boldsymbol{\theta}^0)^\top \mathbf{g} + \frac{1}{2}(\boldsymbol{\theta}-\boldsymbol{\theta}^0)^\top \!\Hess\, (\boldsymbol{\theta}-\boldsymbol{\theta}^0)
     \end{equation*}
   \item Furthermore, Taylor's theorem states (proof in Koenigsberger (1997), p. 68)
     \begin{equation*}
-     \underset{\thetab \rightarrow \boldsymbol{\theta}^0}{\lim} \frac{\risk(\thetab) - T_2f(\thetab, \boldsymbol{\theta}^0)}{||\thetab-\boldsymbol{\theta}^0||^2} = 0
+     \underset{\thetav \rightarrow \boldsymbol{\theta}^0}{\lim} \frac{\risk(\thetav) - T_2f(\thetav, \boldsymbol{\theta}^0)}{||\thetav-\boldsymbol{\theta}^0||^2} = 0
    \end{equation*}
 
   \framebreak 
@@ -416,7 +416,7 @@ within an infinitesimal region.
 \framebreak 
     \item Gradient clipping simply caps the step size to be small enough that it is less likely to go outside the region where the gradient indicates the direction of steepest descent.
     \item We simply \enquote{prune} the norm of the gradient at some threshold $h$:
-    $$\text{if  } ||\nabla \thetab|| > \text h: \nabla \thetab \leftarrow \frac{h}{||\nabla \thetab||} \nabla \thetab $$
+    $$\text{if  } ||\nabla \thetav|| > \text h: \nabla \thetav \leftarrow \frac{h}{||\nabla \thetav||} \nabla \thetav $$
   \end{itemize}
 \end{vbframe}
 

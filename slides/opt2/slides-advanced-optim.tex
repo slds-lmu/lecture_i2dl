@@ -28,8 +28,8 @@
     \item Momentum is designed to accelerate learning, especially when facing high curvature, small but consistent or noisy gradients.
     \item Momentum accumulates an exponentially decaying moving average of past gradients:
       \begin{eqnarray*} 
-        \nub &\leftarrow& \varphi \nub - \alpha \underbrace{\nabla_{\thetab} \Big[\frac{1}{m} \sum_{i} \Lmomentum \Big]}_{\mathbf{g}_{\thetab}}\\[-0.3cm]
-        \thetab &\leftarrow& \thetab + \nub
+        \nub &\leftarrow& \varphi \nub - \alpha \underbrace{\nabla_{\thetav} \Big[\frac{1}{m} \sum_{i} \Lmomentum \Big]}_{\mathbf{g}_{\thetav}}\\[-0.3cm]
+        \thetav &\leftarrow& \thetav + \nub
       \end{eqnarray*}
     \item We introduce a new hyperparameter $\varphi \in [0, 1)$, determining how quickly the contribution of previous gradients decay.
     \item $\nub$ is called \enquote{velocity} and derives from a physical analogy describing how particles move through a parameter space (Newton's law of motion).
@@ -100,12 +100,12 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \caption{Stochastic gradient descent with momentum}
     \begin{algorithmic}[1]
     \State \textbf{require} learning rate $\alpha$ and momentum $\varphi$ \strut
-    \State \textbf{require} initial parameter $\thetab$ and initial velocity $\nub$ \strut
+    \State \textbf{require} initial parameter $\thetav$ and initial velocity $\nub$ \strut
       \While{stopping criterion not met}
         \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$}
-        \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow  \frac{1}{m} \nabla_{\thetab} \sum_{i} \Lxym$
+        \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow  \frac{1}{m} \nabla_{\thetav} \sum_{i} \Lxym$
         \State Compute velocity update: $\nub \leftarrow \varphi \nub - \alpha \hat{\mathbf{g}}$
-        \State Apply update: $\thetab \leftarrow \thetab + \nub$
+        \State Apply update: $\thetav \leftarrow \thetav + \nub$
       \EndWhile
     \end{algorithmic}
   \end{algorithm}
@@ -177,8 +177,8 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \item Momentum aims to solve poor conditioning of the Hessian but also variance in the stochastic gradient.
     \item Nesterov momentum modifies the algorithm such that the gradient is evaluated after the current velocity is applied:
       \begin{eqnarray*} 
-        \nub &\leftarrow& \varphi \nub - \alpha \nabla_{\thetab} \Big[\frac{1}{m} \sum_{i} \Lmomentumnest \Big] \\
-        \thetab &\leftarrow& \thetab + \nub
+        \nub &\leftarrow& \varphi \nub - \alpha \nabla_{\thetav} \Big[\frac{1}{m} \sum_{i} \Lmomentumnest \Big] \\
+        \thetav &\leftarrow& \thetav + \nub
       \end{eqnarray*}
     \item We can interpret Nesterov momentum as an attempt to add a correction factor to the basic method.
     \item The method is also called Nesterov accelerated gradient (NAG).
@@ -191,13 +191,13 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \caption{Stochastic gradient descent with Nesterov momentum}
     \begin{algorithmic}[1]
     \State \textbf{require} learning rate $\alpha$ and momentum $\varphi$ \strut
-    \State \textbf{require} initial parameter $\thetab$ and initial velocity $\nub$ \strut
+    \State \textbf{require} initial parameter $\thetav$ and initial velocity $\nub$ \strut
       \While{stopping criterion not met}
         \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$}
-        \State Apply interim update: $\tilde{\thetab} \leftarrow \thetab + \varphi \nub$
-        \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow  \frac{1}{m} \nabla_{\tilde{\thetab}} \sum_{i} \Lmomentumtilde$
+        \State Apply interim update: $\tilde{\thetav} \leftarrow \thetav + \varphi \nub$
+        \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow  \frac{1}{m} \nabla_{\tilde{\thetav}} \sum_{i} \Lmomentumtilde$
         \State Compute velocity update: $\nub \leftarrow \varphi \nub - \alpha \hat{\mathbf{g}}$
-        \State Apply update: $\thetab \leftarrow \thetab + \nub$
+        \State Apply update: $\thetav \leftarrow \thetav + \nub$
       \EndWhile
     \end{algorithmic}
   \end{algorithm}
@@ -454,15 +454,15 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \begin{algorithmic}[1]
     \scriptsize 
     \State \textbf{require} Global learning rate $\alpha$ \strut
-    \State \textbf{require} Initial parameter $\thetab$ \strut
+    \State \textbf{require} Initial parameter $\thetav$ \strut
     \State \textbf{require} Small constant $\beta$, perhaps $10^{-7}$, for numerical stability \strut
     \State \textbf{Initialize} gradient accumulation variable $\mathbf{r} = \mathbf{0} $
        \While{stopping criterion not met}
          \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$ \strut}
-         \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow \frac{1}{m} \nabla_{\thetab} \sum_{i} \Lxym$
+         \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow \frac{1}{m} \nabla_{\thetav} \sum_{i} \Lxym$
          \State Accumulate squared gradient $\mathbf{r} \leftarrow \mathbf{r} + \hat{\mathbf{g}} \odot  \hat{\mathbf{g}}$
-         \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla \thetab = - \frac{\alpha}{\beta + \sqrt\mathbf{r}} \odot \hat{\mathbf{g}}$ (division and square root applied element-wise) \strut}
-         \State Apply update: $\thetab \leftarrow \thetab + \nabla\thetab$
+         \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla \thetav = - \frac{\alpha}{\beta + \sqrt\mathbf{r}} \odot \hat{\mathbf{g}}$ (division and square root applied element-wise) \strut}
+         \State Apply update: $\thetav \leftarrow \thetav + \nabla\thetav$
        \EndWhile
     \end{algorithmic}
   \end{algorithm}
@@ -507,15 +507,15 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
     \caption{RMSProp}
     \begin{algorithmic}[1]
     \State \textbf{require} Global learning rate $\alpha$ and decay rate $\rho \in [0, 1)$ \strut
-    \State \textbf{require} Initial parameter $\mathbf{\thetab}$ \strut
+    \State \textbf{require} Initial parameter $\mathbf{\thetav}$ \strut
     \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{\textbf{require} Small constant $\beta$, perhaps $10^{-6}$, for numerical stability \strut}
     \State Initialize gradient accumulation variable $\mathbf{r} = \mathbf{0} $
       \While{stopping criterion not met}
         \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$ \strut}
         \State Compute gradient estimate: $\hat{\mathbf{g}} \leftarrow \frac{1}{m} \nabla_\theta \sum_{i} \Lxym$
         \State Accumulate squared gradient $\mathbf{r} \leftarrow \rho \mathbf{r} + (1 - \rho) \hat{\mathbf{g}} \odot  \hat{\mathbf{g}}$
-        \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla\mathbf{\thetab} = - \frac{\alpha}{\beta + \sqrt\mathbf{r}} \odot \hat{\mathbf{g}}$ \strut}
-        \State Apply update: $\mathbf{\thetab} \leftarrow \mathbf{\thetab} + \nabla\mathbf{\thetab}$
+        \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla\mathbf{\thetav} = - \frac{\alpha}{\beta + \sqrt\mathbf{r}} \odot \hat{\mathbf{g}}$ \strut}
+        \State Apply update: $\mathbf{\thetav} \leftarrow \mathbf{\thetav} + \nabla\mathbf{\thetav}$
       \EndWhile
     \end{algorithmic}
   \end{algorithm}
@@ -544,19 +544,19 @@ E.g. a momentum with $\varphi = 0.9$ corresponds to multiplying the maximum spee
   \State \textbf{require} Step size $\alpha$ (suggested default: 0.001) \strut
   \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{\textbf{require} Exponential decay rates for moment estimates, $\rho_1$ and $\rho_2$ in $[0,1)$ (suggested defaults: 0.9 and 0.999 respectively)} \strut
   \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{\textbf{require} Small constant $\beta$ (suggested default $10^{-8}$) \strut}
-  \State \textbf{require} Initial parameters $\thetab$ 
+  \State \textbf{require} Initial parameters $\thetav$ 
   \State Initialize time step $t = 0$
   \State Initialize 1st and 2nd moment variables $\mathbf{s}^{[0]} = 0, \mathbf{r}^{[0]} = 0$
     \While{stopping criterion not met}
       \State $t \leftarrow t + 1$
       \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Sample a minibatch of $m$ examples from the training set $\{\tilde{x}^{(1)},\dots,\tilde{x}^{(m)}\}$ \strut}
-      \State Compute gradient estimate: $\hat{\mathbf{g}}^{[t]} \leftarrow \frac{1}{m} \nabla_{\thetab} \sum_{i} \Lxym$
+      \State Compute gradient estimate: $\hat{\mathbf{g}}^{[t]} \leftarrow \frac{1}{m} \nabla_{\thetav} \sum_{i} \Lxym$
       \State Update biased first moment estimate: $\mathbf{s}^{[t]} \leftarrow \rho_1 \mathbf{s}^{[t-1]}  + (1 - \rho_1) \hat{\mathbf{g}}^{[t]}$
       \State Update biased second moment estimate: $\mathbf{r}^{[t]} \leftarrow \rho_2 \mathbf{r}^{[t-1]}  + (1 - \rho_2) \hat{\mathbf{g}}^{[t]} \odot \hat{\mathbf{g}}^{[t]}$
       \State Correct bias in first moment: $\hat{\mathbf{s}} \leftarrow \frac{\mathbf{s}^{[t]} }{1-\rho_1^t}$
       \State Correct bias in second moment: $\hat{\mathbf{r}} \leftarrow \frac{\mathbf{r}^{[t]} }{1-\rho_2^t}$
-      \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla\thetab = - \alpha \frac{\hat{\mathbf{s}}}{\sqrt{\hat{\mathbf{r}}} + \beta}$ \strut}
-      \State Apply update: $\thetab \leftarrow \thetab + \nabla\thetab$
+      \State \parbox[t]{\dimexpr\linewidth-\algorithmicindent}{Compute update: $\nabla\thetav = - \alpha \frac{\hat{\mathbf{s}}}{\sqrt{\hat{\mathbf{r}}} + \beta}$ \strut}
+      \State Apply update: $\thetav \leftarrow \thetav + \nabla\thetav$
       
     \EndWhile
   \end{algorithmic}
