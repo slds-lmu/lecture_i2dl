@@ -308,8 +308,8 @@ To actually understand the mechanism behind self-attention we want to calculate 
     \end{matrix}\right) \end{equation}
 
     1. $N \times N$
-    2.  - Vector-wise similarity/closeness between the elements in Q and V. 
-        - Intuitively: Ideally, answers the question: Per word (embedding) q, how much does an respective element from v relate to q for the given context. How much does v help us to understand what q is about? 
+    2.  - Vector-wise similarity/closeness between the elements in Q and K. 
+        - Intuitively: Ideally, answers the question: Per word (embedding) q, how much does an respective element from k relate to q for the given context. How much does k help us to understand what q is about? 
         - This is also why we project into the different spaces. If $Q=K$ exactly (i.e., no learned projection), then the dot product $QK^T$ would usually produce mostly high values along the diagonal and smaller values else where. Softmax on this would then result in an almost one-hot attention matrix (where each token attends mostly to itself). Applying this to $V$ would then mean each word is weighted mostly by itself, so the attention mechanism would not change the representation in a meaningful way.
 3. 
     \begin{equation} \text{Attention}(K, Q, V) = A V =
@@ -368,10 +368,10 @@ Now, show that the formulation in 3. actually is equal to the vanilla softmax fo
 
 Since 
 \begin{align*}
-\mathbf{f}(\mathbf{a}_i^{(1)}) \cdot e^{m_1 - m} 
+\mathbf{f}(\mathbf{a}_i^{(1)})_j \cdot e^{m_1 - m} 
 &= \left( e^{a_{i,j}^{(1)} - m_1} \cdot e^{m_1 - m} \right) 
 = \left( e^{a_{i,j}^{(1)} - m} \right) \\
-\mathbf{f}(\mathbf{a}_i^{(2)}) \cdot e^{m_2 - m} 
+\mathbf{f}(\mathbf{a}_i^{(2)})_j \cdot e^{m_2 - m} 
 &= \left( e^{a_{i,j}^{(2)} - m_2} \cdot e^{m_2 - m} \right) 
 = \left( e^{a_{i,j}^{(2)} - m} \right)
 \end{align*}
