@@ -65,7 +65,7 @@
     \item Let use ReLU $\sigma(z) = \max\left\{0, z \right\}$ as activation function and a simple thresholding function $\tau(z) = [ z > 0 ] =  \begin{cases} 1 & \text{ if } z > 0 \\ 0 & \text{otherwise} \end{cases} $ \\ as output transformation function. We can represent the architecture of the model by the following equation: 
   \end{itemize}
   \begin{eqnarray*}
-    f(\xv~|~\thetab) &=& f(\xv~|~ \Wmat, \biasb, \wtu, \biasc) = \tau\left(\wtu^\top\sigma(\Wmat^\top \xv+\biasb)+\biasc\right) \\
+    f(\xv~|~\thetah) &=& f(\xv~|~ \Wmat, \biasb, \wtu, \biasc) = \tau\left(\wtu^\top\sigma(\Wmat^\top \xv+\biasb)+\biasc\right) \\
                 &=& \tau\left(\wtu^\top \max\{0, \Wmat^\top \xv+\biasb\} + \biasc\right)
   \end{eqnarray*}
   % \begin{footnotesize}

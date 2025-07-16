@@ -184,8 +184,8 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
   \begin{itemize}
     \item As we have seen previously, the role of the output activation is to get the final score on the same scale as the target.
     \item The output activations and the loss functions used to train neural networks can be viewed through the lens of maximum likelihood estimation (MLE).
-    \item In general, the function $f(\xv~|~\thetab)$ represented by the neural network defines the conditional $p(y~|~\xv,\thetab)$ in a supervised learning task.
-    \item Maximizing the likelihood is then equivalent to minimizing $- \log p(y~|~\xv,\thetab)$.
+    \item In general, the function $f(\xv~|~\thetav)$ represented by the neural network defines the conditional $p(y~|~\xv,\thetav)$ in a supervised learning task.
+    \item Maximizing the likelihood is then equivalent to minimizing $- \log p(y~|~\xv,\thetav)$.
     \item An output unit with the identity function as the activation can be used to represent the mean of a Gaussian distribution.
     \item For such a unit, training with mean-squared error is equivalent to maximizing the log-likelihood (ignoring issues with non-convexity).
   \end{itemize}
@@ -219,7 +219,7 @@ $$p(y | \xv)=\sum_{c=1}^{m} \phi^{(c)} (\xv) ~ \mathcal{N}\left(y ; \boldsymbol{
   \begin{figure}
     \centering
       \scalebox{1}{\includegraphics{figure/mdn.png}}
-      \caption{\footnotesize Samples drawn from a Mixture Density Network. The input $\xv$ is sampled from a uniform distribution and $y$ is sampled from $p(y~|~\xv,\thetab)$ (Goodfellow et al., 2016).}
+      \caption{\footnotesize Samples drawn from a Mixture Density Network. The input $\xv$ is sampled from a uniform distribution and $y$ is sampled from $p(y~|~\xv,\thetav)$ (Goodfellow et al., 2016).}
   \end{figure}
 \end{frame}
 

@@ -22,7 +22,7 @@
 
 \begin{frame}{Backpropagation: Basic Idea}
 We would like to run ERM by GD on: $$ \risket = \frac{1}{n} \sumin \Lxyit$$ 
-% where $\thetab$ are the weights (and biases) of the network. 
+% where $\thetav$ are the weights (and biases) of the network. 
 
 Backprop training of NNs runs in 2 alternating steps, for one $\xv$:
 \begin{enumerate}
@@ -41,7 +41,7 @@ a lot of intermediate results.
   % \begin{itemize}
     % \item Backpropagation can then be used to compute the gradient of $\Lxyt$ in an \textbf{extremely} efficient way.
     % \item  In GD, the weight for one $\xv$ with learning rate $\alpha$, is 
-      % $$\thetab^{[t+1]} = \thetab^{[t]} - \alpha \cdot \nabla_{\theta}L\left(y, f\left(\xv ~|~ \thetab^{[t]}\right)\right)$$ 
+      % $$\thetav^{[t+1]} = \thetav^{[t]} - \alpha \cdot \nabla_{\theta}L\left(y, f\left(\xv ~|~ \thetav^{[t]}\right)\right)$$ 
         % \item We will see that, at its core, backpropagation is just a clever implementation of the chain rule. Nothing more!
 
   % \item We could now sum up these gradients for all $\xi$ from $\Dset$ to compute the gradient over the complete training set, to perform a full GD step. But as we want to arrive at stochastic gradient descent, 
@@ -349,10 +349,10 @@ z_{1,out} &=& \sigma\left(z_{1,in}\right) = \frac{1}{1+\exp(-(-0.53))} = \num[ro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   \begin{itemize}
-    \item Yields $f(\xv ~|~\thetab^{[t+1]}) = \num[round-mode=places,round-precision=4]{0.7614865}$ and loss 
+    \item Yields $f(\xv ~|~\thetav^{[t+1]}) = \num[round-mode=places,round-precision=4]{0.7614865}$ and loss 
         $\frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7614865})^2 = \num[round-mode=places,round-precision=4]{0.02844434}.$
         % $\Lxy = \frac{1}{2}(1 - \num[round-mode=places,round-precision=4]{0.7614865})^2 = \num[round-mode=places,round-precision=4]{0.02844434}.$$
-    \item Before, we had $f(\xv ~|~\thetab^{[t]}) = \num[round-mode=places,round-precision=4]{0.7525469}$ and higher loss $\num[round-mode=places,round-precision=4]{0.03061652}$.
+    \item Before, we had $f(\xv ~|~\thetav^{[t]}) = \num[round-mode=places,round-precision=4]{0.7525469}$ and higher loss $\num[round-mode=places,round-precision=4]{0.03061652}$.
 
   \end{itemize}
 \lz
