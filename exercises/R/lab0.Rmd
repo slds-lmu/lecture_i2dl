@@ -50,7 +50,7 @@ Ludwig-Maximilians-Universität München
 
  - Mix of theoretical and practical exercises
  - Not graded! Only the final exam counts
- - Exercises and solutions for the previous week posted on Moodle on Thursdays
+ - Exercises and solutions for the week will be posted on Moodle on Thursdays
  - We will discuss the solutions of the previous week. We expect you to **come prepared**!
  - Lab sessions exist to discuss and ask questions
     - Attend not to fall behind the schedule
