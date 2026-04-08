@@ -1,12 +1,14 @@
 ---
-title: "Deep Learning Lab 1 | Summer Term 2025"
-author: "Emanuel Sommer, Prof. Dr. David Rügamer"
+title: "Deep Learning Lab 1 | Summer Term 2026"
+author: "Sarah Deubner, Julius Kobialka, Emanuel Sommer"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 ```
+
+> Kudos to the former contributors to/creators of the lab materials Emilio Dorigatti and Tobias Weber.
 
 ## Exercise 1
 Consider a neural network with one hidden layer with threshold activation function (i.e., $\tau(x)=\mathbf{1}[x>0]$) and one output neuron with no activation function. Prove that such a neural network cannot _exactly_ separate the cyan ($y=1$) and white ($y=0$) areas in Figure 1.
@@ -311,8 +313,6 @@ plot_grid(output)
 ```
 
 ## Exercise 3
-
-**Note:** Focus on solving the second exercise first, as this exercise is of secondary importance. Essentially, it shows that the same function can be computed by many different neural networks.
 
 Consider a neuron with incoming weights $\textbf{w}=w_1,\ldots,w_n$ bias $b$, and activation $\tau(\cdot)$. This neuron is connected to the $i$-th neuron of the next layer with the weight $v_i$, and the bias of the latter neuron is $c_i$. We want to replace $\textbf{w}$, $v_i$, $b$ and $c_i$ with new parameters $\textbf{w}'$, $v'_i$, $b'$ and $c'_i$ so that the output of the network is unchanged for all inputs. At least one of the new parameters must be different, but some are allowed to equal the old ones.
 
