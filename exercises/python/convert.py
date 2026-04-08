@@ -223,7 +223,7 @@ def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
                 if match:
                     title = match.group(0).strip("# ")
                     break
-        title = f"Deep Learning {title} | Summer Term 2025"
+        title = f"Deep Learning {title} | Summer Term 2026"
     except Exception as e:
         print(f"Error extracting title: {e}")
     
@@ -240,7 +240,7 @@ def _convert_ipynb_to_pdf_worker(file_path: Path) -> Path:
                 rf'\\title{{{title}}}',
                 tex_content
             )
-            lecturers = "Emanuel Sommer, Prof. Dr. David Rügamer"
+            lecturers = "Sarah Deubner, Julius Kobialka, Emanuel Sommer"
             tex_content = re.sub(
                 r'(\\title\{.*?\})',
                 rf'\1\n\\author{{{lecturers}}}',

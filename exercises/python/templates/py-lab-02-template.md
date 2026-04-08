@@ -333,7 +333,10 @@ weights_2 = torch.tensor([
 # Note: The weight matrix is transposed in the end. (3 x 5 --> 5 x 3)
 # This gives more readability when entering your weights manually.
 
+#!TAG HWBEGIN
+#!MSG TODO print the shape of the weight matrix to check that it is correct.
 print(weights_2.shape)
+#!TAG HWEND
 ```
 
 ```python pycharm={"name": "#%%\n"}
@@ -442,10 +445,6 @@ plot_decision_boundary(grid_x, grid_y, output)
 
 <!-- #region pycharm={"name": "#%% md\n"} -->
 ## Exercise 3
-
-**Note:** Focus on solving the second exercise first, as this exercise is of secondary
-importance. Essentially, it shows that the same function can be computed by
-many different neural networks.
 
 Consider a neuron with incoming weights $\textbf{w}=w_1,\ldots,w_n$ bias $b$, and
 activation $\tau(\cdot)$. This neuron is connected to the $i$-th neuron of the next
