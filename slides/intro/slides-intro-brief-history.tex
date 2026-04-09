@@ -93,8 +93,8 @@ As for the TLU, the threshold is adjustable and decision boundaries are linear.
 \footnotesize\item Some fundamental mathematical difficulties in modeling long sequences were identified.
 \end{itemize}
 \begin{figure}
-\includegraphics[width=8cm]{figure/ai_winter.jpg}
-\caption{Symbolic image of an \enquote{AI Winter} (Fagella, 2019)}
+\includegraphics[width=7cm]{figure/ai_winter.jpg}
+\caption{\small Symbolic image of an \enquote{AI Winter} (Fagella, 2019)}
 \end{figure}
 \framebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -231,44 +231,30 @@ As for the TLU, the threshold is adjustable and decision boundaries are linear.
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%          REFERENCES          %%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{vbframe}
-\frametitle{References}
-\footnotesize{
-\begin{thebibliography}{99}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[(Goodfellow, 2016)]{1} 
-Goodfellow, I., Bengio, Y., \& Courville, A. (2016). \textit{Deep Learning}. MIT Press. 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\bibitem[(Fagella, 2019)]{2}Faggella, D. (2019, January 2). \textit{Will there be another artificial intelligence winter? probably not.} Emerj Artificial Intelligence Research. \url{https://emerj.com/ai-executive-guides/will-there-be-another-artificial-intelligence-winter-probably-not/} 
 
-\bibitem[(Vazquez, 2018)]{3} Vazquez, F. (2018, August 8). \textit{A “weird” Introduction to deep learning}. Medium. \url{https://towardsdatascience.com/a-weird-introduction-to-deep-learning-7828803693b0}
-
-\bibitem[(IBM, 2011)]{4} IBM. (2011, February 16). \textit{IBM Watson: Final jeopardy! and the future of Watson}. YouTube. \url{https://www.youtube.com/watch?v=lI-M7O_bRNg}
-
-\bibitem[(McCabe, 2016)]{5} McCabe, D. (2016, October 5). \textit{Google self-driving cars cover more than 2 Million Miles} The Hill. \url{https://thehill.com/policy/technology/299480-google-has-driven-self-driving-cars-more-than-two-million-miles/}
-
-\bibitem[(DeepMind, 2022)]{6} DeepMind. (2022, July 28). \textit{Alphafold}. Google DeepMind. \url{https://deepmind.google/technologies/alphafold/} 
-
-\bibitem[(DeepMind, 2022)]{7} DeepMind. (2022, July 28). \textit{Alphago}. Google DeepMind. \url{https://deepmind.google/technologies/alphago/} 
-
-\bibitem[(OpenAI, 2023)]{8} OpenAI. (2023). \textit{OpenAI}. \url{https://openai.com/}
-
-% \bibitem[(MathWorks)]{2} 
-% MathWorks. (n.d.). \textit{Regularization}. MATLAB \& Simulink. \url{https://de.mathworks.com/discovery/regularization.html}
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \bibitem[(Carter)]{3} 
-% Carter, D. S. and S. (n.d.). \textit{Tensorflow - Neural Network Playground. A Neural Network Playground}. \url{https://playground.tensorflow.org} 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \bibitem[(Google)]{4} Google. (n.d.). \textit{Regularization for Simplicity: Playground Exercise (L2 Regularization)}. Google. \url{https://developers.google.com/machine-learning/crash-course/regularization-for-simplicity/playground-exercise-examining-l2-regularization?hl=de} 
-\end{thebibliography}
-}
+\begin{vbframe}{What the field looks like today}
+\vspace{.2cm}
+\begin{itemize}
+  \item A major shift in the 2020s was the move from highly specialized models to \textbf{foundation models}: large pretrained models that can be adapted to many downstream tasks.
+\vspace{.1cm}
+\item The frontier is increasingly \textbf{multimodal}: models can jointly process text, images, audio, video, and actions.
+\vspace{.1cm}
+\item Modern systems are also becoming more \textbf{interactive}: they can write code, search, retrieve documents, and call external tools.
+\vspace{.1cm}
+\item Examples of this broader landscape include \textbf{GPT-5} and \textbf{Claude Opus} for general-purpose assistants, \textbf{Stable Diffusion} for image generation, \textbf{DINOv3} for self-supervised visual representations, and \textbf{TabPFN} for tabular prediction.
+\framebreak
+\item Progress is now often driven by a combination of
+\tiny
+\begin{itemize}
+\item better architectures and training objectives,
+\item much larger datasets,
+\item more compute and specialized hardware,
+\item stronger software tooling and engineering.
+\end{itemize}
+\small
+The modern DL pipeline is frequently: \textbf{pretrain at scale, then adapt with prompting, finetuning, retrieval, or tool use}.
+\end{itemize}
 \end{vbframe}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \endlecture
 \end{document}

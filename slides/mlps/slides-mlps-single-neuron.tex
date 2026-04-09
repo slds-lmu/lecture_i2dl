@@ -51,7 +51,7 @@ with \textbf{input features} $x_1, x_2, ... ,x_p$, \textbf{weights} $w_1, w_2,..
 \vspace{.2cm}
 \item It is a weighted sum of input values, transformed by $\tau$:
 \vspace{-1mm}
-$$f(x) = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(\mathbf{w}^T \mathbf{x}+b)$$
+$$f(\mathbf{x}) = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(\mathbf{w}^T \mathbf{x}+b)$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,10 +63,10 @@ $$f(x) = \tau(w_1x_1 + ... + w_px_p +  b) = \tau(\mathbf{w}^T \mathbf{x}+b)$$
 \vspace{.5cm}
 \begin{itemize}
 \item The identity function gives us the simple \textbf{linear regression}:
-$$f(x) = \tau(\mathbf{w}^T \mathbf{x}) = \mathbf{w}^T \mathbf{x}$$
+$$f(\mathbf{x}) = \tau(\mathbf{w}^T \mathbf{x}) = \mathbf{w}^T \mathbf{x}$$
 %\vspace{.5cm}
 \item The logistic function gives us the \textbf{logistic regression}:
-$$f(x) = \tau(\mathbf{w}^T \mathbf{x}) = \frac{1}{1 + \exp(-\mathbf{w}^T \mathbf{x})}$$
+$$f(\mathbf{x}) = \tau(\mathbf{w}^T \mathbf{x}) = \frac{1}{1 + \exp(-\mathbf{w}^T \mathbf{x})}$$
 \end{itemize}
 \end{vbframe}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

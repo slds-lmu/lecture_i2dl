@@ -184,6 +184,7 @@
     {\usebeamerfont{frametitle}\rule[-0.5ex]{0pt}{2.3ex}\insertframetitle\par}%
     \if@tempswa\else\vskip-.2cm\fi% set inside beamercolorbox... evil here...
   \end{beamercolorbox}%
+  \vskip0.08cm%
 }
 
 \def\beamer@fteright{\vskip0.35cm\advance\leftskip by 1.7cm\advance\rightskip by1.7cm}
@@ -206,18 +207,13 @@
 % redefine \ref (it has been redefined somewhere by the beamerclass)
 \def\lectureref#1{\expandafter\@setref\csname r@#1\endcsname\@firstoftwo{#1}}
 
-% counter for framenumber for current lecture
+% Keep legacy lecture bookkeeping available for \endlecture labels.
 \newcounter{lectureframenumber}
-
-% adjust framenumbers for lecture (check whether reference is already defined)
-\def\addjustlectureframenumber#1{\ifx#1\relax\else%
-  \addtocounter{lectureframenumber}{-\lectureref{lect:@@\thelecture}}\fi}
+\def\addjustlectureframenumber#1{}
 
 \defbeamertemplate*{footline}{lecture theme}
 {
   \usebeamerfont{footline} %author in head/foot}
-  \setcounter{lectureframenumber}{\insertframenumber}%
-  \ifnum\c@lecture<0\else \expandafter\addjustlectureframenumber\csname r@lect:@@\thelecture\endcsname\fi%
   \leavevmode%
   \hbox{%
     \setbox\beamer@linebox=\hbox to\paperwidth{%
@@ -231,8 +227,7 @@
           \arabic{lecture}~~--~~}%
       \fi%
       {\usebeamercolor[fg]{framenumber in head/foot}%
-        \thelectureframenumber~/~%
-        \ifnum\c@lecture<0 \inserttotalframenumber\else\lectureref{endlect:@@\thelecture}\fi%
+        \insertframenumber~/~\inserttotalframenumber%
       }%
       \hskip 1em}%
     \ht\beamer@linebox=2.5mm%
