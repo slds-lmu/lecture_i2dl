@@ -7,9 +7,10 @@ This directory contains PyTorch versions of the lab sessions.
 Every lab session is contained in one notebook.
 You might need to install some requirement packages to be able to run everything.
 For a full new setup it is recommended to create a dedicated environment for this
-project.
+project. Make sure to execute all the following commands while inside `exercises/python/`. 
 
 ```shell
+cd exercises/python/
 python -m venv .venv
 ```
 
