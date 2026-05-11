@@ -86,8 +86,8 @@
         \caption{ReLU activation (Savino \& Tondolo, 2021)}
     \end{figure}
     \item In regions where the activation is positive, the derivative is $1$. 
-    \item As a result, the derivatives do not vanish along paths that contain such "active" neurons even if the network is deep.
-    \item Note that the ReLU is not differentiable at 0 (Software implementations return either $0$ or $1$ for the derivative at this point).
+    \item Derivatives do not vanish along paths containing "active" neurons.
+    \item Note that the ReLU is not differentiable at 0 (Software implementations usually simply return $0$).
   \end{itemize}
 \end{frame}
 
@@ -105,14 +105,14 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
 
 \begin{frame} {Rectified Linear Units (ReLU)}
   \begin{itemize}
-  \item A downside of ReLU units is that when the input to the activation is negative, the derivative is zero. This is known as the "dying ReLU problem".
+  \item A downside of ReLU units is that when the input to the activation is negative, the derivative is zero (the "dying ReLU problem").
     \begin{figure}
       \centering
         \scalebox{1}{\includegraphics{figure/relu_deriv.png}}
         \caption{ReLU activation (Savino \& Tondolo, 2021)}
     \end{figure}
-    \item When a ReLU unit "dies", that is, when its activation is 0 for all datapoints, it kills the gradient flowing through it during backpropogation.
-    \item This means such units are never updated during training and the problem can be irreversible.
+    \item When a ReLU unit "dies" (i.e.\ its activation is 0 for all datapoints), it kills the gradient flowing during backpropogation.
+    \item Such units are never updated during training.
    
   \end{itemize}
 \end{frame}
@@ -130,7 +130,7 @@ training error rate on the CIFAR-10 dataset six times faster than an equivalent 
         \scalebox{0.45}{\includegraphics{figure/leakyrelu_deriv.png}}
         \caption{Leaky ReLU (Savino \& Tondolo, 2021)}
     \end{figure}
-    \item Unlike the ReLU, when the input to the Leaky ReLU activation is negative, the derivative is $\alpha$ which is a small positive value (such as $0.01$).
+    \item Unlike the ReLU, when the input to the Leaky ReLU activation is negative, the derivative is $\alpha$ which is a small positive value.
   \end{itemize}
 \end{frame}
 
