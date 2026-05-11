@@ -49,7 +49,7 @@ $$
 
 It can be translated into a graph that looks like this:
 
-![](../utils/05-lab-graph1.png)
+![](../utils/l5f1.png){width=50%}
 
 Where we have 'leaf' nodes at the top for variables and constants, and 'internal' nodes
 for operations. To make things simpler, in this exercise we will only work with
@@ -1118,7 +1118,7 @@ we will test the code on the five points dataset. Since the functions we have wr
 so far only work with scalar values, we will perform stochastic gradient descent
 using one sample at a time.
 
-![](../utils/03-lab-nn.png)
+![](../utils/03-lab-nn.png){width=50%}
 <!-- #endregion -->
 
 ```python pycharm={"name": "#%%\n"}

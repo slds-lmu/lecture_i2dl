@@ -4,13 +4,13 @@ This directory contains R based versions of the lab sessions.
 
 ## DEVELOPER: How to get started
 
-The introduction to the lab is rendered with the following command:
+The introduction to the lab is rendered with the following command. This applies ONLY to the first lab, for the remaining labs see instructions below:
 
 ```shell
 make generated/lab0.html
 ```
 
-You can directly edit the template`.Rmd` files. To turn them into pdfs use
+You can directly edit the template`.Rmd` files. To turn them into pdfs use the following commands, but make sure that all images for the labs (e.g., `lab2f2.png`) have been copied into the `exercises/R/generated/` folder.
 
 - `make generated/R-lab-{number}-questions.pdf` for the questions
 - `make generated/R-lab-{number}-solutions.pdf` for the solutions

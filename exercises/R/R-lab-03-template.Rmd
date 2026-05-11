@@ -1,6 +1,6 @@
 ---
-title: "Deep Learning Lab 2 | Summer Term 2025"
-author: "Emanuel Sommer, Prof. Dr. David Rügamer"
+title: "Deep Learning Lab 2 | Summer Term 2026"
+author: "Sarah Deubner, Julius Kobialka, Emanuel Sommer"
 output: pdf_document
 ---
 
