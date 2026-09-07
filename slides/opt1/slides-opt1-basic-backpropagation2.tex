@@ -135,7 +135,7 @@ we get:
       {\footnotesize \begin{eqnarray*}
       \delta_{\tilde{k}}^{(i)} &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial \textcolor{violet}{z_{m,in}^{(i+1)}}}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial \textcolor{blue}{z_{\tilde{k},out}^{(i)}}}{\partial z_{\tilde{k},in}^{(i)}}  \\
        &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \frac{\partial \left(\textcolor{violet}{\sum_k W_{k,m}^{(i+1)}z_{k,out}^{(i)} + b_m^{(i+1)}}\right)}{\partial z_{\tilde{k},out}^{(i)}} \Bigg) \frac{\partial \textcolor{blue}{\sigma(z_{\tilde{k},in}^{(i)})}}{\partial z_{\tilde{k},in}^{(i)}}  \\
-      &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \textcolor{violet}{W_{\tilde{k},m}^{(i+1)}} \Bigg) \textcolor{blue}{\sigma'(z_{\tilde{k},in}^{(i)})} = \sum_m \Bigg(  \delta_{\tilde{k}}^{(i+1)} \textcolor{violet}{W_{\tilde{k},m}^{(i+1)}} \Bigg) \textcolor{blue}{\sigma'(z_{\tilde{k},in}^{(i)})} 
+      &=& \sum_m \Bigg( \frac{\partial L}{\partial z_{m,in}^{(i+1)}} \textcolor{violet}{W_{\tilde{k},m}^{(i+1)}} \Bigg) \textcolor{blue}{\sigma'(z_{\tilde{k},in}^{(i)})} = \sum_m \Bigg(  \delta_{m}^{(i+1)} \textcolor{violet}{W_{\tilde{k},m}^{(i+1)}} \Bigg) \textcolor{blue}{\sigma'(z_{\tilde{k},in}^{(i)})} 
       \end{eqnarray*}}\\
       Therefore, we now have a \textbf{recursive definition} for the error signal of a neuron in layer $i$ in terms of the error signals of the neurons in layer $i+1$ and, by extension, layers \{i+2, i+3 \ldots , O\}!
 \end{frame}
