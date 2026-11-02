@@ -1,9 +1,0 @@
-Suggested order of slides:
-
-- slides-cnn-introduction
-- slides-cnn-conv2d
-- slides-cnn-properties
-- slides-cnn-components
-- slides-cnn-architecture
-- slides-cnn-math
-- slides-cnn-application

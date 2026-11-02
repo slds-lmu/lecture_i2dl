@@ -24,3 +24,6 @@
 *.DS_Store
 *.Rhistory
 .Rproj.user
+
+# slidemk build output
+build/
